@@ -1,0 +1,388 @@
+/* ---- Exercise container ---- */
+.math-exercise-cell {
+  position: relative;
+  margin: 1.5em 0;
+  padding: 1.25em 1.5em;
+  border: 1px solid var(--bs-border-color, #dee2e6);
+  border-radius: .5em;
+  background: var(--bs-body-bg, #fafafa);
+  color: var(--bs-body-color, #212529);
+}
+
+/* Pool reload button – top-right corner */
+.math-pool-reload {
+  position: absolute;
+  top: .55em;
+  right: .6em;
+  background: none;
+  border: 1px solid var(--bs-border-color, #ced4da);
+  border-radius: .3em;
+  padding: .1em .4em;
+  font-size: 1.05em;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--bs-secondary-color, #6c757d);
+  transition: background .12s, color .12s;
+}
+.math-pool-reload:hover { background: var(--bs-tertiary-bg, #e9ecef); color: var(--bs-body-color, #212529); }
+
+.math-exercise-caption {
+  font-weight: 600;
+  font-size: 1.05em;
+  margin-bottom: 0;
+  color: var(--bs-body-color, #1a1a2e);
+  border-bottom: 2px solid var(--bs-border-color, #dee2e6);
+  padding-bottom: .35em;
+}
+
+/* Collapsible toggle */
+.math-exercise-toggle {
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: .45em;
+}
+.math-exercise-toggle:hover { color: var(--bs-primary, #0d6efd); border-bottom-color: var(--bs-primary, #0d6efd); }
+.math-exercise-open .math-exercise-toggle { margin-bottom: .75em; }
+
+.math-chevron {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  transition: transform .18s ease;
+  color: var(--bs-secondary-color, #6c757d);
+  font-size: .7em;
+}
+.math-chevron::before { content: '▶'; }
+.math-exercise-open .math-chevron { transform: rotate(90deg); }
+
+.math-exercise-question {
+  margin-bottom: 1em;
+  line-height: 1.8;
+  color: var(--bs-body-color, #212529);
+}
+
+/* ---- Input fields ---- */
+.math-input {
+  font-family: 'Fira Mono', 'Consolas', 'Courier New', monospace;
+  font-size: .92em;
+  padding: .3em .55em;
+  border: 1px solid var(--bs-border-color, #adb5bd);
+  border-radius: .3em;
+  background: var(--bs-body-bg, #fff);
+  color: var(--bs-body-color, #212529);
+  vertical-align: middle;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.math-input:focus {
+  outline: none;
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, .18);
+}
+
+.math-input-small  { width: 10em; }
+.math-input-medium { width: 20em; }
+
+.math-input-large {
+  display: block;
+  width: 100%;
+  margin: .35em 0;
+  resize: vertical;
+  min-height: 4em;
+}
+
+/* State feedback on the input itself.
+   Background AND text color are fixed together (not theme variables) so the
+   text stays readable regardless of the page's light/dark theme. */
+.math-input-ok {
+  border-color: #198754 !important;
+  background:   #f0fff4 !important;
+  color:        #14532d !important;
+}
+.math-input-wrong {
+  border-color: #dc3545 !important;
+  background:   #fff5f5 !important;
+  color:        #7f1d1d !important;
+}
+.math-input-err {
+  border-color: #fd7e14 !important;
+  background:   #fffbf0 !important;
+  color:        #7c2d12 !important;
+}
+
+/* ---- Buttons ---- */
+.math-exercise-controls {
+  display: flex;
+  gap: .5em;
+  margin-bottom: .75em;
+  flex-wrap: wrap;
+}
+
+.math-legend-btn.active {
+  background: var(--bs-secondary-bg, #e2e3e5);
+  border-color: var(--bs-border-color, #adb5bd);
+}
+
+/* ---- Legend panel ---- */
+.math-legend-panel {
+  margin: 0 0 .75em;
+  padding: .75em 1em;
+  background: var(--bs-tertiary-bg, #f8f9fa);
+  border: 1px solid var(--bs-border-color, #dee2e6);
+  border-radius: .4em;
+  font-size: .88em;
+  color: var(--bs-body-color, #212529);
+}
+
+.math-legend-ops {
+  margin: 0 0 .6em;
+  color: var(--bs-secondary-color, #495057);
+}
+
+.math-legend-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.math-legend-table th,
+.math-legend-table td {
+  padding: .28em .6em;
+  border-bottom: 1px solid var(--bs-border-color, #e9ecef);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.math-legend-table th {
+  font-weight: 600;
+  background: var(--bs-secondary-bg, #e9ecef);
+  font-size: .9em;
+  text-transform: uppercase;
+  letter-spacing: .02em;
+}
+
+.math-legend-math {
+  min-width: 6em;
+}
+
+/* Fixed light-blue chip: background + text are paired and theme-independent. */
+.math-legend-code {
+  background: #dde8fd;
+  color: #1a1a2e;
+  padding: .1em .4em;
+  border-radius: .2em;
+  font-family: 'Fira Mono', 'Consolas', monospace;
+  font-size: .95em;
+  white-space: nowrap;
+}
+
+.math-legend-desc {
+  color: var(--bs-secondary-color, #6c757d);
+}
+
+/* ---- Feedback messages ---- */
+.math-feedback-area {
+  margin-top: .25em;
+}
+
+.math-fb-ok,
+.math-fb-wrong,
+.math-fb-empty,
+.math-fb-err,
+.math-fb-checking {
+  padding: .4em .8em;
+  border-radius: .3em;
+  margin-bottom: .3em;
+  font-size: .92em;
+  line-height: 1.5;
+}
+
+.math-fb-ok       { background: #d1e7dd; color: #0a3622; }
+.math-fb-wrong    { background: #f8d7da; color: #58151c; }
+.math-fb-empty    { background: #fff3cd; color: #664d03; }
+.math-fb-err      { background: #fff3cd; color: #664d03; }
+.math-fb-checking { background: #e2e3e5; color: #41464b; font-style: italic; }
+
+/* ---- LLM feedback block ---- */
+.math-fb-llm {
+  background: #e8f4fd;
+  border: 1px solid #b8d9f8;
+  border-radius: .3em;
+  padding: .5em .85em;
+  font-size: .92em;
+}
+.math-fb-llm-header {
+  font-weight: 600;
+  color: #004085;
+  margin-bottom: .3em;
+}
+.math-fb-llm-cnt {
+  font-weight: 400;
+  font-size: .9em;
+  color: #6c8ebf;
+}
+.math-fb-llm-body {
+  line-height: 1.65;
+  color: #1a1a2e;
+}
+
+/* ---- Config modal ---- */
+.math-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.math-modal {
+  background: var(--bs-body-bg, #fff);
+  color: var(--bs-body-color, #212529);
+  border-radius: .5em;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, .25);
+  width: min(540px, 94vw);
+  overflow: hidden;
+}
+
+.math-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .7em 1em;
+  background: var(--bs-tertiary-bg, #f8f9fa);
+  border-bottom: 1px solid var(--bs-border-color, #dee2e6);
+}
+
+.math-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.4em;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--bs-secondary-color, #6c757d);
+  padding: 0 .25em;
+}
+.math-modal-close:hover { color: var(--bs-body-color, #212529); }
+
+.math-modal-body {
+  padding: 1em 1.25em .75em;
+  max-height: 72vh;
+  overflow-y: auto;
+}
+
+.math-modal-hint {
+  font-size: .85em;
+  color: var(--bs-secondary-color, #6c757d);
+  margin: 0 0 .8em;
+}
+
+.math-modal-label {
+  display: block;
+  margin-bottom: .55em;
+  font-weight: 500;
+  font-size: .9em;
+}
+
+.math-modal-input {
+  display: block;
+  width: 100%;
+  margin-top: .2em;
+  padding: .38em .6em;
+  border: 1px solid var(--bs-border-color, #ced4da);
+  border-radius: .3em;
+  font-size: .9em;
+  font-weight: 400;
+  background: var(--bs-body-bg, #fff);
+  color: var(--bs-body-color, #212529);
+}
+.math-modal-input:focus {
+  outline: none;
+  border-color: var(--bs-primary, #0d6efd);
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, .15);
+}
+
+.math-modal-footer {
+  display: flex;
+  gap: .5em;
+  justify-content: flex-end;
+  padding: .7em 1.25em;
+  border-top: 1px solid var(--bs-border-color, #dee2e6);
+  background: var(--bs-tertiary-bg, #f8f9fa);
+}
+
+/* ---- Modal field rows ---- */
+.math-modal-field {
+  display: block;
+  margin-bottom: .55em;
+  font-weight: 500;
+  font-size: .9em;
+}
+
+.math-modal-field > span {
+  display: block;
+  margin-bottom: .2em;
+}
+
+select.math-modal-input {
+  cursor: pointer;
+}
+
+/* Model input and "Fetch models" button side by side */
+.math-modal-inputrow {
+  display: flex;
+  gap: .4em;
+  align-items: center;
+}
+
+.math-modal-inputrow .math-modal-input {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Small link hint below model field when auto-fetch fails */
+.math-modal-model-hint {
+  font-size: .82em;
+  color: var(--bs-secondary-color, #6c757d);
+  margin: .15em 0 .45em 0;
+}
+
+/* Fetched model picker list */
+.math-modal-modellist {
+  background: var(--bs-tertiary-bg, #f8f9fa);
+  border: 1px solid var(--bs-border-color, #dee2e6);
+  border-radius: .35em;
+  padding: .5em .7em;
+  margin-bottom: .55em;
+  font-size: .87em;
+}
+
+.math-modal-modellist-info {
+  color: var(--bs-secondary-color, #495057);
+  margin-bottom: .35em;
+}
+
+.math-modal-modellist label {
+  font-weight: 400;
+  display: block;
+  margin-bottom: .3em;
+}
+
+/* Info button */
+.math-modal-info-btn {
+  margin-top: .4em;
+  font-size: .85em;
+}
+
+/* Help text box */
+.math-modal-help {
+  background: var(--bs-tertiary-bg, #f8f9fa);
+  border: 1px solid var(--bs-border-color, #dee2e6);
+  border-radius: .35em;
+  padding: .65em .85em;
+  margin-top: .45em;
+  font-size: .83em;
+  line-height: 1.55;
+}

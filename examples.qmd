@@ -1,0 +1,264 @@
+---
+title: "math-exercise – Overview of All Check Modes"
+lang: en
+format:
+  html:
+    toc: true
+engine: markdown
+filters:
+  - math-exercise
+---
+
+This page briefly introduces and lets you try out **every check mode** of the
+`math-exercise` extension. See the [README](README.md) for full option
+details.
+
+## `mode: equivalent` *(default)*
+
+Accepts any mathematically equivalent representation.
+
+```{math-exercise}
+#| label: ex-equivalent
+#| caption: equivalent
+Compute the area of a circle with r = 3 cm.
+A = _[pi * 9] cm²
+```
+
+Try `pi*9`, `9*pi`, and `3**2*pi` – all are accepted.
+
+## `mode: exact`
+
+The strictest check mode: accepts only the canonical SymPy representation.
+
+```{math-exercise}
+#| label: ex-exact-numeric
+#| caption: exact (numeric fraction)
+#| mode: exact
+Give 6/8 fully reduced: _[3/4]
+```
+
+`3/4` is accepted. `6/8` is rejected – even though SymPy reduces `6/8` and
+`3/4` to the same internal object on parse, `mode: exact` additionally checks
+the raw text you typed for un-reduced numeric fractions (including ones
+hidden inside expressions like `1/4 + 2/4`).
+
+```{math-exercise}
+#| label: ex-exact
+#| caption: exact (algebraic)
+#| vars: x
+#| mode: exact
+Give the factored form of x² + 2x + 1: __[(x+1)**2]
+```
+
+`(x+1)**2` is accepted. `x**2+2*x+1` is mathematically equivalent but a
+different representation, so it's rejected as "correct, but not in the
+requested form".
+
+## `reject` (add-on for `equivalent`)
+
+Rejects one specific – mathematically equivalent – expression. Useful for
+simplification tasks.
+
+```{math-exercise}
+#| label: ex-reject
+#| caption: equivalent + reject
+#| vars: x
+#| mode: equivalent
+#| reject: (x+1)**2
+Simplify (x+1)²: __[x**2 + 2*x + 1]
+```
+
+`(x+1)^2` and `(1+x)^2` are rejected; `x^2 + 2x + 1` is accepted.
+
+## `mode: numeric` – `tolerance`
+
+Compares numeric values instead of expressions, with an absolute or relative
+(`%`) tolerance.
+
+```{math-exercise}
+#| label: ex-numeric-tol
+#| caption: numeric + tolerance
+#| mode: numeric
+#| tolerance: 0.01
+Approximate π (2 decimal places): _[3.14159]
+```
+
+`3.14` is accepted; `3.10` is not (deviation > 0.01).
+
+## `mode: numeric` – `decplaces`
+
+Rounds both values to N decimal places before comparing.
+
+```{math-exercise}
+#| label: ex-numeric-dec
+#| caption: numeric + decplaces
+#| mode: numeric
+#| decplaces: 2
+Compute 1/3 to 2 decimal places: _[1/3]
+```
+
+`0.33` is accepted; `0.3` is not.
+
+## `mode: numeric` – `sigfigs`
+
+Rounds both values to N significant figures before comparing.
+
+```{math-exercise}
+#| label: ex-numeric-sig
+#| caption: numeric + sigfigs
+#| mode: numeric
+#| sigfigs: 3
+Measure the length of a segment (3 significant figures): _[1234]
+```
+
+`1230` is accepted (both round to `1.23e3`); `1200` is not.
+
+## `mode: string`
+
+Literal text comparison, no SymPy parsing. Useful for terms rather than
+expressions.
+
+```{math-exercise}
+#| label: ex-string
+#| caption: string
+#| mode: string
+What is the name of Euler's number in SymPy notation (exact case)? __[E]
+```
+
+Only `E` is accepted – `e` or `Euler` is not.
+
+## `mode: string_ci`
+
+Like `string`, but case-insensitive.
+
+```{math-exercise}
+#| label: ex-string-ci
+#| caption: string_ci
+#| mode: string_ci
+What is the name of pi in SymPy notation? __[Pi]
+```
+
+`pi`, `Pi`, and `PI` are all accepted.
+
+## `mode: set`
+
+Comma-separated list, order doesn't matter, each element is checked
+individually like `equivalent`. Useful for "list all solutions" tasks.
+
+```{math-exercise}
+#| label: ex-set
+#| caption: set
+#| vars: x
+#| mode: set
+Solve x² = 4. All solutions (comma-separated): __[2, -2]
+```
+
+`-2, 2`, `2,-2`, and `sqrt(4), -2` are all accepted; a missing or duplicate
+solution is rejected.
+
+## `form: factored`
+
+In addition to correctness, requires the factored form.
+
+```{math-exercise}
+#| label: ex-form-factored
+#| caption: form: factored
+#| vars: x
+#| mode: equivalent
+#| form: factored
+Factor x² + 3x + 2: __[(x+1)*(x+2)]
+```
+
+`(x+1)*(x+2)` is accepted; `x**2+3*x+2` is correct but not factored.
+
+## `form: expanded`
+
+Requires the fully expanded (multiplied-out) form.
+
+```{math-exercise}
+#| label: ex-form-expanded
+#| caption: form: expanded
+#| vars: x
+#| mode: equivalent
+#| form: expanded
+Expand: (x-1)(x+1) = __[x**2 - 1]
+```
+
+`x**2 - 1` is accepted; `(x-1)*(x+1)` is not (not expanded).
+
+## `form: single_fraction`
+
+Requires a single fraction instead of a sum of fractions.
+
+```{math-exercise}
+#| label: ex-form-single-fraction
+#| caption: form: single_fraction
+#| vars: x, y
+#| mode: equivalent
+#| form: single_fraction
+Combine 1/x + 1/y into a single fraction: __[(x+y)/(x*y)]
+```
+
+`(x+y)/(x*y)` is accepted; `1/x + 1/y` (correct, but a sum of two fractions)
+is not.
+
+## `form: lowest_terms`
+
+Requires a fully reduced fraction.
+
+```{math-exercise}
+#| label: ex-form-lowest-terms
+#| caption: form: lowest_terms
+#| vars: x
+#| mode: equivalent
+#| form: lowest_terms
+Reduce (x² − 1) / (x² − x) fully: __[(x+1)/x]
+```
+
+`(x+1)/x` is accepted; `(x**2-1)/(x**2-x)` (correct, but not reduced) is not.
+
+`form: lowest_terms` also works for **plain numeric fractions** – here the
+raw text is checked directly, independent of SymPy's automatic reduction at
+parse time:
+
+```{math-exercise}
+#| label: ex-form-lowest-terms-numeric
+#| caption: form: lowest_terms (numeric fraction)
+#| mode: equivalent
+#| form: lowest_terms
+Reduce 6/8 fully: _[3/4]
+```
+
+`3/4` is accepted; `6/8` (mathematically equal, but not fully reduced) is
+rejected.
+
+Difference from `mode: exact` above: `form: lowest_terms` + `equivalent`
+accepts **any** value-equal, reduced notation (including `0.75`) without
+requiring the exact string of the `correct` field – `mode: exact` requires
+that exact string too.
+
+## Bonus: task pool
+
+Not a check mode of its own, but an orthogonal option: `pool: true` randomly
+picks one of several variants per page load.
+
+```{math-exercise}
+#| label: ex-pool
+#| caption: pool (combined with numeric + tolerance)
+#| mode: numeric
+#| tolerance: 0.01
+#| pool: true
+
+Compute the area of a circle with r = 3 cm (2 decimal places).
+A = _[3.14159*9] cm²
+
+---
+
+Compute the area of a circle with r = 5 cm (2 decimal places).
+A = _[3.14159*25] cm²
+
+---
+
+Compute the area of a circle with r = 7 cm (2 decimal places).
+A = _[3.14159*49] cm²
+```
