@@ -1,0 +1,310 @@
+/* ==========================================================================
+   Demo-specific presentation layer for the math-exercise showcase.
+
+   Everything in this file is presentation only: it styles standard Quarto
+   HTML (headings, callouts, divs) and this demo's own markup. It does not
+   touch, override the behaviour of, or depend on internals of
+   math-exercise.css / math-exercise.js.
+   ========================================================================== */
+
+:root {
+  --demo-navy:      #0b2545;
+  --demo-navy-2:    #13315c;
+  --demo-blue:      #1b4b91;
+  --demo-gold:      #f3b61f;
+  --demo-gold-2:    #ffd764;
+  --demo-ink:       #1b2430;
+  --demo-paper:     #fbfaf7;
+  --demo-line:      #e3e0d8;
+  --demo-feature:   #1a7f4e;
+  --demo-feature-bg:#eafaf1;
+  --demo-showcase:  #6a3fb5;
+  --demo-showcase-bg:#f4effc;
+  --demo-vision:    #b25a00;
+  --demo-vision-bg: #fff3e2;
+}
+
+body {
+  background: var(--demo-paper);
+}
+
+/* Quarto's page-layout-article grid hardcodes the body-content column to
+   minmax(500px, calc(850px - 3em)) via named grid lines on .page-columns
+   (compiled into bootstrap-*.min.css) - a plain max-width on .content has
+   no effect because the grid track itself is already narrower. Override
+   the track directly (id selector + !important to reliably beat the
+   compiled, occasionally media-scoped, bootstrap rule) to widen it, then
+   the .content max-width below actually takes effect within it. */
+#quarto-content.page-columns {
+  grid-template-columns:
+    [screen-start] 1.5em [screen-start-inset] 5fr
+    [page-start page-start-inset] 35px [body-start-outset] 35px
+    [body-start] 1.5em [body-content-start] minmax(500px, calc(1180px - 3em))
+    [body-content-end] 1.5em [body-end] 35px [body-end-outset] minmax(75px, 200px)
+    [page-end-inset] 35px [page-end] 5fr [screen-end-inset] 1.5em [screen-end] !important;
+}
+
+.content, main {
+  max-width: 1140px;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Hero                                                                    */
+/* ---------------------------------------------------------------------- */
+
+.demo-hero {
+  margin: 1.75rem -1.5rem 2.5rem -1.5rem;
+  padding: 3.2rem 2rem 3rem 2rem;
+  background:
+    radial-gradient(1100px 420px at 85% -10%, rgba(255, 215, 100, .16), transparent 60%),
+    linear-gradient(135deg, var(--demo-navy) 0%, var(--demo-navy-2) 55%, var(--demo-blue) 100%);
+  color: #f5f7fb;
+  border-radius: 1.1rem;
+  text-align: center;
+}
+
+.demo-kicker {
+  display: inline-block;
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--demo-gold-2);
+  border: 1px solid rgba(255, 215, 100, .45);
+  border-radius: 999px;
+  padding: .3em 1em;
+  margin-bottom: 1.1rem;
+}
+
+.demo-hero h1 {
+  color: #ffffff;
+  font-size: 2.3rem;
+  margin: 0 0 .6rem 0;
+  border: none;
+}
+
+.demo-hero p.demo-subtitle {
+  font-size: 1.12rem;
+  max-width: 640px;
+  margin: 0 auto;
+  color: #d7e0f2;
+}
+
+.demo-hero-meta {
+  display: flex;
+  justify-content: center;
+  gap: .6rem;
+  flex-wrap: wrap;
+  margin-top: 1.6rem;
+}
+
+.demo-hero-meta span {
+  font-size: .82rem;
+  background: rgba(255, 255, 255, .1);
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-radius: 999px;
+  padding: .35em 1em;
+  color: #eef1f8;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Section framing + numbered badges                                      */
+/* ---------------------------------------------------------------------- */
+
+.demo-step {
+  margin: 2.6rem 0 2.2rem 0;
+}
+
+.demo-step-head {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  flex-wrap: wrap;
+  margin-bottom: .4rem;
+}
+
+.demo-step-num {
+  flex: 0 0 auto;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 50%;
+  background: var(--demo-navy);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: .95rem;
+}
+
+.demo-step-head h2 {
+  border: none;
+  margin: 0;
+  padding: 0;
+  font-size: 1.4rem;
+}
+
+/* Boundary pills: what's real vs. presentational vs. envisioned */
+.demo-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .4em;
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .02em;
+  padding: .3em .7em;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.demo-pill-feature  { background: var(--demo-feature-bg);  color: var(--demo-feature);  border: 1px solid #bfe8d3; }
+.demo-pill-showcase  { background: var(--demo-showcase-bg); color: var(--demo-showcase); border: 1px solid #ddceef; }
+.demo-pill-vision   { background: var(--demo-vision-bg);   color: var(--demo-vision);   border: 1px dashed #f0c894; }
+
+/* ---------------------------------------------------------------------- */
+/* Difficulty-level cards (hand-authored stand-ins for AI-generated variants) */
+/* ---------------------------------------------------------------------- */
+
+.demo-level-badge {
+  display: inline-block;
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  border-radius: .35em;
+  padding: .2em .6em;
+  margin-bottom: .5em;
+}
+
+.demo-level-1 { background: #e6f6ea; color: #1a7f4e; }
+.demo-level-2 { background: #fff3e0; color: #b26a00; }
+.demo-level-3 { background: #fdeaea; color: #b32d2d; }
+
+/* math-exercise's answer fields have a fixed width (e.g. 20em for
+   math-input-medium) sized for a full-width exercise. In the narrow 33%
+   columns used for the Level 1/2/3 cards that fixed width can exceed the
+   card, so cap it here without touching the extension's own CSS. */
+.columns .math-input {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Progress dashboard (demo-only illustration, reads the extension's own   */
+/* pass/fail DOM state - see assets/progress-tracker.js)                   */
+/* ---------------------------------------------------------------------- */
+
+.demo-progress-panel {
+  border: 1px solid var(--demo-line);
+  border-radius: .7em;
+  padding: 1.4em 1.6em;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(20, 30, 50, .05);
+}
+
+.demo-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 1em;
+  margin-bottom: 1em;
+}
+
+.demo-progress-track {
+  flex: 1 1 auto;
+  height: .7em;
+  background: #eef0f4;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.demo-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--demo-feature), #38c172);
+  border-radius: 999px;
+  transition: width .35s ease;
+}
+
+.demo-progress-count {
+  flex: 0 0 auto;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--demo-navy);
+  min-width: 3.4em;
+  text-align: right;
+}
+
+.demo-progress-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: .5em;
+}
+
+.demo-progress-item {
+  display: flex;
+  align-items: center;
+  gap: .55em;
+  font-size: .9rem;
+  padding: .45em .6em;
+  border-radius: .45em;
+  background: #f7f8fa;
+  color: #55606e;
+}
+
+.demo-progress-item .demo-dot {
+  flex: 0 0 auto;
+  width: .8em;
+  height: .8em;
+  border-radius: 50%;
+  background: #c9cfd8;
+}
+
+.demo-progress-item.is-done {
+  background: var(--demo-feature-bg);
+  color: #14532d;
+}
+.demo-progress-item.is-done .demo-dot { background: var(--demo-feature); }
+
+/* ---------------------------------------------------------------------- */
+/* Closing / vision section                                               */
+/* ---------------------------------------------------------------------- */
+
+.demo-vision-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.demo-vision-card {
+  border: 1px dashed #e3c58c;
+  background: var(--demo-vision-bg);
+  border-radius: .7em;
+  padding: 1rem 1.1rem;
+}
+
+.demo-vision-card h4 {
+  margin: 0 0 .35em 0;
+  font-size: .95rem;
+  color: var(--demo-vision);
+}
+
+.demo-vision-card p {
+  margin: 0;
+  font-size: .87rem;
+  color: #5b4a2f;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Misc                                                                    */
+/* ---------------------------------------------------------------------- */
+
+.demo-footnote {
+  font-size: .85rem;
+  color: #6c7482;
+  text-align: center;
+  margin: 3rem 0 1rem 0;
+}

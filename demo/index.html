@@ -1,0 +1,2488 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Quadratic Functions — a course module preview</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="index_files/libs/clipboard/clipboard.min.js"></script>
+<script src="index_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="index_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="index_files/libs/quarto-html/popper.min.js"></script>
+<script src="index_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="index_files/libs/quarto-html/anchor.min.js"></script>
+<link href="index_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="index_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="index_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="index_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="index_files/libs/bootstrap/bootstrap-e249d6c8ac2acefee5c2f0da804fe4cc.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<style>html{ scroll-behavior: smooth; }</style>
+<style type="text/css">
+/* ---- Exercise container ---- */
+.math-exercise-cell {
+  position: relative;
+  margin: 1.5em 0;
+  padding: 1.25em 1.5em;
+  border: 1px solid var(--bs-border-color, #dee2e6);
+  border-radius: .5em;
+  background: var(--bs-body-bg, #fafafa);
+  color: var(--bs-body-color, #212529);
+}
+
+/* Pool reload button – top-right corner */
+.math-pool-reload {
+  position: absolute;
+  top: .55em;
+  right: .6em;
+  background: none;
+  border: 1px solid var(--bs-border-color, #ced4da);
+  border-radius: .3em;
+  padding: .1em .4em;
+  font-size: 1.05em;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--bs-secondary-color, #6c757d);
+  transition: background .12s, color .12s;
+}
+.math-pool-reload:hover { background: var(--bs-tertiary-bg, #e9ecef); color: var(--bs-body-color, #212529); }
+
+.math-exercise-caption {
+  font-weight: 600;
+  font-size: 1.05em;
+  margin-bottom: 0;
+  color: var(--bs-body-color, #1a1a2e);
+  border-bottom: 2px solid var(--bs-border-color, #dee2e6);
+  padding-bottom: .35em;
+}
+
+/* Collapsible toggle */
+.math-exercise-toggle {
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: .45em;
+}
+.math-exercise-toggle:hover { color: var(--bs-primary, #0d6efd); border-bottom-color: var(--bs-primary, #0d6efd); }
+.math-exercise-open .math-exercise-toggle { margin-bottom: .75em; }
+
+.math-chevron {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  transition: transform .18s ease;
+  color: var(--bs-secondary-color, #6c757d);
+  font-size: .7em;
+}
+.math-chevron::before { content: '▶'; }
+.math-exercise-open .math-chevron { transform: rotate(90deg); }
+
+.math-exercise-question {
+  margin-bottom: 1em;
+  line-height: 1.8;
+  color: var(--bs-body-color, #212529);
+}
+
+/* ---- Input fields ---- */
+.math-input {
+  font-family: 'Fira Mono', 'Consolas', 'Courier New', monospace;
+  font-size: .92em;
+  padding: .3em .55em;
+  border: 1px solid var(--bs-border-color, #adb5bd);
+  border-radius: .3em;
+  background: var(--bs-body-bg, #fff);
+  color: var(--bs-body-color, #212529);
+  vertical-align: middle;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.math-input:focus {
+  outline: none;
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, .18);
+}
+
+.math-input-small  { width: 10em; }
+.math-input-medium { width: 20em; }
+
+.math-input-large {
+  display: block;
+  width: 100%;
+  margin: .35em 0;
+  resize: vertical;
+  min-height: 4em;
+}
+
+/* State feedback on the input itself.
+   Background AND text color are fixed together (not theme variables) so the
+   text stays readable regardless of the page's light/dark theme. */
+.math-input-ok {
+  border-color: #198754 !important;
+  background:   #f0fff4 !important;
+  color:        #14532d !important;
+}
+.math-input-wrong {
+  border-color: #dc3545 !important;
+  background:   #fff5f5 !important;
+  color:        #7f1d1d !important;
+}
+.math-input-err {
+  border-color: #fd7e14 !important;
+  background:   #fffbf0 !important;
+  color:        #7c2d12 !important;
+}
+
+/* ---- Buttons ---- */
+.math-exercise-controls {
+  display: flex;
+  gap: .5em;
+  margin-bottom: .75em;
+  flex-wrap: wrap;
+}
+
+.math-legend-btn.active {
+  background: var(--bs-secondary-bg, #e2e3e5);
+  border-color: var(--bs-border-color, #adb5bd);
+}
+
+/* ---- Legend panel ---- */
+.math-legend-panel {
+  margin: 0 0 .75em;
+  padding: .75em 1em;
+  background: var(--bs-tertiary-bg, #f8f9fa);
+  border: 1px solid var(--bs-border-color, #dee2e6);
+  border-radius: .4em;
+  font-size: .88em;
+  color: var(--bs-body-color, #212529);
+}
+
+.math-legend-ops {
+  margin: 0 0 .6em;
+  color: var(--bs-secondary-color, #495057);
+}
+
+.math-legend-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.math-legend-table th,
+.math-legend-table td {
+  padding: .28em .6em;
+  border-bottom: 1px solid var(--bs-border-color, #e9ecef);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.math-legend-table th {
+  font-weight: 600;
+  background: var(--bs-secondary-bg, #e9ecef);
+  font-size: .9em;
+  text-transform: uppercase;
+  letter-spacing: .02em;
+}
+
+.math-legend-math {
+  min-width: 6em;
+}
+
+/* Fixed light-blue chip: background + text are paired and theme-independent. */
+.math-legend-code {
+  background: #dde8fd;
+  color: #1a1a2e;
+  padding: .1em .4em;
+  border-radius: .2em;
+  font-family: 'Fira Mono', 'Consolas', monospace;
+  font-size: .95em;
+  white-space: nowrap;
+}
+
+.math-legend-desc {
+  color: var(--bs-secondary-color, #6c757d);
+}
+
+/* ---- Feedback messages ---- */
+.math-feedback-area {
+  margin-top: .25em;
+}
+
+.math-fb-ok,
+.math-fb-wrong,
+.math-fb-empty,
+.math-fb-err,
+.math-fb-checking {
+  padding: .4em .8em;
+  border-radius: .3em;
+  margin-bottom: .3em;
+  font-size: .92em;
+  line-height: 1.5;
+}
+
+.math-fb-ok       { background: #d1e7dd; color: #0a3622; }
+.math-fb-wrong    { background: #f8d7da; color: #58151c; }
+.math-fb-empty    { background: #fff3cd; color: #664d03; }
+.math-fb-err      { background: #fff3cd; color: #664d03; }
+.math-fb-checking { background: #e2e3e5; color: #41464b; font-style: italic; }
+
+/* ---- LLM feedback block ---- */
+.math-fb-llm {
+  background: #e8f4fd;
+  border: 1px solid #b8d9f8;
+  border-radius: .3em;
+  padding: .5em .85em;
+  font-size: .92em;
+}
+.math-fb-llm-header {
+  font-weight: 600;
+  color: #004085;
+  margin-bottom: .3em;
+}
+.math-fb-llm-cnt {
+  font-weight: 400;
+  font-size: .9em;
+  color: #6c8ebf;
+}
+.math-fb-llm-body {
+  line-height: 1.65;
+  color: #1a1a2e;
+}
+
+/* ---- Config modal ---- */
+.math-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.math-modal {
+  background: var(--bs-body-bg, #fff);
+  color: var(--bs-body-color, #212529);
+  border-radius: .5em;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, .25);
+  width: min(540px, 94vw);
+  overflow: hidden;
+}
+
+.math-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .7em 1em;
+  background: var(--bs-tertiary-bg, #f8f9fa);
+  border-bottom: 1px solid var(--bs-border-color, #dee2e6);
+}
+
+.math-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.4em;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--bs-secondary-color, #6c757d);
+  padding: 0 .25em;
+}
+.math-modal-close:hover { color: var(--bs-body-color, #212529); }
+
+.math-modal-body {
+  padding: 1em 1.25em .75em;
+  max-height: 72vh;
+  overflow-y: auto;
+}
+
+.math-modal-hint {
+  font-size: .85em;
+  color: var(--bs-secondary-color, #6c757d);
+  margin: 0 0 .8em;
+}
+
+.math-modal-label {
+  display: block;
+  margin-bottom: .55em;
+  font-weight: 500;
+  font-size: .9em;
+}
+
+.math-modal-input {
+  display: block;
+  width: 100%;
+  margin-top: .2em;
+  padding: .38em .6em;
+  border: 1px solid var(--bs-border-color, #ced4da);
+  border-radius: .3em;
+  font-size: .9em;
+  font-weight: 400;
+  background: var(--bs-body-bg, #fff);
+  color: var(--bs-body-color, #212529);
+}
+.math-modal-input:focus {
+  outline: none;
+  border-color: var(--bs-primary, #0d6efd);
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, .15);
+}
+
+.math-modal-footer {
+  display: flex;
+  gap: .5em;
+  justify-content: flex-end;
+  padding: .7em 1.25em;
+  border-top: 1px solid var(--bs-border-color, #dee2e6);
+  background: var(--bs-tertiary-bg, #f8f9fa);
+}
+
+/* ---- Modal field rows ---- */
+.math-modal-field {
+  display: block;
+  margin-bottom: .55em;
+  font-weight: 500;
+  font-size: .9em;
+}
+
+.math-modal-field > span {
+  display: block;
+  margin-bottom: .2em;
+}
+
+select.math-modal-input {
+  cursor: pointer;
+}
+
+/* Model input and "Fetch models" button side by side */
+.math-modal-inputrow {
+  display: flex;
+  gap: .4em;
+  align-items: center;
+}
+
+.math-modal-inputrow .math-modal-input {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Small link hint below model field when auto-fetch fails */
+.math-modal-model-hint {
+  font-size: .82em;
+  color: var(--bs-secondary-color, #6c757d);
+  margin: .15em 0 .45em 0;
+}
+
+/* Fetched model picker list */
+.math-modal-modellist {
+  background: var(--bs-tertiary-bg, #f8f9fa);
+  border: 1px solid var(--bs-border-color, #dee2e6);
+  border-radius: .35em;
+  padding: .5em .7em;
+  margin-bottom: .55em;
+  font-size: .87em;
+}
+
+.math-modal-modellist-info {
+  color: var(--bs-secondary-color, #495057);
+  margin-bottom: .35em;
+}
+
+.math-modal-modellist label {
+  font-weight: 400;
+  display: block;
+  margin-bottom: .3em;
+}
+
+/* Info button */
+.math-modal-info-btn {
+  margin-top: .4em;
+  font-size: .85em;
+}
+
+/* Help text box */
+.math-modal-help {
+  background: var(--bs-tertiary-bg, #f8f9fa);
+  border: 1px solid var(--bs-border-color, #dee2e6);
+  border-radius: .35em;
+  padding: .65em .85em;
+  margin-top: .45em;
+  font-size: .83em;
+  line-height: 1.55;
+}
+
+</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="assets/demo.css">
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Module contents</h2>
+   
+  <ul>
+  <li><a href="#sec-warmup" id="toc-sec-warmup" class="nav-link active" data-scroll-target="#sec-warmup">1 · The exercise</a></li>
+  <li><a href="#sec-hints" id="toc-sec-hints" class="nav-link" data-scroll-target="#sec-hints">2 · Stuck? Ask for a hint</a></li>
+  <li><a href="#sec-solution" id="toc-sec-solution" class="nav-link" data-scroll-target="#sec-solution">3 · The worked solution</a></li>
+  <li><a href="#sec-followup" id="toc-sec-followup" class="nav-link" data-scroll-target="#sec-followup">4 · A related follow-up</a></li>
+  <li><a href="#sec-variants" id="toc-sec-variants" class="nav-link" data-scroll-target="#sec-variants">5 · Practice variants</a>
+  <ul class="collapse">
+  <li><a href="#a-task-pools-an-existing-capability" id="toc-a-task-pools-an-existing-capability" class="nav-link" data-scroll-target="#a-task-pools-an-existing-capability">5a · Task pools — an existing capability</a></li>
+  <li><a href="#b-difficulty-progression-an-illustration-not-a-feature" id="toc-b-difficulty-progression-an-illustration-not-a-feature" class="nav-link" data-scroll-target="#b-difficulty-progression-an-illustration-not-a-feature">5b · Difficulty progression — an illustration, not a feature</a></li>
+  </ul></li>
+  <li><a href="#sec-progress" id="toc-sec-progress" class="nav-link" data-scroll-target="#sec-progress">6 · Assessment &amp; progress</a></li>
+  <li><a href="#from-demo-to-course" id="toc-from-demo-to-course" class="nav-link" data-scroll-target="#from-demo-to-course">From demo to course</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+<script>window.__mathExerciseConfig = {"lang":"en"};</script>
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Quadratic Functions — a course module preview</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="demo-hero">
+<p><span class="demo-kicker">math-exercise · live demo</span></p>
+<section id="factoring-solving-quadratics" class="level1">
+<h1>Factoring &amp; Solving Quadratics</h1>
+<p class="demo-subtitle">
+A short, self-checking course module built entirely with Quarto and the <code>math-exercise</code> extension — no server, no LMS, just a browser. This page shows one coherent teaching sequence end to end: exercise → hint → worked solution → follow-up → assessment.
+</p>
+<div class="demo-hero-meta">
+<p><span>🧮 SymPy-checked answers</span> <span>🌐 Runs fully client-side (Pyodide)</span> <span>💬 Progressive AI hints</span> <span>🔁 Randomized task pools</span></p>
+</div>
+</section>
+</div>
+<p>This module targets a first bridging-course topic: <strong>factoring and solving quadratic equations</strong> via the difference-of-squares pattern and general trinomials. Every exercise below is a live, working <code>math-exercise</code> block — try it.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Learning objectives
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>By the end of this module, a student can:</p>
+<ul>
+<li>expand and factor simple quadratic expressions,</li>
+<li>solve a quadratic equation by factoring,</li>
+<li>apply a quadratic model to a numeric question, and</li>
+<li>recognize the same pattern across problems of increasing difficulty.</li>
+</ul>
+</div>
+</div>
+<hr>
+<section id="sec-warmup" class="level2">
+<h2 class="anchored" data-anchor-id="sec-warmup">1 · The exercise</h2>
+<div class="demo-step-head">
+<p><span class="demo-step-num">1</span> <span class="demo-pill demo-pill-feature">✓ math-exercise capability: <code>mode: equivalent</code> + <code>form: expanded</code></span></p>
+</div>
+<p>A student opens the module and meets the first task. Any algebraically equivalent answer is accepted, but it must actually be <strong>expanded</strong> — typing the un-multiplied product back is correctly rejected as “not in the requested form.”</p>
+<div class="math-exercise-cell" id="math-exercise-1" data-label="warmup" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="expanded" data-fields="[&quot;math-exercise-1-f1&quot;]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Warm-up — expand a product</div>
+
+<div class="math-exercise-body" style="display:none;">
+<div class="math-exercise-question">Expand the product: $(x-3)(x+3) = $ <input type="text" id="math-exercise-1-f1" data-answer="x**2 - 9" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
+<div class="math-exercise-controls">
+  <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
+  <button type="button" class="btn btn-light math-legend-btn">ⓘ&nbsp;Input help</button>
+  <div class="btn-group">
+    <button type="button" class="btn btn-light math-feedback-btn">💬&nbsp;Feedback</button>
+    <button type="button" class="btn btn-light math-reconfig-btn" title="Change AI configuration">⚙</button>
+  </div>
+</div>
+<div class="math-legend-panel" style="display:none;"></div>
+<div class="math-feedback-area"></div>
+</div>
+</div>
+</section>
+<section id="sec-hints" class="level2">
+<h2 class="anchored" data-anchor-id="sec-hints">2 · Stuck? Ask for a hint</h2>
+<div class="demo-step-head">
+<p><span class="demo-step-num">2</span> <span class="demo-pill demo-pill-feature">✓ math-exercise capability: built-in progressive AI feedback</span></p>
+</div>
+<p>Every exercise on this page already has a <strong>Feedback</strong> button (next to Check, above). It calls any OpenAI-compatible model — Cerebras, OpenRouter, OpenAI, a local Ollama — configured once per browser, and the hint gets <strong>more concrete each time the same student asks again on the same task</strong>:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Attempt</th>
+<th>What the tutor says</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1st click</td>
+<td>A gentle nudge — the solution is <em>not</em> given away</td>
+</tr>
+<tr class="even">
+<td>2nd click</td>
+<td>A concrete hint about the solution approach</td>
+</tr>
+<tr class="odd">
+<td>3rd+ click</td>
+<td>The full step-by-step solution</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>For a live demonstration, click <strong>Feedback</strong> on the exercise in <a href="#sec-warmup">§1</a> after entering a (possibly wrong) answer. This needs an API key for the chosen provider — several offer a free tier (see the <a href="../README.md#ai-feedback">README</a>). Screenshots of this dialog and the resulting hint bubble are good candidates for the funding application.</p>
+</div>
+</div>
+</section>
+<section id="sec-solution" class="level2">
+<h2 class="anchored" data-anchor-id="sec-solution">3 · The worked solution</h2>
+<div class="demo-step-head">
+<p><span class="demo-step-num">3</span> <span class="demo-pill demo-pill-showcase">🧩 demo presentation — standard Quarto callout, not an extension feature</span></p>
+</div>
+<p>Instead of (or alongside) AI feedback, a course can simply publish the worked solution as ordinary Quarto content — here as a collapsible callout, directly below the matching exercise:</p>
+<div class="math-exercise-cell" id="math-exercise-2" data-label="factor" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="factored" data-fields="[&quot;math-exercise-2-f1&quot;]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Now go the other way — factor it</div>
+
+<div class="math-exercise-body" style="display:none;">
+<div class="math-exercise-question">Factor the expression: $x^2 - 9 = $ <input type="text" id="math-exercise-2-f1" data-answer="(x-3)*(x+3)" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
+<div class="math-exercise-controls">
+  <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
+  <button type="button" class="btn btn-light math-legend-btn">ⓘ&nbsp;Input help</button>
+  <div class="btn-group">
+    <button type="button" class="btn btn-light math-feedback-btn">💬&nbsp;Feedback</button>
+    <button type="button" class="btn btn-light math-reconfig-btn" title="Change AI configuration">⚙</button>
+  </div>
+</div>
+<div class="math-legend-panel" style="display:none;"></div>
+<div class="math-feedback-area"></div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>📖 Show worked solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p><span class="math inline">\(x^2 - 9\)</span> is a <strong>difference of two squares</strong>: <span class="math inline">\(a^2 - b^2 = (a-b)(a+b)\)</span>.</p>
+<p>Here <span class="math inline">\(a = x\)</span> and <span class="math inline">\(b = 3\)</span>, since <span class="math inline">\(9 = 3^2\)</span>. Substituting:</p>
+<p><span class="math display">\[x^2 - 9 = x^2 - 3^2 = (x-3)(x+3)\]</span></p>
+<p>Notice this is exactly the reverse of the expansion in <a href="#sec-warmup">the warm-up exercise</a> — the two tasks are the same identity, read in opposite directions.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-followup" class="level2">
+<h2 class="anchored" data-anchor-id="sec-followup">4 · A related follow-up</h2>
+<div class="demo-step-head">
+<p><span class="demo-step-num">4</span> <span class="demo-pill demo-pill-feature">✓ math-exercise capability: <code>mode: set</code> and <code>mode: numeric</code></span></p>
+</div>
+<p>Two follow-ups build on the same identity: first <em>solving</em> the equation (multiple correct answers, order-independent), then <em>applying</em> the same kind of expression to a numeric, real-world question.</p>
+<div class="math-exercise-cell" id="math-exercise-3" data-label="solve" data-mode="set" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-fields="[&quot;math-exercise-3-f1&quot;]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Solve it</div>
+
+<div class="math-exercise-body" style="display:none;">
+<div class="math-exercise-question">Solve $x^2 - 9 = 0$. Give all solutions, comma-separated: <input type="text" id="math-exercise-3-f1" data-answer="3, -3" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
+<div class="math-exercise-controls">
+  <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
+  <button type="button" class="btn btn-light math-legend-btn">ⓘ&nbsp;Input help</button>
+  <div class="btn-group">
+    <button type="button" class="btn btn-light math-feedback-btn">💬&nbsp;Feedback</button>
+    <button type="button" class="btn btn-light math-reconfig-btn" title="Change AI configuration">⚙</button>
+  </div>
+</div>
+<div class="math-legend-panel" style="display:none;"></div>
+<div class="math-feedback-area"></div>
+</div>
+</div>
+<div class="math-exercise-cell" id="math-exercise-4" data-label="applied" data-mode="numeric" data-reject="" data-vars="" data-tolerance="0.1" data-decplaces="" data-sigfigs="" data-form="" data-fields="[&quot;math-exercise-4-f1&quot;]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Apply it — a quadratic model</div>
+
+<div class="math-exercise-body" style="display:none;">
+<div class="math-exercise-question">A stone is thrown so that its height after $t$ seconds is<br>
+$h(t) = -5t^2 + 20t$ metres.<br>
+What is its height at $t = 1.5\text{ s}$, in metres?<br>
+$h(1.5) = $ <input type="text" id="math-exercise-4-f1" data-answer="18.75" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"> m</div>
+<div class="math-exercise-controls">
+  <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
+  <button type="button" class="btn btn-light math-legend-btn">ⓘ&nbsp;Input help</button>
+  <div class="btn-group">
+    <button type="button" class="btn btn-light math-feedback-btn">💬&nbsp;Feedback</button>
+    <button type="button" class="btn btn-light math-reconfig-btn" title="Change AI configuration">⚙</button>
+  </div>
+</div>
+<div class="math-legend-panel" style="display:none;"></div>
+<div class="math-feedback-area"></div>
+</div>
+</div>
+</section>
+<section id="sec-variants" class="level2">
+<h2 class="anchored" data-anchor-id="sec-variants">5 · Practice variants</h2>
+<div class="demo-step-head">
+<p><span class="demo-step-num">5</span> <span class="demo-pill demo-pill-feature">✓ existing feature</span> <span class="demo-pill demo-pill-vision">🔮 envisioned extension</span></p>
+</div>
+<p>Two different ideas about “variants,” shown side by side and kept deliberately distinct.</p>
+<section id="a-task-pools-an-existing-capability" class="level3">
+<h3 class="anchored" data-anchor-id="a-task-pools-an-existing-capability">5a · Task pools — an existing capability</h3>
+<p><code>math-exercise</code> already supports a <strong>task pool</strong>: a set of hand-authored variants of the same problem, one shown at random per browser session, with a reload button (top-right of the box) to draw a new one.</p>
+<div class="math-exercise-cell" id="math-exercise-5" data-label="pool-factor" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="factored" data-pool="[&quot;Factor: $x^2 - 16 = $ __[(x-4)*(x+4)]&quot;,&quot;Factor: $x^2 - 36 = $ __[(x-6)*(x+6)]&quot;,&quot;Factor: $x^2 - 49 = $ __[(x-7)*(x+7)]&quot;]" data-fields="[]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Practice pool — click ↻ for a new random variant</div>
+
+<div class="math-exercise-body" style="display:none;">
+<button type="button" class="math-pool-reload" title="Load a new random task">↻</button>
+<div class="math-exercise-question"></div>
+<div class="math-exercise-controls">
+  <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
+  <button type="button" class="btn btn-light math-legend-btn">ⓘ&nbsp;Input help</button>
+  <div class="btn-group">
+    <button type="button" class="btn btn-light math-feedback-btn">💬&nbsp;Feedback</button>
+    <button type="button" class="btn btn-light math-reconfig-btn" title="Change AI configuration">⚙</button>
+  </div>
+</div>
+<div class="math-legend-panel" style="display:none;"></div>
+<div class="math-feedback-area"></div>
+</div>
+</div>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>This is real, working functionality</strong> — the three variants above are written directly in the document; <code>math-exercise</code> picks and remembers one per session and swaps it in on reload. No AI involved.</p>
+</div>
+</div>
+</section>
+<section id="b-difficulty-progression-an-illustration-not-a-feature" class="level3">
+<h3 class="anchored" data-anchor-id="b-difficulty-progression-an-illustration-not-a-feature">5b · Difficulty progression — an illustration, not a feature</h3>
+<p><span class="demo-pill demo-pill-vision">🔮 future vision — hand-written here to stand in for AI generation</span></p>
+<p>The three tasks below are <strong>written by hand for this demo</strong>. They illustrate what an AI question-generation step could plausibly hand a course author — several variants of the <em>same underlying concept</em> at increasing difficulty — which the author would then drop into <code>math-exercise</code> blocks exactly like any other exercise. <code>math-exercise</code> itself does not generate exercises; it only renders and checks whatever content it is given.</p>
+<div class="columns">
+<div class="column" style="width:33%;">
+<p><span class="demo-level-badge demo-level-1">Level 1 · easier</span></p>
+<div class="math-exercise-cell" id="math-exercise-6" data-label="level1" data-mode="set" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-fields="[&quot;math-exercise-6-f1&quot;]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Difference of squares</div>
+
+<div class="math-exercise-body" style="display:none;">
+<div class="math-exercise-question">Solve: $x^2 - 4 = 0$ <input type="text" id="math-exercise-6-f1" data-answer="2, -2" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
+<div class="math-exercise-controls">
+  <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
+  <button type="button" class="btn btn-light math-legend-btn">ⓘ&nbsp;Input help</button>
+  <div class="btn-group">
+    <button type="button" class="btn btn-light math-feedback-btn">💬&nbsp;Feedback</button>
+    <button type="button" class="btn btn-light math-reconfig-btn" title="Change AI configuration">⚙</button>
+  </div>
+</div>
+<div class="math-legend-panel" style="display:none;"></div>
+<div class="math-feedback-area"></div>
+</div>
+</div>
+</div><div class="column" style="width:33%;">
+<p><span class="demo-level-badge demo-level-2">Level 2 · medium</span></p>
+<div class="math-exercise-cell" id="math-exercise-7" data-label="level2" data-mode="set" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-fields="[&quot;math-exercise-7-f1&quot;]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Trinomial, integer roots</div>
+
+<div class="math-exercise-body" style="display:none;">
+<div class="math-exercise-question">Solve: $x^2 - x - 6 = 0$ <input type="text" id="math-exercise-7-f1" data-answer="3, -2" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
+<div class="math-exercise-controls">
+  <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
+  <button type="button" class="btn btn-light math-legend-btn">ⓘ&nbsp;Input help</button>
+  <div class="btn-group">
+    <button type="button" class="btn btn-light math-feedback-btn">💬&nbsp;Feedback</button>
+    <button type="button" class="btn btn-light math-reconfig-btn" title="Change AI configuration">⚙</button>
+  </div>
+</div>
+<div class="math-legend-panel" style="display:none;"></div>
+<div class="math-feedback-area"></div>
+</div>
+</div>
+</div><div class="column" style="width:33%;">
+<p><span class="demo-level-badge demo-level-3">Level 3 · harder</span></p>
+<div class="math-exercise-cell" id="math-exercise-8" data-label="level3" data-mode="set" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-fields="[&quot;math-exercise-8-f1&quot;]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Leading coefficient ≠ 1</div>
+
+<div class="math-exercise-body" style="display:none;">
+<div class="math-exercise-question">Solve: $2x^2 - 3x - 2 = 0$ <input type="text" id="math-exercise-8-f1" data-answer="2, -1/2" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
+<div class="math-exercise-controls">
+  <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
+  <button type="button" class="btn btn-light math-legend-btn">ⓘ&nbsp;Input help</button>
+  <div class="btn-group">
+    <button type="button" class="btn btn-light math-feedback-btn">💬&nbsp;Feedback</button>
+    <button type="button" class="btn btn-light math-reconfig-btn" title="Change AI configuration">⚙</button>
+  </div>
+</div>
+<div class="math-legend-panel" style="display:none;"></div>
+<div class="math-feedback-area"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="sec-progress" class="level2">
+<h2 class="anchored" data-anchor-id="sec-progress">6 · Assessment &amp; progress</h2>
+<div class="demo-step-head">
+<p><span class="demo-step-num">6</span> <span class="demo-pill demo-pill-feature">✓ per-exercise: strict, symbolic correctness checking</span> <span class="demo-pill demo-pill-showcase">🧩 dashboard below: demo-only illustration</span></p>
+</div>
+<p>Assessment already happens <strong>inside every exercise above</strong>: each <code>Check</code> click runs a real symbolic comparison in SymPy, not string matching — it can require a <em>specific algebraic form</em> (factored, expanded, exact, reduced), not just a numerically correct value. That is what makes <code>form: factored</code> above reject a mathematically-correct-but-unfactored answer.</p>
+<p>What <code>math-exercise</code> does <strong>not</strong> currently provide is a course-wide view across many exercises. The panel below is a small demo-only script (<code>assets/progress-tracker.js</code>, ships only with this demo) that watches the pass/fail state <code>math-exercise</code> already puts on the page and aggregates it — illustrating what a lightweight course dashboard or gradebook feed could look like.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The panel below is <strong>not</strong> part of <code>math-exercise</code>. It is presentation code specific to this demo, built only on the extension’s already-public DOM output (the <code>math-input-ok</code> / <code>math-input-wrong</code> classes it adds after a check). No extension file was modified to build it.</p>
+</div>
+</div>
+<div id="demo-progress-panel" class="demo-progress-panel" data-track="warmup:1 · Expand,factor:2 · Factor,solve:3 · Solve,applied:4 · Apply,pool-factor:5a · Practice pool,level1:5b · Level 1,level2:5b · Level 2,level3:5b · Level 3">
+<div class="demo-progress-row">
+<div class="demo-progress-track">
+<div class="demo-progress-fill">
+
+</div>
+</div>
+<div class="demo-progress-count">
+0 / 8
+</div>
+</div>
+<ul class="demo-progress-list">
+</ul>
+</div>
+<hr>
+</section>
+<section id="from-demo-to-course" class="level2">
+<h2 class="anchored" data-anchor-id="from-demo-to-course">From demo to course</h2>
+<div class="demo-vision-grid">
+<div class="demo-vision-card">
+<h4 class="anchored">
+🔮 AI-generated question banks
+</h4>
+<p>
+Generate large pools of variants (like §5b) automatically from a single worked template, then curate them into <code>math-exercise</code> task pools (like §5a) for actual use.
+</p>
+</div>
+<div class="demo-vision-card">
+<h4 class="anchored">
+🔮 Course-wide gradebook
+</h4>
+<p>
+Extend the illustration in §6 into a real, privacy-respecting record of completed exercises across a whole module or semester.
+</p>
+</div>
+<div class="demo-vision-card">
+<h4 class="anchored">
+🔮 Adaptive difficulty
+</h4>
+<p>
+Route a student toward Level 1, 2, or 3 style variants automatically, based on which exercises they already solved.
+</p>
+</div>
+<div class="demo-vision-card">
+<h4 class="anchored">
+🔮 LMS integration
+</h4>
+<p>
+Feed the underlying check results (already computed client-side, in SymPy) into a university’s existing LMS or reporting workflow.
+</p>
+</div>
+</div>
+<p class="demo-footnote">
+Built with Quarto and the <code>math-exercise</code> extension (Erasmus+ project 2023-1-NO01-KA220-HED-000166744). This page is a standalone demo; it does not modify the extension.
+</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script src="assets/auto-expand.js"></script>
+<script src="assets/progress-tracker.js"></script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<script type="text/javascript">
+(function () {
+  'use strict';
+
+  // ---------------------------------------------------------------------------
+  // Locales – add new languages here
+  //
+  // The active language comes from window.__mathExerciseConfig, which the Lua
+  // filter fills from `math-exercise: lang:` or Quarto's own `lang:`.
+  // When adding a language, also add its code to `supportedLangs` in
+  // math-exercise.lua (that file holds the button labels it renders itself).
+  // ---------------------------------------------------------------------------
+
+  var LOCALES = {
+    en: {
+      // Legend: [LaTeX, input syntax, meaning]
+      legend: [
+        ['x^2',             'x^2 \\text{ or } x{**}2',   'Power'],
+        ['\\sqrt{x}',       'sqrt(x)',                   'Square root'],
+        ['\\sqrt[n]{x}',    'root(x, n)',                'n-th root'],
+        ['\\dfrac{a}{b}',   'a/b',                       'Fraction'],
+        ['\\pi',            'pi',                        'Pi'],
+        ['e',               'E',                         "Euler's number e"],
+        ['\\sin(x)',        'sin(x)',                    'Sine'],
+        ['\\cos(x)',        'cos(x)',                    'Cosine'],
+        ['\\tan(x)',        'tan(x)',                    'Tangent'],
+        ['\\ln(x)',         'ln(x)',                     'Natural logarithm'],
+        ['\\log_a(x)',      'log(x, a)',                 'Log to base a'],
+        ['|x|',             'Abs(x)',                    'Absolute value'],
+        ['\\infty',         'inf &nbsp;or&nbsp; oo',     'Infinity'],
+        ['\\int f\\,dx',    'integrate(f, x)',           'Integral'],
+        ['\\dfrac{d}{dx}f', 'diff(f, x)',                'Derivative'],
+      ],
+      legendOps:
+        'Basic operators:&nbsp;<code>+</code>&nbsp;<code>-</code>&nbsp;<code>*</code>&nbsp;<code>/</code>' +
+        '&nbsp;&nbsp;|&nbsp;&nbsp;Brackets:&nbsp;<code>(</code>&nbsp;<code>)</code>' +
+        '&nbsp;&nbsp;|&nbsp;&nbsp;Power:&nbsp;<code>^</code>&nbsp;or&nbsp;<code>**</code>',
+      legendThExpr:    'Expression',
+      legendThInput:   'Input',
+      legendThMeaning: 'Meaning',
+
+      // Error messages
+      errSyntax:   'Syntax error: check that all brackets are closed and no operator is missing.',
+      errUnknownName: function (name) {
+        return 'Unknown name &bdquo;' + name + '&ldquo; – use the input help (e.g. <code>pi</code> instead of <code>π</code>).';
+      },
+      errNameGeneric: 'Unknown name – use the input help for the correct spelling.',
+      errDivZero:  'Division by zero: the expression is undefined at this point.',
+      errType:     'Type error: make sure numbers and variables are combined correctly.',
+      errGeneric:  'The input could not be processed – use the input help for the correct spelling.',
+
+      // Check results
+      fieldPrefix:  function (n) { return 'Field&nbsp;' + n + ': '; },
+      resEmpty:     'Please enter an answer.',
+      resCorrect:   'Correct!',
+      resWrong:     'Not correct – try again.',
+      resRejected:  'Mathematically correct, but not simplified yet. Keep transforming the expression.',
+      resNotExact:  'Mathematically correct, but not in the requested form. Rewrite the expression exactly as asked.',
+      resNotForm:   function (form) {
+        var names = { factored: 'factored form', expanded: 'expanded form',
+          single_fraction: 'a single fraction', lowest_terms: 'lowest terms' };
+        return 'Mathematically correct, but not written in ' + (names[form] || 'the required form') +
+          '. Rewrite the expression accordingly.';
+      },
+
+      // Status
+      loadingHelp:     '&#9203; Loading help&hellip;',
+      checking:        '&#9203; Checking&hellip;',
+      fetchingFeedback:'&#9203; Fetching feedback&hellip;',
+      needAnswerFirst: 'Please enter an answer first, then request feedback.',
+
+      // AI prompts – the length limit must stay in every language, otherwise
+      // the answer gets cut off mid-sentence.
+      promptBase: 'Answer in English. At most about 250 words, so the answer stays complete.',
+      promptHint1: 'You are a friendly mathematics tutor. The student has worked on a task. Gently point out the possible mistake without revealing the solution. Give only a small nudge. ',
+      promptHint2: 'You are a friendly mathematics tutor. The student is asking for help a second time. Give a concrete hint towards the solution approach, without showing the full solution. ',
+      promptHint3: 'You are a friendly mathematics tutor. The student has asked for help several times. Explain the complete solution path step by step now, clearly and understandably. ',
+
+      // Settings modal
+      modalTitle:      'Set up AI feedback',
+      modalClose:      'Close',
+      modalHint:       'The credentials are stored only locally in your browser.',
+      modalFillAll:    'Please fill in base URL, API key and model.',
+      fieldPreset:     'Provider preset',
+      fieldModel:      'Model',
+      presetPlaceholder: '– choose a template or fill in yourself –',
+      presetCerebras:  'Cerebras (free tier)',
+      presetOpenrouter:'OpenRouter (free models · shared limit)',
+      presetOpenai:    'OpenAI (paid)',
+      presetOllama:    'Ollama (local, no key)',
+      phBaseUrl:       'e.g. https://api.cerebras.ai/v1',
+      phApiKey:        'API key (stays local in the browser)',
+      phModel:         'e.g. gpt-oss-120b',
+      fetchModelsBtn:  'Fetch models',
+      fetchModelsBusy: 'loading …',
+      modelChoose:     function (count) { return '– choose model (' + count + ' found) –'; },
+      freeModelsOnly:  ' show free models only',
+      modelFree:       'free',
+      modelPaid:       'paid!',
+      modelListSelect: 'Choose a model – it will be copied to the model field.',
+      modelListNoPricing: '⚠️ This provider does not supply pricing information. Check the provider’s website to see whether the model is free.',
+      errNeedBaseUrl:  'Please enter a base URL first (or choose a template).',
+      errNoModels:     'The response did not contain any models.',
+      errModelListFailed: function (msg) { return 'Model list could not be loaded: ' + msg; },
+      modelHintKeyNeeded: function (url) {
+        return 'API key required to fetch models. <a href="' + url +
+          '" target="_blank" rel="noopener">Available models at the provider →</a>';
+      },
+      infoBtn:    'ℹ️ How do I get credentials?',
+      saveBtn:    'Save & load feedback',
+      cancelBtn:  'Cancel',
+      reconfigBtn:'Change configuration',
+      promptTask: 'Task:',
+      promptAnswer: 'My answer:',
+      feedbackTitle: 'Feedback',
+      feedbackAttempt: function (n) { return 'Attempt&nbsp;' + n; },
+      errorPrefix: 'Error:',
+
+      helpBox:
+        '<b>Set up AI access – works with any OpenAI-compatible API.</b><br>' +
+        'You need three things: a <b>base URL</b>, an <b>API key</b> and a <b>model</b>.<br><br>' +
+        '<b>Providers with a free quota (examples):</b><br>' +
+        '&bull; <b>Cerebras</b> – base URL <code>https://api.cerebras.ai/v1</code>, ' +
+          'key: <a href="https://cloud.cerebras.ai" target="_blank" rel="noopener">cloud.cerebras.ai</a>; ' +
+          'model e.g. <code>gpt-oss-120b</code><br>' +
+        '&bull; <b>OpenRouter</b> – base URL <code>https://openrouter.ai/api/v1</code>, ' +
+          'key: <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">openrouter.ai/keys</a>; ' +
+          'free models (suffix <code>:free</code>, ' +
+          '<a href="https://openrouter.ai/models?max_price=0" target="_blank" rel="noopener">list</a>), ' +
+          'e.g. <code>meta-llama/llama-3.3-70b-instruct:free</code><br>' +
+        '&bull; <b>Ollama (local)</b> – base URL <code>http://localhost:11434/v1</code>, no key<br>' +
+        '<br><i>All entries stay local in your browser only.</i>',
+    },
+
+    de: {
+      // Legend: [LaTeX, input syntax, meaning]
+      legend: [
+        ['x^2',             'x^2 \\text{ oder } x{**}2', 'Potenz'],
+        ['\\sqrt{x}',       'sqrt(x)',                   'Quadratwurzel'],
+        ['\\sqrt[n]{x}',    'root(x, n)',                'n-te Wurzel'],
+        ['\\dfrac{a}{b}',   'a/b',                       'Bruch'],
+        ['\\pi',            'pi',                        'Kreiszahl π'],
+        ['e',               'E',                         'Eulersche Zahl e'],
+        ['\\sin(x)',        'sin(x)',                    'Sinus'],
+        ['\\cos(x)',        'cos(x)',                    'Kosinus'],
+        ['\\tan(x)',        'tan(x)',                    'Tangens'],
+        ['\\ln(x)',         'ln(x)',                     'Nat. Logarithmus'],
+        ['\\log_a(x)',      'log(x, a)',                 'Log. zur Basis a'],
+        ['|x|',             'Abs(x)',                    'Betrag'],
+        ['\\infty',         'inf &nbsp;oder&nbsp; oo',   'Unendlich'],
+        ['\\int f\\,dx',    'integrate(f, x)',           'Integral'],
+        ['\\dfrac{d}{dx}f', 'diff(f, x)',                'Ableitung'],
+      ],
+      legendOps:
+        'Grundrechenzeichen:&nbsp;<code>+</code>&nbsp;<code>-</code>&nbsp;<code>*</code>&nbsp;<code>/</code>' +
+        '&nbsp;&nbsp;|&nbsp;&nbsp;Klammern:&nbsp;<code>(</code>&nbsp;<code>)</code>' +
+        '&nbsp;&nbsp;|&nbsp;&nbsp;Potenz:&nbsp;<code>^</code>&nbsp;oder&nbsp;<code>**</code>',
+      legendThExpr:    'Ausdruck',
+      legendThInput:   'Eingabe',
+      legendThMeaning: 'Bedeutung',
+
+      // Error messages
+      errSyntax:   'Syntax-Fehler: Prüfe ob alle Klammern geschlossen sind und kein Operatorzeichen fehlt.',
+      errUnknownName: function (name) {
+        return 'Unbekannte Bezeichnung &bdquo;' + name + '&ldquo; – nutze die Eingabe-Hilfe (z.&nbsp;B. <code>pi</code> statt <code>π</code>).';
+      },
+      errNameGeneric: 'Unbekannte Bezeichnung – nutze die Eingabe-Hilfe für korrekte Schreibweisen.',
+      errDivZero:  'Division durch Null: der Ausdruck ist an dieser Stelle nicht definiert.',
+      errType:     'Typ-Fehler: Stelle sicher, dass Zahlen und Variablen korrekt kombiniert sind.',
+      errGeneric:  'Die Eingabe konnte nicht verarbeitet werden – nutze die Eingabe-Hilfe für korrekte Schreibweisen.',
+
+      // Check results
+      fieldPrefix:  function (n) { return 'Feld&nbsp;' + n + ': '; },
+      resEmpty:     'Bitte eine Antwort eingeben.',
+      resCorrect:   'Richtig!',
+      resWrong:     'Nicht korrekt – versuche es noch einmal.',
+      resRejected:  'Mathematisch korrekt, aber noch nicht vereinfacht. Forme den Ausdruck weiter um.',
+      resNotExact:  'Mathematisch korrekt, aber nicht in der gesuchten Form. Schreibe den Ausdruck genau so um, wie gefordert.',
+      resNotForm:   function (form) {
+        var names = { factored: 'faktorisierter Form', expanded: 'ausmultiplizierter Form',
+          single_fraction: 'einem einzigen Bruch', lowest_terms: 'vollständig gekürzter Form' };
+        return 'Mathematisch korrekt, aber nicht in ' + (names[form] || 'der geforderten Form') +
+          ' geschrieben. Forme den Ausdruck entsprechend um.';
+      },
+
+      // Status
+      loadingHelp:     '&#9203; Lade Hilfe&hellip;',
+      checking:        '&#9203; Überprüfe&hellip;',
+      fetchingFeedback:'&#9203; Hole Feedback&hellip;',
+      needAnswerFirst: 'Bitte zuerst eine Antwort eingeben, dann Feedback anfordern.',
+
+      // AI prompts – the length limit must stay in every language, otherwise
+      // the answer gets cut off mid-sentence.
+      promptBase: 'Antworte auf Deutsch. Höchstens etwa 250 Wörter, damit die Antwort vollständig bleibt.',
+      promptHint1: 'Du bist ein freundlicher Mathematik-Tutor. Der Schüler hat eine Aufgabe bearbeitet. Weise sanft auf den möglichen Fehler hin, ohne die Lösung zu verraten. Gib nur einen kleinen Denkanstoß. ',
+      promptHint2: 'Du bist ein freundlicher Mathematik-Tutor. Der Schüler fragt zum zweiten Mal nach Hilfe. Gib einen konkreten Hinweis auf den Lösungsansatz, ohne die vollständige Lösung zu zeigen. ',
+      promptHint3: 'Du bist ein freundlicher Mathematik-Tutor. Der Schüler hat bereits mehrfach um Hilfe gebeten. Erkläre den vollständigen Lösungsweg jetzt Schritt für Schritt, klar und verständlich. ',
+
+      // Settings modal
+      modalTitle:      'KI-Feedback einrichten',
+      modalClose:      'Schließen',
+      modalHint:       'Die Zugangsdaten werden nur lokal in Ihrem Browser gespeichert.',
+      modalFillAll:    'Bitte Base URL, API Key und Modell ausfüllen.',
+      fieldPreset:     'Anbieter-Vorlage',
+      fieldModel:      'Modell',
+      presetPlaceholder: '– Vorlage wählen oder selbst eintragen –',
+      presetCerebras:  'Cerebras (Gratis-Tier)',
+      presetOpenrouter:'OpenRouter (Gratis-Modelle · geteiltes Limit)',
+      presetOpenai:    'OpenAI (kostenpflichtig)',
+      presetOllama:    'Ollama (lokal, kein Key)',
+      phBaseUrl:       'z. B. https://api.cerebras.ai/v1',
+      phApiKey:        'API Key (bleibt lokal im Browser)',
+      phModel:         'z. B. gpt-oss-120b',
+      fetchModelsBtn:  'Modelle abrufen',
+      fetchModelsBusy: 'lädt …',
+      modelChoose:     function (count) { return '– Modell wählen (' + count + ' gefunden) –'; },
+      freeModelsOnly:  ' nur kostenlose Modelle anzeigen',
+      modelFree:       'gratis',
+      modelPaid:       'kostenpflichtig!',
+      modelListSelect: 'Wähle ein Modell – es wird ins Modell-Feld übernommen.',
+      modelListNoPricing: '⚠️ Dieser Anbieter liefert keine Preisinfo. Prüfe auf der Anbieterseite, ob das Modell kostenlos ist.',
+      errNeedBaseUrl:  'Bitte zuerst eine Base URL eingeben (oder eine Vorlage wählen).',
+      errNoModels:     'Die Antwort enthielt keine Modelle.',
+      errModelListFailed: function (msg) { return 'Modell-Liste konnte nicht geladen werden: ' + msg; },
+      modelHintKeyNeeded: function (url) {
+        return 'API-Key nötig für Modellabruf. <a href="' + url +
+          '" target="_blank" rel="noopener">Verfügbare Modelle beim Anbieter →</a>';
+      },
+      infoBtn:    'ℹ️ Wie komme ich an Zugangsdaten?',
+      saveBtn:    'Speichern & Feedback laden',
+      cancelBtn:  'Abbrechen',
+      reconfigBtn:'Konfiguration ändern',
+      promptTask: 'Aufgabe:',
+      promptAnswer: 'Meine Antwort:',
+      feedbackTitle: 'Feedback',
+      feedbackAttempt: function (n) { return 'Versuch&nbsp;' + n; },
+      errorPrefix: 'Fehler:',
+
+      helpBox:
+        '<b>KI-Zugang einrichten – funktioniert mit jeder OpenAI-kompatiblen API.</b><br>' +
+        'Du brauchst drei Angaben: <b>Base URL</b>, <b>API Key</b> und ein <b>Modell</b>.<br><br>' +
+        '<b>Anbieter mit kostenlosem Kontingent (Beispiele):</b><br>' +
+        '&bull; <b>Cerebras</b> – Base URL <code>https://api.cerebras.ai/v1</code>, ' +
+          'Key: <a href="https://cloud.cerebras.ai" target="_blank" rel="noopener">cloud.cerebras.ai</a>; ' +
+          'Modell z. B. <code>gpt-oss-120b</code><br>' +
+        '&bull; <b>OpenRouter</b> – Base URL <code>https://openrouter.ai/api/v1</code>, ' +
+          'Key: <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">openrouter.ai/keys</a>; ' +
+          'Gratis-Modelle (Endung <code>:free</code>, ' +
+          '<a href="https://openrouter.ai/models?max_price=0" target="_blank" rel="noopener">Liste</a>), ' +
+          'z. B. <code>meta-llama/llama-3.3-70b-instruct:free</code><br>' +
+        '&bull; <b>Ollama (lokal)</b> – Base URL <code>http://localhost:11434/v1</code>, kein Key<br>' +
+        '<br><i>Alle Eingaben bleiben nur lokal in deinem Browser.</i>',
+    },
+  };
+
+  // Active locale. Unknown language -> English (never undefined).
+  var ME_CFG = window.__mathExerciseConfig || { lang: 'en' };
+  var L = LOCALES[ME_CFG.lang] || LOCALES.en;
+
+  // ---------------------------------------------------------------------------
+  // Utilities
+  // ---------------------------------------------------------------------------
+
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  // Sanitizes LLM output: escapes HTML first (prevents XSS), then re-adds
+  // a minimal subset of markdown as safe HTML tags.
+  function simpleMarkdown(text) {
+    return escHtml(text)
+      .replace(/\*\*([\s\S]*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*([\s\S]*?)\*/g,     '<em>$1</em>')
+      .replace(/`([^`]*)`/g,          '<code>$1</code>')
+      .replace(/\n/g, '<br>');
+  }
+
+  // Loads a script exactly once. If its tag already exists but has not finished
+  // loading, wait for its load event instead of resolving immediately. Otherwise,
+  // a second extension could access globals that do not exist yet.
+  function loadScript(src) {
+    return new Promise(function (resolve, reject) {
+      var existing = document.querySelector('script[src="' + src + '"]');
+      if (existing) {
+        if (existing.dataset.qLoaded === '1') { resolve(); return; }
+        existing.addEventListener('load', function () { resolve(); });
+        existing.addEventListener('error', function () {
+          reject(new Error('Failed to load: ' + src));
+        });
+        return;
+      }
+      var s = document.createElement('script');
+      s.src = src;
+      s.onload = function () { s.dataset.qLoaded = '1'; resolve(); };
+      s.onerror = function () { reject(new Error('Failed to load: ' + src)); };
+      document.head.appendChild(s);
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Pyodide bootstrap  (reuse coatless instance if present)
+  // ---------------------------------------------------------------------------
+
+  async function ensurePyodide() {
+    if (typeof qpyodideInstance !== 'undefined') {
+      window.mainPyodide = await qpyodideInstance; return;
+    }
+    if (typeof mainPyodide !== 'undefined') return;
+    // Standalone mode. Use a shared promise so math-exercise and py-exercise on
+    // the same page do not start two Pyodide instances or interfere while loading.
+    var cdn = 'https://cdn.jsdelivr.net/pyodide/v0.27.2/full/';
+    if (!globalThis.__qExercisePyodide) {
+      globalThis.__qExercisePyodide = (async function () {
+        await loadScript(cdn + 'pyodide.js');
+        return await loadPyodide({ indexURL: cdn });
+      })();
+    }
+    window.mainPyodide = await globalThis.__qExercisePyodide;
+  }
+
+  // ---------------------------------------------------------------------------
+  // KaTeX  (legend rendering – loaded independently of page math)
+  // ---------------------------------------------------------------------------
+
+  var katexReady = false;
+  var katexLib = null;
+  var renderMathInElementFn = null;
+  var KATEX = 'https://cdn.jsdelivr.net/npm/katex@0.16.11/';
+
+  async function ensureKatex() {
+    if (katexReady) return;
+    var link = document.createElement('link');
+    link.rel = 'stylesheet'; link.href = KATEX + 'dist/katex.min.css';
+    document.head.appendChild(link);
+    // Loaded as ES modules (jsDelivr's `+esm` build), not classic <script>
+    // tags. Reason: KaTeX's classic UMD bundles register themselves through
+    // Monaco's global AMD loader (vs/loader.js, injected here for the code
+    // editor) instead of setting window.katex / window.renderMathInElement,
+    // and RequireJS throws "Can only have one anonymous define call per
+    // script file" when they do. Dynamic import() uses a separate module
+    // system AMD detection can't see, so it sidesteps the collision instead
+    // of racing Monaco's own concurrent module loads (a "temporarily hide
+    // define.amd" workaround was tried first and broke Monaco's lazily
+    // loaded markdown renderer for hover tooltips).
+    var katexMod      = await import(KATEX + '+esm');
+    var autoRenderMod = await import(KATEX + 'contrib/auto-render/+esm');
+    katexLib = katexMod.default;
+    renderMathInElementFn = autoRenderMod.default;
+    katexReady = true;
+  }
+
+  var KATEX_DELIMITERS = [
+    { left: '$$', right: '$$', display: true  },
+    { left: '$',  right: '$',  display: false },
+    { left: '\\(', right: '\\)', display: false },
+    { left: '\\[', right: '\\]', display: true  },
+  ];
+
+  function renderMathInQuestion(el) {
+    if (!el || typeof renderMathInElementFn !== 'function') return;
+    renderMathInElementFn(el, { delimiters: KATEX_DELIMITERS, throwOnError: false });
+  }
+
+  // ---------------------------------------------------------------------------
+  // SymPy  (lazy – first Check click)
+  // ---------------------------------------------------------------------------
+
+  var sympyReady = false;
+
+  async function ensureSympy() {
+    if (sympyReady) return;
+    await mainPyodide.loadPackage('sympy');
+    await mainPyodide.runPythonAsync([
+      'from sympy import *',
+      'from sympy.parsing.sympy_parser import (',
+      '    parse_expr, standard_transformations,',
+      '    implicit_multiplication_application, convert_xor',
+      ')',
+      '_math_tf = standard_transformations + (',
+      '    implicit_multiplication_application, convert_xor,',
+      ')',
+      'import json as _mj',
+      'import re as _mre',
+      'from math import log10, floor, gcd',
+      '',
+      '_FRAC_RE = _mre.compile(r"(-?\\d+)\\s*/\\s*(-?\\d+)")',
+      '',
+      'def _numeric_not_reduced(raw):',
+      '    # True if raw contains any literal int/int fraction that is not fully',
+      '    # reduced (e.g. the "2/4" inside "1/4 + 2/4"). SymPy auto-reduces',
+      '    # Rationals as soon as they are parsed/combined, so this has to scan',
+      '    # the original text, not the parsed expression.',
+      '    for _m in _FRAC_RE.finditer(raw):',
+      '        num, den = int(_m.group(1)), int(_m.group(2))',
+      '        if den != 0 and gcd(abs(num), abs(den)) != 1:',
+      '            return True',
+      '    return False',
+      '',
+      'def _split_top(s, sep=","):',
+      '    parts = []',
+      '    depth = 0',
+      '    cur = ""',
+      '    for ch in s:',
+      '        if ch in "([{": depth += 1',
+      '        elif ch in ")]}": depth -= 1',
+      '        if ch == sep and depth == 0:',
+      '            parts.append(cur)',
+      '            cur = ""',
+      '        else:',
+      '            cur += ch',
+      '    parts.append(cur)',
+      '    return [p.strip() for p in parts if p.strip() != ""]',
+      '',
+      'def _sigfigs_round(x, n):',
+      '    if x == 0: return 0.0',
+      '    d = n - int(floor(log10(abs(x)))) - 1',
+      '    return round(x, d)',
+      '',
+      'def _parse_tol(spec, ref):',
+      '    spec = spec.strip()',
+      '    if spec.endswith("%"):',
+      '        return abs(ref) * float(spec[:-1]) / 100.0',
+      '    return float(spec)',
+      '',
+      'def _canon_form(expr, form):',
+      '    if form == "factored":        return factor(expr)',
+      '    if form == "expanded":        return expand(expr)',
+      '    if form == "single_fraction": return together(expr)',
+      '    if form == "lowest_terms":    return cancel(expr)',
+      '    return expr',
+      '',
+      'def _num_equal(sv, cv):',
+      '    if _math_decplaces.strip():',
+      '        n = int(_math_decplaces)',
+      '        return round(sv, n) == round(cv, n)',
+      '    if _math_sigfigs.strip():',
+      '        n = int(_math_sigfigs)',
+      '        return _sigfigs_round(sv, n) == _sigfigs_round(cv, n)',
+      '    if _math_tolerance.strip():',
+      '        return abs(sv - cv) <= _parse_tol(_math_tolerance, cv)',
+      '    return abs(sv - cv) <= 1e-8 * max(1.0, abs(cv))',
+      '',
+      'def _build_locals():',
+      '    _local = {}',
+      '    if _math_vars.strip():',
+      '        for _v in _math_vars.replace(",", " ").split():',
+      '            _v = _v.strip()',
+      '            if _v: _local[_v] = symbols(_v)',
+      '    _local.setdefault("inf", oo)',
+      '    return _local',
+      '',
+      'def _math_check():',
+      '    try:',
+      '        mode = _math_mode',
+      '        if mode in ("string", "string_ci"):',
+      '            s, c = _math_student, _math_correct',
+      '            if mode == "string_ci": s, c = s.lower(), c.lower()',
+      '            return {"status": "correct" if s == c else "wrong"}',
+      '',
+      '        _local = _build_locals()',
+      '',
+      '        if mode == "set":',
+      '            s_items = [parse_expr(p, local_dict=_local, transformations=_math_tf) for p in _split_top(_math_student)]',
+      '            c_items = [parse_expr(p, local_dict=_local, transformations=_math_tf) for p in _split_top(_math_correct)]',
+      '            if len(s_items) != len(c_items):',
+      '                return {"status": "wrong"}',
+      '            unmatched = list(c_items)',
+      '            for si in s_items:',
+      '                found = None',
+      '                for ci in unmatched:',
+      '                    d = simplify(si - ci)',
+      '                    if d == 0 or (d.is_number and abs(complex(d.evalf())) < 1e-8):',
+      '                        found = ci',
+      '                        break',
+      '                if found is None:',
+      '                    return {"status": "wrong"}',
+      '                unmatched.remove(found)',
+      '            return {"status": "correct"}',
+      '',
+      '        _ms = parse_expr(_math_student, local_dict=_local, transformations=_math_tf)',
+      '        _mc = parse_expr(_math_correct,  local_dict=_local, transformations=_math_tf)',
+      '',
+      '        if mode == "numeric":',
+      '            sv, cv = complex(_ms.evalf()), complex(_mc.evalf())',
+      '            if abs(sv.imag) > 1e-9 or abs(cv.imag) > 1e-9:',
+      '                return {"status": "wrong"}',
+      '            ok = _num_equal(sv.real, cv.real)',
+      '            return {"status": "correct" if ok else "wrong"}',
+      '',
+      '        _d  = simplify(_ms - _mc)',
+      '        _eq = (_d == 0) or (_d.is_number and abs(complex(_d.evalf())) < 1e-10)',
+      '        if not _eq:',
+      '            return {"status": "wrong"}',
+      '        if mode == "exact":',
+      '            if str(_ms) != str(_mc):',
+      '                return {"status": "not_exact"}',
+      '            # SymPy auto-reduces Rationals on parse, so an un-reduced',
+      '            # numeric fraction (e.g. "2/4" inside "1/4 + 2/4") is',
+      '            # invisible to the string check above; "exact" is meant to',
+      '            # be the strictest mode, so catch it on the raw text too.',
+      '            if not _ms.free_symbols and _numeric_not_reduced(_math_student):',
+      '                return {"status": "not_exact"}',
+      '        if _math_form.strip():',
+      '            if _math_form == "lowest_terms" and not _ms.free_symbols:',
+      '                if _numeric_not_reduced(_math_student):',
+      '                    return {"status": "not_form"}',
+      '            elif _ms != _canon_form(_ms, _math_form):',
+      '                return {"status": "not_form"}',
+      '        if _math_reject.strip():',
+      '            _mr  = parse_expr(_math_reject, local_dict=_local, transformations=_math_tf)',
+      '            if str(_ms) == str(_mr):',
+      '                return {"status": "rejected"}',
+      '        return {"status": "correct"}',
+      '    except Exception as _me:',
+      '        return {"status": "error", "message": str(_me)}',
+    ].join('\n'));
+    sympyReady = true;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Legend
+  // ---------------------------------------------------------------------------
+
+  var LEGEND = L.legend;
+
+  async function buildLegend(container) {
+    await ensureKatex();
+    var rows = LEGEND.map(function (item) {
+      var math;
+      try { math = katexLib.renderToString(item[0], { throwOnError: false }); }
+      catch (e) { math = escHtml(item[0]); }
+      return '<tr>'
+        + '<td class="math-legend-math">'  + math + '</td>'
+        + '<td><code class="math-legend-code">' + item[1] + '</code></td>'
+        + '<td class="math-legend-desc">'  + item[2] + '</td>'
+        + '</tr>';
+    }).join('');
+    container.innerHTML =
+      '<div class="math-legend-inner">'
+      + '<p class="math-legend-ops">'
+      + L.legendOps
+      + '</p>'
+      + '<table class="math-legend-table"><thead><tr>'
+      + '<th>' + L.legendThExpr + '</th><th>' + L.legendThInput + '</th><th>' + L.legendThMeaning + '</th>'
+      + '</tr></thead><tbody>' + rows + '</tbody></table>'
+      + '</div>';
+  }
+
+  // ---------------------------------------------------------------------------
+  // Convert low-level errors into localized, human-readable messages
+  // ---------------------------------------------------------------------------
+
+  function friendlyError(raw) {
+    var msg = String(raw || '');
+    if (/SyntaxError/i.test(msg))
+      return L.errSyntax;
+    var nm = msg.match(/name ['"]([\w]+)['"] is not defined/);
+    if (nm)
+      return L.errUnknownName(nm[1]);
+    if (/NameError/i.test(msg))
+      return L.errNameGeneric;
+    if (/ZeroDivisionError/i.test(msg) || /\bzoo\b/.test(msg))
+      return L.errDivZero;
+    if (/TypeError/i.test(msg))
+      return L.errType;
+    return L.errGeneric;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Task-text renderer  (used by pool mode: parses _[answer] markers in JS)
+  // ---------------------------------------------------------------------------
+
+  function renderTaskText(text, exerciseId, vars) {
+    var count = 0, fieldIds = [];
+    var html = text.replace(/(_+)\[([^\]]*)\]/g, function (_, underscores, answer) {
+      count++;
+      var fid  = exerciseId + '-f' + count;
+      fieldIds.push(fid);
+      var n    = underscores.length;
+      var base = ' id="' + fid + '"'
+               + ' data-answer="' + escHtml(answer) + '"'
+               + ' data-vars="'   + escHtml(vars)   + '"'
+               + ' autocomplete="off" autocorrect="off" spellcheck="false"';
+      if (n >= 3) return '<textarea' + base + ' class="math-input math-input-large" rows="2"></textarea>';
+      if (n >= 2) return '<input type="text"' + base + ' class="math-input math-input-medium">';
+      return '<input type="text"' + base + ' class="math-input math-input-small">';
+    });
+    return { html: html.replace(/\n/g, '<br>\n'), fieldIds: fieldIds };
+  }
+
+  // ---------------------------------------------------------------------------
+  // SymPy checker
+  // ---------------------------------------------------------------------------
+
+  // Calls the _math_check() helper defined once in ensureSympy() and returns
+  // its result as a JSON status string.
+  var CHECK_PY = '_mj.dumps(_math_check())';
+
+  async function checkField(el, mode, opts) {
+    var val = el.value.trim();
+    if (!val) return { status: 'empty' };
+    opts = opts || {};
+    mainPyodide.globals.set('_math_student',   val);
+    mainPyodide.globals.set('_math_correct',   el.dataset.answer || '');
+    mainPyodide.globals.set('_math_vars',      el.dataset.vars   || '');
+    mainPyodide.globals.set('_math_mode',      mode || 'equivalent');
+    mainPyodide.globals.set('_math_reject',    opts.reject    || '');
+    mainPyodide.globals.set('_math_tolerance', opts.tolerance || '');
+    mainPyodide.globals.set('_math_decplaces', opts.decplaces || '');
+    mainPyodide.globals.set('_math_sigfigs',   opts.sigfigs   || '');
+    mainPyodide.globals.set('_math_form',      opts.form      || '');
+    return JSON.parse(await mainPyodide.runPythonAsync(CHECK_PY));
+  }
+
+  // ---------------------------------------------------------------------------
+  // LLM / AI-Feedback  (OpenAI-compatible API, config stored in localStorage)
+  // ---------------------------------------------------------------------------
+
+  var LLM_CFG_KEY = 'math-exercise-llm-config';
+  var LLM_CNT_NS  = 'math-fb-cnt';
+
+  function loadCfg()    { try { return JSON.parse(localStorage.getItem(LLM_CFG_KEY) || 'null'); } catch(e) { return null; } }
+  function saveCfg(cfg) { try { localStorage.setItem(LLM_CFG_KEY, JSON.stringify(cfg)); } catch(e) {} }
+  function getCnt(lbl)  { try { return parseInt(localStorage.getItem(LLM_CNT_NS + '|' + location.pathname + '|' + lbl) || '0'); } catch(e) { return 0; } }
+  function incCnt(lbl)  { var n = getCnt(lbl) + 1; try { localStorage.setItem(LLM_CNT_NS + '|' + location.pathname + '|' + lbl, String(n)); } catch(e) {} return n; }
+
+  // ---------------------------------------------------------------------------
+  // Provider presets
+  // ---------------------------------------------------------------------------
+
+  var ME_PRESETS = {
+    cerebras:   { label: L.presetCerebras,   baseUrl: 'https://api.cerebras.ai/v1',   model: 'gpt-oss-120b',                           modelsUrl: 'https://inference-docs.cerebras.ai/introduction' },
+    openrouter: { label: L.presetOpenrouter, baseUrl: 'https://openrouter.ai/api/v1', model: 'meta-llama/llama-3.3-70b-instruct:free', modelsUrl: 'https://openrouter.ai/models?max_price=0' },
+    openai:     { label: L.presetOpenai,     baseUrl: 'https://api.openai.com/v1',    model: 'gpt-4o-mini',                            modelsUrl: 'https://platform.openai.com/docs/models' },
+    ollama:     { label: L.presetOllama,     baseUrl: 'http://localhost:11434/v1',    model: '' },
+  };
+
+  // ---------------------------------------------------------------------------
+  // Config modal (singleton)
+  // ---------------------------------------------------------------------------
+
+  var _modal = null;
+  var _meFetchedModels = [];
+
+  function meMakeField(labelText, controlEl) {
+    var wrap = document.createElement('div');
+    wrap.className = 'math-modal-field';
+    var span = document.createElement('span');
+    span.textContent = labelText;
+    wrap.appendChild(span);
+    wrap.appendChild(controlEl);
+    return wrap;
+  }
+
+  function meFreeModel(m) {
+    if (typeof m.id === 'string' && m.id.endsWith(':free')) return true;
+    var p = m.pricing;
+    if (p && ('prompt' in p || 'completion' in p))
+      return Number(p.prompt || 0) === 0 && Number(p.completion || 0) === 0;
+    return null;
+  }
+
+  function getModal() {
+    if (_modal) return _modal;
+
+    var backdrop = document.createElement('div');
+    backdrop.className = 'math-modal-backdrop';
+    backdrop.style.display = 'none';
+
+    var dialog = document.createElement('div');
+    dialog.className = 'math-modal';
+    dialog.setAttribute('role', 'dialog');
+
+    // --- Header ---
+    var header = document.createElement('div');
+    header.className = 'math-modal-header';
+    var title = document.createElement('strong');
+    title.textContent = L.modalTitle;
+    var closeBtn = document.createElement('button');
+    closeBtn.className = 'math-modal-close';
+    closeBtn.type = 'button';
+    closeBtn.setAttribute('aria-label', L.modalClose);
+    closeBtn.innerHTML = '&times;';
+    header.appendChild(title);
+    header.appendChild(closeBtn);
+
+    // --- Body ---
+    var body = document.createElement('div');
+    body.className = 'math-modal-body';
+
+    var hint = document.createElement('p');
+    hint.className = 'math-modal-hint';
+    hint.textContent = L.modalHint;
+    body.appendChild(hint);
+
+    // Preset dropdown
+    var presetSel = document.createElement('select');
+    presetSel.className = 'math-modal-input';
+    presetSel.add(new Option(L.presetPlaceholder, ''));
+    for (var pk in ME_PRESETS) presetSel.add(new Option(ME_PRESETS[pk].label, pk));
+    body.appendChild(meMakeField(L.fieldPreset, presetSel));
+
+    // Base URL
+    var urlInput = document.createElement('input');
+    urlInput.type = 'text';
+    urlInput.className = 'math-modal-input';
+    urlInput.placeholder = L.phBaseUrl;
+    urlInput.autocomplete = 'off';
+    body.appendChild(meMakeField('Base URL', urlInput));
+
+    // API Key
+    var keyInput = document.createElement('input');
+    keyInput.type = 'password';
+    keyInput.className = 'math-modal-input';
+    keyInput.placeholder = L.phApiKey;
+    keyInput.autocomplete = 'off';
+    body.appendChild(meMakeField('API Key', keyInput));
+
+    // Model input + fetch button
+    var modelInput = document.createElement('input');
+    modelInput.type = 'text';
+    modelInput.className = 'math-modal-input';
+    modelInput.placeholder = L.phModel;
+    modelInput.autocomplete = 'off';
+
+    var fetchBtn = document.createElement('button');
+    fetchBtn.type = 'button';
+    fetchBtn.className = 'btn btn-light btn-sm';
+    fetchBtn.textContent = L.fetchModelsBtn;
+
+    var modelRow = document.createElement('div');
+    modelRow.className = 'math-modal-inputrow';
+    modelRow.appendChild(modelInput);
+    modelRow.appendChild(fetchBtn);
+    body.appendChild(meMakeField(L.fieldModel, modelRow));
+
+    // Model hint (link when auto-fetch fails)
+    var modelHintEl = document.createElement('div');
+    modelHintEl.className = 'math-modal-model-hint';
+    modelHintEl.style.display = 'none';
+    body.appendChild(modelHintEl);
+
+    // Model list (shown after successful fetch)
+    var modelListDiv = document.createElement('div');
+    modelListDiv.className = 'math-modal-modellist';
+    modelListDiv.style.display = 'none';
+
+    var modelListInfo = document.createElement('div');
+    modelListInfo.className = 'math-modal-modellist-info';
+
+    var freeOnlyLabel = document.createElement('label');
+    var freeOnlyCb = document.createElement('input');
+    freeOnlyCb.type = 'checkbox';
+    freeOnlyCb.checked = true;
+    freeOnlyLabel.appendChild(freeOnlyCb);
+    freeOnlyLabel.appendChild(document.createTextNode(L.freeModelsOnly));
+
+    var modelPicker = document.createElement('select');
+    modelPicker.className = 'math-modal-input';
+
+    modelListDiv.appendChild(modelListInfo);
+    modelListDiv.appendChild(freeOnlyLabel);
+    modelListDiv.appendChild(modelPicker);
+    body.appendChild(modelListDiv);
+
+    function renderModelList() {
+      var hasPricing = _meFetchedModels.some(function (m) { return m.free !== null; });
+      freeOnlyLabel.style.display = hasPricing ? 'block' : 'none';
+      var models = _meFetchedModels;
+      if (hasPricing && freeOnlyCb.checked)
+        models = models.filter(function (m) { return m.free === true; });
+      models = models.slice().sort(function (a, b) {
+        return (b.free === true) - (a.free === true) || a.id.localeCompare(b.id);
+      });
+      modelPicker.innerHTML = '';
+      modelPicker.add(new Option(L.modelChoose(models.length), ''));
+      models.forEach(function (m) {
+        var suffix = m.free === true ? ' – ' + L.modelFree
+                   : m.free === false ? ' – ' + L.modelPaid
+                   : '';
+        modelPicker.add(new Option(m.id + suffix, m.id));
+      });
+      modelListInfo.textContent = hasPricing ? L.modelListSelect : L.modelListNoPricing;
+      modelListDiv.style.display = 'block';
+    }
+
+    freeOnlyCb.onchange = renderModelList;
+    modelPicker.onchange = function () {
+      if (modelPicker.value) modelInput.value = modelPicker.value;
+    };
+
+    async function doFetchModels(isAuto) {
+      var baseUrl = urlInput.value.trim();
+      if (!baseUrl) {
+        if (isAuto) return;
+        modelListInfo.textContent = L.errNeedBaseUrl;
+        freeOnlyLabel.style.display = 'none';
+        modelPicker.innerHTML = '';
+        modelListDiv.style.display = 'block';
+        return;
+      }
+      var origLabel = fetchBtn.textContent;
+      fetchBtn.disabled = true;
+      fetchBtn.textContent = L.fetchModelsBusy;
+      try {
+        var headers = {};
+        var key = keyInput.value.trim();
+        if (key) headers['Authorization'] = 'Bearer ' + key;
+        var resp = await fetch(baseUrl.replace(/\/+$/, '') + '/models', { headers: headers });
+        if (!resp.ok) throw new Error('HTTP ' + resp.status + ' ' + resp.statusText);
+        var data = await resp.json();
+        var list = Array.isArray(data.data) ? data.data
+                 : Array.isArray(data.models) ? data.models : [];
+        _meFetchedModels = list
+          .map(function (m) { return { id: m.id || m.name, free: meFreeModel(m) }; })
+          .filter(function (m) { return typeof m.id === 'string' && m.id; });
+        if (_meFetchedModels.length === 0) throw new Error(L.errNoModels);
+        var freeOnes = _meFetchedModels.filter(function (m) { return m.free === true; });
+        var pool = freeOnes.length > 0 ? freeOnes : _meFetchedModels;
+        modelInput.value = pool[Math.floor(Math.random() * pool.length)].id;
+        modelHintEl.style.display = 'none';
+        modelHintEl.innerHTML = '';
+        renderModelList();
+      } catch (err) {
+        if (isAuto) {
+          var preset = ME_PRESETS[presetSel.value];
+          if (preset && preset.modelsUrl) {
+            modelHintEl.innerHTML = L.modelHintKeyNeeded(preset.modelsUrl);
+            modelHintEl.style.display = '';
+          }
+          return;
+        }
+        modelListInfo.textContent = L.errModelListFailed(err.message || err);
+        freeOnlyLabel.style.display = 'none';
+        modelPicker.innerHTML = '';
+        modelListDiv.style.display = 'block';
+      } finally {
+        fetchBtn.disabled = false;
+        fetchBtn.textContent = origLabel;
+      }
+    }
+
+    fetchBtn.addEventListener('click', function () { doFetchModels(false); });
+
+    presetSel.addEventListener('change', function () {
+      var preset = ME_PRESETS[presetSel.value];
+      if (preset) {
+        urlInput.value = preset.baseUrl;
+        modelInput.value = '';
+        modelHintEl.style.display = 'none';
+        modelHintEl.innerHTML = '';
+        _meFetchedModels = [];
+        modelListDiv.style.display = 'none';
+        doFetchModels(true);
+      }
+    });
+
+    // Info button + help box
+    var infoBtn = document.createElement('button');
+    infoBtn.type = 'button';
+    infoBtn.className = 'btn btn-light btn-sm math-modal-info-btn';
+    infoBtn.textContent = L.infoBtn;
+
+    var helpDiv = document.createElement('div');
+    helpDiv.className = 'math-modal-help';
+    helpDiv.style.display = 'none';
+    helpDiv.innerHTML = L.helpBox;
+
+    infoBtn.addEventListener('click', function () {
+      helpDiv.style.display = helpDiv.style.display === 'none' ? 'block' : 'none';
+    });
+
+    body.appendChild(infoBtn);
+    body.appendChild(helpDiv);
+
+    // --- Footer ---
+    var footer = document.createElement('div');
+    footer.className = 'math-modal-footer';
+
+    var saveBtn = document.createElement('button');
+    saveBtn.type = 'button';
+    saveBtn.className = 'btn btn-primary';
+    saveBtn.textContent = L.saveBtn;
+
+    var cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button';
+    cancelBtn.className = 'btn btn-light';
+    cancelBtn.textContent = L.cancelBtn;
+
+    footer.appendChild(saveBtn);
+    footer.appendChild(cancelBtn);
+
+    // --- Assemble ---
+    dialog.appendChild(header);
+    dialog.appendChild(body);
+    dialog.appendChild(footer);
+    backdrop.appendChild(dialog);
+    document.body.appendChild(backdrop);
+
+    // --- Behaviour ---
+    function close() { backdrop.style.display = 'none'; backdrop._cb = null; }
+
+    closeBtn.addEventListener('click', close);
+    cancelBtn.addEventListener('click', close);
+    backdrop.addEventListener('click', function (e) { if (e.target === backdrop) close(); });
+
+    saveBtn.addEventListener('click', function () {
+      var cfg = {
+        baseUrl: urlInput.value.trim(),
+        apiKey:  keyInput.value.trim(),
+        model:   modelInput.value.trim(),
+        preset:  presetSel.value,
+      };
+      if (!cfg.baseUrl || !cfg.apiKey || !cfg.model) {
+        hint.textContent = L.modalFillAll;
+        hint.style.color = '#dc3545';
+        return;
+      }
+      hint.textContent = L.modalHint;
+      hint.style.color = '';
+      saveCfg(cfg);
+      var cb = backdrop._cb;
+      close();
+      if (cb) cb(cfg);
+    });
+
+    // Store named refs on the backdrop element for showModal()
+    backdrop._urlInput   = urlInput;
+    backdrop._keyInput   = keyInput;
+    backdrop._modelInput = modelInput;
+    backdrop._presetSel  = presetSel;
+    backdrop._hint       = hint;
+
+    _modal = backdrop;
+    return backdrop;
+  }
+
+  function showModal(cb) {
+    var m = getModal(), cfg = loadCfg();
+    if (cfg) {
+      m._urlInput.value   = cfg.baseUrl || '';
+      m._keyInput.value   = cfg.apiKey  || '';
+      m._modelInput.value = cfg.model   || '';
+      if (cfg.preset) m._presetSel.value = cfg.preset;
+    }
+    m._hint.textContent = L.modalHint;
+    m._hint.style.color = '';
+    m._cb = cb;
+    m.style.display = 'flex';
+  }
+
+  // ---------------------------------------------------------------------------
+  // LLM call
+  // ---------------------------------------------------------------------------
+
+  function sysPrompt(n) {
+    var base = L.promptBase;
+    if (n <= 1) return L.promptHint1 + base;
+    if (n <= 2) return L.promptHint2 + base;
+    return L.promptHint3 + base;
+  }
+
+  async function callLLM(question, answer, n, cfg) {
+    var resp = await fetch(cfg.baseUrl.replace(/\/+$/, '') + '/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': 'Bearer ' + cfg.apiKey,
+      },
+      body: JSON.stringify({
+        model: cfg.model,
+        messages: [
+          { role: 'system', content: sysPrompt(n) },
+          { role: 'user',   content: L.promptTask + '\n' + question + '\n\n' + L.promptAnswer + '\n' + answer },
+        ],
+        max_tokens: 2000,
+      }),
+    });
+    if (!resp.ok) { var t = await resp.text(); throw new Error('API ' + resp.status + ': ' + t.slice(0, 200)); }
+    return (await resp.json()).choices[0].message.content;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Exercise cell setup
+  // ---------------------------------------------------------------------------
+
+  function setupCell(cell) {
+    var vars   = cell.dataset.vars   || '';
+    var mode   = cell.dataset.mode   || 'equivalent';
+    var reject = cell.dataset.reject || '';
+    var label  = cell.dataset.label  || cell.id;
+    var checkOpts = {
+      reject:    reject,
+      tolerance: cell.dataset.tolerance || '',
+      decplaces: cell.dataset.decplaces || '',
+      sigfigs:   cell.dataset.sigfigs   || '',
+      form:      cell.dataset.form      || ''
+    };
+
+    var poolRaw   = cell.dataset.pool;
+    var poolTasks = poolRaw ? JSON.parse(poolRaw) : null;
+    var poolKey   = 'math-pool|' + location.pathname + '|' + label;
+
+    // Pool: pick a stored or random task index, then render the question
+    if (poolTasks) {
+      var idx;
+      try { idx = parseInt(sessionStorage.getItem(poolKey)); } catch(e) {}
+      if (isNaN(idx) || idx < 0 || idx >= poolTasks.length) {
+        idx = Math.floor(Math.random() * poolTasks.length);
+        try { sessionStorage.setItem(poolKey, String(idx)); } catch(e) {}
+      }
+      var r = renderTaskText(poolTasks[idx], cell.id, vars);
+      var qDiv = cell.querySelector('.math-exercise-question');
+      qDiv.innerHTML = r.html;
+      cell.dataset.fields = JSON.stringify(r.fieldIds);
+      renderMathInQuestion(qDiv);
+    } else {
+      renderMathInQuestion(cell.querySelector('.math-exercise-question'));
+    }
+
+    // Collapsible (only when caption toggle exists)
+    var toggleEl = cell.querySelector('.math-exercise-toggle');
+    var bodyEl   = cell.querySelector('.math-exercise-body');
+    if (toggleEl && bodyEl) {
+      function toggleOpen() {
+        var open = cell.classList.toggle('math-exercise-open');
+        bodyEl.style.display = open ? '' : 'none';
+      }
+      toggleEl.addEventListener('click', toggleOpen);
+      toggleEl.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleOpen(); }
+      });
+    }
+
+    var fieldIds    = JSON.parse(cell.dataset.fields || '[]');
+    var checkBtn    = cell.querySelector('.math-check-btn');
+    var legendBtn   = cell.querySelector('.math-legend-btn');
+    var feedbackBtn  = cell.querySelector('.math-feedback-btn');
+    var reconfigBtn  = cell.querySelector('.math-reconfig-btn');
+    var reloadBtn    = cell.querySelector('.math-pool-reload');
+    var legendPanel = cell.querySelector('.math-legend-panel');
+    var fbDiv       = cell.querySelector('.math-feedback-area');
+    var legendBuilt = false;
+
+    // ---- Legend toggle ----
+    legendBtn.addEventListener('click', async function () {
+      if (legendPanel.style.display === 'none') {
+        legendPanel.style.display = '';
+        legendBtn.classList.add('active');
+        if (!legendBuilt) {
+          legendPanel.innerHTML = '<div class="math-fb-checking">' + L.loadingHelp + '</div>';
+          await buildLegend(legendPanel);
+          legendBuilt = true;
+        }
+      } else {
+        legendPanel.style.display = 'none';
+        legendBtn.classList.remove('active');
+      }
+    });
+
+    // ---- Check ----
+    async function runCheck() {
+      checkBtn.disabled = true;
+      fbDiv.innerHTML = '<div class="math-fb-checking">' + L.checking + '</div>';
+      try {
+        await ensureSympy();
+        var parts = [];
+        for (var i = 0; i < fieldIds.length; i++) {
+          var el     = document.getElementById(fieldIds[i]);
+          if (!el) continue;
+          var prefix = fieldIds.length > 1 ? L.fieldPrefix(i + 1) : '';
+          var res    = await checkField(el, mode, checkOpts);
+          el.classList.remove('math-input-ok', 'math-input-wrong', 'math-input-err');
+          if      (res.status === 'empty')    { parts.push('<div class="math-fb-empty">'  + prefix + L.resEmpty + '</div>'); }
+          else if (res.status === 'correct')  { el.classList.add('math-input-ok');    parts.push('<div class="math-fb-ok">&#10003;&nbsp;'  + prefix + L.resCorrect + '</div>'); }
+          else if (res.status === 'wrong')    { el.classList.add('math-input-wrong'); parts.push('<div class="math-fb-wrong">&#10007;&nbsp;' + prefix + L.resWrong + '</div>'); }
+          else if (res.status === 'rejected') { el.classList.add('math-input-wrong'); parts.push('<div class="math-fb-wrong">&#10007;&nbsp;' + prefix + L.resRejected + '</div>'); }
+          else if (res.status === 'not_exact'){ el.classList.add('math-input-wrong'); parts.push('<div class="math-fb-wrong">&#10007;&nbsp;' + prefix + L.resNotExact + '</div>'); }
+          else if (res.status === 'not_form') { el.classList.add('math-input-wrong'); parts.push('<div class="math-fb-wrong">&#10007;&nbsp;' + prefix + L.resNotForm(checkOpts.form) + '</div>'); }
+          else                                { el.classList.add('math-input-err');   parts.push('<div class="math-fb-err">&#9888;&nbsp;'    + prefix + friendlyError(res.message) + '</div>'); }
+        }
+        fbDiv.innerHTML = parts.join('');
+      } catch (err) {
+        fbDiv.innerHTML = '<div class="math-fb-err">&#9888;&nbsp;' + friendlyError(String(err)) + '</div>';
+      } finally { checkBtn.disabled = false; }
+    }
+
+    function attachKeyListeners() {
+      fieldIds.forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el && el.tagName === 'INPUT')
+          el.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); runCheck(); } });
+      });
+    }
+
+    checkBtn.addEventListener('click', runCheck);
+    attachKeyListeners();
+
+    // ---- Pool reload ----
+    if (reloadBtn && poolTasks) {
+      reloadBtn.addEventListener('click', function () {
+        var cur;
+        try { cur = parseInt(sessionStorage.getItem(poolKey)); } catch(e) {}
+        var next = cur;
+        if (poolTasks.length > 1) {
+          while (next === cur) { next = Math.floor(Math.random() * poolTasks.length); }
+        }
+        try { sessionStorage.setItem(poolKey, String(next)); } catch(e) {}
+
+        var r = renderTaskText(poolTasks[next], cell.id, vars);
+        var qDivR = cell.querySelector('.math-exercise-question');
+        qDivR.innerHTML = r.html;
+        cell.dataset.fields = JSON.stringify(r.fieldIds);
+        fieldIds = r.fieldIds;
+        renderMathInQuestion(qDivR);
+
+        attachKeyListeners();
+        fbDiv.innerHTML = '';
+      });
+    }
+
+    // ---- AI Feedback ----
+    if (feedbackBtn) {
+      feedbackBtn.addEventListener('click', function () {
+        var answers = fieldIds.map(function (id) {
+          var el = document.getElementById(id); return el ? el.value.trim() : '';
+        }).filter(Boolean).join(' | ');
+        if (!answers) {
+          fbDiv.innerHTML = '<div class="math-fb-empty">' + L.needAnswerFirst + '</div>';
+          return;
+        }
+        var qDiv   = cell.querySelector('.math-exercise-question');
+        var capEl  = cell.querySelector('.math-exercise-caption');
+        var clone  = qDiv.cloneNode(true);
+        clone.querySelectorAll('input, textarea').forEach(function (el) {
+          var s = document.createElement('span');
+          s.textContent = '[' + (el.value || '?') + ']';
+          el.parentNode.replaceChild(s, el);
+        });
+        var question = (capEl ? capEl.textContent + '\n' : '') + clone.textContent.replace(/\s+/g, ' ').trim();
+
+        async function doFeedback(cfg) {
+          var n = incCnt(label);
+          feedbackBtn.disabled = true;
+          fbDiv.innerHTML = '<div class="math-fb-checking">' + L.fetchingFeedback + '</div>';
+          try {
+            var reply = await callLLM(question, answers, n, cfg);
+            fbDiv.innerHTML =
+              '<div class="math-fb-llm">'
+              + '<div class="math-fb-llm-header">&#128161;&nbsp;' + L.feedbackTitle
+              + (n > 1 ? ' <span class="math-fb-llm-cnt">(' + L.feedbackAttempt(n) + ')</span>' : '')
+              + '</div>'
+              + '<div class="math-fb-llm-body">' + simpleMarkdown(reply) + '</div>'
+              + '</div>';
+          } catch (err) {
+            fbDiv.innerHTML =
+              '<div class="math-fb-err">&#9888;&nbsp;' + L.errorPrefix + ' ' + escHtml(String(err))
+              + '&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-light math-fb-reconfig">&#9881;&nbsp;' + L.reconfigBtn + '</button>'
+              + '</div>';
+            var fbRecfg = fbDiv.querySelector('.math-fb-reconfig');
+            if (fbRecfg) fbRecfg.addEventListener('click', function () { showModal(function (c) { doFeedback(c); }); });
+          } finally { feedbackBtn.disabled = false; }
+        }
+
+        var cfg = loadCfg();
+        if (cfg) { doFeedback(cfg); }
+        else      { showModal(function (c) { doFeedback(c); }); }
+      });
+    }
+
+    if (reconfigBtn) {
+      reconfigBtn.addEventListener('click', function () { showModal(function () {}); });
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Init
+  // ---------------------------------------------------------------------------
+
+  document.addEventListener('DOMContentLoaded', async function () {
+    var cells = document.querySelectorAll('.math-exercise-cell');
+    if (!cells.length) return;
+    // KaTeX rendering must not depend on Pyodide: Pyodide is only needed lazily
+    // on the first Check click (ensureSympy()), but if ensurePyodide() rejects
+    // (slow/broken network, no other Pyodide extension on the page), a shared
+    // Promise.all would previously also block/kill math rendering entirely.
+    await ensureKatex();
+    cells.forEach(setupCell);
+    ensurePyodide().catch(function (e) {
+      console.warn('math-exercise: Pyodide preload failed (will retry on the first check):', e);
+    });
+  });
+
+})();
+
+</script>
+
+
+
+
+<script src="index_files/libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

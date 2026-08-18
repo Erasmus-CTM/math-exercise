@@ -1,0 +1,329 @@
+---
+title: "Quadratic Functions — a course module preview"
+lang: en
+engine: markdown
+format:
+  html:
+    theme: litera
+    css: assets/demo.css
+    include-after-body: assets/include-after-body.html
+    toc: true
+    toc-title: "Module contents"
+    smooth-scroll: true
+    title-block-banner: false
+    page-layout: article
+filters:
+  - math-exercise
+---
+
+::: {.demo-hero}
+<span class="demo-kicker">math-exercise · live demo</span>
+
+# Factoring & Solving Quadratics
+
+<p class="demo-subtitle">A short, self-checking course module built entirely with
+Quarto and the <code>math-exercise</code> extension — no server, no LMS,
+just a browser. This page shows one coherent teaching sequence end to end:
+exercise → hint → worked solution → follow-up → assessment.</p>
+
+<div class="demo-hero-meta">
+<span>🧮 SymPy-checked answers</span>
+<span>🌐 Runs fully client-side (Pyodide)</span>
+<span>💬 Progressive AI hints</span>
+<span>🔁 Randomized task pools</span>
+</div>
+:::
+
+This module targets a first bridging-course topic: **factoring and solving
+quadratic equations** via the difference-of-squares pattern and general
+trinomials. Every exercise below is a live, working `math-exercise` block —
+try it.
+
+::: {.callout-tip}
+## Learning objectives
+By the end of this module, a student can:
+
+- expand and factor simple quadratic expressions,
+- solve a quadratic equation by factoring,
+- apply a quadratic model to a numeric question, and
+- recognize the same pattern across problems of increasing difficulty.
+:::
+
+---
+
+## 1 · The exercise {#sec-warmup}
+
+::: {.demo-step-head}
+<span class="demo-step-num">1</span>
+<span class="demo-pill demo-pill-feature">✓ math-exercise capability: `mode: equivalent` + `form: expanded`</span>
+:::
+
+A student opens the module and meets the first task. Any algebraically
+equivalent answer is accepted, but it must actually be **expanded** — typing
+the un-multiplied product back is correctly rejected as "not in the
+requested form."
+
+```{math-exercise}
+#| label: warmup
+#| caption: Warm-up — expand a product
+#| vars: x
+#| mode: equivalent
+#| form: expanded
+Expand the product: $(x-3)(x+3) = $ __[x**2 - 9]
+```
+
+## 2 · Stuck? Ask for a hint {#sec-hints}
+
+::: {.demo-step-head}
+<span class="demo-step-num">2</span>
+<span class="demo-pill demo-pill-feature">✓ math-exercise capability: built-in progressive AI feedback</span>
+:::
+
+Every exercise on this page already has a **Feedback** button (next to
+Check, above). It calls any OpenAI-compatible model — Cerebras, OpenRouter,
+OpenAI, a local Ollama — configured once per browser, and the hint gets
+**more concrete each time the same student asks again on the same task**:
+
+| Attempt | What the tutor says |
+|---|---|
+| 1st click | A gentle nudge — the solution is *not* given away |
+| 2nd click | A concrete hint about the solution approach |
+| 3rd+ click | The full step-by-step solution |
+
+::: {.callout-note}
+For a live demonstration, click **Feedback** on the exercise in
+[§1](#sec-warmup) after entering a (possibly wrong) answer. This needs an
+API key for the chosen provider — several offer a free tier (see the
+[README](../README.md#ai-feedback)). Screenshots of this dialog and the
+resulting hint bubble are good candidates for the funding application.
+:::
+
+## 3 · The worked solution {#sec-solution}
+
+::: {.demo-step-head}
+<span class="demo-step-num">3</span>
+<span class="demo-pill demo-pill-showcase">🧩 demo presentation — standard Quarto callout, not an extension feature</span>
+:::
+
+Instead of (or alongside) AI feedback, a course can simply publish the
+worked solution as ordinary Quarto content — here as a collapsible callout,
+directly below the matching exercise:
+
+```{math-exercise}
+#| label: factor
+#| caption: Now go the other way — factor it
+#| vars: x
+#| mode: equivalent
+#| form: factored
+Factor the expression: $x^2 - 9 = $ __[(x-3)*(x+3)]
+```
+
+::: {.callout-note collapse="true"}
+## 📖 Show worked solution
+
+$x^2 - 9$ is a **difference of two squares**: $a^2 - b^2 = (a-b)(a+b)$.
+
+Here $a = x$ and $b = 3$, since $9 = 3^2$. Substituting:
+
+$$x^2 - 9 = x^2 - 3^2 = (x-3)(x+3)$$
+
+Notice this is exactly the reverse of the expansion in
+[the warm-up exercise](#sec-warmup) — the two tasks are the same identity,
+read in opposite directions.
+:::
+
+## 4 · A related follow-up {#sec-followup}
+
+::: {.demo-step-head}
+<span class="demo-step-num">4</span>
+<span class="demo-pill demo-pill-feature">✓ math-exercise capability: `mode: set` and `mode: numeric`</span>
+:::
+
+Two follow-ups build on the same identity: first *solving* the equation
+(multiple correct answers, order-independent), then *applying* the same
+kind of expression to a numeric, real-world question.
+
+```{math-exercise}
+#| label: solve
+#| caption: Solve it
+#| vars: x
+#| mode: set
+Solve $x^2 - 9 = 0$. Give all solutions, comma-separated: __[3, -3]
+```
+
+```{math-exercise}
+#| label: applied
+#| caption: Apply it — a quadratic model
+#| mode: numeric
+#| tolerance: 0.1
+A stone is thrown so that its height after $t$ seconds is
+$h(t) = -5t^2 + 20t$ metres.
+What is its height at $t = 1.5\text{ s}$, in metres?
+$h(1.5) = $ _[18.75] m
+```
+
+## 5 · Practice variants {#sec-variants}
+
+::: {.demo-step-head}
+<span class="demo-step-num">5</span>
+<span class="demo-pill demo-pill-feature">✓ existing feature</span>
+<span class="demo-pill demo-pill-vision">🔮 envisioned extension</span>
+:::
+
+Two different ideas about "variants," shown side by side and kept
+deliberately distinct.
+
+### 5a · Task pools — an existing capability
+
+`math-exercise` already supports a **task pool**: a set of hand-authored
+variants of the same problem, one shown at random per browser session, with
+a reload button (top-right of the box) to draw a new one.
+
+```{math-exercise}
+#| label: pool-factor
+#| caption: Practice pool — click ↻ for a new random variant
+#| vars: x
+#| mode: equivalent
+#| form: factored
+#| pool: true
+
+Factor: $x^2 - 16 = $ __[(x-4)*(x+4)]
+
+---
+
+Factor: $x^2 - 36 = $ __[(x-6)*(x+6)]
+
+---
+
+Factor: $x^2 - 49 = $ __[(x-7)*(x+7)]
+```
+
+::: {.callout-important}
+**This is real, working functionality** — the three variants above are
+written directly in the document; `math-exercise` picks and remembers one
+per session and swaps it in on reload. No AI involved.
+:::
+
+### 5b · Difficulty progression — an illustration, not a feature
+
+<span class="demo-pill demo-pill-vision">🔮 future vision — hand-written here to stand in for AI generation</span>
+
+The three tasks below are **written by hand for this demo**. They illustrate
+what an AI question-generation step could plausibly hand a course author —
+several variants of the *same underlying concept* at increasing difficulty —
+which the author would then drop into `math-exercise` blocks exactly like
+any other exercise. `math-exercise` itself does not generate exercises; it
+only renders and checks whatever content it is given.
+
+:::: {.columns}
+
+::: {.column width="33%"}
+<span class="demo-level-badge demo-level-1">Level 1 · easier</span>
+
+```{math-exercise}
+#| label: level1
+#| caption: Difference of squares
+#| vars: x
+#| mode: set
+Solve: $x^2 - 4 = 0$ __[2, -2]
+```
+:::
+
+::: {.column width="33%"}
+<span class="demo-level-badge demo-level-2">Level 2 · medium</span>
+
+```{math-exercise}
+#| label: level2
+#| caption: Trinomial, integer roots
+#| vars: x
+#| mode: set
+Solve: $x^2 - x - 6 = 0$ __[3, -2]
+```
+:::
+
+::: {.column width="33%"}
+<span class="demo-level-badge demo-level-3">Level 3 · harder</span>
+
+```{math-exercise}
+#| label: level3
+#| caption: Leading coefficient ≠ 1
+#| vars: x
+#| mode: set
+Solve: $2x^2 - 3x - 2 = 0$ __[2, -1/2]
+```
+:::
+
+::::
+
+## 6 · Assessment & progress {#sec-progress}
+
+::: {.demo-step-head}
+<span class="demo-step-num">6</span>
+<span class="demo-pill demo-pill-feature">✓ per-exercise: strict, symbolic correctness checking</span>
+<span class="demo-pill demo-pill-showcase">🧩 dashboard below: demo-only illustration</span>
+:::
+
+Assessment already happens **inside every exercise above**: each `Check`
+click runs a real symbolic comparison in SymPy, not string matching — it can
+require a *specific algebraic form* (factored, expanded, exact, reduced),
+not just a numerically correct value. That is what makes `form: factored`
+above reject a mathematically-correct-but-unfactored answer.
+
+What `math-exercise` does **not** currently provide is a course-wide view
+across many exercises. The panel below is a small demo-only script
+(`assets/progress-tracker.js`, ships only with this demo) that watches the
+pass/fail state `math-exercise` already puts on the page and aggregates it —
+illustrating what a lightweight course dashboard or gradebook feed could
+look like.
+
+::: {.callout-warning}
+The panel below is **not** part of `math-exercise`. It is presentation code
+specific to this demo, built only on the extension's already-public DOM
+output (the `math-input-ok` / `math-input-wrong` classes it adds after a
+check). No extension file was modified to build it.
+:::
+
+<div id="demo-progress-panel" class="demo-progress-panel" data-track="warmup:1 · Expand,factor:2 · Factor,solve:3 · Solve,applied:4 · Apply,pool-factor:5a · Practice pool,level1:5b · Level 1,level2:5b · Level 2,level3:5b · Level 3">
+<div class="demo-progress-row">
+<div class="demo-progress-track"><div class="demo-progress-fill"></div></div>
+<div class="demo-progress-count">0 / 8</div>
+</div>
+<ul class="demo-progress-list"></ul>
+</div>
+
+---
+
+## From demo to course
+
+::: {.demo-vision-grid}
+<div class="demo-vision-card">
+<h4>🔮 AI-generated question banks</h4>
+<p>Generate large pools of variants (like §5b) automatically from a single
+worked template, then curate them into <code>math-exercise</code> task
+pools (like §5a) for actual use.</p>
+</div>
+
+<div class="demo-vision-card">
+<h4>🔮 Course-wide gradebook</h4>
+<p>Extend the illustration in §6 into a real, privacy-respecting record of
+completed exercises across a whole module or semester.</p>
+</div>
+
+<div class="demo-vision-card">
+<h4>🔮 Adaptive difficulty</h4>
+<p>Route a student toward Level 1, 2, or 3 style variants automatically,
+based on which exercises they already solved.</p>
+</div>
+
+<div class="demo-vision-card">
+<h4>🔮 LMS integration</h4>
+<p>Feed the underlying check results (already computed client-side, in
+SymPy) into a university's existing LMS or reporting workflow.</p>
+</div>
+:::
+
+<p class="demo-footnote">
+Built with Quarto and the <code>math-exercise</code> extension
+(Erasmus+ project 2023-1-NO01-KA220-HED-000166744).
+This page is a standalone demo; it does not modify the extension.
+</p>
