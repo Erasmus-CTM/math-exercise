@@ -227,16 +227,17 @@ function CodeBlock(el)
 
   local opts, questionText = parseOptions(el.text)
 
-  local caption   = opts["caption"]   or nil
-  local label     = opts["label"]     or eid
-  local vars      = opts["vars"]      or ""
-  local mode      = opts["mode"]      or "equivalent"
-  local reject    = opts["reject"]    or ""
-  local tolerance = opts["tolerance"] or ""
-  local decplaces = opts["decplaces"] or ""
-  local sigfigs   = opts["sigfigs"]   or ""
-  local form      = opts["form"]      or ""
-  local isPool    = (opts["pool"]     == "true")
+  local caption         = opts["caption"]         or nil
+  local label           = opts["label"]           or eid
+  local vars            = opts["vars"]            or ""
+  local mode            = opts["mode"]            or "equivalent"
+  local reject          = opts["reject"]          or ""
+  local tolerance       = opts["tolerance"]       or ""
+  local decplaces       = opts["decplaces"]       or ""
+  local sigfigs         = opts["sigfigs"]         or ""
+  local form            = opts["form"]            or ""
+  local feedbackContext = opts["feedback-context"] or ""
+  local isPool          = (opts["pool"]           == "true")
 
   local captionHtml = ""
   if caption then
@@ -246,15 +247,16 @@ function CodeBlock(el)
   end
 
   -- Base data attributes shared by both modes
-  local attrs = 'id="'             .. eid                .. '"'
-             .. ' data-label="'     .. attrEsc(label)     .. '"'
-             .. ' data-mode="'      .. attrEsc(mode)      .. '"'
-             .. ' data-reject="'    .. attrEsc(reject)    .. '"'
-             .. ' data-vars="'      .. attrEsc(vars)      .. '"'
-             .. ' data-tolerance="' .. attrEsc(tolerance) .. '"'
-             .. ' data-decplaces="' .. attrEsc(decplaces) .. '"'
-             .. ' data-sigfigs="'   .. attrEsc(sigfigs)   .. '"'
-             .. ' data-form="'      .. attrEsc(form)      .. '"'
+  local attrs = 'id="'                    .. eid                      .. '"'
+             .. ' data-label="'           .. attrEsc(label)           .. '"'
+             .. ' data-mode="'            .. attrEsc(mode)            .. '"'
+             .. ' data-reject="'          .. attrEsc(reject)          .. '"'
+             .. ' data-vars="'            .. attrEsc(vars)            .. '"'
+             .. ' data-tolerance="'       .. attrEsc(tolerance)       .. '"'
+             .. ' data-decplaces="'       .. attrEsc(decplaces)       .. '"'
+             .. ' data-sigfigs="'         .. attrEsc(sigfigs)         .. '"'
+             .. ' data-form="'            .. attrEsc(form)            .. '"'
+             .. ' data-feedback-context="' .. attrEsc(feedbackContext) .. '"'
 
   local questionHtml
 
