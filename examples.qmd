@@ -263,7 +263,7 @@ Compute the area of a circle with r = 7 cm (2 decimal places).
 A = _[3.14159*49] cm²
 ```
 
-## Bonus: AI feedback context
+## AI feedback context
 
 Click **Feedback** below without reading this section first, then again
 after – the surrounding prose is what turns "wrong" into a useful hint. This
