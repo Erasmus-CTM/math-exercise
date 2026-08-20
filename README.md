@@ -66,6 +66,7 @@ The answer inside `[...]` is a SymPy expression, e.g. `pi * 9`, `x**2 + 2*x + 1`
 | `sigfigs` | integer | — | only for `mode: numeric`: round both sides to N significant figures before comparing |
 | `form` | `factored` / `expanded` / `single_fraction` / `lowest_terms` | — | representation additionally required for correctness — only for `mode: equivalent`/`exact` |
 | `pool` | `true` / `false` | `false` | enable a task pool |
+| `context` | comma-separated element IDs, or `none` | — | AI-feedback context: reference explicit `.math-exercise-context` block(s) by id, or `none` to disable the automatic context. See [AI feedback context](#ai-feedback-context) |
 
 ---
 
@@ -338,17 +339,93 @@ Every exercise has a **Feedback** button. On the first click, the
 Credentials are stored in `localStorage` and available on **all pages of the
 same project** – set up once, use everywhere.
 
-**Progressive hint level:** each further Feedback click on the same exercise
-(on the same page) makes the hint more concrete:
+### Progressive hints
+
+Each further Feedback click on the same exercise (on the same page) makes
+the feedback more concrete:
 
 | Attempt | Behavior |
 |---------|----------|
-| 1st | Gentle nudge, the solution isn't given away |
-| 2nd | Concrete hint about the solution approach |
-| 3rd+ | Full step-by-step solution |
+| 1st | A small nudge; the complete final expression, equation, or numerical answer must not be revealed |
+| 2nd | A concrete hint identifying useful components and relationships; the student must still assemble the final answer |
+| 3rd+ | A complete step-by-step solution |
+
+The attempt count is stored per page path and exercise label in
+`localStorage`, so it survives a page reload.
 
 Compatible with any **OpenAI-compatible API** (Cerebras, OpenRouter, OpenAI,
-Ollama, …).
+Ollama, …). AI responses support a small safe Markdown subset and render
+LaTeX written with `\(...\)` or `\[...\]`.
+
+### AI feedback context
+
+By default, the LLM only saw the exercise text itself – it had no idea that,
+say, "convert to binary" actually means "convert to 8-bit two's complement",
+because that rule was explained in a paragraph above the exercise, not inside
+it. `math-exercise` sends that surrounding context along automatically, with
+an explicit option for context that doesn't live in the same section.
+
+**Automatic (no authoring changes needed).** Every exercise collects the
+prose (paragraphs, lists, its own section heading) written since the last
+heading in the document, and sends it to the LLM as background context. Just
+explain the scheme in normal text above the exercise(s) – as many exercises
+as you like can share the same explanation. This part is resolved once, at
+render time.
+
+**Explicit, for context outside the current section.** Tag any Quarto
+content with a unique id and the `.math-exercise-context` class, and
+reference it from any exercise – anywhere on the page, in any order – via
+`#| context: id1, id2, ...`:
+
+````markdown
+::: {#fp16 .math-exercise-context}
+IEEE-754 half precision: 1 sign bit, 5 exponent bits (bias 15),
+10 mantissa bits.
+:::
+
+```{math-exercise}
+#| label: fp-decode
+#| context: fp16
+Decode 0x3C00 as a half-precision float: _[1]
+```
+````
+
+The block renders as normal, visible content on the page (styled as a light
+callout) – students see the same explanation the AI gets. Unlike the
+automatic case, this part is resolved lazily, client-side, when Feedback is
+clicked, directly from the rendered page – so it also picks up KaTeX-rendered
+math cleanly (as its original `$...$` source).
+
+Context rules for explicit references:
+
+- Several ids may be supplied as a comma-separated list; their order becomes
+  the order in the AI request, and the same block may be reused by several
+  exercises.
+- Missing ids, elements without the `.math-exercise-context` class, empty
+  blocks, and blocks that exceed the remaining budget are skipped with a
+  browser console warning rather than failing the request.
+- Combined budget: 6,000 characters across all of an exercise's explicit
+  context blocks; a block that would exceed it is omitted whole (never cut
+  mid-block). The automatic case has its own, separate 1,500-character cap
+  (keeping the most recent part, since that's closest to the exercise).
+
+To opt an exercise out of context entirely, use `#| context: none`.
+
+The AI request contains the selected context, the task, and the student's
+current response, clearly delimited and with an explicit instruction to
+treat them as data rather than as instructions (a prompt-injection
+mitigation, given that both course content and the student's own answer end
+up inside the prompt). It does **not** include the expected answer or the
+SymPy checker result.
+
+### Privacy
+
+The base URL, API key, and model configuration remain in the student's
+browser. However, requesting feedback sends the resolved context, exercise
+text, and student response to the configured AI provider. Course authors
+should reference only material they are comfortable sending to that
+provider, and students should follow the provider's applicable privacy
+policy.
 
 ---
 

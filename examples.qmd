@@ -262,3 +262,41 @@ A = _[3.14159*25] cm²
 Compute the area of a circle with r = 7 cm (2 decimal places).
 A = _[3.14159*49] cm²
 ```
+
+## Bonus: AI feedback context
+
+Click **Feedback** below without reading this section first, then again
+after – the surrounding prose is what turns "wrong" into a useful hint. This
+paragraph is auto-collected as context because it sits directly above the
+exercise, in the same section: convert the given decimal integer into
+**8-bit two's complement**, not a plain unsigned binary conversion.
+
+```{math-exercise}
+#| label: ex-context-auto
+#| caption: two's complement (auto context from this section)
+#| mode: string
+Convert -5 to 8-bit two's complement (as 8 binary digits): __[11111011]
+```
+
+The next exercise instead uses **explicit context blocks**, referenced by id
+and combinable – handy when a scheme is defined once, outside the exercise's
+own section, and reused by several exercises anywhere on the page:
+
+::: {#ieee-half .math-exercise-context}
+IEEE-754 half precision: 1 sign bit, 5 exponent bits (bias 15), 10 mantissa
+bits.
+:::
+
+::: {#ieee-bias .math-exercise-context}
+The biased exponent stores the true exponent **plus the bias** (here 15), so
+it can be represented without a separate sign bit for the exponent itself.
+:::
+
+```{math-exercise}
+#| label: ex-context-explicit
+#| caption: IEEE-754 half precision (explicit, multiple context blocks)
+#| context: ieee-half, ieee-bias
+#| mode: string_ci
+What does the biased exponent field store instead of directly – the true
+exponent, or the true exponent plus 15? __[true exponent plus 15]
+```
