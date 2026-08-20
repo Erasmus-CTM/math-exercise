@@ -66,6 +66,7 @@ The answer inside `[...]` is a SymPy expression, e.g. `pi * 9`, `x**2 + 2*x + 1`
 | `sigfigs` | integer | — | only for `mode: numeric`: round both sides to N significant figures before comparing |
 | `form` | `factored` / `expanded` / `single_fraction` / `lowest_terms` | — | representation additionally required for correctness — only for `mode: equivalent`/`exact` |
 | `pool` | `true` / `false` | `false` | enable a task pool |
+| `feedback-context` | comma-separated element IDs | — | visible course-material blocks supplied as context to AI feedback |
 
 ---
 
@@ -338,17 +339,101 @@ Every exercise has a **Feedback** button. On the first click, the
 Credentials are stored in `localStorage` and available on **all pages of the
 same project** – set up once, use everywhere.
 
-**Progressive hint level:** each further Feedback click on the same exercise
-(on the same page) makes the hint more concrete:
+Compatible with any **OpenAI-compatible API** (Cerebras, OpenRouter, OpenAI,
+Ollama, …).
+
+### Progressive hints
+
+Each further Feedback click on the same exercise makes the feedback more
+concrete:
 
 | Attempt | Behavior |
 |---------|----------|
-| 1st | Gentle nudge, the solution isn't given away |
-| 2nd | Concrete hint about the solution approach |
-| 3rd+ | Full step-by-step solution |
+| 1st | A small nudge; the complete final expression, equation, or numerical answer must not be revealed |
+| 2nd | A concrete hint identifying useful components and relationships; the student must still assemble the final answer |
+| 3rd+ | A complete step-by-step solution |
 
-Compatible with any **OpenAI-compatible API** (Cerebras, OpenRouter, OpenAI,
-Ollama, …).
+The attempt count is stored per page path and exercise label in
+`localStorage`, so it survives a page reload.
+
+### Explicit course context
+
+An exercise can supply visible course material to the AI as learning context.
+Mark ordinary Quarto content with both a unique ID and the
+`.math-feedback-context` class:
+
+```markdown
+::: {#exponential-model .math-feedback-context}
+
+For exponential growth, use
+
+$$
+P(t)=P_0e^{rt}.
+$$
+
+:::
+```
+
+The block remains normal, visible course content. Reference it from an exercise
+using `feedback-context`:
+
+````markdown
+::: {#percentage-notation .math-feedback-context}
+
+Write a percentage rate as a decimal. For example, $4\%=0.04$.
+
+:::
+
+```{math-exercise}
+#| label: population-model
+#| caption: Exponential growth
+#| vars: t
+#| feedback-context: exponential-model, percentage-notation
+
+A population has initial size $P_0=500$ and grows by $4\%$ per year.
+
+Write a formula for the population $P(t)$ after $t$ years. Enter only the
+expression on the right-hand side:
+
+$P(t) =$ ___[500*exp(0.04*t)]
+```
+````
+
+Context rules:
+
+- Context IDs are written without a leading `#`.
+- Several IDs may be supplied as a comma-separated list.
+- Blocks may appear anywhere on the current rendered page.
+- The listed order determines their order in the AI request.
+- The same context block may be reused by several exercises.
+- Referenced elements must have the `.math-feedback-context` class.
+- Only explicitly referenced blocks are collected; surrounding content is
+  never added automatically.
+- Duplicate IDs are ignored.
+- Missing IDs, elements without the required class, empty blocks, and blocks
+  that exceed the remaining context allowance are skipped with a browser
+  console warning.
+- The combined limit is 6,000 characters. Blocks are omitted whole rather than
+  cut in the middle.
+- Context references are limited to the current HTML page.
+
+If no valid context is referenced, AI feedback retains its original prompt
+format.
+
+The request contains the selected visible learning context, the task, and the
+student's current response. It does **not** include the expected answer or the
+SymPy checker result.
+
+### Privacy
+
+The base URL, API key, and model configuration remain in the student's browser.
+However, requesting feedback sends the selected learning context, exercise
+text, and student response to the configured AI provider. Course authors should
+reference only material they are comfortable sending to that provider, and
+students should follow the provider's applicable privacy policy.
+
+AI responses support a small safe Markdown subset and render LaTeX written with
+`\(...\)` or `\[...\]`.
 
 ---
 
