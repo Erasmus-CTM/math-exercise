@@ -52,6 +52,33 @@ The answer inside `[...]` is a SymPy expression, e.g. `pi * 9`, `x**2 + 2*x + 1`
 
 ---
 
+## Vectors & matrices
+
+`vec[...]` and `mat[...]` render as a bracketed grid of small fields instead
+of one text field – each component/cell is its own checkable field (same
+`mode`, `vars`, `tolerance`, etc. as the rest of the exercise):
+
+````markdown
+```{math-exercise}
+#| label: mat-identity
+Enter the 2×2 identity matrix: I = mat[1,0;0,1]
+```
+````
+
+| Marker | Meaning |
+|--------|---------|
+| `vec[1,2,3]` | vector, comma-separated components — column by default, `#| vecdir: row` for a row vector |
+| `mat[1,2;3,4]` | matrix — `;` separates rows, `,` separates columns within a row; all rows must have the same number of columns |
+
+Check highlights each cell individually and labels feedback per component
+("Component 2:") or per cell ("Row 1, Col 2:") instead of the generic
+"Field N:" used for plain `_[...]` fields.
+
+`vec[...]`/`mat[...]` can be mixed freely with `_[...]` fields and work in
+pool tasks (`#| pool: true`) the same way.
+
+---
+
 ## Options (`#|`)
 
 | Option | Type | Default | Description |
@@ -66,6 +93,7 @@ The answer inside `[...]` is a SymPy expression, e.g. `pi * 9`, `x**2 + 2*x + 1`
 | `sigfigs` | integer | — | only for `mode: numeric`: round both sides to N significant figures before comparing |
 | `form` | `factored` / `expanded` / `single_fraction` / `lowest_terms` | — | representation additionally required for correctness — only for `mode: equivalent`/`exact` |
 | `pool` | `true` / `false` | `false` | enable a task pool |
+| `vecdir` | `col` / `row` | `col` | orientation of `vec[...]` fields — see [Vectors & matrices](#vectors--matrices) |
 
 ---
 

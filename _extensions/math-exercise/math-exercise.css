@@ -93,6 +93,39 @@
   min-height: 4em;
 }
 
+/* ---- Vector / matrix input grid (vec[...] / mat[...]) ---- */
+.math-vec, .math-mat {
+  display: inline-grid;
+  gap: .3em;
+  padding: .35em 1.1em;
+  margin: 0 .15em;
+  position: relative;
+  vertical-align: middle;
+}
+.math-mat { grid-template-columns: repeat(var(--cols), auto); }
+.math-vec { grid-template-columns: auto; } /* column vector (default) */
+.math-vec.math-vec-row { grid-template-columns: repeat(var(--n), auto); }
+
+/* Bracket look: two absolutely-positioned partial borders per side. */
+.math-vec::before, .math-vec::after,
+.math-mat::before, .math-mat::after {
+  content: '';
+  position: absolute;
+  top: .12em;
+  bottom: .12em;
+  width: .5em;
+  border: 2px solid var(--bs-body-color, #212529);
+}
+.math-vec::before, .math-mat::before { left: 0;  border-right: none; }
+.math-vec::after,  .math-mat::after  { right: 0; border-left: none; }
+
+.math-mat-cell {
+  width: 3.4em;
+  min-width: 3.4em;
+  text-align: center;
+  padding: .3em .3em;
+}
+
 /* State feedback on the input itself.
    Background AND text color are fixed together (not theme variables) so the
    text stays readable regardless of the page's light/dark theme. */

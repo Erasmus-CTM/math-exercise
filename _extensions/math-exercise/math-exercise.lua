@@ -46,6 +46,15 @@
 --   _[answer]   → short  input
 --   __[answer]  → medium input
 --   ___[answer] → 2-row  textarea
+--
+-- Vector / matrix markers – each component becomes its own checkable field,
+-- rendered as a bracketed grid instead of one text field:
+--
+--   vec[1,2,3]        → column vector (3 components; row via #| vecdir: row)
+--   mat[1,2;3,4]       → matrix; ';' separates rows, ',' separates columns
+--
+-- Components are plain SymPy expressions, checked individually with the
+-- exercise's own #| mode/#| vars/#| tolerance/etc. – same rules as _[...].
 ----
 
 local hasSetup      = false
@@ -150,32 +159,163 @@ local function jsonArrAttr(t)
 end
 
 ----
--- Replace _+[answer] markers with HTML input/textarea elements.
--- Returns: processed HTML string, list of generated field IDs.
+-- Split s on top-level occurrences of sep (ignoring seps nested inside
+-- (), [], {} – e.g. splitTop("sqrt(2),3", ",") -> {"sqrt(2)", "3"}).
 ----
-local function processMarkers(text, exerciseId, vars)
-  local count    = 0
-  local fieldIds = {}
-
-  local result = text:gsub("(_+)%[(.-)%]", function(underscores, answer)
-    count = count + 1
-    local fid  = exerciseId .. "-f" .. count
-    table.insert(fieldIds, fid)
-    local n    = #underscores
-    local base = ' id="'          .. fid             .. '"'
-               .. ' data-answer="' .. attrEsc(answer) .. '"'
-               .. ' data-vars="'   .. attrEsc(vars)   .. '"'
-               .. ' autocomplete="off" autocorrect="off" spellcheck="false"'
-    if n >= 3 then
-      return '<textarea' .. base .. ' class="math-input math-input-large" rows="2"></textarea>'
-    elseif n == 2 then
-      return '<input type="text"' .. base .. ' class="math-input math-input-medium">'
-    else
-      return '<input type="text"' .. base .. ' class="math-input math-input-small">'
+local function splitTop(s, sep)
+  local parts, depth, cur = {}, 0, {}
+  for i = 1, #s do
+    local ch = s:sub(i, i)
+    if ch == "(" or ch == "[" or ch == "{" then depth = depth + 1
+    elseif ch == ")" or ch == "]" or ch == "}" then depth = depth - 1
     end
-  end)
+    if ch == sep and depth == 0 then
+      table.insert(parts, table.concat(cur))
+      cur = {}
+    else
+      table.insert(cur, ch)
+    end
+  end
+  table.insert(parts, table.concat(cur))
+  for i, p in ipairs(parts) do
+    parts[i] = p:match("^%s*(.-)%s*$")
+  end
+  return parts
+end
 
-  return result, fieldIds
+----
+-- HTML builders for a single input field / matrix-vector cell
+----
+local function scalarFieldHtml(fid, answer, vars, underscoreCount)
+  local base = ' id="'          .. fid             .. '"'
+             .. ' data-answer="' .. attrEsc(answer) .. '"'
+             .. ' data-vars="'   .. attrEsc(vars)   .. '"'
+             .. ' autocomplete="off" autocorrect="off" spellcheck="false"'
+  if underscoreCount >= 3 then
+    return '<textarea' .. base .. ' class="math-input math-input-large" rows="2"></textarea>'
+  elseif underscoreCount == 2 then
+    return '<input type="text"' .. base .. ' class="math-input math-input-medium">'
+  else
+    return '<input type="text"' .. base .. ' class="math-input math-input-small">'
+  end
+end
+
+local function cellFieldHtml(fid, answer, vars)
+  return '<input type="text" id="' .. fid .. '"'
+       .. ' data-answer="' .. attrEsc(answer) .. '"'
+       .. ' data-vars="'   .. attrEsc(vars)   .. '"'
+       .. ' autocomplete="off" autocorrect="off" spellcheck="false"'
+       .. ' class="math-input math-mat-cell">'
+end
+
+----
+-- vec[...] / mat[...] builders. `count` is the running field counter (fed in,
+-- returned updated) so numbering stays consistent across marker types.
+-- Field labels are small tokens ("v2", "m1,2") that the JS side localizes
+-- into "Component 2:" / "Row 1, Col 2:" for the Check feedback.
+----
+local function buildVec(exerciseId, count, content, vars, vecdir)
+  local comps = splitTop(content, ",")
+  local ids, labels, cells = {}, {}, {}
+  for k, comp in ipairs(comps) do
+    count = count + 1
+    local fid = exerciseId .. "-f" .. count
+    table.insert(ids, fid)
+    table.insert(labels, "v" .. k)
+    table.insert(cells, cellFieldHtml(fid, comp, vars))
+  end
+  local dirClass = (vecdir == "row") and " math-vec-row" or ""
+  local html = '<span class="math-vec' .. dirClass .. '" style="--n:' .. #comps .. '">'
+            .. table.concat(cells) .. '</span>'
+  return html, ids, labels, count
+end
+
+local function buildMat(exerciseId, count, content, vars)
+  local rowsRaw = splitTop(content, ";")
+  local rows, ncols = {}, nil
+  for _, r in ipairs(rowsRaw) do
+    local cols = splitTop(r, ",")
+    if ncols == nil then ncols = #cols
+    elseif #cols ~= ncols then
+      error("math-exercise: mat[...] rows have inconsistent column counts (expected " ..
+        ncols .. ", got " .. #cols .. ")")
+    end
+    table.insert(rows, cols)
+  end
+  local ids, labels, cells = {}, {}, {}
+  for r, cols in ipairs(rows) do
+    for c, val in ipairs(cols) do
+      count = count + 1
+      local fid = exerciseId .. "-f" .. count
+      table.insert(ids, fid)
+      table.insert(labels, "m" .. r .. "," .. c)
+      table.insert(cells, cellFieldHtml(fid, val, vars))
+    end
+  end
+  local html = '<span class="math-mat" style="--cols:' .. ncols .. '">'
+            .. table.concat(cells) .. '</span>'
+  return html, ids, labels, count
+end
+
+----
+-- True if position i in text is not preceded by a word character. Only
+-- applied to the word-based "vec"/"mat" heads (not "_"), so e.g. "format[x]"
+-- in prose doesn't get misread as a "mat[...]" marker – "_[...]" keeps its
+-- original, unrestricted matching for backward compatibility.
+----
+local function atBoundary(text, i)
+  if i <= 1 then return true end
+  return not text:sub(i - 1, i - 1):match("%w")
+end
+
+----
+-- Replace _+[answer] / vec[...] / mat[...] markers with HTML input elements.
+-- Returns: processed HTML string, list of generated field IDs, list of
+-- field labels (see buildVec/buildMat; "" for plain scalar fields).
+----
+local function processMarkers(text, exerciseId, vars, vecdir)
+  local count       = 0
+  local fieldIds    = {}
+  local fieldLabels = {}
+  local out = {}
+  local i, n = 1, #text
+
+  while i <= n do
+    local uHead = text:match("^_+%[", i)
+    local vHead, mHead
+    if not uHead and atBoundary(text, i) then
+      vHead = text:match("^vec%[", i)
+      if not vHead then mHead = text:match("^mat%[", i) end
+    end
+    local head = uHead or vHead or mHead
+
+    local bracket = head and text:match("^%b[]", i + #head - 1)
+    if bracket then
+      local content = bracket:sub(2, -2)
+      local html, ids, labels
+
+      if uHead then
+        count = count + 1
+        local fid = exerciseId .. "-f" .. count
+        html = scalarFieldHtml(fid, content, vars, #uHead - 1)
+        ids, labels = { fid }, { "" }
+      elseif vHead then
+        html, ids, labels, count = buildVec(exerciseId, count, content, vars, vecdir)
+      else
+        html, ids, labels, count = buildMat(exerciseId, count, content, vars)
+      end
+
+      for _, fid in ipairs(ids)    do table.insert(fieldIds, fid) end
+      for _, lbl in ipairs(labels) do table.insert(fieldLabels, lbl) end
+      table.insert(out, html)
+      i = i + #head - 1 + #bracket
+    else
+      table.insert(out, text:sub(i, i))
+      i = i + 1
+    end
+  end
+
+  return table.concat(out), fieldIds, fieldLabels
 end
 
 ----
@@ -237,6 +377,7 @@ function CodeBlock(el)
   local sigfigs   = opts["sigfigs"]   or ""
   local form      = opts["form"]      or ""
   local isPool    = (opts["pool"]     == "true")
+  local vecdir    = opts["vecdir"]    or "col"
 
   local captionHtml = ""
   if caption then
@@ -255,6 +396,7 @@ function CodeBlock(el)
              .. ' data-decplaces="' .. attrEsc(decplaces) .. '"'
              .. ' data-sigfigs="'   .. attrEsc(sigfigs)   .. '"'
              .. ' data-form="'      .. attrEsc(form)      .. '"'
+             .. ' data-vecdir="'    .. attrEsc(vecdir)    .. '"'
 
   local questionHtml
 
@@ -262,12 +404,14 @@ function CodeBlock(el)
     local tasks = splitTasks(questionText)
     attrs        = attrs .. ' data-pool="'   .. jsonArrAttr(tasks) .. '"'
                          .. ' data-fields="[]"'
+                         .. ' data-fieldlabels="[]"'
     questionHtml = '<button type="button" class="math-pool-reload" title="' .. uiT("poolReload") .. '">&#8635;</button>\n'
                 .. '<div class="math-exercise-question"></div>'
   else
-    local body, fieldIds = processMarkers(questionText, eid, vars)
+    local body, fieldIds, fieldLabels = processMarkers(questionText, eid, vars, vecdir)
     body         = body:gsub("\n", "<br>\n")
-    attrs        = attrs .. ' data-fields="' .. jsonArrAttr(fieldIds) .. '"'
+    attrs        = attrs .. ' data-fields="'      .. jsonArrAttr(fieldIds)    .. '"'
+                         .. ' data-fieldlabels="'  .. jsonArrAttr(fieldLabels) .. '"'
     questionHtml = '<div class="math-exercise-question">' .. body .. '</div>'
   end
 

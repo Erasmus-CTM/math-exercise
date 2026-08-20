@@ -50,6 +50,8 @@
 
       // Check results
       fieldPrefix:  function (n) { return 'Field&nbsp;' + n + ': '; },
+      vecComponent: function (k) { return 'Component&nbsp;' + k + ': '; },
+      matCell:      function (r, c) { return 'Row&nbsp;' + r + ', Col&nbsp;' + c + ': '; },
       resEmpty:     'Please enter an answer.',
       resCorrect:   'Correct!',
       resWrong:     'Not correct – try again.',
@@ -170,6 +172,8 @@
 
       // Check results
       fieldPrefix:  function (n) { return 'Feld&nbsp;' + n + ': '; },
+      vecComponent: function (k) { return 'Komponente&nbsp;' + k + ': '; },
+      matCell:      function (r, c) { return 'Zeile&nbsp;' + r + ', Spalte&nbsp;' + c + ': '; },
       resEmpty:     'Bitte eine Antwort eingeben.',
       resCorrect:   'Richtig!',
       resWrong:     'Nicht korrekt – versuche es noch einmal.',
@@ -568,25 +572,148 @@
   }
 
   // ---------------------------------------------------------------------------
-  // Task-text renderer  (used by pool mode: parses _[answer] markers in JS)
+  // Task-text renderer  (used by pool mode: parses _[...]/vec[...]/mat[...]
+  // markers in JS – mirrors processMarkers() in math-exercise.lua, which
+  // handles the same markers server-side for non-pool exercises)
   // ---------------------------------------------------------------------------
 
-  function renderTaskText(text, exerciseId, vars) {
-    var count = 0, fieldIds = [];
-    var html = text.replace(/(_+)\[([^\]]*)\]/g, function (_, underscores, answer) {
+  // Split s on top-level occurrences of sep (ignoring seps nested inside
+  // (), [], {}).
+  function splitTop(s, sep) {
+    var parts = [], depth = 0, cur = '';
+    for (var i = 0; i < s.length; i++) {
+      var ch = s.charAt(i);
+      if (ch === '(' || ch === '[' || ch === '{') depth++;
+      else if (ch === ')' || ch === ']' || ch === '}') depth--;
+      if (ch === sep && depth === 0) { parts.push(cur); cur = ''; }
+      else cur += ch;
+    }
+    parts.push(cur);
+    return parts.map(function (p) { return p.trim(); });
+  }
+
+  function scalarFieldHtml(fid, answer, vars, underscoreCount) {
+    var base = ' id="' + fid + '"'
+             + ' data-answer="' + escHtml(answer) + '"'
+             + ' data-vars="'   + escHtml(vars)   + '"'
+             + ' autocomplete="off" autocorrect="off" spellcheck="false"';
+    if (underscoreCount >= 3) return '<textarea' + base + ' class="math-input math-input-large" rows="2"></textarea>';
+    if (underscoreCount === 2) return '<input type="text"' + base + ' class="math-input math-input-medium">';
+    return '<input type="text"' + base + ' class="math-input math-input-small">';
+  }
+
+  function cellFieldHtml(fid, answer, vars) {
+    return '<input type="text" id="' + fid + '"'
+         + ' data-answer="' + escHtml(answer) + '"'
+         + ' data-vars="'   + escHtml(vars)   + '"'
+         + ' autocomplete="off" autocorrect="off" spellcheck="false"'
+         + ' class="math-input math-mat-cell">';
+  }
+
+  function buildVec(exerciseId, count, content, vars, vecdir) {
+    var comps = splitTop(content, ',');
+    var ids = [], labels = [], cells = [];
+    for (var k = 0; k < comps.length; k++) {
       count++;
-      var fid  = exerciseId + '-f' + count;
-      fieldIds.push(fid);
-      var n    = underscores.length;
-      var base = ' id="' + fid + '"'
-               + ' data-answer="' + escHtml(answer) + '"'
-               + ' data-vars="'   + escHtml(vars)   + '"'
-               + ' autocomplete="off" autocorrect="off" spellcheck="false"';
-      if (n >= 3) return '<textarea' + base + ' class="math-input math-input-large" rows="2"></textarea>';
-      if (n >= 2) return '<input type="text"' + base + ' class="math-input math-input-medium">';
-      return '<input type="text"' + base + ' class="math-input math-input-small">';
-    });
-    return { html: html.replace(/\n/g, '<br>\n'), fieldIds: fieldIds };
+      var fid = exerciseId + '-f' + count;
+      ids.push(fid);
+      labels.push('v' + (k + 1));
+      cells.push(cellFieldHtml(fid, comps[k], vars));
+    }
+    var dirClass = (vecdir === 'row') ? ' math-vec-row' : '';
+    var html = '<span class="math-vec' + dirClass + '" style="--n:' + comps.length + '">' + cells.join('') + '</span>';
+    return { html: html, ids: ids, labels: labels, count: count };
+  }
+
+  function buildMat(exerciseId, count, content, vars) {
+    var rowsRaw = splitTop(content, ';');
+    var rows = [], ncols = null;
+    for (var r = 0; r < rowsRaw.length; r++) {
+      var cols = splitTop(rowsRaw[r], ',');
+      if (ncols === null) ncols = cols.length;
+      else if (cols.length !== ncols) throw new Error('mat[...] rows have inconsistent column counts');
+      rows.push(cols);
+    }
+    var ids = [], labels = [], cells = [];
+    for (var ri = 0; ri < rows.length; ri++) {
+      for (var ci = 0; ci < rows[ri].length; ci++) {
+        count++;
+        var fid = exerciseId + '-f' + count;
+        ids.push(fid);
+        labels.push('m' + (ri + 1) + ',' + (ci + 1));
+        cells.push(cellFieldHtml(fid, rows[ri][ci], vars));
+      }
+    }
+    var html = '<span class="math-mat" style="--cols:' + ncols + '">' + cells.join('') + '</span>';
+    return { html: html, ids: ids, labels: labels, count: count };
+  }
+
+  // Balanced-bracket match starting exactly at text[pos] === '['.
+  function matchBalancedBracket(text, pos) {
+    if (text.charAt(pos) !== '[') return null;
+    var depth = 0;
+    for (var j = pos; j < text.length; j++) {
+      var ch = text.charAt(j);
+      if (ch === '[') depth++;
+      else if (ch === ']') { depth--; if (depth === 0) return text.slice(pos, j + 1); }
+    }
+    return null;
+  }
+
+  function isWordChar(ch) { return !!ch && /\w/.test(ch); }
+
+  function renderTaskText(text, exerciseId, vars, vecdir) {
+    var count = 0, fieldIds = [], fieldLabels = [];
+    var out = [];
+    var i = 0, n = text.length;
+
+    while (i < n) {
+      // Word-boundary guard applies only to "vec"/"mat" (so e.g. "format[x]"
+      // in prose isn't misread as a marker); "_[...]" keeps its original,
+      // unrestricted matching for backward compatibility.
+      var uMatch = /^_+\[/.exec(text.slice(i));
+      var atBoundary = !uMatch && ((i === 0) || !isWordChar(text.charAt(i - 1)));
+      var vMatch = !uMatch && atBoundary && text.slice(i, i + 4) === 'vec[';
+      var mMatch = !uMatch && !vMatch && atBoundary && text.slice(i, i + 4) === 'mat[';
+      var headLen = uMatch ? uMatch[0].length : (vMatch || mMatch) ? 4 : 0;
+
+      var bracket = headLen && matchBalancedBracket(text, i + headLen - 1);
+      if (bracket) {
+        var content = bracket.slice(1, -1);
+        var res;
+        if (uMatch) {
+          count++;
+          var fid = exerciseId + '-f' + count;
+          out.push(scalarFieldHtml(fid, content, vars, uMatch[0].length - 1));
+          fieldIds.push(fid);
+          fieldLabels.push('');
+        } else if (vMatch) {
+          res = buildVec(exerciseId, count, content, vars, vecdir);
+          out.push(res.html); fieldIds = fieldIds.concat(res.ids); fieldLabels = fieldLabels.concat(res.labels); count = res.count;
+        } else {
+          res = buildMat(exerciseId, count, content, vars);
+          out.push(res.html); fieldIds = fieldIds.concat(res.ids); fieldLabels = fieldLabels.concat(res.labels); count = res.count;
+        }
+        i = i + headLen - 1 + bracket.length;
+      } else {
+        out.push(text.charAt(i));
+        i++;
+      }
+    }
+
+    return { html: out.join('').replace(/\n/g, '<br>\n'), fieldIds: fieldIds, fieldLabels: fieldLabels };
+  }
+
+  // Localizes a field-label token ("" / "v2" / "m1,2") into a Check-feedback
+  // prefix; falls back to the generic "Field N:" numbering.
+  function fieldPrefixFor(fieldLabels, fieldCount, i) {
+    var tok = fieldLabels[i] || '';
+    if (tok.charAt(0) === 'v') return L.vecComponent(tok.slice(1));
+    if (tok.charAt(0) === 'm') {
+      var rc = tok.slice(1).split(',');
+      return L.matCell(rc[0], rc[1]);
+    }
+    return fieldCount > 1 ? L.fieldPrefix(i + 1) : '';
   }
 
   // ---------------------------------------------------------------------------
@@ -990,6 +1117,7 @@
     var mode   = cell.dataset.mode   || 'equivalent';
     var reject = cell.dataset.reject || '';
     var label  = cell.dataset.label  || cell.id;
+    var vecdir = cell.dataset.vecdir || 'col';
     var checkOpts = {
       reject:    reject,
       tolerance: cell.dataset.tolerance || '',
@@ -1010,10 +1138,11 @@
         idx = Math.floor(Math.random() * poolTasks.length);
         try { sessionStorage.setItem(poolKey, String(idx)); } catch(e) {}
       }
-      var r = renderTaskText(poolTasks[idx], cell.id, vars);
+      var r = renderTaskText(poolTasks[idx], cell.id, vars, vecdir);
       var qDiv = cell.querySelector('.math-exercise-question');
       qDiv.innerHTML = r.html;
       cell.dataset.fields = JSON.stringify(r.fieldIds);
+      cell.dataset.fieldlabels = JSON.stringify(r.fieldLabels);
       renderMathInQuestion(qDiv);
     } else {
       renderMathInQuestion(cell.querySelector('.math-exercise-question'));
@@ -1033,7 +1162,8 @@
       });
     }
 
-    var fieldIds    = JSON.parse(cell.dataset.fields || '[]');
+    var fieldIds     = JSON.parse(cell.dataset.fields      || '[]');
+    var fieldLabels  = JSON.parse(cell.dataset.fieldlabels || '[]');
     var checkBtn    = cell.querySelector('.math-check-btn');
     var legendBtn   = cell.querySelector('.math-legend-btn');
     var feedbackBtn  = cell.querySelector('.math-feedback-btn');
@@ -1069,7 +1199,7 @@
         for (var i = 0; i < fieldIds.length; i++) {
           var el     = document.getElementById(fieldIds[i]);
           if (!el) continue;
-          var prefix = fieldIds.length > 1 ? L.fieldPrefix(i + 1) : '';
+          var prefix = fieldPrefixFor(fieldLabels, fieldIds.length, i);
           var res    = await checkField(el, mode, checkOpts);
           el.classList.remove('math-input-ok', 'math-input-wrong', 'math-input-err');
           if      (res.status === 'empty')    { parts.push('<div class="math-fb-empty">'  + prefix + L.resEmpty + '</div>'); }
@@ -1108,11 +1238,13 @@
         }
         try { sessionStorage.setItem(poolKey, String(next)); } catch(e) {}
 
-        var r = renderTaskText(poolTasks[next], cell.id, vars);
+        var r = renderTaskText(poolTasks[next], cell.id, vars, vecdir);
         var qDivR = cell.querySelector('.math-exercise-question');
         qDivR.innerHTML = r.html;
         cell.dataset.fields = JSON.stringify(r.fieldIds);
+        cell.dataset.fieldlabels = JSON.stringify(r.fieldLabels);
         fieldIds = r.fieldIds;
+        fieldLabels = r.fieldLabels;
         renderMathInQuestion(qDivR);
 
         attachKeyListeners();

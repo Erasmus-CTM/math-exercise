@@ -262,3 +262,51 @@ A = _[3.14159*25] cm²
 Compute the area of a circle with r = 7 cm (2 decimal places).
 A = _[3.14159*49] cm²
 ```
+
+## Bonus: vectors & matrices
+
+Not a check mode of its own either: `vec[...]` and `mat[...]` render as a
+bracketed grid of individual fields instead of one text field. Each cell is
+checked on its own (with the exercise's `mode`/`vars`/etc.), so Check
+highlights exactly the cell that's wrong.
+
+```{math-exercise}
+#| label: ex-vec
+#| caption: vec (column vector, default)
+Enter the vector (2, -1, 3): v = vec[2,-1,3]
+```
+
+```{math-exercise}
+#| label: ex-vec-row
+#| caption: vec + vecdir: row
+#| vecdir: row
+Enter the same vector as a row: v = vec[2,-1,3]
+```
+
+```{math-exercise}
+#| label: ex-mat
+#| caption: mat (rows separated by ';', columns by ',')
+#| vars: x
+Enter the 2×2 identity matrix: I = mat[1,0;0,1]
+```
+
+```{math-exercise}
+#| label: ex-mat-symbolic
+#| caption: mat + vars (symbolic entries)
+#| vars: x
+Enter a diagonal matrix with x on the diagonal: D = mat[x,0;0,x]
+```
+
+Works with `pool: true` too (rendered client-side, same rules):
+
+```{math-exercise}
+#| label: ex-mat-pool
+#| caption: mat + pool
+#| pool: true
+
+Enter the 2×2 identity matrix: I = mat[1,0;0,1]
+
+---
+
+Enter the vector (1, 2): v = vec[1,2]
+```
