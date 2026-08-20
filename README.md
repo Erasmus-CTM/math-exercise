@@ -66,6 +66,7 @@ The answer inside `[...]` is a SymPy expression, e.g. `pi * 9`, `x**2 + 2*x + 1`
 | `sigfigs` | integer | — | only for `mode: numeric`: round both sides to N significant figures before comparing |
 | `form` | `factored` / `expanded` / `single_fraction` / `lowest_terms` | — | representation additionally required for correctness — only for `mode: equivalent`/`exact` |
 | `pool` | `true` / `false` | `false` | enable a task pool |
+| `context` | id / `none` | — | AI-feedback context: reference an explicit context block by id, or `none` to disable the automatic context. See [AI feedback context](#ai-feedback-context) |
 
 ---
 
@@ -349,6 +350,55 @@ same project** – set up once, use everywhere.
 
 Compatible with any **OpenAI-compatible API** (Cerebras, OpenRouter, OpenAI,
 Ollama, …).
+
+### AI feedback context
+
+By default, the LLM only saw the exercise text itself – it had no idea that,
+say, "convert to binary" actually means "convert to 8-bit two's complement",
+because that rule was explained in a paragraph above the exercise, not inside
+it. `math-exercise` now sends that surrounding context along automatically.
+
+**Automatic (no authoring changes needed).** Every exercise collects the
+prose (paragraphs, lists, its own section heading) written since the last
+heading in the document, and sends it to the LLM as background context. Just
+explain the scheme in normal text above the exercise(s) – as many exercises
+as you like can share the same explanation:
+
+````markdown
+## IEEE-754 half precision
+
+1 sign bit, 5 exponent bits (bias 15), 10 mantissa bits.
+
+```{math-exercise}
+#| label: fp-decode
+Decode 0x3C00 as a half-precision float: _[1]
+```
+````
+
+**Explicit, for context outside the current section.** Define a named
+context block once and reference it from any exercise, anywhere later in the
+document, via `#| context: <id>`:
+
+````markdown
+::: {.math-exercise-context #fp16}
+IEEE-754 half precision: 1 sign bit, 5 exponent bits (bias 15),
+10 mantissa bits.
+:::
+
+```{math-exercise}
+#| label: fp-decode
+#| context: fp16
+Decode 0x3C00 as a half-precision float: _[1]
+```
+````
+
+The block renders as normal, visible content on the page (styled as a light
+callout) – students see the same explanation the AI gets. The block must
+appear before any exercise referencing it.
+
+To opt an exercise out of context entirely, use `#| context: none`. Context
+text is capped at roughly 1500 characters (keeping the most recent part) to
+bound prompt size and cost – relevant on the free-tier providers above.
 
 ---
 

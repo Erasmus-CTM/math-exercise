@@ -46,10 +46,38 @@
 --   _[answer]   → short  input
 --   __[answer]  → medium input
 --   ___[answer] → 2-row  textarea
+--
+-- Context for AI feedback (hybrid: automatic + optional explicit):
+--
+--   By default, every exercise auto-collects the prose (paragraphs, lists,
+--   its own section heading) since the last heading as background context
+--   for the "Feedback" button's LLM prompt. No authoring changes needed:
+--   just explain the scheme in normal text above the exercise(s).
+--
+--   For context that lives in a different section than the exercises using
+--   it, define it explicitly and reference it by id (must appear *before*
+--   the exercises that use it):
+--
+--   ::: {.math-exercise-context #fp16}
+--   IEEE-754 half precision: 1 sign bit, 5 exponent bits (bias 15),
+--   10 mantissa bits.
+--   :::
+--
+--   ```{math-exercise}
+--   #| label: fp-decode
+--   #| context: fp16
+--   Decode 0x3C00 as a half-precision float: _[1]
+--   ```
+--
+--   #| context: none   – opt out of the automatic section context entirely
+--
+--   Context text is capped at ~1500 characters (keeping the most recent
+--   part) to bound prompt size/cost.
 ----
 
 local hasSetup      = false
 local exerciseCount = 0
+local MAX_CONTEXT_CHARS = 1500
 
 ----
 -- Localization (i18n)
@@ -149,6 +177,31 @@ local function jsonArrAttr(t)
   return ("[" .. table.concat(parts, ",") .. "]"):gsub('"', '&quot;')
 end
 
+-- Same idea as jsonArrAttr, but for a single string (used for data-context).
+local function jsonStrAttr(s)
+  return ('"' .. jsonEsc(s) .. '"'):gsub('"', '&quot;')
+end
+
+----
+-- AI-feedback context helpers
+--
+-- collapseWs: flattens a stringified block to a single line of normalized
+-- whitespace, so accumulated context reads as compact prose rather than
+-- preserving the source markdown's line breaks/indentation.
+--
+-- truncate: keeps the *tail* of long context (the part closest to the
+-- exercise it precedes) instead of the head, since that is the most likely
+-- to be relevant, and bounds prompt size/cost.
+----
+local function collapseWs(s)
+  return (s:gsub("%s+", " "):match("^%s*(.-)%s*$"))
+end
+
+local function truncate(text, n)
+  if #text <= n then return text end
+  return "…" .. text:sub(#text - n + 1)
+end
+
 ----
 -- Replace _+[answer] markers with HTML input/textarea elements.
 -- Returns: processed HTML string, list of generated field IDs.
@@ -215,12 +268,32 @@ local function controlsHtml()
 end
 
 ----
--- CodeBlock filter
+-- AI-feedback context resolution
+--
+-- Precedence: `#| context: none` disables it; `#| context: <id>` looks up an
+-- explicit `.math-exercise-context` div (must be defined earlier in the
+-- document); otherwise falls back to the auto-collected section context.
 ----
-function CodeBlock(el)
-  if not quarto.doc.is_format("html") then return el end
-  if not el.attr.classes:includes("{math-exercise}") then return el end
+local function resolveContext(opts, state, label)
+  local ref = opts["context"]
+  if ref == "none" then return "" end
+  if ref and ref ~= "" then
+    local found = state.namedCtx[ref]
+    if not found then
+      quarto.log.warning("math-exercise: context '" .. ref .. "' not found for '" ..
+        label .. "' (it must be defined, via .math-exercise-context, before this exercise)")
+      return ""
+    end
+    return found
+  end
+  return truncate(state.sectionCtx, MAX_CONTEXT_CHARS)
+end
 
+----
+-- Exercise cell builder (formerly the CodeBlock filter; now called from the
+-- document-order block walk below so it can read the accumulated context).
+----
+local function buildExercise(el, state)
   ensureSetup()
   exerciseCount = exerciseCount + 1
   local eid = "math-exercise-" .. exerciseCount
@@ -237,6 +310,7 @@ function CodeBlock(el)
   local sigfigs   = opts["sigfigs"]   or ""
   local form      = opts["form"]      or ""
   local isPool    = (opts["pool"]     == "true")
+  local context   = resolveContext(opts, state, label)
 
   local captionHtml = ""
   if caption then
@@ -255,6 +329,7 @@ function CodeBlock(el)
              .. ' data-decplaces="' .. attrEsc(decplaces) .. '"'
              .. ' data-sigfigs="'   .. attrEsc(sigfigs)   .. '"'
              .. ' data-form="'      .. attrEsc(form)      .. '"'
+             .. ' data-context="'   .. jsonStrAttr(context) .. '"'
 
   local questionHtml
 
@@ -332,7 +407,7 @@ local function resolveLang(meta)
   return "en"
 end
 
-function Meta(meta)
+local function Meta(meta)
   lang = resolveLang(meta)
 
   -- math-exercise.js reads this to pick its LOCALES entry.
@@ -343,8 +418,67 @@ function Meta(meta)
   return meta
 end
 
--- Meta runs before CodeBlock so the language is known while cells are built.
+----
+-- Document-order block walk
+--
+-- Needed (instead of a plain per-type CodeBlock filter) so exercise cells can
+-- see prose that appeared earlier in the same document: tracks `sectionCtx`
+-- (prose collected since the last heading) and `namedCtx` (id -> text for
+-- explicit `.math-exercise-context` divs) as it goes, in document order.
+--
+-- Recurses into plain Divs/BlockQuotes (callouts, columns, …) so exercises or
+-- headings nested inside them are still found; list/table content is only
+-- captured as flattened text (a nested exercise inside a bullet list would
+-- be missed – an accepted, documented limitation).
+----
+local function walkBlocks(blocks, state)
+  local out = pandoc.Blocks({})
+  for _, b in ipairs(blocks) do
+    if b.t == "Header" then
+      -- Seed the new section's context with its own heading text.
+      state.sectionCtx = collapseWs(pandoc.utils.stringify(b))
+      out:insert(b)
+
+    elseif b.t == "CodeBlock" and b.attr.classes:includes("{math-exercise}") then
+      out:insert(buildExercise(b, state))
+
+    elseif b.t == "CodeBlock" then
+      out:insert(b) -- code isn't useful prose context; don't accumulate
+
+    elseif b.t == "Div" and b.attr.classes:includes("math-exercise-context") then
+      local text = truncate(collapseWs(pandoc.utils.stringify(b)), MAX_CONTEXT_CHARS)
+      if b.attr.identifier ~= "" then state.namedCtx[b.attr.identifier] = text end
+      state.sectionCtx = (state.sectionCtx == "" and text) or (state.sectionCtx .. " " .. text)
+      out:insert(b) -- still rendered normally; students should see it too
+
+    elseif b.t == "Div" or b.t == "BlockQuote" then
+      b.content = walkBlocks(b.content, state)
+      out:insert(b)
+
+    else
+      -- Para, Plain, BulletList, OrderedList, DefinitionList, Table, … :
+      -- flatten to plain text and fold into the running section context.
+      local text = collapseWs(pandoc.utils.stringify(b))
+      if text ~= "" then
+        state.sectionCtx = (state.sectionCtx == "" and text) or (state.sectionCtx .. " " .. text)
+      end
+      out:insert(b)
+    end
+  end
+  return out
+end
+
+local function Pandoc(doc)
+  doc.meta = Meta(doc.meta)
+
+  if quarto.doc.is_format("html") then
+    local state = { sectionCtx = "", namedCtx = {} }
+    doc.blocks = walkBlocks(doc.blocks, state)
+  end
+
+  return doc
+end
+
 return {
-  { Meta = Meta },
-  { CodeBlock = CodeBlock },
+  { Pandoc = Pandoc },
 }

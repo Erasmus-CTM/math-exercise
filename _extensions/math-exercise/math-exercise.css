@@ -9,6 +9,15 @@
   color: var(--bs-body-color, #212529);
 }
 
+/* ---- Explicit AI-feedback context block (::: {.math-exercise-context}) ---- */
+.math-exercise-context {
+  margin: 1.5em 0;
+  padding: .85em 1.1em;
+  border-left: 3px solid var(--bs-secondary-color, #6c757d);
+  background: var(--bs-tertiary-bg, #f8f9fa);
+  border-radius: 0 .35em .35em 0;
+}
+
 /* Pool reload button – top-right corner */
 .math-pool-reload {
   position: absolute;

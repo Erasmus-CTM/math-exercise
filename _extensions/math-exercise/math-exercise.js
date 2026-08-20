@@ -109,6 +109,7 @@
       saveBtn:    'Save & load feedback',
       cancelBtn:  'Cancel',
       reconfigBtn:'Change configuration',
+      promptContext: 'Context (from the surrounding document):',
       promptTask: 'Task:',
       promptAnswer: 'My answer:',
       feedbackTitle: 'Feedback',
@@ -229,6 +230,7 @@
       saveBtn:    'Speichern & Feedback laden',
       cancelBtn:  'Abbrechen',
       reconfigBtn:'Konfiguration ändern',
+      promptContext: 'Kontext (aus dem umgebenden Dokument):',
       promptTask: 'Aufgabe:',
       promptAnswer: 'Meine Antwort:',
       feedbackTitle: 'Feedback',
@@ -961,7 +963,10 @@
     return L.promptHint3 + base;
   }
 
-  async function callLLM(question, answer, n, cfg) {
+  async function callLLM(question, answer, n, cfg, context) {
+    var userMsg = '';
+    if (context) userMsg += L.promptContext + '\n' + context + '\n\n';
+    userMsg += L.promptTask + '\n' + question + '\n\n' + L.promptAnswer + '\n' + answer;
     var resp = await fetch(cfg.baseUrl.replace(/\/+$/, '') + '/chat/completions', {
       method: 'POST',
       headers: {
@@ -972,7 +977,7 @@
         model: cfg.model,
         messages: [
           { role: 'system', content: sysPrompt(n) },
-          { role: 'user',   content: L.promptTask + '\n' + question + '\n\n' + L.promptAnswer + '\n' + answer },
+          { role: 'user',   content: userMsg },
         ],
         max_tokens: 2000,
       }),
@@ -990,6 +995,8 @@
     var mode   = cell.dataset.mode   || 'equivalent';
     var reject = cell.dataset.reject || '';
     var label  = cell.dataset.label  || cell.id;
+    var context;
+    try { context = JSON.parse(cell.dataset.context || '""'); } catch (e) { context = ''; }
     var checkOpts = {
       reject:    reject,
       tolerance: cell.dataset.tolerance || '',
@@ -1145,7 +1152,7 @@
           feedbackBtn.disabled = true;
           fbDiv.innerHTML = '<div class="math-fb-checking">' + L.fetchingFeedback + '</div>';
           try {
-            var reply = await callLLM(question, answers, n, cfg);
+            var reply = await callLLM(question, answers, n, cfg, context);
             fbDiv.innerHTML =
               '<div class="math-fb-llm">'
               + '<div class="math-fb-llm-header">&#128161;&nbsp;' + L.feedbackTitle
