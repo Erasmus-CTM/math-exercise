@@ -1224,23 +1224,49 @@
 
   async function callLLM(question, answer, assessment, contexts, n, cfg) {
     async function requestOnce(extraSystemPrompt) {
-      var system = sysPrompt(n, contexts.length > 0) + (extraSystemPrompt ? ' ' + extraSystemPrompt : '');
+      var modelId = String(cfg.model || '').toLowerCase();
+      var isGptOss = modelId.indexOf('gpt-oss') !== -1;
+      var isKimiK26 = modelId.indexOf('kimi-k2.6') !== -1;
+      var isKimiK25 = modelId.indexOf('kimi-k2.5') !== -1;
+
+      var system = sysPrompt(n, contexts.length > 0) +
+        (extraSystemPrompt ? ' ' + extraSystemPrompt : '');
+
+      // GPT-OSS supports low/medium/high reasoning effort through the system
+      // message. Low effort is sufficient for short formative hints and leaves
+      // more of the completion budget available for the student-facing answer.
+      if (isGptOss) system = 'Reasoning: low\n\n' + system;
+
+      var requestBody = {
+        model: cfg.model,
+        messages: [
+          { role: 'system', content: system },
+          { role: 'user',   content: buildUserPrompt(question, answer, assessment, contexts) },
+        ],
+
+        // Reasoning tokens and visible feedback share this budget. A 2,000-token
+        // limit can expire before GPT-OSS or Kimi reaches its final answer.
+        // Kimi K2.5/K2.6 use 32k as their documented default ceiling.
+        max_tokens: 8192,
+      };
+
+      // vLLM's GPT-OSS Chat Completions endpoint can omit chain-of-thought from
+      // the returned payload while still providing the final answer.
+      if (isGptOss) requestBody.include_reasoning = false;
+
+      // Kimi K2.5/K2.6 support an explicit instant mode. These feedback calls
+      // need a concise pedagogical hint, not long-form internal reasoning.
+      if (isKimiK25 || isKimiK26) {
+        requestBody.thinking = { type: 'disabled' };
+      }
+
       var resp = await fetch(cfg.baseUrl.replace(/\/+$/, '') + '/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type':  'application/json',
           'Authorization': 'Bearer ' + cfg.apiKey,
         },
-        body: JSON.stringify({
-          model: cfg.model,
-          messages: [
-            { role: 'system', content: system },
-            { role: 'user',   content: buildUserPrompt(question, answer, assessment, contexts) },
-          ],
-          // Reasoning models may spend part of this budget internally. Keep the
-          // ceiling generous and control visible length through the system prompt.
-          max_tokens: 2000,
-        }),
+        body: JSON.stringify(requestBody),
       });
       if (!resp.ok) { var t = await resp.text(); throw new Error('API ' + resp.status + ': ' + t.slice(0, 200)); }
       var data = await resp.json();
