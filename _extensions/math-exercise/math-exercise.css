@@ -232,8 +232,29 @@
   color: #6c8ebf;
 }
 .math-fb-llm-body {
-  line-height: 1.65;
+  line-height: 1.55;
   color: #1a1a2e;
+}
+
+.math-fb-llm-body p {
+  margin: 0 0 .7em;
+}
+.math-fb-llm-body p:last-child {
+  margin-bottom: 0;
+}
+.math-fb-llm-body ul,
+.math-fb-llm-body ol {
+  margin: .35em 0 .7em;
+  padding-left: 1.4em;
+}
+.math-fb-llm-body li {
+  margin: .15em 0;
+}
+.math-fb-llm-body .math-fb-display {
+  margin: .5em 0 .65em;
+}
+.math-fb-llm-body .katex-display {
+  margin: 0;
 }
 
 /* ---- Config modal ---- */

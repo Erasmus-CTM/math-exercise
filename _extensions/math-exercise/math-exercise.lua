@@ -32,6 +32,9 @@
 -- correct AND already written in the given canonical form:
 --   #| form: factored | expanded | single_fraction | lowest_terms
 --
+-- Optional human-readable labels for multi-field feedback:
+--   #| field-labels: S, E, M
+--
 -- Pool syntax  (#| pool: true, tasks separated by lines containing only ---):
 --
 --   ```{math-exercise}
@@ -186,6 +189,15 @@ local function jsonStrAttr(s)
   return ('"' .. jsonEsc(s) .. '"'):gsub('"', '&quot;')
 end
 
+local function splitCsv(s)
+  local result = {}
+  for item in (s or ""):gmatch("[^,]+") do
+    local trimmed = item:match("^%s*(.-)%s*$")
+    if trimmed ~= "" then table.insert(result, trimmed) end
+  end
+  return result
+end
+
 ----
 -- AI-feedback auto-context helpers
 --
@@ -304,6 +316,7 @@ local function buildExercise(el, state)
   local decplaces = opts["decplaces"] or ""
   local sigfigs   = opts["sigfigs"]   or ""
   local form      = opts["form"]      or ""
+  local fieldLabels = splitCsv(opts["field-labels"] or "")
   local isPool    = (opts["pool"]     == "true")
 
   local captionHtml = ""
@@ -323,6 +336,7 @@ local function buildExercise(el, state)
              .. ' data-decplaces="' .. attrEsc(decplaces) .. '"'
              .. ' data-sigfigs="'   .. attrEsc(sigfigs)   .. '"'
              .. ' data-form="'      .. attrEsc(form)      .. '"'
+             .. ' data-field-labels="' .. jsonArrAttr(fieldLabels) .. '"'
              .. ' data-context-mode="' .. contextMode(opts) .. '"'
              .. ' data-context-refs="' .. attrEsc(opts["context"] or "") .. '"'
              .. ' data-context="'      .. jsonStrAttr(truncate(state.sectionCtx, MAX_CONTEXT_CHARS)) .. '"'

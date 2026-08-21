@@ -300,3 +300,141 @@ it can be represented without a separate sign bit for the exponent itself.
 What does the biased exponent field store instead of directly – the true
 exponent, or the true exponent plus 15? __[true exponent plus 15]
 ```
+
+## AI feedback with reusable mini-machine context
+
+This example is adapted and translated from the
+[mini-machine exercises](https://github.com/aacchhee/ingmat3a_ntnu/blob/main/_includes/module1/m1_3.md).
+
+::: {#mini-machine-representation .math-exercise-context}
+
+### Mini-machine number representation
+
+The mini-machine uses the simplified floating-point format
+
+$$
+\boxed{S}\quad\boxed{EEE}\quad\boxed{MMMM},
+$$
+
+where:
+
+- $S$ is one sign bit;
+- $E$ is a three-bit exponent field;
+- $M$ is a four-bit mantissa field;
+- the exponent bias is $3$.
+
+Only normalized numbers with $E=1,2,\ldots,6$ are used. The bit patterns
+$E=0$ and $E=7$ are excluded, so this mini-machine ignores subnormal numbers,
+infinities, and NaNs.
+
+A bit pattern represents the number
+
+$$
+(-1)^S\left(1+\frac{M}{16}\right)2^{E-3},
+$$
+
+where $M$ is the integer value of the four mantissa bits.
+
+For example,
+
+$$
+0\;|\;100\;|\;0110
+$$
+
+has $S=0$, $E=(100)_2=4$, $e=4-3=1$, and $M=(0110)_2=6$. Therefore,
+
+$$
+x=(1+6/16)2^1=2.75.
+$$
+
+To encode a representable number, first write it as
+
+$$
+\pm(1.MMMM)_2\,2^e.
+$$
+
+Then determine the sign bit, calculate the stored exponent $E=e+3$, and write
+$S$, $E$, and $M$ as bit fields.
+
+:::
+
+### Problem 1A — decode a bit pattern
+
+Calculate the value represented by the bit pattern.
+
+```{math-exercise}
+#| label: ex-mini-decode
+#| caption: Decode a mini floating-point number
+#| pool: true
+#| mode: equivalent
+#| context: mini-machine-representation
+
+$$0\;|\;100\;|\;0110$$
+
+The represented value is: _[11/4]
+
+---
+
+$$0\;|\;101\;|\;0110$$
+
+The represented value is: _[11/2]
+
+---
+
+$$1\;|\;100\;|\;0000$$
+
+The represented value is: _[-2]
+
+---
+
+$$0\;|\;011\;|\;1000$$
+
+The represented value is: _[3/2]
+
+---
+
+$$0\;|\;010\;|\;0100$$
+
+The represented value is: _[5/8]
+```
+
+### Problem 1B — encode a number
+
+Fill in the sign, exponent, and mantissa fields.
+
+```{math-exercise}
+#| label: ex-mini-encode
+#| caption: Encode a number in the mini-machine format
+#| pool: true
+#| mode: string
+#| field-labels: S, E, M
+#| context: mini-machine-representation
+
+$$x=3$$
+
+$S=$ _[0] &nbsp;&nbsp; $E=$ _[100] &nbsp;&nbsp; $M=$ _[1000]
+
+---
+
+$$x=5.5$$
+
+$S=$ _[0] &nbsp;&nbsp; $E=$ _[101] &nbsp;&nbsp; $M=$ _[0110]
+
+---
+
+$$x=-0.75$$
+
+$S=$ _[1] &nbsp;&nbsp; $E=$ _[010] &nbsp;&nbsp; $M=$ _[1000]
+
+---
+
+$$x=0.3125$$
+
+$S=$ _[0] &nbsp;&nbsp; $E=$ _[001] &nbsp;&nbsp; $M=$ _[0100]
+
+---
+
+$$x=12$$
+
+$S=$ _[0] &nbsp;&nbsp; $E=$ _[110] &nbsp;&nbsp; $M=$ _[1000]
+```

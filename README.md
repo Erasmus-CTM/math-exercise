@@ -66,6 +66,7 @@ The answer inside `[...]` is a SymPy expression, e.g. `pi * 9`, `x**2 + 2*x + 1`
 | `sigfigs` | integer | — | only for `mode: numeric`: round both sides to N significant figures before comparing |
 | `form` | `factored` / `expanded` / `single_fraction` / `lowest_terms` | — | representation additionally required for correctness — only for `mode: equivalent`/`exact` |
 | `pool` | `true` / `false` | `false` | enable a task pool |
+| `field-labels` | comma-separated | — | optional human-readable labels for answer fields, e.g. `S, E, M`; missing labels fall back to `Answer` or numbered field names |
 | `context` | comma-separated element IDs, or `none` | — | AI-feedback context: reference explicit `.math-exercise-context` block(s) by id, or `none` to disable the automatic context. See [AI feedback context](#ai-feedback-context) |
 
 ---
@@ -346,12 +347,72 @@ the feedback more concrete:
 
 | Attempt | Behavior |
 |---------|----------|
-| 1st | A small nudge; the complete final expression, equation, or numerical answer must not be revealed |
-| 2nd | A concrete hint identifying useful components and relationships; the student must still assemble the final answer |
-| 3rd+ | A complete step-by-step solution |
+| 1st | One diagnostic question pointing toward the first likely mistake; no formula, method, intermediate value, or answer |
+| 2nd | A conceptual hint naming what to inspect; no formulas, calculations, substitutions, intermediate values, or answer |
+| 3rd | Procedural guidance in at most three steps; a general formula is allowed, but task values, arithmetic, and the final answer remain hidden |
+| 4th+ | A concise complete worked solution with substitutions, calculations, and the final answer |
 
 The attempt count is stored per page path and exercise label in
 `localStorage`, so it survives a page reload.
+
+Before producing any hint, the tutor is instructed to treat the exact task and
+learning context as authoritative. It must preserve stated givens, grouping,
+signs, operators, notation, units, domains, assumptions, and constraints; avoid
+silently importing conventions from a familiar problem type; and verify factual
+and mathematical claims against the supplied material. Unsupported claims about
+"typical" values, plausible ranges, magnitudes, or likely error causes are
+forbidden. When the source is genuinely ambiguous, the tutor should ask a
+guiding question rather than invent an interpretation.
+
+### How the feedback prompt is assembled
+
+The extension builds two messages for the OpenAI-compatible chat-completions
+request. The **system message** is assembled in this order:
+
+1. **Private assessment rules** – checker statuses may guide the response but
+   must never be quoted, summarized, or described as fields being "marked"
+   correct or incorrect. Correct work may be acknowledged naturally; the tutor
+   should otherwise move directly to the next mathematical idea.
+2. **Mathematical grounding rules** – the exact task and learning context are
+   authoritative. Givens, structure, notation, signs, units, domains,
+   assumptions, and constraints must be preserved, and unsupported plausibility
+   claims or imported conventions are forbidden.
+3. **Output rules** – use the document language, remain concise, render
+   mathematics with LaTeX delimiters, and output student-facing feedback only;
+   chain-of-thought, scratch work, hidden analysis, and reasoning tags are
+   forbidden.
+4. **Context rules** *(when context is present)* – use it to select the right
+   method and notation, but do not copy worked examples or prematurely reveal
+   formulas and values.
+5. **Current hint level** – the attempt-specific instruction is deliberately
+   placed last for stronger compliance. Levels 1–3 prohibit progressively less
+   information; only level 4 permits a complete solution.
+
+The **user message** contains clearly separated blocks:
+
+```xml
+<learning_context>...</learning_context>
+<task>...</task>
+<student_response>
+  <field label="...">student input</field>
+</student_response>
+<private_field_assessment never_quote="true">
+  <field label="...">correct | incorrect | empty | invalid</field>
+</private_field_assessment>
+```
+
+There may be several `<learning_context>` and `<field>` blocks. The expected
+answer is never included. Field statuses are calculated locally by the existing
+checker and reveal only whether each submitted field passed, not what its answer
+should have been.
+
+Before display, the extension rejects empty responses and responses truncated
+by the provider's completion limit. It also detects leaked `<think>`,
+`<analysis>`, or `<reasoning>` tags. Such a response is never shown: the request
+is retried once with a corrective student-facing-only instruction. If the retry
+still leaks internal reasoning, a localized error is displayed instead. Failed
+requests do not consume a hint attempt. The automatic retry can result in one
+additional provider request.
 
 Compatible with any **OpenAI-compatible API** (Cerebras, OpenRouter, OpenAI,
 Ollama, …). AI responses support a small safe Markdown subset and render
@@ -412,11 +473,28 @@ Context rules for explicit references:
 To opt an exercise out of context entirely, use `#| context: none`.
 
 The AI request contains the selected context, the task, and the student's
-current response, clearly delimited and with an explicit instruction to
-treat them as data rather than as instructions (a prompt-injection
-mitigation, given that both course content and the student's own answer end
-up inside the prompt). It does **not** include the expected answer or the
-SymPy checker result.
+current response as individually labelled fields. A separate private assessment
+block contains only the corresponding checker statuses (`correct`, `incorrect`,
+`empty`, or `invalid`) and is explicitly marked as internal evidence that must
+never be quoted or summarized to the student. Everything is clearly delimited
+and accompanied by an instruction to treat it as data rather than as
+instructions (a prompt-injection mitigation, given that both course content and
+the student's own answer end up inside the prompt). It does **not** include the
+expected answer. The limited private status metadata lets feedback acknowledge
+correct work and focus on the next mathematical idea without exposing the
+solution or repeating information already shown by the interface.
+
+For clearer multi-field feedback, authors can provide labels explicitly:
+
+```yaml
+#| field-labels: S, E, M
+```
+
+Without this option, existing documents remain compatible: a single input is
+labelled `Answer`, while multiple inputs become `Answer field 1`, `Answer field
+2`, and so on. Too few supplied labels are completed with these fallbacks;
+extra labels are ignored with a browser console warning. Empty fields are kept
+in the AI request so feedback can identify what is still missing.
 
 ### Privacy
 
