@@ -323,13 +323,12 @@ var board = JXG.JSXGraph.initBoard(BOARDID, {
   showNavigation: false
 });
 
+var drawing = false;
 var sketch = null;
 var fittedGraph = null;
 var rawSamples = [];
 var regression = null;
 var regressionDegree = 5;
-
-board.BOARD_MODE_SKETCH = 0x0100;
 
 function binnedSamples(samples, count) {
   var bins = Array.from({ length: count }, function () { return []; });
@@ -364,13 +363,13 @@ function fitSketch() {
 }
 
 board.on('down', function (event) {
-  if (board.mode !== board.BOARD_MODE_NONE) return;
+  if (drawing) return;
+  drawing = true;
   rawSamples = [];
   regression = null;
   if (sketch) board.removeObject(sketch);
   if (fittedGraph) board.removeObject(fittedGraph);
   fittedGraph = null;
-  board.mode = board.BOARD_MODE_SKETCH;
   sketch = board.create('curve', [[], []], {
     strokeColor: '#94a3b8',
     strokeWidth: 7,
@@ -382,8 +381,8 @@ board.on('down', function (event) {
   }
 });
 
-board.on('move', function (event, mode) {
-  if (mode !== board.BOARD_MODE_SKETCH) return;
+board.on('move', function (event) {
+  if (!drawing) return;
   var screen = board.getMousePosition(event);
   var coords = new JXG.Coords(JXG.COORDS_BY_SCREEN, screen, board);
   var point = [coords.usrCoords[1], coords.usrCoords[2]];
@@ -394,7 +393,11 @@ board.on('move', function (event, mode) {
 });
 
 function finishSketch(event) {
-  if (board.mode !== board.BOARD_MODE_SKETCH) return;
+  if (!drawing) {
+    board.mode = board.BOARD_MODE_NONE;
+    return;
+  }
+  drawing = false;
   board.mode = board.BOARD_MODE_NONE;
   if (event && event.pointerId !== undefined && board.containerObj.hasPointerCapture &&
       board.containerObj.hasPointerCapture(event.pointerId)) {
@@ -406,6 +409,7 @@ function finishSketch(event) {
 board.on('up', finishSketch);
 board.containerObj.addEventListener('pointercancel', finishSketch);
 board.containerObj.addEventListener('lostpointercapture', finishSketch);
+window.addEventListener('blur', finishSketch);
 
 function responseData() {
   var inside = rawSamples.filter(function (point) { return point[0] >= 0 && point[0] <= 1; });
@@ -493,9 +497,9 @@ degree-five fit that will be assessed.
 ## JSXGraph response — editable freehand polynomial approximation
 
 Draw a curve across $[0,1]$. JSXGraph simplifies the captured pointer samples
-to six ordinary points taken directly from the stroke and draws the degree-five
-interpolation polynomial through them. Move the blue points to refine the curve
-before checking your answer. Assessment uses dense samples of that polynomial.
+to nine fixed-x adjustment points and fits a degree-five regression polynomial.
+After you move one blue point, all blue points are projected back onto the new
+red polynomial. Assessment uses dense samples of that polynomial.
 
 ```{.jsxgraph assessment_id="editable-freehand-monotonicity-board" width="800" height="440" style="border:1px solid #ddd; border-radius:8px; max-width:100%;"}
 var board = JXG.JSXGraph.initBoard(BOARDID, {
@@ -506,6 +510,7 @@ var board = JXG.JSXGraph.initBoard(BOARDID, {
   showNavigation: false
 });
 
+var drawing = false;
 var sketch = null;
 var fittedGraph = null;
 var rawSamples = [];
@@ -513,8 +518,7 @@ var controlPoints = [];
 var controlGuides = [];
 var regression = null;
 var regressionDegree = 5;
-
-board.BOARD_MODE_SKETCH = 0x0100;
+var controlPointCount = 9;
 
 function binnedSamples(samples, count) {
   var bins = Array.from({ length: count }, function () { return []; });
@@ -537,22 +541,28 @@ function removeControlPoints() {
   controlGuides = [];
 }
 
-function interpolatedValue(x) {
-  if (controlPoints.length !== regressionDegree + 1) return NaN;
-  var value = 0;
-  for (var i = 0; i < controlPoints.length; i++) {
-    var basis = 1;
-    var xi = controlPoints[i].X();
-    for (var j = 0; j < controlPoints.length; j++) {
-      if (i !== j) basis *= (x - controlPoints[j].X()) / (xi - controlPoints[j].X());
-    }
-    value += controlPoints[i].Y() * basis;
-  }
-  return value;
-}
-
 function updateInterpolation() {
-  regression = controlPoints.length === regressionDegree + 1 ? interpolatedValue : null;
+  regression = null;
+  if (controlPoints.length < regressionDegree + 1) return;
+  var dataX = controlPoints.map(function (point) { return point.X(); });
+  var dataY = controlPoints.map(function (point) { return point.Y(); });
+  var fitted = JXG.Math.Numerics.regressionPolynomial(regressionDegree, dataX, dataY);
+
+  controlPoints.forEach(function (point, index) {
+    point.setPosition(JXG.COORDS_BY_USER, [dataX[index], fitted(dataX[index])]);
+  });
+  var projectedY = controlPoints.map(function (point) { return point.Y(); });
+  regression = JXG.Math.Numerics.regressionPolynomial(regressionDegree, dataX, projectedY);
+
+  if (fittedGraph) board.removeObject(fittedGraph);
+  fittedGraph = null;
+  if (regression) {
+    fittedGraph = board.create('functiongraph', [regression, 0, 1], {
+      strokeColor: '#dc2626',
+      strokeWidth: 4,
+      fixed: true
+    });
+  }
   board.update();
 }
 
@@ -565,7 +575,7 @@ function createControlPoints() {
   var coords = samples.map(function (point) {
     return new JXG.Coords(JXG.COORDS_BY_USER, point, board);
   });
-  var simplified = JXG.Math.Numerics.Visvalingam(coords, regressionDegree - 1);
+  var simplified = JXG.Math.Numerics.Visvalingam(coords, controlPointCount - 2);
   controlPoints = simplified.map(function (coord) {
     var x = coord.usrCoords[1];
     var guide = board.create('line', [[x, 0], [x, 1]], {
@@ -581,30 +591,24 @@ function createControlPoints() {
       highlightStrokeColor: '#1e40af',
       highlightFillColor: '#93c5fd'
     });
-    point.on('drag', updateInterpolation);
     point.on('up', updateInterpolation);
     return point;
   });
 
-  fittedGraph = board.create('functiongraph', [function (x) {
-    return interpolatedValue(x);
-  }, 0, 1], {
-    strokeColor: '#dc2626',
-    strokeWidth: 4,
-    fixed: true
-  });
   updateInterpolation();
 }
 
 board.on('down', function (event) {
-  if (board.mode !== board.BOARD_MODE_NONE) return;
+  if (drawing) return;
+  var hits = board.getAllObjectsUnderMouse ? board.getAllObjectsUnderMouse(event) : [];
+  if (hits.some(function (object) { return object.elType === 'point' || object.elType === 'glider'; })) return;
+  drawing = true;
   rawSamples = [];
   regression = null;
   if (sketch) board.removeObject(sketch);
   if (fittedGraph) board.removeObject(fittedGraph);
   fittedGraph = null;
   removeControlPoints();
-  board.mode = board.BOARD_MODE_SKETCH;
   sketch = board.create('curve', [[], []], {
     strokeColor: '#94a3b8',
     strokeWidth: 7,
@@ -616,8 +620,8 @@ board.on('down', function (event) {
   }
 });
 
-board.on('move', function (event, mode) {
-  if (mode !== board.BOARD_MODE_SKETCH) return;
+board.on('move', function (event) {
+  if (!drawing) return;
   var screen = board.getMousePosition(event);
   var coords = new JXG.Coords(JXG.COORDS_BY_SCREEN, screen, board);
   var point = [coords.usrCoords[1], coords.usrCoords[2]];
@@ -628,7 +632,11 @@ board.on('move', function (event, mode) {
 });
 
 function finishEditableSketch(event) {
-  if (board.mode !== board.BOARD_MODE_SKETCH) return;
+  if (!drawing) {
+    board.mode = board.BOARD_MODE_NONE;
+    return;
+  }
+  drawing = false;
   board.mode = board.BOARD_MODE_NONE;
   if (event && event.pointerId !== undefined && board.containerObj.hasPointerCapture &&
       board.containerObj.hasPointerCapture(event.pointerId)) {
@@ -640,6 +648,7 @@ function finishEditableSketch(event) {
 board.on('up', finishEditableSketch);
 board.containerObj.addEventListener('pointercancel', finishEditableSketch);
 board.containerObj.addEventListener('lostpointercapture', finishEditableSketch);
+window.addEventListener('blur', finishEditableSketch);
 
 function responseData() {
   var inside = rawSamples.filter(function (point) { return point[0] >= 0 && point[0] <= 1; });
@@ -653,7 +662,7 @@ function responseData() {
     }
   }
   return {
-    representation: 'freehand-polynomial-interpolation',
+    representation: 'freehand-polynomial-regression-controls',
     interval: [0, 1],
     rawSamples: rawSamples,
     controlPoints: controlPoints.map(function (point) { return [point.X(), point.Y()]; }),
@@ -722,10 +731,9 @@ JXG.QuartoAssessment.register({
 #|       }
 
 Draw a function on $[0,1]$ whose polynomial approximation is strongly
-monotonically increasing. After drawing, adjust the blue control points as
-needed. The grey line is your original stroke and the red line is the
-degree-five interpolation polynomial through the blue points that will be
-assessed.
+monotonically increasing. After drawing, adjust the blue points as needed.
+Their x-coordinates stay fixed; when you release a point, every blue point is
+snapped onto the recomputed red degree-five polynomial that will be assessed.
 ```
 
 ## `form: factored`
