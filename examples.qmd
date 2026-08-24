@@ -309,10 +309,11 @@ piecewise-linear function on $[0,1]$.
 
 ## JSXGraph response — freehand drawing and polynomial approximation
 
-Draw a curve across $[0,1]$. JSXGraph bins the captured pointer samples, fits a
-degree-five regression polynomial, and displays the approximation. Assessment
-uses dense samples of the fitted polynomial rather than the original noisy
-stroke.
+Draw a curve across $[0,1]$. JSXGraph simplifies the captured pointer samples
+to editable control points, fits a degree-five regression polynomial, and
+displays the approximation. Move the blue points to refine the fit before
+checking your answer. Assessment uses dense samples of the fitted polynomial
+rather than the original noisy stroke.
 
 ```{.jsxgraph assessment_id="freehand-monotonicity-board" width="800" height="440" style="border:1px solid #ddd; border-radius:8px; max-width:100%;"}
 var board = JXG.JSXGraph.initBoard(BOARDID, {
@@ -327,8 +328,12 @@ var drawing = false;
 var sketch = null;
 var fittedGraph = null;
 var rawSamples = [];
+var controlPoints = [];
 var regression = null;
 var regressionDegree = 5;
+var controlPointCount = 9;
+
+board.BOARD_MODE_SKETCH = 0x0100;
 
 function userCoordinates(event) {
   var screen = board.getMousePosition(event);
@@ -358,32 +363,66 @@ function binnedSamples(samples, count) {
   }).filter(Boolean);
 }
 
-function fitSketch() {
-  var samples = binnedSamples(rawSamples, 51);
-  regression = null;
-  if (fittedGraph) board.removeObject(fittedGraph);
-  fittedGraph = null;
-  if (samples.length < regressionDegree + 1) return;
+function removeControlPoints() {
+  controlPoints.forEach(function (point) { board.removeObject(point); });
+  controlPoints = [];
+}
 
+function updateRegression() {
+  regression = null;
+  if (controlPoints.length < regressionDegree + 1) return;
+
+  var samples = controlPoints.map(function (point) {
+    return [point.X(), point.Y()];
+  }).sort(function (a, b) { return a[0] - b[0]; });
   var dataX = samples.map(function (point) { return point[0]; });
   var dataY = samples.map(function (point) { return point[1]; });
   regression = JXG.Math.Numerics.regressionPolynomial(regressionDegree, dataX, dataY);
-  fittedGraph = board.create('functiongraph', [regression, 0, 1], {
+  board.update();
+}
+
+function createControlPoints() {
+  var samples = binnedSamples(rawSamples, 51);
+  if (samples.length < regressionDegree + 1) return;
+
+  var coords = samples.map(function (point) {
+    return new JXG.Coords(JXG.COORDS_BY_USER, point, board);
+  });
+  var simplified = JXG.Math.Numerics.Visvalingam(coords, controlPointCount - 2);
+  controlPoints = simplified.map(function (coord) {
+    var point = board.create('point', [coord.usrCoords[1], coord.usrCoords[2]], {
+      name: '',
+      size: 4,
+      strokeColor: '#1d4ed8',
+      fillColor: '#60a5fa',
+      highlightStrokeColor: '#1e40af',
+      highlightFillColor: '#93c5fd'
+    });
+    point.on('drag', updateRegression);
+    point.on('up', updateRegression);
+    return point;
+  });
+
+  fittedGraph = board.create('functiongraph', [function (x) {
+    return regression ? regression(x) : NaN;
+  }, 0, 1], {
     strokeColor: '#dc2626',
     strokeWidth: 4,
     fixed: true
   });
-  board.update();
+  updateRegression();
 }
 
 board.on('down', function (event) {
-  if (drawing) return;
+  if (board.mode !== board.BOARD_MODE_NONE) return;
+  board.mode = board.BOARD_MODE_SKETCH;
   drawing = true;
   rawSamples = [];
   regression = null;
   if (sketch) board.removeObject(sketch);
   if (fittedGraph) board.removeObject(fittedGraph);
   fittedGraph = null;
+  removeControlPoints();
   sketch = board.create('curve', [[], []], {
     strokeColor: '#94a3b8',
     strokeWidth: 7,
@@ -393,15 +432,16 @@ board.on('down', function (event) {
   addSample(event);
 });
 
-board.on('move', function (event) {
-  if (drawing) addSample(event);
+board.on('move', function (event, mode) {
+  if (drawing && mode === board.BOARD_MODE_SKETCH) addSample(event);
 });
 
 board.on('up', function (event) {
-  if (!drawing) return;
+  if (!drawing || board.mode !== board.BOARD_MODE_SKETCH) return;
   addSample(event);
   drawing = false;
-  fitSketch();
+  board.mode = board.BOARD_MODE_NONE;
+  createControlPoints();
 });
 
 function responseData() {
@@ -419,6 +459,7 @@ function responseData() {
     representation: 'freehand-polynomial-regression',
     interval: [0, 1],
     rawSamples: rawSamples,
+    controlPoints: controlPoints.map(function (point) { return [point.X(), point.Y()]; }),
     coverage: coverage,
     regression: regression ? {
       degree: regressionDegree,
@@ -442,6 +483,8 @@ JXG.QuartoAssessment.register({
         representation: data.representation,
         interval: data.interval,
         rawSampleCount: data.rawSamples.length,
+        controlPointCount: data.controlPoints.length,
+        controlPoints: data.controlPoints,
         domainCoverage: data.coverage,
         polynomialDegree: data.regression ? data.regression.degree : null,
         polynomial: data.regression ? data.regression.term : null,
@@ -482,7 +525,8 @@ JXG.QuartoAssessment.register({
 #|       }
 
 Draw a function on $[0,1]$ whose polynomial approximation is strongly
-monotonically increasing. The grey line is your stroke and the red line is the
+monotonically increasing. After drawing, adjust the blue control points as
+needed. The grey line is your original stroke and the red line is the
 degree-five fit that will be assessed.
 ```
 
