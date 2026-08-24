@@ -156,6 +156,56 @@ Solve x² = 4. All solutions (comma-separated): __[2, -2]
 `-2, 2`, `2,-2`, and `sqrt(4), -2` are all accepted; a missing or duplicate
 solution is rejected.
 
+## Partial credit for a set
+
+With partial credit enabled, correctly matched items earn credit while missing
+items and extra guesses both lower the score.
+
+```{math-exercise}
+#| label: ex-set-partial
+#| caption: set with partial credit
+#| vars: x
+#| mode: set
+#| partial-credit: true
+List all integer solutions of $(x-1)(x-2)(x-3)(x-4)=0$: ___[1, 2, 3, 4]
+```
+
+Try `1, 2`, then `1, 2, 5`, and finally all four solutions.
+
+## `mode: custom` — strongly monotone increasing
+
+This checker receives the student's parsed SymPy expression and verifies that
+its derivative has a strictly positive lower bound on $[0,1]$.
+
+```{math-exercise}
+#| label: ex-custom-strong-monotonicity
+#| caption: custom SymPy checker
+#| vars: x
+#| mode: custom
+#| checker: |
+#|   def check(expressions, symbols):
+#|       f = expressions[0]
+#|       x = symbols["x"]
+#|       lower = minimum(diff(f, x), x, Interval(0, 1))
+#|       if lower.is_positive is True:
+#|           return {
+#|               "score": 1.0,
+#|               "feedback": "The derivative has a positive lower bound on the interval."
+#|           }
+#|       return {
+#|           "score": 0.0,
+#|           "feedback": "A positive lower bound for the derivative was not established."
+#|       }
+
+Give an example of a strongly monotonically increasing function on $[0,1]$:
+
+$f(x) =$ ___[]
+```
+
+Try `x`, `x**2 + x`, and `x**2`. The final expression is increasing on the
+interval but is not strongly increasing under the positive derivative lower
+bound criterion because its derivative reaches zero at the left endpoint.
+
 ## `form: factored`
 
 In addition to correctness, requires the factored form.

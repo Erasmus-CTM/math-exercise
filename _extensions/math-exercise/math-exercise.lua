@@ -22,6 +22,8 @@
 --   string / string_ci   – exact / case-insensitive text comparison
 --   set                  – comma-separated list, compared as a multiset
 --                          (each item checked via equivalent-mode matching)
+--   custom               – author-supplied SymPy/Python checker, run once for
+--                          all expression fields in the exercise
 --
 -- Extra options for mode: numeric (pick at most one; default: small abs. tol.):
 --   #| tolerance: 0.5     – absolute, or "5%" for relative to the correct value
@@ -34,6 +36,16 @@
 --
 -- Optional human-readable labels for multi-field feedback:
 --   #| field-labels: S, E, M
+--
+-- Partial credit (opt-in for built-in modes; custom checkers always may score):
+--   #| partial-credit: true
+--   #| form-credit: 0.5
+--
+-- Custom checker (trusted author code; student input is parsed separately):
+--   #| mode: custom
+--   #| checker: |
+--   #|   def check(expressions, symbols):
+--   #|       return {"score": 1.0, "feedback": "Well done."}
 --
 -- Pool syntax  (#| pool: true, tasks separated by lines containing only ---):
 --
@@ -149,12 +161,39 @@ end
 -- Parse #| key: value lines; return opts table + remaining content
 ----
 local function parseOptions(raw)
-  local opts  = {}
-  local lines = {}
+  local opts, lines, source = {}, {}, {}
   for line in (raw .. "\n"):gmatch("([^\r\n]*)\n") do
+    table.insert(source, line)
+  end
+
+  local i = 1
+  while i <= #source do
+    local line = source[i]
     local k, v = line:match("^#|%s*(.-):%s*(.-)%s*$")
-    if k and v then opts[k] = v
-    else            table.insert(lines, line) end
+    if k and v then
+      if v == "|" then
+        local block = {}
+        i = i + 1
+        while i <= #source do
+          local blockLine = source[i]
+          if blockLine:match("^#|%s*$") then
+            table.insert(block, "")
+          elseif blockLine:sub(1, 5) == "#|   " then
+            table.insert(block, blockLine:sub(6))
+          else
+            break
+          end
+          i = i + 1
+        end
+        opts[k] = table.concat(block, "\n")
+      else
+        opts[k] = v
+        i = i + 1
+      end
+    else
+      table.insert(lines, line)
+      i = i + 1
+    end
   end
   return opts, table.concat(lines, "\n"):match("^%s*(.-)%s*$")
 end
@@ -316,6 +355,9 @@ local function buildExercise(el, state)
   local decplaces = opts["decplaces"] or ""
   local sigfigs   = opts["sigfigs"]   or ""
   local form      = opts["form"]      or ""
+  local checker   = opts["checker"]   or ""
+  local partialCredit = (opts["partial-credit"] == "true")
+  local formCredit = opts["form-credit"] or "0.5"
   local fieldLabels = splitCsv(opts["field-labels"] or "")
   local isPool    = (opts["pool"]     == "true")
 
@@ -336,6 +378,9 @@ local function buildExercise(el, state)
              .. ' data-decplaces="' .. attrEsc(decplaces) .. '"'
              .. ' data-sigfigs="'   .. attrEsc(sigfigs)   .. '"'
              .. ' data-form="'      .. attrEsc(form)      .. '"'
+             .. ' data-checker="'   .. jsonStrAttr(checker) .. '"'
+             .. ' data-partial-credit="' .. tostring(partialCredit) .. '"'
+             .. ' data-form-credit="' .. attrEsc(formCredit) .. '"'
              .. ' data-field-labels="' .. jsonArrAttr(fieldLabels) .. '"'
              .. ' data-context-mode="' .. contextMode(opts) .. '"'
              .. ' data-context-refs="' .. attrEsc(opts["context"] or "") .. '"'

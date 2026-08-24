@@ -52,6 +52,8 @@
       fieldPrefix:  function (n) { return 'Field&nbsp;' + n + ': '; },
       resEmpty:     'Please enter an answer.',
       resCorrect:   'Correct!',
+      resPartial:   function (pct) { return 'Partially correct (' + pct + '%).'; },
+      resScore:     function (pct) { return 'Overall score: ' + pct + '%.'; },
       resWrong:     'Not correct – try again.',
       resRejected:  'Mathematically correct, but not simplified yet. Keep transforming the expression.',
       resNotExact:  'Mathematically correct, but not in the requested form. Rewrite the expression exactly as asked.',
@@ -79,7 +81,7 @@
       feedbackFieldSingle: 'Answer',
       feedbackFieldNumbered: function (n) { return 'Answer field ' + n; },
       warnExtraFieldLabels: 'math-exercise: extra field-labels entries were ignored for',
-      promptResponseReview: 'Use each field status only as private evidence for choosing the feedback. Never mention statuses, evaluation metadata, the checker, fields being marked correct or incorrect, generic field numbers, or summaries such as "correct fields: none". Do not tell the student which nonempty responses are wrong; the interface already shows that. If some submitted work is correct, acknowledge it briefly and naturally using its meaningful label or mathematical content. If none is correct, skip any correctness summary. You may naturally point to an empty named field when that helps, but focus on the mathematical next step. Never reveal an expected value unless the current hint level permits a full solution. Address the student directly in a warm, encouraging tone. ',
+      promptResponseReview: 'Use field and exercise assessments only as private evidence for choosing the feedback. A custom checker may assess several submitted fields together. Never mention statuses, scores, evaluation metadata, the checker, fields being marked correct or incorrect, generic field numbers, or summaries such as "correct fields: none". Do not tell the student which nonempty responses are wrong; the interface already shows that. If some submitted work is correct, acknowledge it briefly and naturally using its meaningful label or mathematical content. If none is correct, skip any correctness summary. You may naturally point to an empty named field when that helps, but focus on the mathematical next step. Never reveal an expected value unless the current hint level permits a full solution. Address the student directly in a warm, encouraging tone. ',
       promptHint1: 'CURRENT HINT LEVEL: 1 OF 4. Write one or two natural sentences. Briefly acknowledge any genuine progress, then ask exactly one guiding question that helps the student notice the first useful idea. Do not use headings, lists, labels such as "Field 1", or words such as "marked incorrect". Do not give a formula, method, decomposition, intermediate value, or answer. Do not restate the full task. ',
       promptHint2: 'CURRENT HINT LEVEL: 2 OF 4. Give a short conceptual nudge in one or two natural sentences. Point toward what the student should think about next without announcing which fields are wrong. Do not use headings, lists, checklists, formulas, calculations, substitutions, intermediate values, or the answer. ',
       promptHint3: 'CURRENT HINT LEVEL: 3 OF 4 — PROCEDURE ONLY, NOT A SOLUTION. Begin directly with the general mathematical procedure and explain it in at most three concise steps. You may state a general formula, but you must stop before the first task-specific substitution or calculation. Do not compute any exponent, mantissa, field value, intermediate result, or requested answer. Do not state the final answer, even if it is obvious from the context. End by asking the student to carry out the next substitution or calculation. Do not begin with a correctness or field-status summary and do not use meta-headings such as "Concept" or "Things to inspect". ',
@@ -185,6 +187,8 @@
       fieldPrefix:  function (n) { return 'Feld&nbsp;' + n + ': '; },
       resEmpty:     'Bitte eine Antwort eingeben.',
       resCorrect:   'Richtig!',
+      resPartial:   function (pct) { return 'Teilweise richtig (' + pct + '&nbsp;%).'; },
+      resScore:     function (pct) { return 'Gesamtpunktzahl: ' + pct + '&nbsp;%.'; },
       resWrong:     'Nicht korrekt – versuche es noch einmal.',
       resRejected:  'Mathematisch korrekt, aber noch nicht vereinfacht. Forme den Ausdruck weiter um.',
       resNotExact:  'Mathematisch korrekt, aber nicht in der gesuchten Form. Schreibe den Ausdruck genau so um, wie gefordert.',
@@ -212,7 +216,7 @@
       feedbackFieldSingle: 'Antwort',
       feedbackFieldNumbered: function (n) { return 'Antwortfeld ' + n; },
       warnExtraFieldLabels: 'math-exercise: Überzählige field-labels-Einträge wurden ignoriert für',
-      promptResponseReview: 'Nutze den Status jedes Feldes nur als interne Information zur Auswahl des Feedbacks. Erwähne niemals Statusangaben, Auswertungsmetadaten, den Prüfer, als korrekt oder falsch markierte Felder, generische Feldnummern oder Zusammenfassungen wie „korrekte Felder: keine“. Sage der lernenden Person nicht, welche nichtleeren Eingaben falsch sind; die Oberfläche zeigt dies bereits. Wenn Teile der Eingabe korrekt sind, bestätige sie kurz und natürlich anhand ihrer sinnvollen Bezeichnung oder ihres mathematischen Inhalts. Wenn nichts korrekt ist, lasse jede Zusammenfassung zur Korrektheit weg. Du darfst ein leeres, benanntes Feld natürlich ansprechen, wenn dies hilfreich ist, aber konzentriere dich auf den nächsten mathematischen Schritt. Verrate einen erwarteten Wert nur auf der Stufe mit vollständiger Lösung. Sprich die lernende Person direkt, freundlich und ermutigend an. ',
+      promptResponseReview: 'Nutze Feld- und Gesamtbewertungen nur als interne Information zur Auswahl des Feedbacks. Ein benutzerdefinierter Prüfer kann mehrere Eingabefelder gemeinsam bewerten. Erwähne niemals Statusangaben, Punktzahlen, Auswertungsmetadaten, den Prüfer, als korrekt oder falsch markierte Felder, generische Feldnummern oder Zusammenfassungen wie „korrekte Felder: keine“. Sage der lernenden Person nicht, welche nichtleeren Eingaben falsch sind; die Oberfläche zeigt dies bereits. Wenn Teile der Eingabe korrekt sind, bestätige sie kurz und natürlich anhand ihrer sinnvollen Bezeichnung oder ihres mathematischen Inhalts. Wenn nichts korrekt ist, lasse jede Zusammenfassung zur Korrektheit weg. Du darfst ein leeres, benanntes Feld natürlich ansprechen, wenn dies hilfreich ist, aber konzentriere dich auf den nächsten mathematischen Schritt. Verrate einen erwarteten Wert nur auf der Stufe mit vollständiger Lösung. Sprich die lernende Person direkt, freundlich und ermutigend an. ',
       promptHint1: 'AKTUELLE HINWEISSTUFE: 1 VON 4. Schreibe ein oder zwei natürliche Sätze. Bestätige kurz echte Fortschritte und stelle danach genau eine Leitfrage, die hilft, die erste nützliche Idee zu erkennen. Verwende keine Überschriften, Listen, Bezeichnungen wie „Feld 1“ oder Formulierungen wie „als falsch markiert“. Gib keine Formel, Methode, Zerlegung, keinen Zwischenwert und keine Antwort an. Wiederhole nicht die vollständige Aufgabe. ',
       promptHint2: 'AKTUELLE HINWEISSTUFE: 2 VON 4. Gib in ein oder zwei natürlichen Sätzen einen kurzen begrifflichen Denkanstoß. Weise darauf hin, worüber als Nächstes nachgedacht werden sollte, ohne zu verkünden, welche Felder falsch sind. Verwende keine Überschriften, Listen, Checklisten, Formeln, Rechnungen, eingesetzten Werte, Zwischenwerte oder die Antwort. ',
       promptHint3: 'AKTUELLE HINWEISSTUFE: 3 VON 4 — NUR VORGEHEN, KEINE LÖSUNG. Beginne direkt mit dem allgemeinen mathematischen Vorgehen und erkläre es in höchstens drei knappen Schritten. Du darfst eine allgemeine Formel nennen, musst aber vor dem ersten Einsetzen oder Berechnen aufgabenspezifischer Werte stoppen. Berechne keinen Exponenten, keine Mantisse, keinen Feldwert, kein Zwischenergebnis und keine verlangte Antwort. Nenne die endgültige Antwort nicht, auch wenn sie aus dem Kontext offensichtlich ist. Beende den Hinweis mit der Aufforderung, den nächsten Wert selbst einzusetzen oder zu berechnen. Beginne nicht mit einer Zusammenfassung zur Korrektheit oder zum Feldstatus und verwende keine Meta-Überschriften wie „Konzept“ oder „Zu prüfen“. ',
@@ -559,16 +563,16 @@
       '        if mode in ("string", "string_ci"):',
       '            s, c = _math_student, _math_correct',
       '            if mode == "string_ci": s, c = s.lower(), c.lower()',
-      '            return {"status": "correct" if s == c else "wrong"}',
+      '            ok = s == c',
+      '            return {"status": "correct" if ok else "wrong", "score": 1.0 if ok else 0.0}',
       '',
       '        _local = _build_locals()',
       '',
       '        if mode == "set":',
       '            s_items = [parse_expr(p, local_dict=_local, transformations=_math_tf) for p in _split_top(_math_student)]',
       '            c_items = [parse_expr(p, local_dict=_local, transformations=_math_tf) for p in _split_top(_math_correct)]',
-      '            if len(s_items) != len(c_items):',
-      '                return {"status": "wrong"}',
       '            unmatched = list(c_items)',
+      '            matched = 0',
       '            for si in s_items:',
       '                found = None',
       '                for ci in unmatched:',
@@ -576,10 +580,15 @@
       '                    if d == 0 or (d.is_number and abs(complex(d.evalf())) < 1e-8):',
       '                        found = ci',
       '                        break',
-      '                if found is None:',
-      '                    return {"status": "wrong"}',
-      '                unmatched.remove(found)',
-      '            return {"status": "correct"}',
+      '                if found is not None:',
+      '                    unmatched.remove(found)',
+      '                    matched += 1',
+      '            exact = matched == len(c_items) == len(s_items)',
+      '            if exact:',
+      '                return {"status": "correct", "score": 1.0}',
+      '            denom = len(c_items) + len(s_items)',
+      '            score = (2.0 * matched / denom) if (_math_partial_credit and denom) else 0.0',
+      '            return {"status": "partial" if score > 0 else "wrong", "score": score}',
       '',
       '        _ms = parse_expr(_math_student, local_dict=_local, transformations=_math_tf)',
       '        _mc = parse_expr(_math_correct,  local_dict=_local, transformations=_math_tf)',
@@ -587,34 +596,72 @@
       '        if mode == "numeric":',
       '            sv, cv = complex(_ms.evalf()), complex(_mc.evalf())',
       '            if abs(sv.imag) > 1e-9 or abs(cv.imag) > 1e-9:',
-      '                return {"status": "wrong"}',
+      '                return {"status": "wrong", "score": 0.0}',
       '            ok = _num_equal(sv.real, cv.real)',
-      '            return {"status": "correct" if ok else "wrong"}',
+      '            return {"status": "correct" if ok else "wrong", "score": 1.0 if ok else 0.0}',
       '',
       '        _d  = simplify(_ms - _mc)',
       '        _eq = (_d == 0) or (_d.is_number and abs(complex(_d.evalf())) < 1e-10)',
       '        if not _eq:',
-      '            return {"status": "wrong"}',
+      '            return {"status": "wrong", "score": 0.0}',
       '        if mode == "exact":',
       '            if str(_ms) != str(_mc):',
-      '                return {"status": "not_exact"}',
+      '                return {"status": "not_exact", "score": _math_form_credit if _math_partial_credit else 0.0}',
       '            # SymPy auto-reduces Rationals on parse, so an un-reduced',
       '            # numeric fraction (e.g. "2/4" inside "1/4 + 2/4") is',
       '            # invisible to the string check above; "exact" is meant to',
       '            # be the strictest mode, so catch it on the raw text too.',
       '            if not _ms.free_symbols and _numeric_not_reduced(_math_student):',
-      '                return {"status": "not_exact"}',
+      '                return {"status": "not_exact", "score": _math_form_credit if _math_partial_credit else 0.0}',
       '        if _math_form.strip():',
       '            if _math_form == "lowest_terms" and not _ms.free_symbols:',
       '                if _numeric_not_reduced(_math_student):',
-      '                    return {"status": "not_form"}',
+      '                    return {"status": "not_form", "score": _math_form_credit if _math_partial_credit else 0.0}',
       '            elif _ms != _canon_form(_ms, _math_form):',
-      '                return {"status": "not_form"}',
+      '                return {"status": "not_form", "score": _math_form_credit if _math_partial_credit else 0.0}',
       '        if _math_reject.strip():',
       '            _mr  = parse_expr(_math_reject, local_dict=_local, transformations=_math_tf)',
       '            if str(_ms) == str(_mr):',
-      '                return {"status": "rejected"}',
-      '        return {"status": "correct"}',
+      '                return {"status": "rejected", "score": 0.0}',
+      '        return {"status": "correct", "score": 1.0}',
+      '    except Exception as _me:',
+      '        return {"status": "error", "message": str(_me)}',
+      '',
+      'def _normalize_custom_result(result):',
+      '    feedback = ""',
+      '    if isinstance(result, bool):',
+      '        score = 1.0 if result else 0.0',
+      '    elif isinstance(result, (int, float)):',
+      '        score = float(result)',
+      '    elif isinstance(result, dict):',
+      '        feedback = str(result.get("feedback", ""))',
+      '        if "score" in result:',
+      '            score = float(result["score"])',
+      '        elif "correct" in result:',
+      '            score = 1.0 if bool(result["correct"]) else 0.0',
+      '        else:',
+      '            raise ValueError("Custom checker result needs score or correct")',
+      '    else:',
+      '        raise TypeError("Custom checker must return bool, number, or dict")',
+      '    if not 0.0 <= score <= 1.0:',
+      '        raise ValueError("Custom checker score must be between 0 and 1")',
+      '    status = "correct" if score == 1.0 else ("wrong" if score == 0.0 else "partial")',
+      '    return {"status": status, "score": score, "feedback": feedback}',
+      '',
+      'def _math_check_custom():',
+      '    try:',
+      '        if not _math_checker.strip():',
+      '            raise ValueError("mode custom requires a checker")',
+      '        _local = _build_locals()',
+      '        raw_values = _mj.loads(_math_students_json)',
+      '        expressions = [parse_expr(v, local_dict=_local, transformations=_math_tf) for v in raw_values]',
+      '        checker_symbols = {k: v for k, v in _local.items() if isinstance(v, Symbol)}',
+      '        namespace = dict(globals())',
+      '        exec(_math_checker, namespace)',
+      '        checker = namespace.get("check")',
+      '        if not callable(checker):',
+      '            raise ValueError("Custom checker must define check(expressions, symbols)")',
+      '        return _normalize_custom_result(checker(expressions, checker_symbols))',
       '    except Exception as _me:',
       '        return {"status": "error", "message": str(_me)}',
     ].join('\n'));
@@ -699,10 +746,11 @@
   // Calls the _math_check() helper defined once in ensureSympy() and returns
   // its result as a JSON status string.
   var CHECK_PY = '_mj.dumps(_math_check())';
+  var CHECK_CUSTOM_PY = '_mj.dumps(_math_check_custom())';
 
   async function checkField(el, mode, opts) {
     var val = el.value.trim();
-    if (!val) return { status: 'empty' };
+    if (!val) return { status: 'empty', score: 0.0 };
     opts = opts || {};
     mainPyodide.globals.set('_math_student',   val);
     mainPyodide.globals.set('_math_correct',   el.dataset.answer || '');
@@ -713,7 +761,20 @@
     mainPyodide.globals.set('_math_decplaces', opts.decplaces || '');
     mainPyodide.globals.set('_math_sigfigs',   opts.sigfigs   || '');
     mainPyodide.globals.set('_math_form',      opts.form      || '');
+    mainPyodide.globals.set('_math_partial_credit', !!opts.partialCredit);
+    mainPyodide.globals.set('_math_form_credit', Number(opts.formCredit));
     return JSON.parse(await mainPyodide.runPythonAsync(CHECK_PY));
+  }
+
+  async function checkCustom(fields, opts) {
+    var values = fields.map(function (el) { return el ? el.value.trim() : ''; });
+    if (values.some(function (value) { return value === ''; })) {
+      return { status: 'empty', score: 0.0 };
+    }
+    mainPyodide.globals.set('_math_students_json', JSON.stringify(values));
+    mainPyodide.globals.set('_math_vars', opts.vars || '');
+    mainPyodide.globals.set('_math_checker', opts.checker || '');
+    return JSON.parse(await mainPyodide.runPythonAsync(CHECK_CUSTOM_PY));
   }
 
   // ---------------------------------------------------------------------------
@@ -1309,12 +1370,20 @@
     var label  = cell.dataset.label  || cell.id;
     var configuredFieldLabels = [];
     try { configuredFieldLabels = JSON.parse(cell.dataset.fieldLabels || '[]'); } catch (e) {}
+    var checker = '';
+    try { checker = JSON.parse(cell.dataset.checker || '""'); } catch (e) {}
+    var formCredit = Number(cell.dataset.formCredit || '0.5');
+    if (!Number.isFinite(formCredit) || formCredit < 0 || formCredit > 1) formCredit = 0.5;
     var checkOpts = {
       reject:    reject,
       tolerance: cell.dataset.tolerance || '',
       decplaces: cell.dataset.decplaces || '',
       sigfigs:   cell.dataset.sigfigs   || '',
-      form:      cell.dataset.form      || ''
+      form:      cell.dataset.form      || '',
+      vars:       vars,
+      checker:    checker,
+      partialCredit: cell.dataset.partialCredit === 'true',
+      formCredit: formCredit
     };
 
     var poolRaw   = cell.dataset.pool;
@@ -1399,19 +1468,52 @@
       try {
         await ensureSympy();
         var parts = [];
+        var fieldElements = fieldIds.map(function (id) { return document.getElementById(id); });
+        if (mode === 'custom') {
+          var custom = await checkCustom(fieldElements, checkOpts);
+          fieldElements.forEach(function (el) {
+            if (!el) return;
+            el.classList.remove('math-input-ok', 'math-input-partial', 'math-input-wrong', 'math-input-err');
+            if (custom.status === 'correct') el.classList.add('math-input-ok');
+            else if (custom.status === 'partial') el.classList.add('math-input-partial');
+            else if (custom.status === 'error') el.classList.add('math-input-err');
+            else if (custom.status !== 'empty') el.classList.add('math-input-wrong');
+          });
+          var customMessage = custom.feedback ? ' ' + escHtml(custom.feedback) : '';
+          var customPct = Math.round((Number(custom.score) || 0) * 100);
+          if (custom.status === 'correct')
+            parts.push('<div class="math-fb-ok">&#10003;&nbsp;' + L.resCorrect + customMessage + '</div>');
+          else if (custom.status === 'partial')
+            parts.push('<div class="math-fb-partial">' + L.resPartial(customPct) + customMessage + '</div>');
+          else if (custom.status === 'wrong')
+            parts.push('<div class="math-fb-wrong">&#10007;&nbsp;' + L.resWrong + customMessage + '</div>');
+          else if (custom.status === 'empty')
+            parts.push('<div class="math-fb-empty">' + L.resEmpty + '</div>');
+          else
+            parts.push('<div class="math-fb-err">&#9888;&nbsp;' + friendlyError(custom.message) + '</div>');
+          fbDiv.innerHTML = parts.join('');
+          return;
+        }
+        var totalScore = 0;
+        var scoredFields = 0;
         for (var i = 0; i < fieldIds.length; i++) {
           var el     = document.getElementById(fieldIds[i]);
           if (!el) continue;
           var prefix = fieldIds.length > 1 ? escHtml(fieldLabel(i)) + ': ' : '';
           var res    = await checkField(el, mode, checkOpts);
-          el.classList.remove('math-input-ok', 'math-input-wrong', 'math-input-err');
+          el.classList.remove('math-input-ok', 'math-input-partial', 'math-input-wrong', 'math-input-err');
+          if (typeof res.score === 'number') { totalScore += res.score; scoredFields++; }
           if      (res.status === 'empty')    { parts.push('<div class="math-fb-empty">'  + prefix + L.resEmpty + '</div>'); }
           else if (res.status === 'correct')  { el.classList.add('math-input-ok');    parts.push('<div class="math-fb-ok">&#10003;&nbsp;'  + prefix + L.resCorrect + '</div>'); }
+          else if (res.status === 'partial')  { el.classList.add('math-input-partial'); parts.push('<div class="math-fb-partial">' + prefix + L.resPartial(Math.round(res.score * 100)) + '</div>'); }
           else if (res.status === 'wrong')    { el.classList.add('math-input-wrong'); parts.push('<div class="math-fb-wrong">&#10007;&nbsp;' + prefix + L.resWrong + '</div>'); }
           else if (res.status === 'rejected') { el.classList.add('math-input-wrong'); parts.push('<div class="math-fb-wrong">&#10007;&nbsp;' + prefix + L.resRejected + '</div>'); }
-          else if (res.status === 'not_exact'){ el.classList.add('math-input-wrong'); parts.push('<div class="math-fb-wrong">&#10007;&nbsp;' + prefix + L.resNotExact + '</div>'); }
-          else if (res.status === 'not_form') { el.classList.add('math-input-wrong'); parts.push('<div class="math-fb-wrong">&#10007;&nbsp;' + prefix + L.resNotForm(checkOpts.form) + '</div>'); }
+          else if (res.status === 'not_exact'){ el.classList.add(res.score > 0 ? 'math-input-partial' : 'math-input-wrong'); parts.push('<div class="' + (res.score > 0 ? 'math-fb-partial' : 'math-fb-wrong') + '">' + prefix + L.resNotExact + (res.score > 0 ? ' ' + L.resPartial(Math.round(res.score * 100)) : '') + '</div>'); }
+          else if (res.status === 'not_form') { el.classList.add(res.score > 0 ? 'math-input-partial' : 'math-input-wrong'); parts.push('<div class="' + (res.score > 0 ? 'math-fb-partial' : 'math-fb-wrong') + '">' + prefix + L.resNotForm(checkOpts.form) + (res.score > 0 ? ' ' + L.resPartial(Math.round(res.score * 100)) : '') + '</div>'); }
           else                                { el.classList.add('math-input-err');   parts.push('<div class="math-fb-err">&#9888;&nbsp;'    + prefix + friendlyError(res.message) + '</div>'); }
+        }
+        if (checkOpts.partialCredit && fieldIds.length > 1 && scoredFields === fieldIds.length) {
+          parts.push('<div class="math-fb-score">' + L.resScore(Math.round(100 * totalScore / scoredFields)) + '</div>');
         }
         fbDiv.innerHTML = parts.join('');
       } catch (err) {
@@ -1488,30 +1590,52 @@
           fbDiv.innerHTML = '<div class="math-fb-checking">' + L.fetchingFeedback + '</div>';
           try {
             await ensureSympy();
-            for (var i = 0; i < responses.length; i++) {
-              var result;
+            var overallAssessment = '';
+            if (mode === 'custom') {
+              var customResult;
               try {
-                result = responses[i].element
-                  ? await checkField(responses[i].element, mode, checkOpts)
-                  : { status: 'error' };
+                customResult = await checkCustom(responses.map(function (field) { return field.element; }), checkOpts);
               } catch (e) {
-                result = { status: 'error' };
+                customResult = { status: 'error', score: 0, message: String(e) };
               }
-              if (result.status === 'correct') responses[i].status = 'correct';
-              else if (result.status === 'empty') responses[i].status = 'empty';
-              else if (result.status === 'wrong' || result.status === 'rejected' ||
-                       result.status === 'not_exact' || result.status === 'not_form') {
-                responses[i].status = 'incorrect';
-              } else responses[i].status = 'invalid';
+              responses.forEach(function (field) {
+                field.status = field.value === '' ? 'empty' : 'submitted';
+              });
+              var overallStatus = customResult.status === 'wrong' ? 'incorrect' : customResult.status;
+              overallAssessment = '<exercise status="' + promptXmlEsc(overallStatus || 'invalid') + '"' +
+                ' score="' + promptXmlEsc(typeof customResult.score === 'number' ? customResult.score : '') + '">' +
+                promptXmlEsc(customResult.feedback || '') + '</exercise>';
+            } else {
+              for (var i = 0; i < responses.length; i++) {
+                var result;
+                try {
+                  result = responses[i].element
+                    ? await checkField(responses[i].element, mode, checkOpts)
+                    : { status: 'error' };
+                } catch (e) {
+                  result = { status: 'error' };
+                }
+                responses[i].score = typeof result.score === 'number' ? result.score : '';
+                if (result.status === 'correct') responses[i].status = 'correct';
+                else if (result.status === 'empty') responses[i].status = 'empty';
+                else if (result.status === 'partial' ||
+                         ((result.status === 'not_exact' || result.status === 'not_form') && result.score > 0)) {
+                  responses[i].status = 'partial';
+                } else if (result.status === 'wrong' || result.status === 'rejected' ||
+                           result.status === 'not_exact' || result.status === 'not_form') {
+                  responses[i].status = 'incorrect';
+                } else responses[i].status = 'invalid';
+              }
             }
             var answers = responses.map(function (field) {
               return '<field label="' + promptXmlEsc(field.label) + '">' +
                 promptXmlEsc(field.value) + '</field>';
             }).join('\n');
             var assessment = responses.map(function (field) {
-              return '<field label="' + promptXmlEsc(field.label) + '">' +
+              var scoreAttr = typeof field.score === 'number' ? ' score="' + promptXmlEsc(field.score) + '"' : '';
+              return '<field label="' + promptXmlEsc(field.label) + '"' + scoreAttr + '>' +
                 field.status + '</field>';
-            }).join('\n');
+            }).join('\n') + (overallAssessment ? '\n' + overallAssessment : '');
             var reply = await callLLM(question, answers, assessment, contexts, n, cfg);
             incCnt(label);
             fbDiv.innerHTML =

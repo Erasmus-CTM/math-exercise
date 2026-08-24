@@ -110,6 +110,11 @@
   background:   #f0fff4 !important;
   color:        #14532d !important;
 }
+.math-input-partial {
+  border-color: #d39e00 !important;
+  background:   #fffbea !important;
+  color:        #664d03 !important;
+}
 .math-input-wrong {
   border-color: #dc3545 !important;
   background:   #fff5f5 !important;
@@ -196,6 +201,7 @@
 }
 
 .math-fb-ok,
+.math-fb-partial,
 .math-fb-wrong,
 .math-fb-empty,
 .math-fb-err,
@@ -208,6 +214,9 @@
 }
 
 .math-fb-ok       { background: #d1e7dd; color: #0a3622; }
+.math-fb-partial,
+.math-fb-score    { background: #fff3cd; color: #664d03; }
+.math-fb-score    { padding: .4em .8em; border-radius: .3em; margin-bottom: .3em; font-size: .92em; font-weight: 600; }
 .math-fb-wrong    { background: #f8d7da; color: #58151c; }
 .math-fb-empty    { background: #fff3cd; color: #664d03; }
 .math-fb-err      { background: #fff3cd; color: #664d03; }

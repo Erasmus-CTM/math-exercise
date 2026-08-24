@@ -65,6 +65,9 @@ The answer inside `[...]` is a SymPy expression, e.g. `pi * 9`, `x**2 + 2*x + 1`
 | `decplaces` | integer | — | only for `mode: numeric`: round both sides to N decimal places before comparing |
 | `sigfigs` | integer | — | only for `mode: numeric`: round both sides to N significant figures before comparing |
 | `form` | `factored` / `expanded` / `single_fraction` / `lowest_terms` | — | representation additionally required for correctness — only for `mode: equivalent`/`exact` |
+| `checker` | multiline Python | — | trusted author checker for `mode: custom`; define `check(expressions, symbols)` |
+| `partial-credit` | `true` / `false` | `false` | average multiple fields, partially score sets, and award `form-credit` for equivalent answers in the wrong form |
+| `form-credit` | number from `0` to `1` | `0.5` | score for an equivalent answer that fails `mode: exact` or the requested `form` |
 | `pool` | `true` / `false` | `false` | enable a task pool |
 | `field-labels` | comma-separated | — | optional human-readable labels for answer fields, e.g. `S, E, M`; missing labels fall back to `Answer` or numbered field names |
 | `context` | comma-separated element IDs, or `none` | — | AI-feedback context: reference explicit `.math-exercise-context` block(s) by id, or `none` to disable the automatic context. See [AI feedback context](#ai-feedback-context) |
@@ -247,6 +250,64 @@ Solve x² = 4. All solutions: __[2, -2]
 → `-2, 2`, `2,-2`, `sqrt(4), -2` are all accepted; a missing or duplicate
 solution is rejected.
 
+### `mode: custom`
+
+Runs trusted, instructor-authored SymPy/Python once for all expression fields
+in an exercise. Student input is parsed separately and passed as SymPy
+expressions; it is never interpolated into the checker source.
+
+The checker must define `check(expressions, symbols)`. `expressions` is the
+ordered list of parsed answers and `symbols` maps names from `vars` to SymPy
+symbols. Normal SymPy names such as `diff`, `minimum`, `Interval`, and `Matrix`
+are available. The function may return a boolean, a score from `0` to `1`, or
+a dictionary containing `score` (or `correct`) and optional plain-text
+`feedback`.
+
+````markdown
+```{math-exercise}
+#| label: strongly-monotone
+#| vars: x
+#| mode: custom
+#| checker: |
+#|   def check(expressions, symbols):
+#|       f = expressions[0]
+#|       x = symbols["x"]
+#|       lower = minimum(diff(f, x), x, Interval(0, 1))
+#|       if lower.is_positive is True:
+#|           return {"score": 1, "feedback": "The derivative has a positive lower bound."}
+#|       return {"score": 0, "feedback": "No positive derivative lower bound was established."}
+
+Give an example of a strongly monotonically increasing function on $[0,1]$:
+$f(x) =$ ___[]
+```
+````
+
+Custom checker code is shipped in the generated HTML, is visible to students,
+and executes in browser-side Pyodide. It must therefore come only from trusted
+document authors. Student strings go through the extension's existing SymPy
+expression parser and are never concatenated into the custom checker source;
+invalid expressions and checker exceptions are shown as errors.
+
+### Partial credit
+
+Partial credit is opt-in for built-in modes:
+
+```yaml
+#| partial-credit: true
+#| form-credit: 0.5
+```
+
+- Multiple fields are averaged, with empty fields counting as zero.
+- `set` uses `2M / (E + S)`, where `M` is the number of matched elements,
+  `E` the number expected, and `S` the number submitted. Missing elements and
+  extra guesses both reduce the score.
+- A mathematically equivalent answer that fails `mode: exact` or `form`
+  receives `form-credit`.
+- Other individual built-in checks remain binary.
+- Custom checkers may always return any score from `0` to `1`.
+
+The default remains binary, so existing documents keep their current behavior.
+
 ### Form checking (`form`)
 
 In addition to correctness, the answer can be required to be in a specific
@@ -397,14 +458,16 @@ The **user message** contains clearly separated blocks:
   <field label="...">student input</field>
 </student_response>
 <private_field_assessment never_quote="true">
-  <field label="...">correct | incorrect | empty | invalid</field>
+  <field label="..." score="...">correct | partial | incorrect | empty | invalid | submitted</field>
+  <exercise status="..." score="...">optional custom-checker feedback</exercise>
 </private_field_assessment>
 ```
 
 There may be several `<learning_context>` and `<field>` blocks. The expected
-answer is never included. Field statuses are calculated locally by the existing
-checker and reveal only whether each submitted field passed, not what its answer
-should have been.
+answer is never included. Built-in checks may include a private normalized score.
+For `mode: custom`, fields are marked only as submitted or empty and a single
+exercise-level assessment carries the joint result, because the checker may
+depend on all expressions together.
 
 Before display, the extension rejects empty responses and responses truncated
 by the provider's completion limit. It also detects leaked `<think>`,
@@ -474,8 +537,8 @@ To opt an exercise out of context entirely, use `#| context: none`.
 
 The AI request contains the selected context, the task, and the student's
 current response as individually labelled fields. A separate private assessment
-block contains only the corresponding checker statuses (`correct`, `incorrect`,
-`empty`, or `invalid`) and is explicitly marked as internal evidence that must
+block contains only the corresponding checker statuses and normalized scores
+(`correct`, `partial`, `incorrect`, `empty`, `submitted`, or `invalid`) and is explicitly marked as internal evidence that must
 never be quoted or summarized to the student. Everything is clearly delimited
 and accompanied by an instruction to treat it as data rather than as
 instructions (a prompt-injection mitigation, given that both course content and
