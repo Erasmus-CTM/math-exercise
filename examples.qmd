@@ -541,29 +541,32 @@ function removeControlPoints() {
   controlGuides = [];
 }
 
-function updateInterpolation() {
+function updateInterpolation(activePoint) {
   regression = null;
   if (controlPoints.length < regressionDegree + 1) return;
   var dataX = controlPoints.map(function (point) { return point.X(); });
   var dataY = controlPoints.map(function (point) { return point.Y(); });
   var fitted = JXG.Math.Numerics.regressionPolynomial(regressionDegree, dataX, dataY);
+  var offset = activePoint ? activePoint.Y() - fitted(activePoint.X()) : 0;
 
   controlPoints.forEach(function (point, index) {
-    point.setPosition(JXG.COORDS_BY_USER, [dataX[index], fitted(dataX[index])]);
+    if (point !== activePoint) {
+      point.setPosition(JXG.COORDS_BY_USER, [dataX[index], fitted(dataX[index]) + offset]);
+    }
   });
   var projectedY = controlPoints.map(function (point) { return point.Y(); });
   regression = JXG.Math.Numerics.regressionPolynomial(regressionDegree, dataX, projectedY);
 
-  if (fittedGraph) board.removeObject(fittedGraph);
-  fittedGraph = null;
-  if (regression) {
-    fittedGraph = board.create('functiongraph', [regression, 0, 1], {
+  if (!fittedGraph) {
+    fittedGraph = board.create('functiongraph', [function (x) {
+      return regression ? regression(x) : NaN;
+    }, 0, 1], {
       strokeColor: '#dc2626',
       strokeWidth: 4,
       fixed: true
     });
   }
-  board.update();
+  board.fullUpdate();
 }
 
 function createControlPoints() {
@@ -591,7 +594,8 @@ function createControlPoints() {
       highlightStrokeColor: '#1e40af',
       highlightFillColor: '#93c5fd'
     });
-    point.on('up', updateInterpolation);
+    point.on('drag', function () { updateInterpolation(point); });
+    point.on('up', function () { updateInterpolation(point); });
     return point;
   });
 
