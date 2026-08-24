@@ -358,6 +358,7 @@ local function buildExercise(el, state)
   local form      = opts["form"]      or ""
   local checker   = opts["checker"]   or ""
   local response  = opts["response"]  or ""
+  local embedResponse = (opts["embed-response"] == "true")
   local partialCredit = (opts["partial-credit"] == "true")
   local formCredit = opts["form-credit"] or "0.5"
   local fieldLabels = splitCsv(opts["field-labels"] or "")
@@ -382,6 +383,7 @@ local function buildExercise(el, state)
              .. ' data-form="'      .. attrEsc(form)      .. '"'
              .. ' data-checker="'   .. jsonStrAttr(checker) .. '"'
              .. ' data-response="'  .. attrEsc(response) .. '"'
+             .. ' data-embed-response="' .. tostring(embedResponse) .. '"'
              .. ' data-partial-credit="' .. tostring(partialCredit) .. '"'
              .. ' data-form-credit="' .. attrEsc(formCredit) .. '"'
              .. ' data-field-labels="' .. jsonArrAttr(fieldLabels) .. '"'
@@ -406,6 +408,7 @@ local function buildExercise(el, state)
 
   local bodyHtml = table.concat({
     questionHtml,
+    embedResponse and '<div class="math-exercise-response-slot"></div>' or '',
     controlsHtml(),
     '<div class="math-legend-panel" style="display:none;"></div>',
     '<div class="math-feedback-area"></div>',

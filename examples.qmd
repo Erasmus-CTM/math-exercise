@@ -282,6 +282,7 @@ JXG.QuartoAssessment.register({
 #| caption: Draw a strongly increasing piecewise-linear function
 #| mode: custom
 #| response: jsxgraph:pwl-monotonicity-board
+#| embed-response: true
 #| checker: |
 #|   def check(response, symbols):
 #|       points = response.get("points", [])
@@ -478,6 +479,7 @@ JXG.QuartoAssessment.register({
 #| caption: Draw and fit a strongly increasing function
 #| mode: custom
 #| response: jsxgraph:freehand-monotonicity-board
+#| embed-response: true
 #| checker: |
 #|   def check(response, symbols):
 #|       regression = response.get("regression")
@@ -737,6 +739,7 @@ JXG.QuartoAssessment.register({
 #| caption: Draw, adjust, and fit a strongly increasing function
 #| mode: custom
 #| response: jsxgraph:editable-freehand-monotonicity-board
+#| embed-response: true
 #| checker: |
 #|   def check(response, symbols):
 #|       regression = response.get("regression")

@@ -72,6 +72,16 @@
   color: var(--bs-body-color, #212529);
 }
 
+.math-exercise-response-slot {
+  margin: 0 0 1em;
+}
+
+.math-exercise-response-slot iframe {
+  display: block;
+  width: 100% !important;
+  max-width: 100%;
+}
+
 /* ---- Input fields ---- */
 .math-input {
   font-family: 'Fira Mono', 'Consolas', 'Courier New', monospace;

@@ -1498,6 +1498,17 @@
       formCredit: formCredit
     };
 
+    if (cell.dataset.embedResponse === 'true' && checkOpts.responseSource.indexOf('jsxgraph:') === 0) {
+      var assessmentId = checkOpts.responseSource.slice('jsxgraph:'.length);
+      var responseFrame = document.getElementById(assessmentId);
+      var responseSlot = cell.querySelector('.math-exercise-response-slot');
+      if (responseFrame && responseFrame.tagName === 'IFRAME' && responseSlot) {
+        responseSlot.appendChild(responseFrame);
+      } else {
+        console.warn('math-exercise: could not embed JSXGraph response "' + assessmentId + '".');
+      }
+    }
+
     var poolRaw   = cell.dataset.pool;
     var poolTasks = poolRaw ? JSON.parse(poolRaw) : null;
     var poolKey   = 'math-pool|' + location.pathname + '|' + label;

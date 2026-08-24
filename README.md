@@ -67,6 +67,7 @@ The answer inside `[...]` is a SymPy expression, e.g. `pi * 9`, `x**2 + 2*x + 1`
 | `form` | `factored` / `expanded` / `single_fraction` / `lowest_terms` | — | representation additionally required for correctness — only for `mode: equivalent`/`exact` |
 | `checker` | multiline Python | — | trusted author checker for `mode: custom`; define `check(response, symbols)` |
 | `response` | `jsxgraph:iframe-id` | — | obtain arbitrary JSON from a JSXGraph assessment iframe instead of expression fields |
+| `embed-response` | `true` / `false` | `false` | move the referenced JSXGraph iframe into the exercise card, between the question and controls |
 | `partial-credit` | `true` / `false` | `false` | average multiple fields, partially score sets, and award `form-credit` for equivalent answers in the wrong form |
 | `form-credit` | number from `0` to `1` | `0.5` | score for an equivalent answer that fails `mode: exact` or the requested `form` |
 | `pool` | `true` / `false` | `false` | enable a task pool |
@@ -326,6 +327,7 @@ JXG.QuartoAssessment.register({
 ```{math-exercise}
 #| mode: custom
 #| response: jsxgraph:my-board
+#| embed-response: true
 #| checker: |
 #|   def check(response, symbols):
 #|       x, y = response["point"]
@@ -334,6 +336,11 @@ JXG.QuartoAssessment.register({
 Move the point above the line $y=x$.
 ```
 ````
+
+`embed-response: true` changes only the rendered placement: the JSXGraph block
+remains a separate source block, but its iframe is moved into the exercise card
+between the question and the controls. Leaving the option unset preserves the
+standalone board placement.
 
 The payload has no required educational schema: objects, arrays, numbers,
 strings, booleans, and null values are decoded into ordinary Python types.
