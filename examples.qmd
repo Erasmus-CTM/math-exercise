@@ -445,14 +445,28 @@ JXG.QuartoAssessment.register({
       var slopes = samples.slice(1).map(function (point, i) {
         return (point[1] - samples[i][1]) / (point[0] - samples[i][0]);
       });
+      var decreasingIntervals = [];
+      var decreasingStart = null;
+      slopes.forEach(function (slope, i) {
+        if (slope <= 1e-3 && decreasingStart === null) decreasingStart = samples[i][0];
+        if (slope > 1e-3 && decreasingStart !== null) {
+          decreasingIntervals.push([decreasingStart, samples[i][0]]);
+          decreasingStart = null;
+        }
+      });
+      if (decreasingStart !== null && samples.length) {
+        decreasingIntervals.push([decreasingStart, samples[samples.length - 1][0]]);
+      }
       return {
         representation: data.representation,
         interval: data.interval,
         rawSampleCount: data.rawSamples.length,
         domainCoverage: data.coverage,
         polynomialDegree: data.regression ? data.regression.degree : null,
-        polynomial: data.regression ? data.regression.term : null,
-        minimumSampledDerivative: slopes.length ? Math.min.apply(null, slopes) : null
+        minimumSampledSlope: slopes.length ? Math.min.apply(null, slopes) : null,
+        positiveSlopeFraction: slopes.length ? slopes.filter(function (slope) { return slope > 1e-3; }).length / slopes.length : null,
+        nonIncreasingIntervals: decreasingIntervals,
+        feedbackPolicy: 'Discuss only the visible shape and qualitative behavior. Do not reveal, reconstruct, or display polynomial coefficients, fitted expressions, symbolic derivatives, raw samples, or point coordinates.'
       };
     }
   }
@@ -689,16 +703,29 @@ JXG.QuartoAssessment.register({
       var slopes = samples.slice(1).map(function (point, i) {
         return (point[1] - samples[i][1]) / (point[0] - samples[i][0]);
       });
+      var decreasingIntervals = [];
+      var decreasingStart = null;
+      slopes.forEach(function (slope, i) {
+        if (slope <= 1e-3 && decreasingStart === null) decreasingStart = samples[i][0];
+        if (slope > 1e-3 && decreasingStart !== null) {
+          decreasingIntervals.push([decreasingStart, samples[i][0]]);
+          decreasingStart = null;
+        }
+      });
+      if (decreasingStart !== null && samples.length) {
+        decreasingIntervals.push([decreasingStart, samples[samples.length - 1][0]]);
+      }
       return {
         representation: data.representation,
         interval: data.interval,
         rawSampleCount: data.rawSamples.length,
         controlPointCount: data.controlPoints.length,
-        controlPoints: data.controlPoints,
         domainCoverage: data.coverage,
         polynomialDegree: data.regression ? data.regression.degree : null,
-        polynomial: data.regression ? data.regression.term : null,
-        minimumSampledDerivative: slopes.length ? Math.min.apply(null, slopes) : null
+        minimumSampledSlope: slopes.length ? Math.min.apply(null, slopes) : null,
+        positiveSlopeFraction: slopes.length ? slopes.filter(function (slope) { return slope > 1e-3; }).length / slopes.length : null,
+        nonIncreasingIntervals: decreasingIntervals,
+        feedbackPolicy: 'Discuss only the visible shape and qualitative behavior. Do not reveal, reconstruct, or display polynomial coefficients, fitted expressions, symbolic derivatives, raw samples, or point coordinates.'
       };
     }
   }
