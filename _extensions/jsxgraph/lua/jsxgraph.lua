@@ -1,0 +1,706 @@
+-- JSXGraph filter
+--[[
+  MIT License, see file LICENSE
+]]
+
+local EXTENSION_NAME = "JSXGraph"
+local svg_counter = 0
+
+-- Set Paths
+local script_path = debug.getinfo(1, "S").source:sub(2)
+local lua_dir = pandoc.path.directory(script_path)
+local extension_dir = pandoc.path.directory(lua_dir)
+
+-- Helper function to copy a table
+local function copyTable(obj, seen)
+    if type(obj) ~= 'table' then return obj end
+    if seen and seen[obj] then return seen[obj] end
+    local s = seen or {}
+    local res = {}
+    s[obj] = res
+    for k, v in pairs(obj) do
+        res[copyTable(k, s)] = copyTable(v, s)
+    end
+    return setmetatable(res, getmetatable(obj))
+end
+
+-- Helper function
+local function isNonemptyString(x)
+    return x ~= nil and type(x) == "string"
+end
+
+-- Read file
+local function ioRead(file)
+    local ioFile, err = io.open(file, "r")
+    if not ioFile then error("Cannot open file: " .. file .. "\n" .. (err or "unknown error")) end
+    local content = ioFile:read("*a")
+    ioFile:close()
+    return content
+end
+
+-- Write file
+local function ioWrite(file, content)
+    local ioFile, err = io.open(file, "w")
+    if not ioFile then error("Cannot open file for writing: " .. file .. "\n" .. (err or "unknown error")) end
+    ioFile:write(content)
+    ioFile:close()
+end
+
+-- Directory helpers
+local function dirExists(path)
+    local ok, _, code = os.rename(path, path)
+    if ok then return true else return code == 13 end
+end
+
+-- Create hidden directory
+local function ensureHiddenDir(path)
+    if dirExists(path) then return end
+    if package.config:sub(1,1) == "\\" then
+        os.execute('mkdir "' .. path .. '"')
+        os.execute('attrib +h "' .. path .. '"')
+    else
+        os.execute('mkdir -p "' .. path .. '"')
+    end
+end
+
+-- Temp directory, only once
+local TEMP_DIR
+
+-- Temp directory
+local function getTempDir()
+    if TEMP_DIR then return TEMP_DIR end
+    TEMP_DIR = ".temp_jsxgraph"
+    ensureHiddenDir(TEMP_DIR)
+    return TEMP_DIR
+end
+
+-- UUID generator
+math.randomseed(os.time())
+local function uuid()
+    local template = 'xxxxxxxx_xxxx_xxxx_xxxx_xxxxxxxx'
+    return 'JXG' .. string.gsub(template, '[xy]', function(c)
+        local r = math.random(0, 15)
+        if c == 'x' then return string.format('%x', r) else return string.format('%x', (r % 4) + 8) end
+    end)
+end
+
+-- Parse number
+local function parseNumber(s)
+    if not s or s == "" then return nil end
+    s = s:match("^%s*(.-)%s*$")
+    return tonumber(s)
+end
+
+-- Parse Aspect
+local function parseAspect(s)
+    if not s or s == "" then return 1 end
+    s = s:match("^%s*(.-)%s*$")
+    local a, b = s:match("([%d%.]+)%s*/%s*([%d%.]+)")
+    if a and b then
+        local numA, numB = tonumber(a), tonumber(b)
+        if numB ~= 0 then return numA / numB else return 1 end
+    end
+    local n = tonumber(s)
+    return n or 1
+end
+
+-- Calculate dimensions
+local function calculateDimensions(widthStr, heightStr, aspectStr)
+    local width = parseNumber(widthStr)
+    local height = parseNumber(heightStr)
+    local aspect = parseAspect(aspectStr)
+    if width and not height then height = width / aspect
+    elseif height and not width then width = height * aspect
+    elseif not width and not height then width = 500; height = width / aspect
+    end
+    return tostring(width), tostring(height)
+end
+
+-- Node runner
+local function runNode(node_cmd)
+    local project_dir = pandoc.path.directory(PANDOC_STATE.output_file or ".")
+    local cd_cmd
+    if package.config:sub(1,1) == "\\" then
+        cd_cmd = 'cd /d "' .. project_dir .. '" && '
+    else
+        cd_cmd = 'cd "' .. project_dir .. '" && '
+    end
+    local full_cmd = cd_cmd .. node_cmd
+    local ok, _, code = os.execute(full_cmd)
+    if not ok or code ~= 0 then error("Node.js execution failed: " .. node_cmd) end
+end
+
+-- Join path
+local function joinPath(...)
+    local SEP = package.config:sub(1,1)
+    return table.concat({...}, SEP)
+end
+
+-- Cache Base64 for speed
+local JSXGRAPH_BASE64
+local CSS_BASE64
+local function loadBase64Files()
+    if not JSXGRAPH_BASE64 then JSXGRAPH_BASE64 = 'data:text/javascript;base64,' .. quarto.base64.encode(ioRead(joinPath(extension_dir,"resources","js","jsxgraphcore.js"))) end
+    if not CSS_BASE64 then CSS_BASE64 = 'data:text/css;base64,' .. quarto.base64.encode(ioRead(joinPath(extension_dir,"resources","css","jsxgraph.css"))) end
+end
+
+-- Render JSXGraph
+local function renderJsxgraph(globalOptions)
+
+    function CodeBlock(content)
+        if not content.classes:includes("jsxgraph") then return end
+
+        local options = copyTable(globalOptions)
+        local attr
+
+        -- Global attributes
+        if quarto.metadata then
+            attr = quarto.metadata.get('jsxgraph')
+            if type(attr) == "table" then
+                for k,v in pairs(attr) do options[k] = pandoc.utils.stringify(v) end
+            end
+        end
+
+        -- CodeBlock attributes
+        attr = content.attr.attributes
+        if type(attr) == "userdata" then
+            for k,v in pairs(attr) do options[k] = pandoc.utils.stringify(v) end
+        end
+
+        -- Dimensions
+        options.width, options.height = calculateDimensions(options.width, options.height, options.aspect_ratio)
+        local id = uuid()
+        options.uuid = id
+        svg_counter = svg_counter + 1
+
+        -- JSXGraph javascript code
+        local jsxgraph = content.text
+        jsxgraph = jsxgraph:gsub("initBoard%(%s*BOARDID%s*,", 'initBoard("jxg_box",')
+        jsxgraph = jsxgraph:gsub([[initBoard%s*%(%s*(['"])[^'"]*%1%s*,]], 'initBoard("' .. id .. '",')
+
+        local out = 'svg'
+        if quarto.doc.is_format("html") then out = options.out end
+        if isNonemptyString(options.echo) then options.echo = options.echo=="true" end
+
+        if out == 'svg' then
+            local temp_dir = getTempDir()
+            local prefix = "file_" .. id .. "_"
+            local file_node_path = joinPath(temp_dir, prefix .. "code_node_board.mjs")
+            local file_svg_path = joinPath(temp_dir, prefix .. "board.svg")
+
+            options.src_jxg = options.src_jxg:gsub("\\", "/")
+            options.src_css = options.src_css:gsub("\\", "/")
+            file_svg_path = file_svg_path:gsub("\\", "/")
+            file_node_path = file_node_path:gsub("\\", "/")
+
+            local import_js
+            local browser
+            local pdfexport
+
+            if(options.dom ~= 'chrome') then
+                import_js = string.format([[
+import { chromium } from "playwright";
+                ]])
+                browser = string.format([[
+
+async function main() {
+    const browser = await chromium.launch({ headless: true });
+    let context = await browser.newContext({
+        viewport: { width: parseInt(width), height: parseInt(height) }
+    });
+    const page = await context.newPage();
+                ]])
+                pdfexport = string.format([[
+    context = await browser.newContext({
+        viewport: { width: parseInt(width), height: parseInt(height) }
+    });
+                ]])
+            else
+                import_js = string.format([[
+import puppeteer from "puppeteer";
+    ]])
+                browser = string.format([[
+
+async function main() {
+        const browser = await puppeteer.launch({
+            headless: "new",
+            protocolTimeout: 60000,
+            args: [
+               '--disable-setuid-sandbox',
+               '--disable-dev-shm-usage',
+               '--disable-gpu',
+               '--no-first-run',
+               '--no-zygote',
+               '--no-sandbox'
+            ]
+        });
+        const page = await browser.newPage();
+        await page.setViewport({width: parseInt(width), height: parseInt(height)});
+                ]])
+                pdfexport = string.format([[
+        await page.setViewport({ width: Math.ceil(pdfWidthPx), height: Math.ceil(pdfHeightPx) });
+                ]])
+            end
+
+            local content_node = import_js .. string.format([[
+
+import path from 'path';
+import fs from "fs";
+
+let width = "%s";
+let height = "%s";
+let style = "%s";
+let src_jxg = "%s";
+let dom = "%s";
+let src_mjx = "%s";
+let src_css = "%s";
+let uuid = "%s";
+let unit = "%s";
+let textwidth = "%s";
+let svgFilename = "%s";
+let reload = "%s";
+let format = "%s";
+
+            ]], options.width, options.height, options.style, options.src_jxg, options.dom, options.src_mjx, options.src_css, options.uuid, options.unit, options.textwidth, file_svg_path, options.reload, FORMAT) .. string.format([[
+
+function getUnit(value) {
+    const match = value.toString().match(/[a-z%%]+$/i);
+    return match ? match[0] : '';
+}
+function getNumber(value) {
+    const match = value.toString().match(/^[\d.]+/);
+    return match ? parseFloat(match[0]) : 0;
+}
+
+function toPx(value) {
+    const num = getNumber(value);
+    switch(unit) {
+        case "px": return num;
+        case "em": return num * 16;       // 1em = 16px
+        case "rem": return num * 16;
+        case "pt": return num * (96/72);  // 1pt = 1/72in, 1in = 96px
+        case "cm": return num * 37.795275591;
+        case "mm": return num * 3.779527559;
+        case "in": return num * 96;
+        default: return num;
+    }
+}
+
+let textUnit = getUnit(textwidth);
+let textNum = getNumber(textwidth);
+let widthNum = getNumber(width);
+let heightNum = getNumber(height);
+
+if (unit === "%%") {
+    width = ((widthNum / 100) * textNum).toFixed(4);
+    height = ((heightNum / 100) * textNum).toFixed(4);
+    unit = textUnit;
+}
+
+            ]]) .. browser .. string.format([[
+
+    await page.setContent(`
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <!-- Include MathJax -->
+    <script id="MathJax-script" defer src="${src_mjx}"></script>
+    <!-- Include JSXGraph -->
+    <!--<script src="${src_jxg}"></script>-->
+    <!-- Include CSS -->
+    <style>
+        @import url("${src_css}");
+    </style>
+    <style>
+      html, body { margin: 0; padding: 0; width: 100%%; height: 100%%; }
+      .jxgbox { border: none; }
+    </style>
+  </head>
+  <body>
+    <div id="${uuid}" class="jxgbox" style="width: ${width}${unit}; height: ${height}${unit}; display: block; object-fit: fill; box-sizing: border-box; ${style};"></div>
+  </body>
+</html>
+`);
+
+    if (fs.existsSync(src_jxg)) {
+        await page.addScriptTag({ path: path.resolve(src_jxg) });
+    } else if (src_jxg.startsWith('http://') || src_jxg.startsWith('https://') || src_jxg.startsWith('file://')) {
+        await page.addScriptTag({url: src_jxg});
+    }
+
+    await page.evaluate((uuid) => {
+            ]]) .. jsxgraph .. string.format([[
+    }, uuid);
+
+    const svgContent = await page.evaluate((uuid) => {
+        const board = Object.values(JXG.boards)
+            .find(b => b.container === uuid);
+        if (!board) return null;
+        board.setAttribute({showNavigation: false});
+        let text = board.create('text', [ board.getBoundingBox()[2], board.getBoundingBox()[3], 'Generated by JSXGraph'], {
+            color: '#000',
+            anchorX: 'right',
+            anchorY: 'bottom',
+            fontSize: 12,
+            frozen: true,
+            fixed: false,
+            opacity: 0.2,
+            cssstyle: 'padding: 3px;'
+        });
+
+        function decodeDataURI(dataURI) {
+            const base64 = dataURI.split(',')[1];
+            return decodeURIComponent(escape(window.atob(base64)));
+        }
+        return decodeDataURI(board.renderer.dumpToDataURI(false));
+    }, uuid);
+
+    const boardOptions = await page.evaluate((uuid) => {
+        const board = Object.values(JXG.boards)
+            .find(b => b.container === uuid);
+        if (!board) return null;
+        return {
+            borderWidth: getComputedStyle(board.containerObj).borderWidth,
+            borderRadius: getComputedStyle(board.containerObj).borderRadius
+        }
+    }, uuid);
+
+    await page.waitForFunction(() => Object.values(JXG.boards).length > 0);
+    await new Promise(r => setTimeout(r, 300));
+
+    if (format === 'pdf' || format === 'latex') {
+        const pdfWidthPx = toPx(width);
+        const pdfHeightPx = toPx(height);
+
+                ]]) .. pdfexport .. string.format([[
+
+        let pdfFileName = svgFilename + ".pdf";
+        await page.pdf({
+            path: pdfFileName,
+            width: pdfWidthPx + "px",
+            height: pdfHeightPx + "px",
+            printBackground: false,
+            margin: { top: 0, right: 0, bottom: 0, left: 0 },
+            preferCSSPageSize: true
+        });
+    } else {
+        createSvg({
+            innerContent: svgContent,
+            width: parseFloat(width),
+            height: parseFloat(height),
+            unit: unit,
+            svgFilename: svgFilename,
+            backgroundColor: "none",
+            borderWidth: parseFloat(boardOptions['borderWidth']),
+            borderRadius: parseFloat(boardOptions['borderRadius'])
+        });
+    }
+    await browser.close();
+}
+
+main().catch(console.error);
+
+
+function parseSvgMeta(svgString) {
+    if (!svgString || typeof svgString !== "string") {
+        throw new Error("innerSvgContent is undefined or not a string.");
+    }
+
+    const viewBoxMatch = svgString.match(/viewBox="([^"]+)"/i);
+    const widthMatch = svgString.match(/width="([^"]+)"/i);
+    const heightMatch = svgString.match(/height="([^"]+)"/i);
+
+    let vbX = 0, vbY = 0, vbW = 0, vbH = 0;
+
+    if (viewBoxMatch) {
+        const parts = viewBoxMatch[1].split(/\s+/).map(Number);
+        [vbX, vbY, vbW, vbH] = parts;
+    } else if (widthMatch && heightMatch) {
+        vbW = parseFloat(widthMatch[1]);
+        vbH = parseFloat(heightMatch[1]);
+    } else {
+        throw new Error("Inner SVG has no usable dimensions (no viewBox or width/height).");
+    }
+
+    return { vbX, vbY, vbW, vbH };
+}
+
+function stripOuterSvg(svgString) {
+    return svgString
+        .replace(/<\?xml.*?\?>/g, "")
+        .replace(/<!DOCTYPE.*?>/g, "")
+        .replace(/<svg[^>]*>/i, "")
+        .replace(/<\/svg>/i, "");
+}
+
+function createSvg({
+       innerContent,
+       width,
+       height,
+       unit,            // "px", "em", "rem", "cm", "mm", "in", "pt"
+       svgFilename,
+       backgroundColor,
+       borderWidth,     // in px
+       borderRadius,    // in px
+       padding = 0      // in px
+    }) {
+    const wNum = parseFloat(width);
+    const hNum = parseFloat(height);
+    const bw = parseFloat(borderWidth);
+    const br = parseFloat(borderRadius);
+    const p = parseFloat(padding);
+
+    let factor = toPx(1);
+
+    const svgWidthPx = wNum * factor + 2 * bw + 2 * p;
+    const svgHeightPx = hNum * factor + 2 * bw + 2 * p;
+
+    const svgContent = `
+<svg
+    width="${wNum}${unit}"
+    height="${hNum}${unit}"
+    viewBox="0 0 ${svgWidthPx} ${svgHeightPx}"
+    xmlns="http://www.w3.org/2000/svg"
+>
+    <defs>
+        <clipPath id="rounded-clip">
+            <rect
+                x="${bw/2}"
+                y="${bw/2}"
+                width="${svgWidthPx - bw}"
+                height="${svgHeightPx - bw}"
+                rx="${br}"
+                ry="${br}"
+            />
+        </clipPath>
+    </defs>
+
+    <!-- Background -->
+    <rect
+        x="${bw/2}"
+        y="${bw/2}"
+        width="${svgWidthPx - bw}"
+        height="${svgHeightPx - bw}"
+        rx="${br}"
+        ry="${br}"
+        fill="${backgroundColor}"
+    />
+
+    <!-- Embedded SVG as Image -->
+
+    <g clip-path="url(#rounded-clip)">
+        <g transform="translate(${bw + p}, ${bw + p})">
+            ${innerContent}
+        </g>
+    </g>
+    <!-- Border -->
+    <rect
+        x="${bw/2}"
+        y="${bw/2}"
+        width="${svgWidthPx - bw}"
+        height="${svgHeightPx - bw}"
+        rx="${br}"
+        ry="${br}"
+        fill="none"
+        stroke="#000000"
+        stroke-width="${bw}"
+    />
+</svg>
+`;
+
+    fs.writeFileSync(svgFilename, `<?xml version="1.0" encoding="UTF-8"?>\n${svgContent}`);
+}
+            ]])
+
+            ioWrite(file_node_path, content_node)
+
+            local node_cmd = string.format('node "%s" "%s"', file_node_path, file_svg_path)
+
+            runNode(node_cmd)
+
+            local img
+
+            if FORMAT == "pdf" or FORMAT == "latex" then
+                img = pandoc.Image({}, file_svg_path .. ".pdf", "")
+            else
+                img = pandoc.Image({}, file_svg_path, "")
+            end
+
+            local svg_code = pandoc.Para({img})
+
+            if options.echo then
+                local codeBlock = pandoc.CodeBlock(content.text, {class='javascript'})
+                return pandoc.Div({svg_code, codeBlock})
+            else
+                return svg_code
+            end
+        else
+
+            if (options.reload) then
+                jsxgraph = jsxgraph .. string.format([[
+
+const board%s = Object.values(JXG.boards) .find(b => b.container === %q);
+board%s.setAttribute({ showReload: true });
+board%s.reload = function() { window.location.reload(); };
+
+                ]], options.uuid, options.uuid, options.uuid, options.uuid)
+            end
+
+            if not options.src_jxg:match("^http") or
+               (options.src_css ~= '' and not options.src_css:match("^http")) then
+                loadBase64Files()
+            end
+            if not options.src_jxg:match("^http") then options.src_jxg = JSXGRAPH_BASE64 end
+            if options.src_css ~= '' and not options.src_css:match("^http") then options.src_css = CSS_BASE64 end
+
+            local assessment_id = options.assessment_id or options.iframe_id or id
+            local assessment_bridge = string.format([[
+(function () {
+  'use strict';
+  const protocol = 'jsxgraph-quarto-assessment';
+  const version = 1;
+  const assessmentId = %q;
+  let registration = null;
+
+  async function svgToPng(dataUri, board) {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(board.canvasWidth || image.width || 800));
+        canvas.height = Math.max(1, Math.round(board.canvasHeight || image.height || 600));
+        const context = canvas.getContext('2d');
+        context.fillStyle = '#ffffff';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/png'));
+      };
+      image.onerror = () => reject(new Error('Could not render the JSXGraph board'));
+      image.src = dataUri;
+    });
+  }
+
+  function resolveBoard(spec) {
+    if (spec && typeof spec.board === 'function') return spec.board();
+    if (spec && spec.board) return spec.board;
+    const boards = Object.values(JXG.boards || {});
+    return boards.length ? boards[0] : null;
+  }
+
+  JXG.QuartoAssessment = {
+    register(spec) {
+      registration = typeof spec === 'function' ? { response: spec } : spec;
+      if (!registration || typeof registration.response !== 'function') {
+        throw new TypeError('Assessment registration requires a response function');
+      }
+    }
+  };
+
+  window.addEventListener('message', async (event) => {
+    const message = event.data;
+    if (event.source !== window.parent || !message || message.protocol !== protocol ||
+        message.version !== version || message.type !== 'request' ||
+        message.assessmentId !== assessmentId) return;
+
+    const reply = {
+      protocol,
+      version,
+      type: 'response',
+      assessmentId,
+      requestId: message.requestId
+    };
+    try {
+      if (!registration) throw new Error('No JSXGraph assessment response is registered');
+      const raw = await registration.response();
+      reply.payload = JSON.parse(JSON.stringify(raw));
+      if (message.includeAI && registration.ai) {
+        const aiSpec = registration.ai;
+        const summary = typeof aiSpec.summary === 'function'
+          ? await aiSpec.summary(reply.payload)
+          : aiSpec.summary;
+        reply.ai = {};
+        if (summary !== undefined) reply.ai.summary = summary;
+        if (aiSpec.render) {
+          const board = resolveBoard(registration);
+          if (!board || !board.renderer || typeof board.renderer.dumpToDataURI !== 'function') {
+            throw new Error('No renderable JSXGraph board is available');
+          }
+          reply.ai.image = await svgToPng(board.renderer.dumpToDataURI(false), board);
+        }
+      }
+    } catch (error) {
+      reply.error = error && error.message ? error.message : String(error);
+    }
+    window.parent.postMessage(reply, '*');
+  });
+})();
+]], assessment_id)
+
+            local icontent = string.format([[
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script id="MathJax-script" async src="%s"></script>
+<script src="%s"></script>
+<style>@import url("%s");</style>
+<style>html,body{margin:0;padding:0;width:100%%;height:100%%;}.jxgbox{border:none;border-radius:0px;}</style>
+</head>
+<body>
+<div id="%s" class="jxgbox" style="width:100%%;height:100%%;display:block;object-fit:fill;box-sizing:border-box;"></div>
+<script>%s</script>
+<script>%s</script>
+</body>
+</html>]], options.src_mjx, options.src_jxg, options.src_css, id, assessment_bridge, jsxgraph)
+
+            local jsx_b64 = 'data:text/html;base64,' .. quarto.base64.encode(icontent)
+            local iframe = '<iframe src="'..jsx_b64..'" class="'..options.class..'" name="iframe'..id..'"'
+            if options.unit == "%" then
+                iframe = iframe .. ' style="width:'..options.width..options.unit..'; aspect-ratio:'..options.width..'/'..options.height..'; position:relative; margin:0; padding:0; display:block; z-index:1;'..options.style..';"'
+            else
+                iframe = iframe .. ' style="width:'..options.width..options.unit..'; height:'..options.height..options.unit..'; position:relative; margin:0; padding:0; display:block; z-index:1;'..options.style..';"'
+            end
+            iframe = iframe .. ' id="'..assessment_id..'"'
+            iframe = iframe..' sandbox="allow-scripts"></iframe>'
+
+            local html_code = pandoc.RawBlock("html", iframe)
+            if options.echo then
+                local codeBlock = pandoc.CodeBlock(content.text, {class='javascript'})
+                return pandoc.Div({html_code, codeBlock})
+            else
+                return html_code
+            end
+        end
+    end
+
+    return {CodeBlock = CodeBlock}
+end
+
+function Pandoc(doc)
+    local options = {
+        iframe_id = nil,
+        assessment_id = nil,
+        width = nil,
+        height = nil,
+        aspect_ratio = "1/1",
+        out = 'js',
+        dom = 'chrome',
+        textwidth = '20cm',
+        style = 'border:1px solid black; border-radius:10px;',
+        class = '',
+        echo = false,
+        unit = 'px',
+        reload = false,
+        src_jxg = 'https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js',
+        src_css = 'https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css',
+        src_mjx = 'https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-svg.js'
+    }
+
+    local globalOptions = doc.meta["jsxgraph"]
+    if type(globalOptions) == "table" then
+        for k,v in pairs(globalOptions) do options[k] = pandoc.utils.stringify(v) end
+    end
+
+    return doc:walk(renderJsxgraph(options))
+end

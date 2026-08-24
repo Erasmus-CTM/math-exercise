@@ -43,8 +43,9 @@
 --
 -- Custom checker (trusted author code; student input is parsed separately):
 --   #| mode: custom
+--   #| response: jsxgraph:board-iframe-id   -- optional external JSON source
 --   #| checker: |
---   #|   def check(expressions, symbols):
+--   #|   def check(response, symbols):
 --   #|       return {"score": 1.0, "feedback": "Well done."}
 --
 -- Pool syntax  (#| pool: true, tasks separated by lines containing only ---):
@@ -356,6 +357,7 @@ local function buildExercise(el, state)
   local sigfigs   = opts["sigfigs"]   or ""
   local form      = opts["form"]      or ""
   local checker   = opts["checker"]   or ""
+  local response  = opts["response"]  or ""
   local partialCredit = (opts["partial-credit"] == "true")
   local formCredit = opts["form-credit"] or "0.5"
   local fieldLabels = splitCsv(opts["field-labels"] or "")
@@ -379,6 +381,7 @@ local function buildExercise(el, state)
              .. ' data-sigfigs="'   .. attrEsc(sigfigs)   .. '"'
              .. ' data-form="'      .. attrEsc(form)      .. '"'
              .. ' data-checker="'   .. jsonStrAttr(checker) .. '"'
+             .. ' data-response="'  .. attrEsc(response) .. '"'
              .. ' data-partial-credit="' .. tostring(partialCredit) .. '"'
              .. ' data-form-credit="' .. attrEsc(formCredit) .. '"'
              .. ' data-field-labels="' .. jsonArrAttr(fieldLabels) .. '"'

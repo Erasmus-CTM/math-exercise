@@ -65,7 +65,8 @@ The answer inside `[...]` is a SymPy expression, e.g. `pi * 9`, `x**2 + 2*x + 1`
 | `decplaces` | integer | — | only for `mode: numeric`: round both sides to N decimal places before comparing |
 | `sigfigs` | integer | — | only for `mode: numeric`: round both sides to N significant figures before comparing |
 | `form` | `factored` / `expanded` / `single_fraction` / `lowest_terms` | — | representation additionally required for correctness — only for `mode: equivalent`/`exact` |
-| `checker` | multiline Python | — | trusted author checker for `mode: custom`; define `check(expressions, symbols)` |
+| `checker` | multiline Python | — | trusted author checker for `mode: custom`; define `check(response, symbols)` |
+| `response` | `jsxgraph:iframe-id` | — | obtain arbitrary JSON from a JSXGraph assessment iframe instead of expression fields |
 | `partial-credit` | `true` / `false` | `false` | average multiple fields, partially score sets, and award `form-credit` for equivalent answers in the wrong form |
 | `form-credit` | number from `0` to `1` | `0.5` | score for an equivalent answer that fails `mode: exact` or the requested `form` |
 | `pool` | `true` / `false` | `false` | enable a task pool |
@@ -252,16 +253,16 @@ solution is rejected.
 
 ### `mode: custom`
 
-Runs trusted, instructor-authored SymPy/Python once for all expression fields
-in an exercise. Student input is parsed separately and passed as SymPy
-expressions; it is never interpolated into the checker source.
+Runs trusted, instructor-authored SymPy/Python once for the complete exercise
+response. Expression fields and external interactive responses use the same
+checker contract.
 
-The checker must define `check(expressions, symbols)`. `expressions` is the
-ordered list of parsed answers and `symbols` maps names from `vars` to SymPy
-symbols. Normal SymPy names such as `diff`, `minimum`, `Interval`, and `Matrix`
-are available. The function may return a boolean, a score from `0` to `1`, or
-a dictionary containing `score` (or `correct`) and optional plain-text
-`feedback`.
+The checker must define `check(response, symbols)`. For ordinary expression
+fields, `response` contains `kind`, `raw`, and an ordered `expressions` list of
+parsed SymPy values. `symbols` maps names from `vars` to SymPy symbols. Normal
+SymPy names such as `diff`, `minimum`, `Interval`, and `Matrix` are available.
+The function may return a boolean, a score from `0` to `1`, or a dictionary
+containing `score` (or `correct`) and optional plain-text `feedback`.
 
 ````markdown
 ```{math-exercise}
@@ -269,8 +270,8 @@ a dictionary containing `score` (or `correct`) and optional plain-text
 #| vars: x
 #| mode: custom
 #| checker: |
-#|   def check(expressions, symbols):
-#|       f = expressions[0]
+#|   def check(response, symbols):
+#|       f = response["expressions"][0]
 #|       x = symbols["x"]
 #|       lower = minimum(diff(f, x), x, Interval(0, 1))
 #|       if lower.is_positive is True:
@@ -287,6 +288,74 @@ and executes in browser-side Pyodide. It must therefore come only from trusted
 document authors. Student strings go through the extension's existing SymPy
 expression parser and are never concatenated into the custom checker source;
 invalid expressions and checker exceptions are shown as errors.
+
+### Arbitrary JSON from JSXGraph
+
+This repository includes a local fork of the MIT-licensed
+[`jsxgraph-quarto`](https://github.com/jsxgraph/jsxgraph-quarto) filter with a
+generic assessment bridge. Enable both filters:
+
+```yaml
+filters:
+  - jsxgraph
+  - math-exercise
+```
+
+Give a JSXGraph iframe an `assessment_id` and register a response provider:
+
+````markdown
+```{.jsxgraph assessment_id="my-board"}
+var board = JXG.JSXGraph.initBoard(BOARDID, {axis: true});
+var point = board.create('point', [0, 0]);
+
+JXG.QuartoAssessment.register({
+  board: board,
+  response: function () {
+    // Any JSON-serializable value is allowed.
+    return { point: [point.X(), point.Y()] };
+  },
+  ai: {
+    render: true,
+    summary: function (data) {
+      return { point: data.point };
+    }
+  }
+});
+```
+
+```{math-exercise}
+#| mode: custom
+#| response: jsxgraph:my-board
+#| checker: |
+#|   def check(response, symbols):
+#|       x, y = response["point"]
+#|       return {"score": 1 if y > x else 0}
+
+Move the point above the line $y=x$.
+```
+````
+
+The payload has no required educational schema: objects, arrays, numbers,
+strings, booleans, and null values are decoded into ordinary Python types.
+Functions, cyclic structures, DOM nodes, and live JSXGraph objects are not JSON
+and must be converted by the response provider. The transport validates the
+iframe window and request id, times out after five seconds, and has a 1 MB
+accidental-overload limit.
+
+The optional `ai` configuration is independent of local assessment:
+
+- `summary` may be a JSON value or a function of the response. It is capped
+  before inclusion in the AI prompt.
+- `render: true` converts the current JSXGraph board to a PNG and attaches it
+  for vision-capable providers.
+- Providers that reject image input with a format/capability error are retried
+  once with the textual summary only.
+- The full arbitrary response JSON stays local and is not sent to the AI.
+
+Because the generated JSXGraph iframe is sandboxed with an opaque origin, the
+bridge communicates with `postMessage`; the parent never attempts direct DOM
+access. Custom checker code and board source remain visible in the generated
+page and must come from trusted document authors.
 
 ### Partial credit
 

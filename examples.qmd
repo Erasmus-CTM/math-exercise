@@ -6,6 +6,7 @@ format:
     toc: true
 engine: markdown
 filters:
+  - jsxgraph
   - math-exercise
 ---
 
@@ -183,8 +184,8 @@ its derivative has a strictly positive lower bound on $[0,1]$.
 #| vars: x
 #| mode: custom
 #| checker: |
-#|   def check(expressions, symbols):
-#|       f = expressions[0]
+#|   def check(response, symbols):
+#|       f = response["expressions"][0]
 #|       x = symbols["x"]
 #|       lower = minimum(diff(f, x), x, Interval(0, 1))
 #|       if lower.is_positive is True:
@@ -205,6 +206,285 @@ $f(x) =$ ___[]
 Try `x`, `x**2 + x`, and `x**2`. The final expression is increasing on the
 interval but is not strongly increasing under the positive derivative lower
 bound criterion because its derivative reaches zero at the left endpoint.
+
+## JSXGraph response — movable piecewise-linear function
+
+Move the points vertically. The graph starts flat; full credit requires every
+line segment to have strictly positive slope. The JSXGraph iframe sends its
+point coordinates as arbitrary JSON when **Check** or **Feedback** is clicked.
+
+```{.jsxgraph assessment_id="pwl-monotonicity-board" width="800" height="420" style="border:1px solid #ddd; border-radius:8px; max-width:100%;"}
+var board = JXG.JSXGraph.initBoard(BOARDID, {
+  boundingbox: [-0.1, 1.25, 1.1, -0.25],
+  axis: true,
+  pan: { enabled: false },
+  zoom: { enabled: false },
+  showNavigation: false
+});
+
+var xs = [0, 0.25, 0.5, 0.75, 1];
+var points = xs.map(function (x, index) {
+  var guide = board.create('line', [[x, 0], [x, 1]], {
+    visible: false,
+    fixed: true
+  });
+  return board.create('glider', [x, 0.35, guide], {
+    name: 'P_' + index,
+    size: 5,
+    color: '#2563eb',
+    showInfobox: false
+  });
+});
+
+for (var i = 0; i < points.length - 1; i++) {
+  board.create('segment', [points[i], points[i + 1]], {
+    strokeWidth: 3,
+    strokeColor: '#2563eb',
+    fixed: true
+  });
+}
+
+function pointData() {
+  return points.map(function (point) { return [point.X(), point.Y()]; });
+}
+
+JXG.QuartoAssessment.register({
+  board: board,
+  response: function () {
+    return {
+      representation: 'piecewise-linear',
+      interval: [0, 1],
+      points: pointData()
+    };
+  },
+  ai: {
+    render: true,
+    summary: function (data) {
+      var slopes = data.points.slice(1).map(function (point, i) {
+        return (point[1] - data.points[i][1]) / (point[0] - data.points[i][0]);
+      });
+      return {
+        representation: data.representation,
+        interval: data.interval,
+        segmentCount: slopes.length,
+        positiveSegments: slopes.filter(function (s) { return s > 1e-8; }).length,
+        flatSegments: slopes.filter(function (s) { return Math.abs(s) <= 1e-8; }).length,
+        decreasingSegments: slopes.filter(function (s) { return s < -1e-8; }).length,
+        minimumSlope: Math.min.apply(null, slopes)
+      };
+    }
+  }
+});
+```
+
+```{math-exercise}
+#| label: ex-jsxgraph-pwl-monotonicity
+#| caption: Draw a strongly increasing piecewise-linear function
+#| mode: custom
+#| response: jsxgraph:pwl-monotonicity-board
+#| checker: |
+#|   def check(response, symbols):
+#|       points = response.get("points", [])
+#|       if len(points) < 2:
+#|           return {"score": 0, "feedback": "Move the points to define a graph."}
+#|       try:
+#|           slopes = [
+#|               (float(b[1]) - float(a[1])) / (float(b[0]) - float(a[0]))
+#|               for a, b in zip(points, points[1:])
+#|           ]
+#|       except (TypeError, ValueError, ZeroDivisionError):
+#|           return {"score": 0, "feedback": "The board returned invalid point data."}
+#|       positive = sum(slope > 1e-8 for slope in slopes)
+#|       score = positive / len(slopes)
+#|       if score == 1:
+#|           return {"score": 1, "feedback": "Every segment has positive slope."}
+#|       return {
+#|           "score": score,
+#|           "feedback": f"{positive} of {len(slopes)} segments have positive slope."
+#|       }
+
+Use the movable points to construct a strongly monotonically increasing
+piecewise-linear function on $[0,1]$.
+```
+
+## JSXGraph response — freehand drawing and polynomial approximation
+
+Draw a curve across $[0,1]$. JSXGraph bins the captured pointer samples, fits a
+degree-five regression polynomial, and displays the approximation. Assessment
+uses dense samples of the fitted polynomial rather than the original noisy
+stroke.
+
+```{.jsxgraph assessment_id="freehand-monotonicity-board" width="800" height="440" style="border:1px solid #ddd; border-radius:8px; max-width:100%;"}
+var board = JXG.JSXGraph.initBoard(BOARDID, {
+  boundingbox: [-0.1, 1.25, 1.1, -0.25],
+  axis: true,
+  pan: { enabled: false },
+  zoom: { enabled: false },
+  showNavigation: false
+});
+
+var drawing = false;
+var sketch = null;
+var fittedGraph = null;
+var rawSamples = [];
+var regression = null;
+var regressionDegree = 5;
+
+function userCoordinates(event) {
+  var screen = board.getMousePosition(event);
+  var coords = new JXG.Coords(JXG.COORDS_BY_SCREEN, screen, board);
+  return [coords.usrCoords[1], coords.usrCoords[2]];
+}
+
+function addSample(event) {
+  var point = userCoordinates(event);
+  rawSamples.push(point);
+  sketch.dataX.push(point[0]);
+  sketch.dataY.push(point[1]);
+  board.update();
+}
+
+function binnedSamples(samples, count) {
+  var bins = Array.from({ length: count }, function () { return []; });
+  samples.forEach(function (point) {
+    if (point[0] < 0 || point[0] > 1 || !Number.isFinite(point[1])) return;
+    var index = Math.max(0, Math.min(count - 1, Math.round(point[0] * (count - 1))));
+    bins[index].push(point[1]);
+  });
+  return bins.map(function (values, index) {
+    if (!values.length) return null;
+    var mean = values.reduce(function (sum, value) { return sum + value; }, 0) / values.length;
+    return [index / (count - 1), mean];
+  }).filter(Boolean);
+}
+
+function fitSketch() {
+  var samples = binnedSamples(rawSamples, 51);
+  regression = null;
+  if (fittedGraph) board.removeObject(fittedGraph);
+  fittedGraph = null;
+  if (samples.length < regressionDegree + 1) return;
+
+  var dataX = samples.map(function (point) { return point[0]; });
+  var dataY = samples.map(function (point) { return point[1]; });
+  regression = JXG.Math.Numerics.regressionPolynomial(regressionDegree, dataX, dataY);
+  fittedGraph = board.create('functiongraph', [regression, 0, 1], {
+    strokeColor: '#dc2626',
+    strokeWidth: 4,
+    fixed: true
+  });
+  board.update();
+}
+
+board.on('down', function (event) {
+  if (drawing) return;
+  drawing = true;
+  rawSamples = [];
+  regression = null;
+  if (sketch) board.removeObject(sketch);
+  if (fittedGraph) board.removeObject(fittedGraph);
+  fittedGraph = null;
+  sketch = board.create('curve', [[], []], {
+    strokeColor: '#94a3b8',
+    strokeWidth: 7,
+    lineCap: 'round',
+    fixed: true
+  });
+  addSample(event);
+});
+
+board.on('move', function (event) {
+  if (drawing) addSample(event);
+});
+
+board.on('up', function (event) {
+  if (!drawing) return;
+  addSample(event);
+  drawing = false;
+  fitSketch();
+});
+
+function responseData() {
+  var inside = rawSamples.filter(function (point) { return point[0] >= 0 && point[0] <= 1; });
+  var xs = inside.map(function (point) { return point[0]; });
+  var coverage = xs.length ? Math.max.apply(null, xs) - Math.min.apply(null, xs) : 0;
+  var fitSamples = [];
+  if (regression) {
+    for (var i = 0; i <= 200; i++) {
+      var x = i / 200;
+      fitSamples.push([x, regression(x)]);
+    }
+  }
+  return {
+    representation: 'freehand-polynomial-regression',
+    interval: [0, 1],
+    rawSamples: rawSamples,
+    coverage: coverage,
+    regression: regression ? {
+      degree: regressionDegree,
+      term: regression.getTerm ? regression.getTerm() : '',
+      samples: fitSamples
+    } : null
+  };
+}
+
+JXG.QuartoAssessment.register({
+  board: board,
+  response: responseData,
+  ai: {
+    render: true,
+    summary: function (data) {
+      var samples = data.regression ? data.regression.samples : [];
+      var slopes = samples.slice(1).map(function (point, i) {
+        return (point[1] - samples[i][1]) / (point[0] - samples[i][0]);
+      });
+      return {
+        representation: data.representation,
+        interval: data.interval,
+        rawSampleCount: data.rawSamples.length,
+        domainCoverage: data.coverage,
+        polynomialDegree: data.regression ? data.regression.degree : null,
+        polynomial: data.regression ? data.regression.term : null,
+        minimumSampledDerivative: slopes.length ? Math.min.apply(null, slopes) : null
+      };
+    }
+  }
+});
+```
+
+```{math-exercise}
+#| label: ex-jsxgraph-freehand-monotonicity
+#| caption: Draw and fit a strongly increasing function
+#| mode: custom
+#| response: jsxgraph:freehand-monotonicity-board
+#| checker: |
+#|   def check(response, symbols):
+#|       regression = response.get("regression")
+#|       coverage = float(response.get("coverage", 0))
+#|       if not regression or len(regression.get("samples", [])) < 2:
+#|           return {"score": 0, "feedback": "Draw across the interval to create a polynomial fit."}
+#|       samples = regression["samples"]
+#|       try:
+#|           slopes = [
+#|               (float(b[1]) - float(a[1])) / (float(b[0]) - float(a[0]))
+#|               for a, b in zip(samples, samples[1:])
+#|           ]
+#|       except (TypeError, ValueError, ZeroDivisionError):
+#|           return {"score": 0, "feedback": "The fitted curve data is invalid."}
+#|       positive_fraction = sum(slope > 1e-3 for slope in slopes) / len(slopes)
+#|       coverage_score = min(max(coverage / 0.9, 0), 1)
+#|       score = 0.25 * coverage_score + 0.75 * positive_fraction
+#|       if coverage >= 0.9 and min(slopes) > 1e-3:
+#|           return {"score": 1, "feedback": "The fitted polynomial has positive slope throughout the interval."}
+#|       return {
+#|           "score": score,
+#|           "feedback": "Extend the drawing across the interval and remove flat or decreasing parts."
+#|       }
+
+Draw a function on $[0,1]$ whose polynomial approximation is strongly
+monotonically increasing. The grey line is your stroke and the red line is the
+degree-five fit that will be assessed.
+```
 
 ## `form: factored`
 
