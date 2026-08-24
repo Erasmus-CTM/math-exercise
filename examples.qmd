@@ -173,13 +173,13 @@ List all integer solutions of $(x-1)(x-2)(x-3)(x-4)=0$: ___[1, 2, 3, 4]
 
 Try `1, 2`, then `1, 2, 5`, and finally all four solutions.
 
-## `mode: custom` — strongly monotone increasing
+## `mode: custom` — monotone increasing with flat points allowed
 
 This checker receives the student's parsed SymPy expression and verifies that
-its derivative has a strictly positive lower bound on $[0,1]$.
+its derivative is non-negative on $[0,1]$ and that the function rises overall.
 
 ```{math-exercise}
-#| label: ex-custom-strong-monotonicity
+#| label: ex-custom-monotonicity
 #| caption: custom SymPy checker
 #| vars: x
 #| mode: custom
@@ -188,29 +188,30 @@ its derivative has a strictly positive lower bound on $[0,1]$.
 #|       f = response["expressions"][0]
 #|       x = symbols["x"]
 #|       lower = minimum(diff(f, x), x, Interval(0, 1))
-#|       if lower.is_positive is True:
+#|       rise = simplify(f.subs(x, 1) - f.subs(x, 0))
+#|       if lower.is_nonnegative is True and rise.is_positive is True:
 #|           return {
 #|               "score": 1.0,
-#|               "feedback": "The derivative has a positive lower bound on the interval."
+#|               "feedback": "The derivative is non-negative and the function rises overall."
 #|           }
 #|       return {
 #|           "score": 0.0,
-#|           "feedback": "A positive lower bound for the derivative was not established."
+#|           "feedback": "Non-decreasing behavior with an overall rise was not established."
 #|       }
 
-Give an example of a strongly monotonically increasing function on $[0,1]$:
+Give an example of a monotonically increasing function on $[0,1]$:
 
 $f(x) =$ ___[]
 ```
 
-Try `x`, `x**2 + x`, and `x**2`. The final expression is increasing on the
-interval but is not strongly increasing under the positive derivative lower
-bound criterion because its derivative reaches zero at the left endpoint.
+Try `x`, `x**2 + x`, and `x**2`. All three are accepted; isolated zero
+derivatives and flat portions are allowed, provided the function never
+decreases and rises overall.
 
 ## JSXGraph response — movable piecewise-linear function
 
-Move the points vertically. The graph starts flat; full credit requires every
-line segment to have strictly positive slope. The JSXGraph iframe sends its
+Move the points vertically. Full credit allows flat segments, but requires no
+decreasing segment and a genuine overall rise. The JSXGraph iframe sends its
 point coordinates as arbitrary JSON when **Check** or **Feedback** is clicked.
 
 ```{.jsxgraph assessment_id="pwl-monotonicity-board" width="800" height="420" style="border:1px solid #ddd; border-radius:8px; max-width:100%;"}
@@ -279,7 +280,7 @@ JXG.QuartoAssessment.register({
 
 ```{math-exercise}
 #| label: ex-jsxgraph-pwl-monotonicity
-#| caption: Draw a strongly increasing piecewise-linear function
+#| caption: Draw a monotonically increasing piecewise-linear function
 #| mode: custom
 #| response: jsxgraph:pwl-monotonicity-board
 #| embed-response: true
@@ -295,16 +296,17 @@ JXG.QuartoAssessment.register({
 #|           ]
 #|       except (TypeError, ValueError, ZeroDivisionError):
 #|           return {"score": 0, "feedback": "The board returned invalid point data."}
-#|       positive = sum(slope > 1e-8 for slope in slopes)
-#|       score = positive / len(slopes)
-#|       if score == 1:
-#|           return {"score": 1, "feedback": "Every segment has positive slope."}
+#|       nondecreasing = sum(slope >= -1e-8 for slope in slopes)
+#|       rise = float(points[-1][1]) - float(points[0][1])
+#|       score = 0.8 * nondecreasing / len(slopes) + 0.2 * min(max(rise / 0.1, 0), 1)
+#|       if nondecreasing == len(slopes) and rise > 1e-8:
+#|           return {"score": 1, "feedback": "No segment decreases and the graph rises overall."}
 #|       return {
 #|           "score": score,
-#|           "feedback": f"{positive} of {len(slopes)} segments have positive slope."
+#|           "feedback": f"{nondecreasing} of {len(slopes)} segments are non-decreasing; the graph must also rise overall."
 #|       }
 
-Use the movable points to construct a strongly monotonically increasing
+Use the movable points to construct a monotonically increasing
 piecewise-linear function on $[0,1]$.
 ```
 
@@ -449,8 +451,8 @@ JXG.QuartoAssessment.register({
       var decreasingIntervals = [];
       var decreasingStart = null;
       slopes.forEach(function (slope, i) {
-        if (slope <= 1e-3 && decreasingStart === null) decreasingStart = samples[i][0];
-        if (slope > 1e-3 && decreasingStart !== null) {
+        if (slope < -1e-3 && decreasingStart === null) decreasingStart = samples[i][0];
+        if (slope >= -1e-3 && decreasingStart !== null) {
           decreasingIntervals.push([decreasingStart, samples[i][0]]);
           decreasingStart = null;
         }
@@ -465,8 +467,8 @@ JXG.QuartoAssessment.register({
         domainCoverage: data.coverage,
         polynomialDegree: data.regression ? data.regression.degree : null,
         minimumSampledSlope: slopes.length ? Math.min.apply(null, slopes) : null,
-        positiveSlopeFraction: slopes.length ? slopes.filter(function (slope) { return slope > 1e-3; }).length / slopes.length : null,
-        nonIncreasingIntervals: decreasingIntervals,
+        nondecreasingSlopeFraction: slopes.length ? slopes.filter(function (slope) { return slope >= -1e-3; }).length / slopes.length : null,
+        decreasingIntervals: decreasingIntervals,
         feedbackPolicy: 'Discuss only the visible shape and qualitative behavior. Do not reveal, reconstruct, or display polynomial coefficients, fitted expressions, symbolic derivatives, raw samples, or point coordinates.'
       };
     }
@@ -476,7 +478,7 @@ JXG.QuartoAssessment.register({
 
 ```{math-exercise}
 #| label: ex-jsxgraph-freehand-monotonicity
-#| caption: Draw and fit a strongly increasing function
+#| caption: Draw and fit a monotonically increasing function
 #| mode: custom
 #| response: jsxgraph:freehand-monotonicity-board
 #| embed-response: true
@@ -494,18 +496,20 @@ JXG.QuartoAssessment.register({
 #|           ]
 #|       except (TypeError, ValueError, ZeroDivisionError):
 #|           return {"score": 0, "feedback": "The fitted curve data is invalid."}
-#|       positive_fraction = sum(slope > 1e-3 for slope in slopes) / len(slopes)
+#|       nondecreasing_fraction = sum(slope >= -1e-3 for slope in slopes) / len(slopes)
+#|       rise = float(samples[-1][1]) - float(samples[0][1])
 #|       coverage_score = min(max(coverage / 0.9, 0), 1)
-#|       score = 0.25 * coverage_score + 0.75 * positive_fraction
-#|       if coverage >= 0.9 and min(slopes) > 1e-3:
-#|           return {"score": 1, "feedback": "The fitted polynomial has positive slope throughout the interval."}
+#|       rise_score = min(max(rise / 0.1, 0), 1)
+#|       score = 0.2 * coverage_score + 0.7 * nondecreasing_fraction + 0.1 * rise_score
+#|       if coverage >= 0.9 and min(slopes) >= -1e-3 and rise > 1e-3:
+#|           return {"score": 1, "feedback": "The fitted polynomial never decreases and rises overall."}
 #|       return {
 #|           "score": score,
-#|           "feedback": "Extend the drawing across the interval and remove flat or decreasing parts."
+#|           "feedback": "Extend the drawing across the interval and remove decreasing parts; flat portions are allowed."
 #|       }
 
-Draw a function on $[0,1]$ whose polynomial approximation is strongly
-monotonically increasing. The grey line is your stroke and the red line is the
+Draw a function on $[0,1]$ whose polynomial approximation is monotonically
+increasing, allowing flat portions. The grey line is your stroke and the red line is the
 degree-five fit that will be assessed.
 ```
 
@@ -708,8 +712,8 @@ JXG.QuartoAssessment.register({
       var decreasingIntervals = [];
       var decreasingStart = null;
       slopes.forEach(function (slope, i) {
-        if (slope <= 1e-3 && decreasingStart === null) decreasingStart = samples[i][0];
-        if (slope > 1e-3 && decreasingStart !== null) {
+        if (slope < -1e-3 && decreasingStart === null) decreasingStart = samples[i][0];
+        if (slope >= -1e-3 && decreasingStart !== null) {
           decreasingIntervals.push([decreasingStart, samples[i][0]]);
           decreasingStart = null;
         }
@@ -725,8 +729,8 @@ JXG.QuartoAssessment.register({
         domainCoverage: data.coverage,
         polynomialDegree: data.regression ? data.regression.degree : null,
         minimumSampledSlope: slopes.length ? Math.min.apply(null, slopes) : null,
-        positiveSlopeFraction: slopes.length ? slopes.filter(function (slope) { return slope > 1e-3; }).length / slopes.length : null,
-        nonIncreasingIntervals: decreasingIntervals,
+        nondecreasingSlopeFraction: slopes.length ? slopes.filter(function (slope) { return slope >= -1e-3; }).length / slopes.length : null,
+        decreasingIntervals: decreasingIntervals,
         feedbackPolicy: 'Discuss only the visible shape and qualitative behavior. Do not reveal, reconstruct, or display polynomial coefficients, fitted expressions, symbolic derivatives, raw samples, or point coordinates.'
       };
     }
@@ -736,7 +740,7 @@ JXG.QuartoAssessment.register({
 
 ```{math-exercise}
 #| label: ex-jsxgraph-editable-freehand-monotonicity
-#| caption: Draw, adjust, and fit a strongly increasing function
+#| caption: Draw, adjust, and fit a monotonically increasing function
 #| mode: custom
 #| response: jsxgraph:editable-freehand-monotonicity-board
 #| embed-response: true
@@ -754,18 +758,20 @@ JXG.QuartoAssessment.register({
 #|           ]
 #|       except (TypeError, ValueError, ZeroDivisionError):
 #|           return {"score": 0, "feedback": "The fitted curve data is invalid."}
-#|       positive_fraction = sum(slope > 1e-3 for slope in slopes) / len(slopes)
+#|       nondecreasing_fraction = sum(slope >= -1e-3 for slope in slopes) / len(slopes)
+#|       rise = float(samples[-1][1]) - float(samples[0][1])
 #|       coverage_score = min(max(coverage / 0.9, 0), 1)
-#|       score = 0.25 * coverage_score + 0.75 * positive_fraction
-#|       if coverage >= 0.9 and min(slopes) > 1e-3:
-#|           return {"score": 1, "feedback": "The fitted polynomial has positive slope throughout the interval."}
+#|       rise_score = min(max(rise / 0.1, 0), 1)
+#|       score = 0.2 * coverage_score + 0.7 * nondecreasing_fraction + 0.1 * rise_score
+#|       if coverage >= 0.9 and min(slopes) >= -1e-3 and rise > 1e-3:
+#|           return {"score": 1, "feedback": "The fitted polynomial never decreases and rises overall."}
 #|       return {
 #|           "score": score,
-#|           "feedback": "Extend the drawing across the interval and remove flat or decreasing parts."
+#|           "feedback": "Extend the drawing across the interval and remove decreasing parts; flat portions are allowed."
 #|       }
 
-Draw a function on $[0,1]$ whose polynomial approximation is strongly
-monotonically increasing. After drawing, adjust the blue points as needed.
+Draw a function on $[0,1]$ whose polynomial approximation is monotonically
+increasing, allowing flat portions. After drawing, adjust the blue points as needed.
 Their x-coordinates stay fixed; when you release a point, every blue point is
 snapped onto the recomputed red degree-five polynomial that will be assessed.
 ```

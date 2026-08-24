@@ -267,7 +267,7 @@ containing `score` (or `correct`) and optional plain-text `feedback`.
 
 ````markdown
 ```{math-exercise}
-#| label: strongly-monotone
+#| label: monotone-increasing
 #| vars: x
 #| mode: custom
 #| checker: |
@@ -275,11 +275,12 @@ containing `score` (or `correct`) and optional plain-text `feedback`.
 #|       f = response["expressions"][0]
 #|       x = symbols["x"]
 #|       lower = minimum(diff(f, x), x, Interval(0, 1))
-#|       if lower.is_positive is True:
-#|           return {"score": 1, "feedback": "The derivative has a positive lower bound."}
-#|       return {"score": 0, "feedback": "No positive derivative lower bound was established."}
+#|       rise = simplify(f.subs(x, 1) - f.subs(x, 0))
+#|       if lower.is_nonnegative is True and rise.is_positive is True:
+#|           return {"score": 1, "feedback": "The function is non-decreasing and rises overall."}
+#|       return {"score": 0, "feedback": "Non-decreasing behavior with an overall rise was not established."}
 
-Give an example of a strongly monotonically increasing function on $[0,1]$:
+Give an example of a monotonically increasing function on $[0,1]$:
 $f(x) =$ ___[]
 ```
 ````
@@ -341,6 +342,11 @@ Move the point above the line $y=x$.
 remains a separate source block, but its iframe is moved into the exercise card
 between the question and the controls. Leaving the option unset preserves the
 standalone board placement.
+
+The two fenced blocks deliberately remain siblings rather than being nested.
+This lets the JSXGraph and `math-exercise` Quarto filters parse their own block
+types independently; the browser relocates the already-rendered iframe after
+the page loads.
 
 The payload has no required educational schema: objects, arrays, numbers,
 strings, booleans, and null values are decoded into ordinary Python types.
