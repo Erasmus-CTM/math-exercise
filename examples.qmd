@@ -377,6 +377,9 @@ board.on('down', function (event) {
     lineCap: 'round',
     fixed: true
   });
+  if (event.pointerId !== undefined && board.containerObj.setPointerCapture) {
+    board.containerObj.setPointerCapture(event.pointerId);
+  }
 });
 
 board.on('move', function (event, mode) {
@@ -390,11 +393,19 @@ board.on('move', function (event, mode) {
   board.update();
 });
 
-board.on('up', function (event) {
+function finishSketch(event) {
   if (board.mode !== board.BOARD_MODE_SKETCH) return;
   board.mode = board.BOARD_MODE_NONE;
+  if (event && event.pointerId !== undefined && board.containerObj.hasPointerCapture &&
+      board.containerObj.hasPointerCapture(event.pointerId)) {
+    board.containerObj.releasePointerCapture(event.pointerId);
+  }
   fitSketch();
-});
+}
+
+board.on('up', finishSketch);
+board.containerObj.addEventListener('pointercancel', finishSketch);
+board.containerObj.addEventListener('lostpointercapture', finishSketch);
 
 function responseData() {
   var inside = rawSamples.filter(function (point) { return point[0] >= 0 && point[0] <= 1; });
@@ -499,6 +510,7 @@ var sketch = null;
 var fittedGraph = null;
 var rawSamples = [];
 var controlPoints = [];
+var controlGuides = [];
 var regression = null;
 var regressionDegree = 5;
 
@@ -520,13 +532,27 @@ function binnedSamples(samples, count) {
 
 function removeControlPoints() {
   controlPoints.forEach(function (point) { board.removeObject(point); });
+  controlGuides.forEach(function (guide) { board.removeObject(guide); });
   controlPoints = [];
+  controlGuides = [];
+}
+
+function interpolatedValue(x) {
+  if (controlPoints.length !== regressionDegree + 1) return NaN;
+  var value = 0;
+  for (var i = 0; i < controlPoints.length; i++) {
+    var basis = 1;
+    var xi = controlPoints[i].X();
+    for (var j = 0; j < controlPoints.length; j++) {
+      if (i !== j) basis *= (x - controlPoints[j].X()) / (xi - controlPoints[j].X());
+    }
+    value += controlPoints[i].Y() * basis;
+  }
+  return value;
 }
 
 function updateInterpolation() {
-  regression = null;
-  if (controlPoints.length < regressionDegree + 1) return;
-  regression = JXG.Math.Numerics.lagrangePolynomial(controlPoints);
+  regression = controlPoints.length === regressionDegree + 1 ? interpolatedValue : null;
   board.update();
 }
 
@@ -541,7 +567,13 @@ function createControlPoints() {
   });
   var simplified = JXG.Math.Numerics.Visvalingam(coords, regressionDegree - 1);
   controlPoints = simplified.map(function (coord) {
-    var point = board.create('point', [coord.usrCoords[1], coord.usrCoords[2]], {
+    var x = coord.usrCoords[1];
+    var guide = board.create('line', [[x, 0], [x, 1]], {
+      visible: false,
+      fixed: true
+    });
+    controlGuides.push(guide);
+    var point = board.create('glider', [x, coord.usrCoords[2], guide], {
       name: '',
       size: 4,
       strokeColor: '#1d4ed8',
@@ -555,7 +587,7 @@ function createControlPoints() {
   });
 
   fittedGraph = board.create('functiongraph', [function (x) {
-    return regression ? regression(x) : NaN;
+    return interpolatedValue(x);
   }, 0, 1], {
     strokeColor: '#dc2626',
     strokeWidth: 4,
@@ -579,6 +611,9 @@ board.on('down', function (event) {
     lineCap: 'round',
     fixed: true
   });
+  if (event.pointerId !== undefined && board.containerObj.setPointerCapture) {
+    board.containerObj.setPointerCapture(event.pointerId);
+  }
 });
 
 board.on('move', function (event, mode) {
@@ -592,11 +627,19 @@ board.on('move', function (event, mode) {
   board.update();
 });
 
-board.on('up', function (event) {
+function finishEditableSketch(event) {
   if (board.mode !== board.BOARD_MODE_SKETCH) return;
   board.mode = board.BOARD_MODE_NONE;
+  if (event && event.pointerId !== undefined && board.containerObj.hasPointerCapture &&
+      board.containerObj.hasPointerCapture(event.pointerId)) {
+    board.containerObj.releasePointerCapture(event.pointerId);
+  }
   createControlPoints();
-});
+}
+
+board.on('up', finishEditableSketch);
+board.containerObj.addEventListener('pointercancel', finishEditableSketch);
+board.containerObj.addEventListener('lostpointercapture', finishEditableSketch);
 
 function responseData() {
   var inside = rawSamples.filter(function (point) { return point[0] >= 0 && point[0] <= 1; });
