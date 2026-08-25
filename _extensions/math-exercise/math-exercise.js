@@ -1719,16 +1719,11 @@
             var overallAssessment = '';
             var externalAI = null;
             if (mode === 'custom') {
-              var customResult;
-              try {
-                var customTransport = await collectCustomResponse(fieldIds, checkOpts, true);
-                externalAI = customTransport.ai;
-                customResult = customTransport.empty
-                  ? { status: 'empty', score: 0 }
-                  : await checkCustom(customTransport.response, checkOpts);
-              } catch (e) {
-                customResult = { status: 'error', score: 0, message: String(e) };
-              }
+              var customTransport = await collectCustomResponse(fieldIds, checkOpts, true);
+              externalAI = customTransport.ai;
+              var customResult = customTransport.empty
+                ? { status: 'empty', score: 0 }
+                : await checkCustom(customTransport.response, checkOpts);
               responses.forEach(function (field) {
                 field.status = field.value === '' ? 'empty' : 'submitted';
               });
