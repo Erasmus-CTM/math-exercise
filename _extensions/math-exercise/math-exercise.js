@@ -647,7 +647,7 @@
       '        raise TypeError("Custom checker must return bool, number, or dict")',
       '    if not 0.0 <= score <= 1.0:',
       '        raise ValueError("Custom checker score must be between 0 and 1")',
-      '    status = "correct" if score == 1.0 else ("wrong" if score == 0.0 else "partial")',
+      '    status = "correct" if score >= 1.0 - 1e-9 else ("wrong" if score <= 1e-9 else "partial")',
       '    return {"status": status, "score": score, "feedback": feedback}',
       '',
       'def _math_check_custom():',
