@@ -830,6 +830,16 @@
     return { response: { kind: 'expressions', raw: values }, ai: null };
   }
 
+  // Shared by runCheck and doFeedback so the empty/score-0 fallback and the
+  // collect-then-check sequence for mode: custom exist in exactly one place.
+  async function collectAndCheckCustom(fieldIds, opts, includeAI) {
+    var transport = await collectCustomResponse(fieldIds, opts, includeAI);
+    var result = transport.empty
+      ? { status: 'empty', score: 0 }
+      : await checkCustom(transport.response, opts);
+    return { transport: transport, result: result };
+  }
+
   function externalAISummary(ai) {
     if (!ai || ai.summary === undefined || ai.summary === null) return '';
     var text = typeof ai.summary === 'string' ? ai.summary : JSON.stringify(ai.summary);
@@ -1593,10 +1603,7 @@
         var parts = [];
         var fieldElements = fieldIds.map(function (id) { return document.getElementById(id); });
         if (mode === 'custom') {
-          var customTransport = await collectCustomResponse(fieldIds, checkOpts, false);
-          var custom = customTransport.empty
-            ? { status: 'empty', score: 0.0 }
-            : await checkCustom(customTransport.response, checkOpts);
+          var custom = (await collectAndCheckCustom(fieldIds, checkOpts, false)).result;
           fieldElements.forEach(function (el) {
             if (!el) return;
             el.classList.remove('math-input-ok', 'math-input-partial', 'math-input-wrong', 'math-input-err');
@@ -1719,11 +1726,9 @@
             var overallAssessment = '';
             var externalAI = null;
             if (mode === 'custom') {
-              var customTransport = await collectCustomResponse(fieldIds, checkOpts, true);
-              externalAI = customTransport.ai;
-              var customResult = customTransport.empty
-                ? { status: 'empty', score: 0 }
-                : await checkCustom(customTransport.response, checkOpts);
+              var customOutcome = await collectAndCheckCustom(fieldIds, checkOpts, true);
+              externalAI = customOutcome.transport.ai;
+              var customResult = customOutcome.result;
               responses.forEach(function (field) {
                 field.status = field.value === '' ? 'empty' : 'submitted';
               });
