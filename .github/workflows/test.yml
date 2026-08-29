@@ -12,6 +12,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install checker test dependencies
+        run: python -m pip install sympy==1.14.0
       - name: Test feedback and provider compatibility
         run: node --test tests/*.test.mjs
       - uses: quarto-dev/quarto-actions/setup@v2

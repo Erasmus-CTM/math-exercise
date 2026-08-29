@@ -172,15 +172,16 @@ test('dynamic matrix labels and AI answer summaries include shape', () => {
 test('custom matrix assessment records complete vector statuses for AI feedback', () => {
   const api = loadBundle();
   const assessment = {
-    Z: { columns: [true, false, 0.5, 'empty'] },
+    Z: { columns: [true, false, 'dependent', 0.5, 'empty'] },
     R: { rows: ['correct', 'wrong'] },
   };
   const xml = api.structuredAssessmentXml(assessment);
   assert.match(xml, /<matrix name="Z">/);
   assert.match(xml, /<column index="1" status="correct"\/>/);
   assert.match(xml, /<column index="2" status="incorrect"\/>/);
-  assert.match(xml, /<column index="3" status="partial"\/>/);
-  assert.match(xml, /<column index="4" status="empty"\/>/);
+  assert.match(xml, /<column index="3" status="dependent"\/>/);
+  assert.match(xml, /<column index="4" status="partial"\/>/);
+  assert.match(xml, /<column index="5" status="empty"\/>/);
   assert.match(xml, /<matrix name="R"><row index="1" status="correct"\/><row index="2" status="incorrect"\/><\/matrix>/);
   assert.equal(api.structuredGroupStatus(assessment, 'R', 'rows', 1), 'correct');
   assert.equal(api.structuredGroupStatus(assessment, 'R', 'rows', 2), 'incorrect');
@@ -195,11 +196,15 @@ test('normalizes task dollar math before raw HTML rendering', () => {
   assert.doesNotMatch(rendered.html, /\$/);
 });
 
-test('basis examples do not award vacuous credit and mark redundant vectors', () => {
-  assert.doesNotMatch(dynamicExamples, /contained\s*=\s*all\(/);
-  assert.equal((dynamicExamples.match(/coverage = min\(len\(accepted\), target_dim\) \/ target_dim/g) || []).length, 3);
-  assert.equal((dynamicExamples.match(/precision = len\(accepted\) \/ [ZBR]\.(?:cols|rows) if [ZBR]\.(?:cols|rows) else 0/g) || []).length, 3);
-  assert.equal((dynamicExamples.match(/adds_direction/g) || []).length, 9);
+test('basis examples delegate symmetric assessment to the shared helper', () => {
+  assert.equal((dynamicExamples.match(/return assess_basis\(/g) || []).length, 3);
+  assert.equal((dynamicExamples.match(/axis="columns"/g) || []).length, 2);
+  assert.equal((dynamicExamples.match(/axis="rows"/g) || []).length, 1);
+  assert.doesNotMatch(dynamicExamples, /accepted|adds_direction|redundant vector/);
+  assert.match(source, /dependent = rank < valid_count/);
+  assert.match(source, /\("dependent" if dependent else "correct"\) if valid else "incorrect"/);
+  assert.match(source, /coverage \* validity \* independence/);
+  assert.match(source, /\^\(correct\|dependent\|partial\|incorrect\|empty\|invalid\)\$/);
 });
 
 test('meaningful dynamic examples precede the empty-state edge cases', () => {

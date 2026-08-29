@@ -22,10 +22,11 @@ entering the matrix. Only dimensions that the exercise allows you to change are
 shown. Fill every visible cell, then select **Check**.
 
 In exercises that assess complete vectors, all cells in a row or column receive
-the same color. Green means that vector is valid *and adds a new independent
-direction*. A red vector may be outside the required space, zero, or redundant.
-The whole answer is correct only when the submitted vectors form a complete
-basis.
+the same color. Green vectors are valid and form an independent family. Yellow
+vectors belong to the required space, but the yellow family is linearly
+dependent; no one vector is singled out as “the redundant one.” A red vector is
+zero or outside the required space. The whole answer is correct only when the
+submitted vectors form a complete basis.
 :::
 
 ::: {.callout-note title="For exercise authors"}
@@ -35,6 +36,12 @@ Dynamic matrices use `mode: custom`. The checker receives the SymPy matrix at
 `response["inputs"][name]["matrix"]` and can return whole-vector assessment as
 `{"assessment": {"Z": {"columns": [...]}}}` or
 `{"assessment": {"R": {"rows": [...]}}}`.
+
+For basis problems, prefer the shared `assess_basis(...)` helper. The checker
+only supplies the submitted matrix, whether vectors are stored as rows or
+columns, the target dimension, and a test for membership in the target space.
+The helper calculates rank, permutation-invariant partial credit, colors, and
+standard feedback.
 :::
 
 ## Bases with an unknown number of vectors
@@ -47,9 +54,9 @@ must determine both the entries and the number of vectors.
 To check a proposed basis:
 
 1. Verify that every vector belongs to the required subspace.
-2. Remove zero or redundant vectors; every remaining vector must add a new
-   independent direction.
-3. Verify that the independent vectors span the entire subspace.
+2. Verify that the vectors are linearly independent. Dependence is a property
+   of the entire family, not of whichever vector happens to appear last.
+3. Verify that the independent family spans the entire subspace.
 
 :::
 
@@ -64,33 +71,14 @@ To check a proposed basis:
 #|   def check(response, symbols):
 #|       Z = response["inputs"]["Z"]["matrix"]
 #|       C = Matrix([[1, 2, 3], [2, 4, 6]])
-#|       target_dim = C.cols - C.rank()
-#|       accepted = []
-#|       column_status = []
-#|       for j in range(Z.cols):
-#|           vector = Z[:, j]
-#|           belongs = (
-#|               Z.rows == C.cols
-#|               and vector != zeros(Z.rows, 1)
-#|               and C * vector == zeros(C.rows, 1)
-#|           )
-#|           trial = accepted + [vector]
-#|           adds_direction = belongs and Matrix.hstack(*trial).rank() == len(trial)
-#|           column_status.append(adds_direction)
-#|           if adds_direction:
-#|               accepted.append(vector)
-#|       coverage = min(len(accepted), target_dim) / target_dim
-#|       precision = len(accepted) / Z.cols if Z.cols else 0
-#|       score = coverage * precision
-#|       feedback = "" if score == 1 else (
-#|           "This null space is not trivial; add basis vectors." if Z.cols == 0
-#|           else "A red column is zero, outside the null space, or redundant. Keep enough independent columns to span the null space."
+#|       return assess_basis(
+#|           Z,
+#|           axis="columns",
+#|           target_dimension=C.cols - C.rank(),
+#|           belongs=lambda vector: Z.rows == C.cols and C * vector == zeros(C.rows, 1),
+#|           name="Z",
+#|           space_name="null space",
 #|       )
-#|       return {
-#|           "score": score,
-#|           "feedback": feedback,
-#|           "assessment": {"Z": {"columns": column_status}}
-#|       }
 
 Give a basis for the null space of
 $C=\begin{bmatrix}1&2&3\\2&4&6\end{bmatrix}$.
@@ -111,33 +99,14 @@ $Z=$ mat{name=Z, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}
 #|   def check(response, symbols):
 #|       B = response["inputs"]["B"]["matrix"]
 #|       A = Matrix([[1, 2, 0], [0, 1, 1], [1, 3, 1]])
-#|       target_dim = A.rank()
-#|       accepted = []
-#|       column_status = []
-#|       for j in range(B.cols):
-#|           vector = B[:, j]
-#|           belongs = (
-#|               B.rows == A.rows
-#|               and vector != zeros(B.rows, 1)
-#|               and A.row_join(vector).rank() == A.rank()
-#|           )
-#|           trial = accepted + [vector]
-#|           adds_direction = belongs and Matrix.hstack(*trial).rank() == len(trial)
-#|           column_status.append(adds_direction)
-#|           if adds_direction:
-#|               accepted.append(vector)
-#|       coverage = min(len(accepted), target_dim) / target_dim
-#|       precision = len(accepted) / B.cols if B.cols else 0
-#|       score = coverage * precision
-#|       feedback = "" if score == 1 else (
-#|           "This column space is not trivial; add basis vectors." if B.cols == 0
-#|           else "A red column is zero, outside the column space, or redundant. Keep only enough independent columns to span the space."
+#|       return assess_basis(
+#|           B,
+#|           axis="columns",
+#|           target_dimension=A.rank(),
+#|           belongs=lambda vector: B.rows == A.rows and A.row_join(vector).rank() == A.rank(),
+#|           name="B",
+#|           space_name="column space",
 #|       )
-#|       return {
-#|           "score": score,
-#|           "feedback": feedback,
-#|           "assessment": {"B": {"columns": column_status}}
-#|       }
 
 Compute a basis for the column space of
 $A=\begin{bmatrix}1&2&0\\0&1&1\\1&3&1\end{bmatrix}$.
@@ -158,33 +127,14 @@ $B=$ mat{name=B, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}
 #|   def check(response, symbols):
 #|       R = response["inputs"]["R"]["matrix"]
 #|       A = Matrix([[1, 0, 1, 2], [0, 1, 1, 1], [1, 1, 2, 3]])
-#|       target_dim = A.rank()
-#|       accepted = []
-#|       row_status = []
-#|       for i in range(R.rows):
-#|           vector = R[i, :]
-#|           belongs = (
-#|               R.cols == A.cols
-#|               and vector != zeros(1, R.cols)
-#|               and A.col_join(vector).rank() == A.rank()
-#|           )
-#|           trial = accepted + [vector]
-#|           adds_direction = belongs and Matrix.vstack(*trial).rank() == len(trial)
-#|           row_status.append(adds_direction)
-#|           if adds_direction:
-#|               accepted.append(vector)
-#|       coverage = min(len(accepted), target_dim) / target_dim
-#|       precision = len(accepted) / R.rows if R.rows else 0
-#|       score = coverage * precision
-#|       feedback = "" if score == 1 else (
-#|           "This row space is not trivial; add basis vectors." if R.rows == 0
-#|           else "A red row is zero, outside the row space, or redundant. Keep only enough independent rows to span the space."
+#|       return assess_basis(
+#|           R,
+#|           axis="rows",
+#|           target_dimension=A.rank(),
+#|           belongs=lambda vector: R.cols == A.cols and A.col_join(vector).rank() == A.rank(),
+#|           name="R",
+#|           space_name="row space",
 #|       )
-#|       return {
-#|           "score": score,
-#|           "feedback": feedback,
-#|           "assessment": {"R": {"rows": row_status}}
-#|       }
 
 Compute a basis for the row space of
 $A=\begin{bmatrix}1&0&1&2\\0&1&1&1\\1&1&2&3\end{bmatrix}$.

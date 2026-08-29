@@ -240,6 +240,11 @@
   background:   #f0fff4 !important;
   color:        #14532d !important;
 }
+.math-input-dependent {
+  border-color: #c58a00 !important;
+  background:   #fff4bf !important;
+  color:        #5f4300 !important;
+}
 .math-input-partial {
   border-color: #d39e00 !important;
   background:   #fffbea !important;
