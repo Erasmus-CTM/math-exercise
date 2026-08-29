@@ -26,6 +26,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -753,6 +788,8 @@ select.math-modal-input {
   <li><a href="#null-space-basis" id="toc-null-space-basis" class="nav-link" data-scroll-target="#null-space-basis">Null-space basis</a></li>
   <li><a href="#column-space-basis" id="toc-column-space-basis" class="nav-link" data-scroll-target="#column-space-basis">Column-space basis</a></li>
   <li><a href="#row-space-basis" id="toc-row-space-basis" class="nav-link" data-scroll-target="#row-space-basis">Row-space basis</a></li>
+  <li><a href="#eigenspace-basis" id="toc-eigenspace-basis" class="nav-link" data-scroll-target="#eigenspace-basis">Eigenspace basis</a></li>
+  <li><a href="#basis-of-a-polynomial-subspace" id="toc-basis-of-a-polynomial-subspace" class="nav-link" data-scroll-target="#basis-of-a-polynomial-subspace">Basis of a polynomial subspace</a></li>
   </ul></li>
   <li><a href="#matrix-size-as-part-of-the-problem" id="toc-matrix-size-as-part-of-the-problem" class="nav-link" data-scroll-target="#matrix-size-as-part-of-the-problem">Matrix size as part of the problem</a>
   <ul class="collapse">
@@ -831,7 +868,16 @@ select.math-modal-input {
 </div>
 <div class="callout-body-container callout-body">
 <p>Write a resizable input as, for example, <code>mat{name=Z, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}</code>. Dynamic matrices use <code>mode: custom</code>. The checker receives the SymPy matrix at <code>response["inputs"][name]["matrix"]</code> and can return whole-vector assessment as <code>{"assessment": {"Z": {"columns": [...]}}}</code> or <code>{"assessment": {"R": {"rows": [...]}}}</code>.</p>
-<p>For basis problems, prefer the shared <code>assess_basis(...)</code> helper. The checker only supplies the submitted matrix, whether vectors are stored as rows or columns, the target dimension, and a test for membership in the target space. The helper calculates rank, permutation-invariant partial credit, colors, and standard feedback.</p>
+<p>For basis problems, prefer the shared <code>assess_basis(...)</code> helper. The checker only supplies the submitted matrix, whether vectors are stored as rows or columns, the target dimension, and a test for membership in the target space. The helper calculates rank, permutation-invariant partial credit, colors, and standard feedback. Its internal score is available for assessment but hidden from the student, because displaying it could reveal the unknown dimension.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> assess_basis(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    matrix,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    axis<span class="op">=</span><span class="st">"columns"</span>,          <span class="co"># or "rows"</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    target_dimension<span class="op">=</span>d,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    belongs<span class="op">=</span><span class="kw">lambda</span> vector: ...,  <span class="co"># True exactly for vectors in the target space</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">"B"</span>,                <span class="co"># the name used in mat{name=B, ...}</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    space_name<span class="op">=</span><span class="st">"target space"</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The helper rejects zero vectors itself, so <code>belongs</code> only needs to test membership. It returns the exercise score, qualitative feedback, and complete row or column assessment. Green means valid and independent, yellow means valid but part of a dependent submitted family, and red means zero or outside the target space. See the README for the complete API contract and scoring formula.</p>
 </div>
 </div>
 <section id="bases-with-an-unknown-number-of-vectors" class="level2">
@@ -1007,13 +1053,124 @@ $R=$ mat{name=R, rows=auto, cols=4, initial-rows=1, min-rows=0, max-rows=3}
 ```</code></pre>
 </details>
 </section>
+<section id="eigenspace-basis" class="level3">
+<h3 class="anchored" data-anchor-id="eigenspace-basis">Eigenspace basis</h3>
+<div class="math-exercise-cell" id="math-exercise-4" data-label="dynamic-eigenspace-basis" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    E = response[\&quot;inputs\&quot;][\&quot;E\&quot;][\&quot;matrix\&quot;]\n    A = Matrix([[2, 1, 1], [0, 2, 0], [0, 0, 2]])\n    constraint = A - 2*eye(3)\n    return assess_basis(\n        E,\n        axis=\&quot;columns\&quot;,\n        target_dimension=constraint.cols - constraint.rank(),\n        belongs=lambda vector: E.rows == A.rows and constraint * vector == zeros(A.rows, 1),\n        name=\&quot;E\&quot;,\n        space_name=\&quot;eigenspace\&quot;,\n    )&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="explicit" data-context-refs="dynamic-basis-method" data-context="&quot;Eigenspace basis&quot;" data-fields="[&quot;math-exercise-4-dm-E-1-1&quot;,&quot;math-exercise-4-dm-E-2-1&quot;,&quot;math-exercise-4-dm-E-3-1&quot;]" data-structural-field-labels="[&quot;dm:E:1,1&quot;,&quot;dm:E:2,1&quot;,&quot;dm:E:3,1&quot;]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Find a basis for an eigenspace</div>
+
+<div class="math-exercise-body" style="display:none;">
+<div class="math-exercise-question">Find a basis for the eigenspace of<br>
+\(A=\begin{bmatrix}2&amp;1&amp;1\\0&amp;2&amp;0\\0&amp;0&amp;2\end{bmatrix}\)<br>
+corresponding to the eigenvalue \(2\). Enter one eigenvector per column of \(E\);<br>
+the number of columns is part of your answer:<br>
+<br>
+\(E=\) <span class="math-dynamic-matrix-wrap" data-matrix-name="E"><span class="math-mat math-dynamic-mat" style="--cols:1" data-matrix-name="E" data-rows="3" data-cols="1" data-auto-rows="false" data-auto-cols="true" data-min-rows="3" data-max-rows="3" data-min-cols="0" data-max-cols="3" data-last-rows="3" data-last-cols="1"><input type="text" id="math-exercise-4-dm-E-1-1" data-answer="" data-vars="" data-dynamic-matrix-name="E" data-matrix-row="1" data-matrix-column="1" data-structural-label="dm:E:1,1" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-4-dm-E-2-1" data-answer="" data-vars="" data-dynamic-matrix-name="E" data-matrix-row="2" data-matrix-column="1" data-structural-label="dm:E:2,1" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-4-dm-E-3-1" data-answer="" data-vars="" data-dynamic-matrix-name="E" data-matrix-row="3" data-matrix-column="1" data-structural-label="dm:E:3,1" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span><span class="math-dynamic-matrix-controls" aria-label="Matrix size controls"><span class="math-dynamic-axis" data-dynamic-axis="row"><span class="math-dynamic-axis-label"></span><button type="button" data-dynamic-action="remove-row">−</button><output></output><button type="button" data-dynamic-action="add-row">+</button></span><span class="math-dynamic-axis" data-dynamic-axis="col"><span class="math-dynamic-axis-label"></span><button type="button" data-dynamic-action="remove-col">−</button><output></output><button type="button" data-dynamic-action="add-col">+</button></span></span></span></div>
+
+<div class="math-exercise-controls">
+  <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
+  <button type="button" class="btn btn-light math-legend-btn">ⓘ&nbsp;Input help</button>
+  <div class="btn-group">
+    <button type="button" class="btn btn-light math-feedback-btn">💬&nbsp;Feedback</button>
+    <button type="button" class="btn btn-light math-reconfig-btn" title="Change AI configuration">⚙</button>
+  </div>
+</div>
+<div class="math-legend-panel" style="display:none;"></div>
+<div class="math-feedback-area"></div>
+</div>
+</div>
+<details class="math-example-source">
+  <summary>Show source</summary>
+  <pre><code class="language-markdown">```{math-exercise}
+#| label: dynamic-eigenspace-basis
+#| caption: Find a basis for an eigenspace
+#| mode: custom
+#| context: dynamic-basis-method
+#| checker: |
+#|   def check(response, symbols):
+#|       E = response["inputs"]["E"]["matrix"]
+#|       A = Matrix([[2, 1, 1], [0, 2, 0], [0, 0, 2]])
+#|       constraint = A - 2*eye(3)
+#|       return assess_basis(
+#|           E,
+#|           axis="columns",
+#|           target_dimension=constraint.cols - constraint.rank(),
+#|           belongs=lambda vector: E.rows == A.rows and constraint * vector == zeros(A.rows, 1),
+#|           name="E",
+#|           space_name="eigenspace",
+#|       )
+
+Find a basis for the eigenspace of
+$A=\begin{bmatrix}2&amp;1&amp;1\\0&amp;2&amp;0\\0&amp;0&amp;2\end{bmatrix}$
+corresponding to the eigenvalue $2$. Enter one eigenvector per column of $E$;
+the number of columns is part of your answer:
+
+$E=$ mat{name=E, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}
+```</code></pre>
+</details>
+</section>
+<section id="basis-of-a-polynomial-subspace" class="level3">
+<h3 class="anchored" data-anchor-id="basis-of-a-polynomial-subspace">Basis of a polynomial subspace</h3>
+<div class="math-exercise-cell" id="math-exercise-5" data-label="dynamic-polynomial-basis" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    P = response[\&quot;inputs\&quot;][\&quot;Pcoef\&quot;][\&quot;matrix\&quot;]\n    constraints = Matrix([[1, 1, 1, 1], [0, 1, -2, 3]])\n    return assess_basis(\n        P,\n        axis=\&quot;columns\&quot;,\n        target_dimension=constraints.cols - constraints.rank(),\n        belongs=lambda vector: P.rows == constraints.cols and constraints * vector == zeros(constraints.rows, 1),\n        name=\&quot;Pcoef\&quot;,\n        space_name=\&quot;polynomial subspace\&quot;,\n    )&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="explicit" data-context-refs="dynamic-basis-method" data-context="&quot;Basis of a polynomial subspace&quot;" data-fields="[&quot;math-exercise-5-dm-Pcoef-1-1&quot;,&quot;math-exercise-5-dm-Pcoef-2-1&quot;,&quot;math-exercise-5-dm-Pcoef-3-1&quot;,&quot;math-exercise-5-dm-Pcoef-4-1&quot;]" data-structural-field-labels="[&quot;dm:Pcoef:1,1&quot;,&quot;dm:Pcoef:2,1&quot;,&quot;dm:Pcoef:3,1&quot;,&quot;dm:Pcoef:4,1&quot;]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Encode polynomials as coefficient vectors</div>
+
+<div class="math-exercise-body" style="display:none;">
+<div class="math-exercise-question">Let \(W\) be the subspace of polynomials<br>
+\(p(x)=a+bx+cx^2+dx^3\) satisfying \(p(1)=0\) and \(p'(-1)=0\).<br>
+Represent each polynomial by its coefficient vector<br>
+\(\begin{bmatrix}a&amp;b&amp;c&amp;d\end{bmatrix}^{\mathsf T}\) and enter one basis vector<br>
+per column of \(P\):<br>
+<br>
+\(P=\) <span class="math-dynamic-matrix-wrap" data-matrix-name="Pcoef"><span class="math-mat math-dynamic-mat" style="--cols:1" data-matrix-name="Pcoef" data-rows="4" data-cols="1" data-auto-rows="false" data-auto-cols="true" data-min-rows="4" data-max-rows="4" data-min-cols="0" data-max-cols="4" data-last-rows="4" data-last-cols="1"><input type="text" id="math-exercise-5-dm-Pcoef-1-1" data-answer="" data-vars="" data-dynamic-matrix-name="Pcoef" data-matrix-row="1" data-matrix-column="1" data-structural-label="dm:Pcoef:1,1" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-5-dm-Pcoef-2-1" data-answer="" data-vars="" data-dynamic-matrix-name="Pcoef" data-matrix-row="2" data-matrix-column="1" data-structural-label="dm:Pcoef:2,1" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-5-dm-Pcoef-3-1" data-answer="" data-vars="" data-dynamic-matrix-name="Pcoef" data-matrix-row="3" data-matrix-column="1" data-structural-label="dm:Pcoef:3,1" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-5-dm-Pcoef-4-1" data-answer="" data-vars="" data-dynamic-matrix-name="Pcoef" data-matrix-row="4" data-matrix-column="1" data-structural-label="dm:Pcoef:4,1" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span><span class="math-dynamic-matrix-controls" aria-label="Matrix size controls"><span class="math-dynamic-axis" data-dynamic-axis="row"><span class="math-dynamic-axis-label"></span><button type="button" data-dynamic-action="remove-row">−</button><output></output><button type="button" data-dynamic-action="add-row">+</button></span><span class="math-dynamic-axis" data-dynamic-axis="col"><span class="math-dynamic-axis-label"></span><button type="button" data-dynamic-action="remove-col">−</button><output></output><button type="button" data-dynamic-action="add-col">+</button></span></span></span></div>
+
+<div class="math-exercise-controls">
+  <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
+  <button type="button" class="btn btn-light math-legend-btn">ⓘ&nbsp;Input help</button>
+  <div class="btn-group">
+    <button type="button" class="btn btn-light math-feedback-btn">💬&nbsp;Feedback</button>
+    <button type="button" class="btn btn-light math-reconfig-btn" title="Change AI configuration">⚙</button>
+  </div>
+</div>
+<div class="math-legend-panel" style="display:none;"></div>
+<div class="math-feedback-area"></div>
+</div>
+</div>
+<details class="math-example-source">
+  <summary>Show source</summary>
+  <pre><code class="language-markdown">```{math-exercise}
+#| label: dynamic-polynomial-basis
+#| caption: Encode polynomials as coefficient vectors
+#| mode: custom
+#| context: dynamic-basis-method
+#| checker: |
+#|   def check(response, symbols):
+#|       P = response["inputs"]["Pcoef"]["matrix"]
+#|       constraints = Matrix([[1, 1, 1, 1], [0, 1, -2, 3]])
+#|       return assess_basis(
+#|           P,
+#|           axis="columns",
+#|           target_dimension=constraints.cols - constraints.rank(),
+#|           belongs=lambda vector: P.rows == constraints.cols and constraints * vector == zeros(constraints.rows, 1),
+#|           name="Pcoef",
+#|           space_name="polynomial subspace",
+#|       )
+
+Let $W$ be the subspace of polynomials
+$p(x)=a+bx+cx^2+dx^3$ satisfying $p(1)=0$ and $p'(-1)=0$.
+Represent each polynomial by its coefficient vector
+$\begin{bmatrix}a&amp;b&amp;c&amp;d\end{bmatrix}^{\mathsf T}$ and enter one basis vector
+per column of $P$:
+
+$P=$ mat{name=Pcoef, rows=4, cols=auto, initial-cols=1, min-cols=0, max-cols=4}
+```</code></pre>
+</details>
+</section>
 </section>
 <section id="matrix-size-as-part-of-the-problem" class="level2">
 <h2 class="anchored" data-anchor-id="matrix-size-as-part-of-the-problem">Matrix size as part of the problem</h2>
 <p>These exercises use adjustable dimensions for reasons other than choosing a basis. Read the task before changing the initial size.</p>
 <section id="hessian-with-three-variables" class="level3">
 <h3 class="anchored" data-anchor-id="hessian-with-three-variables">Hessian with three variables</h3>
-<div class="math-exercise-cell" id="math-exercise-4" data-label="dynamic-hessian" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    H = response[\&quot;inputs\&quot;][\&quot;H\&quot;][\&quot;matrix\&quot;]\n    target = Matrix([[2, 1, 0], [1, 4, 1], [0, 1, 6]])\n    shape_ok = H.shape == target.shape\n    row_status = [\n        shape_ok and all(simplify(H[i, j] - target[i, j]) == 0 for j in range(3))\n        for i in range(H.rows)\n    ]\n    score = sum(row_status) / 3\n    return {\n        \&quot;score\&quot;: score,\n        \&quot;feedback\&quot;: \&quot;\&quot; if score == 1 else \&quot;A Hessian has one row and one column for every variable. After fixing the size, check each second derivative.\&quot;,\n        \&quot;assessment\&quot;: {\&quot;H\&quot;: {\&quot;rows\&quot;: row_status}}\n    }&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Hessian with three variables&quot;" data-fields="[&quot;math-exercise-4-dm-H-1-1&quot;,&quot;math-exercise-4-dm-H-1-2&quot;,&quot;math-exercise-4-dm-H-2-1&quot;,&quot;math-exercise-4-dm-H-2-2&quot;]" data-structural-field-labels="[&quot;dm:H:1,1&quot;,&quot;dm:H:1,2&quot;,&quot;dm:H:2,1&quot;,&quot;dm:H:2,2&quot;]">
+<div class="math-exercise-cell" id="math-exercise-6" data-label="dynamic-hessian" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    H = response[\&quot;inputs\&quot;][\&quot;H\&quot;][\&quot;matrix\&quot;]\n    target = Matrix([[2, 1, 0], [1, 4, 1], [0, 1, 6]])\n    shape_ok = H.shape == target.shape\n    row_status = [\n        shape_ok and all(simplify(H[i, j] - target[i, j]) == 0 for j in range(3))\n        for i in range(H.rows)\n    ]\n    score = sum(row_status) / 3\n    return {\n        \&quot;score\&quot;: score,\n        \&quot;feedback\&quot;: \&quot;\&quot; if score == 1 else \&quot;A Hessian has one row and one column for every variable. After fixing the size, check each second derivative.\&quot;,\n        \&quot;assessment\&quot;: {\&quot;H\&quot;: {\&quot;rows\&quot;: row_status}}\n    }&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Hessian with three variables&quot;" data-fields="[&quot;math-exercise-6-dm-H-1-1&quot;,&quot;math-exercise-6-dm-H-1-2&quot;,&quot;math-exercise-6-dm-H-2-1&quot;,&quot;math-exercise-6-dm-H-2-2&quot;]" data-structural-field-labels="[&quot;dm:H:1,1&quot;,&quot;dm:H:1,2&quot;,&quot;dm:H:2,1&quot;,&quot;dm:H:2,2&quot;]">
 <div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Build a 3 × 3 Hessian from a 2 × 2 start</div>
 
 <div class="math-exercise-body" style="display:none;">
@@ -1022,7 +1179,7 @@ $R=$ mat{name=R, rows=auto, cols=4, initial-rows=1, min-rows=0, max-rows=3}
 There are three variables, but the input deliberately starts at \(2\times2\).<br>
 First correct its size, then enter the second derivatives:<br>
 <br>
-\(H_f=\) <span class="math-dynamic-matrix-wrap" data-matrix-name="H"><span class="math-mat math-dynamic-mat" style="--cols:2" data-matrix-name="H" data-rows="2" data-cols="2" data-auto-rows="true" data-auto-cols="true" data-min-rows="1" data-max-rows="3" data-min-cols="1" data-max-cols="3" data-last-rows="2" data-last-cols="2"><input type="text" id="math-exercise-4-dm-H-1-1" data-answer="" data-vars="" data-dynamic-matrix-name="H" data-matrix-row="1" data-matrix-column="1" data-structural-label="dm:H:1,1" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-4-dm-H-1-2" data-answer="" data-vars="" data-dynamic-matrix-name="H" data-matrix-row="1" data-matrix-column="2" data-structural-label="dm:H:1,2" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-4-dm-H-2-1" data-answer="" data-vars="" data-dynamic-matrix-name="H" data-matrix-row="2" data-matrix-column="1" data-structural-label="dm:H:2,1" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-4-dm-H-2-2" data-answer="" data-vars="" data-dynamic-matrix-name="H" data-matrix-row="2" data-matrix-column="2" data-structural-label="dm:H:2,2" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span><span class="math-dynamic-matrix-controls" aria-label="Matrix size controls"><span class="math-dynamic-axis" data-dynamic-axis="row"><span class="math-dynamic-axis-label"></span><button type="button" data-dynamic-action="remove-row">−</button><output></output><button type="button" data-dynamic-action="add-row">+</button></span><span class="math-dynamic-axis" data-dynamic-axis="col"><span class="math-dynamic-axis-label"></span><button type="button" data-dynamic-action="remove-col">−</button><output></output><button type="button" data-dynamic-action="add-col">+</button></span></span></span></div>
+\(H_f=\) <span class="math-dynamic-matrix-wrap" data-matrix-name="H"><span class="math-mat math-dynamic-mat" style="--cols:2" data-matrix-name="H" data-rows="2" data-cols="2" data-auto-rows="true" data-auto-cols="true" data-min-rows="1" data-max-rows="3" data-min-cols="1" data-max-cols="3" data-last-rows="2" data-last-cols="2"><input type="text" id="math-exercise-6-dm-H-1-1" data-answer="" data-vars="" data-dynamic-matrix-name="H" data-matrix-row="1" data-matrix-column="1" data-structural-label="dm:H:1,1" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-6-dm-H-1-2" data-answer="" data-vars="" data-dynamic-matrix-name="H" data-matrix-row="1" data-matrix-column="2" data-structural-label="dm:H:1,2" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-6-dm-H-2-1" data-answer="" data-vars="" data-dynamic-matrix-name="H" data-matrix-row="2" data-matrix-column="1" data-structural-label="dm:H:2,1" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-6-dm-H-2-2" data-answer="" data-vars="" data-dynamic-matrix-name="H" data-matrix-row="2" data-matrix-column="2" data-structural-label="dm:H:2,2" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span><span class="math-dynamic-matrix-controls" aria-label="Matrix size controls"><span class="math-dynamic-axis" data-dynamic-axis="row"><span class="math-dynamic-axis-label"></span><button type="button" data-dynamic-action="remove-row">−</button><output></output><button type="button" data-dynamic-action="add-row">+</button></span><span class="math-dynamic-axis" data-dynamic-axis="col"><span class="math-dynamic-axis-label"></span><button type="button" data-dynamic-action="remove-col">−</button><output></output><button type="button" data-dynamic-action="add-col">+</button></span></span></span></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -1069,7 +1226,7 @@ $H_f=$ mat{name=H, rows=auto, cols=auto, initial-rows=2, initial-cols=2, min-row
 </section>
 <section id="adjacency-matrix-of-a-path" class="level3">
 <h3 class="anchored" data-anchor-id="adjacency-matrix-of-a-path">Adjacency matrix of a path</h3>
-<div class="math-exercise-cell" id="math-exercise-5" data-label="dynamic-path-adjacency" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    P = response[\&quot;inputs\&quot;][\&quot;Pth\&quot;][\&quot;matrix\&quot;]\n    square = P.rows == P.cols\n    target = Matrix(P.rows, P.cols, lambda i, j: int(abs(i-j) == 1)) if square else None\n    row_status = [\n        square and all(simplify(P[i, j] - target[i, j]) == 0 for j in range(P.cols))\n        for i in range(P.rows)\n    ]\n    score = sum(row_status) / P.rows if P.rows else 0\n    return {\n        \&quot;score\&quot;: score,\n        \&quot;feedback\&quot;: \&quot;\&quot; if score == 1 else \&quot;The matrix must be square. Put 1 exactly where consecutive vertices meet and 0 everywhere else.\&quot;,\n        \&quot;assessment\&quot;: {\&quot;Pth\&quot;: {\&quot;rows\&quot;: row_status}}\n    }&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Adjacency matrix of a path&quot;" data-fields="[&quot;math-exercise-5-dm-Pth-1-1&quot;,&quot;math-exercise-5-dm-Pth-1-2&quot;,&quot;math-exercise-5-dm-Pth-2-1&quot;,&quot;math-exercise-5-dm-Pth-2-2&quot;]" data-structural-field-labels="[&quot;dm:Pth:1,1&quot;,&quot;dm:Pth:1,2&quot;,&quot;dm:Pth:2,1&quot;,&quot;dm:Pth:2,2&quot;]">
+<div class="math-exercise-cell" id="math-exercise-7" data-label="dynamic-path-adjacency" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    P = response[\&quot;inputs\&quot;][\&quot;Pth\&quot;][\&quot;matrix\&quot;]\n    square = P.rows == P.cols\n    target = Matrix(P.rows, P.cols, lambda i, j: int(abs(i-j) == 1)) if square else None\n    row_status = [\n        square and all(simplify(P[i, j] - target[i, j]) == 0 for j in range(P.cols))\n        for i in range(P.rows)\n    ]\n    score = sum(row_status) / P.rows if P.rows else 0\n    return {\n        \&quot;score\&quot;: score,\n        \&quot;feedback\&quot;: \&quot;\&quot; if score == 1 else \&quot;The matrix must be square. Put 1 exactly where consecutive vertices meet and 0 everywhere else.\&quot;,\n        \&quot;assessment\&quot;: {\&quot;Pth\&quot;: {\&quot;rows\&quot;: row_status}}\n    }&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Adjacency matrix of a path&quot;" data-fields="[&quot;math-exercise-7-dm-Pth-1-1&quot;,&quot;math-exercise-7-dm-Pth-1-2&quot;,&quot;math-exercise-7-dm-Pth-2-1&quot;,&quot;math-exercise-7-dm-Pth-2-2&quot;]" data-structural-field-labels="[&quot;dm:Pth:1,1&quot;,&quot;dm:Pth:1,2&quot;,&quot;dm:Pth:2,1&quot;,&quot;dm:Pth:2,2&quot;]">
 <div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Let the matrix size choose the graph</div>
 
 <div class="math-exercise-body" style="display:none;">
@@ -1077,7 +1234,7 @@ $H_f=$ mat{name=H, rows=auto, cols=auto, initial-rows=2, initial-cols=2, min-row
 path \(v_1-v_2-\cdots-v_n\). The number of rows and columns chooses \(n\).<br>
 Consecutive vertices are joined; no other pair is joined:<br>
 <br>
-\(P_n=\) <span class="math-dynamic-matrix-wrap" data-matrix-name="Pth"><span class="math-mat math-dynamic-mat" style="--cols:2" data-matrix-name="Pth" data-rows="2" data-cols="2" data-auto-rows="true" data-auto-cols="true" data-min-rows="2" data-max-rows="5" data-min-cols="2" data-max-cols="5" data-last-rows="2" data-last-cols="2"><input type="text" id="math-exercise-5-dm-Pth-1-1" data-answer="" data-vars="" data-dynamic-matrix-name="Pth" data-matrix-row="1" data-matrix-column="1" data-structural-label="dm:Pth:1,1" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-5-dm-Pth-1-2" data-answer="" data-vars="" data-dynamic-matrix-name="Pth" data-matrix-row="1" data-matrix-column="2" data-structural-label="dm:Pth:1,2" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-5-dm-Pth-2-1" data-answer="" data-vars="" data-dynamic-matrix-name="Pth" data-matrix-row="2" data-matrix-column="1" data-structural-label="dm:Pth:2,1" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-5-dm-Pth-2-2" data-answer="" data-vars="" data-dynamic-matrix-name="Pth" data-matrix-row="2" data-matrix-column="2" data-structural-label="dm:Pth:2,2" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span><span class="math-dynamic-matrix-controls" aria-label="Matrix size controls"><span class="math-dynamic-axis" data-dynamic-axis="row"><span class="math-dynamic-axis-label"></span><button type="button" data-dynamic-action="remove-row">−</button><output></output><button type="button" data-dynamic-action="add-row">+</button></span><span class="math-dynamic-axis" data-dynamic-axis="col"><span class="math-dynamic-axis-label"></span><button type="button" data-dynamic-action="remove-col">−</button><output></output><button type="button" data-dynamic-action="add-col">+</button></span></span></span></div>
+\(P_n=\) <span class="math-dynamic-matrix-wrap" data-matrix-name="Pth"><span class="math-mat math-dynamic-mat" style="--cols:2" data-matrix-name="Pth" data-rows="2" data-cols="2" data-auto-rows="true" data-auto-cols="true" data-min-rows="2" data-max-rows="5" data-min-cols="2" data-max-cols="5" data-last-rows="2" data-last-cols="2"><input type="text" id="math-exercise-7-dm-Pth-1-1" data-answer="" data-vars="" data-dynamic-matrix-name="Pth" data-matrix-row="1" data-matrix-column="1" data-structural-label="dm:Pth:1,1" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-7-dm-Pth-1-2" data-answer="" data-vars="" data-dynamic-matrix-name="Pth" data-matrix-row="1" data-matrix-column="2" data-structural-label="dm:Pth:1,2" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-7-dm-Pth-2-1" data-answer="" data-vars="" data-dynamic-matrix-name="Pth" data-matrix-row="2" data-matrix-column="1" data-structural-label="dm:Pth:2,1" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-7-dm-Pth-2-2" data-answer="" data-vars="" data-dynamic-matrix-name="Pth" data-matrix-row="2" data-matrix-column="2" data-structural-label="dm:Pth:2,2" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span><span class="math-dynamic-matrix-controls" aria-label="Matrix size controls"><span class="math-dynamic-axis" data-dynamic-axis="row"><span class="math-dynamic-axis-label"></span><button type="button" data-dynamic-action="remove-row">−</button><output></output><button type="button" data-dynamic-action="add-row">+</button></span><span class="math-dynamic-axis" data-dynamic-axis="col"><span class="math-dynamic-axis-label"></span><button type="button" data-dynamic-action="remove-col">−</button><output></output><button type="button" data-dynamic-action="add-col">+</button></span></span></span></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -1123,14 +1280,14 @@ $P_n=$ mat{name=Pth, rows=auto, cols=auto, initial-rows=2, initial-cols=2, min-r
 </section>
 <section id="a-variable-length-list-of-points" class="level3">
 <h3 class="anchored" data-anchor-id="a-variable-length-list-of-points">A variable-length list of points</h3>
-<div class="math-exercise-cell" id="math-exercise-6" data-label="dynamic-point-rows" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    P = response[\&quot;inputs\&quot;][\&quot;P\&quot;][\&quot;matrix\&quot;]\n    seen = set()\n    row_status = []\n    for i in range(P.rows):\n        point = tuple(P.row(i))\n        valid = simplify(P[i, 1] - 2*P[i, 0]) == 0 and point not in seen\n        row_status.append(valid)\n        if valid:\n            seen.add(point)\n    score = sum(row_status) / P.rows\n    return {\n        \&quot;score\&quot;: score,\n        \&quot;feedback\&quot;: \&quot;\&quot; if score == 1 else \&quot;Each red row must be changed: it is either off the line or duplicates an earlier point.\&quot;,\n        \&quot;assessment\&quot;: {\&quot;P\&quot;: {\&quot;rows\&quot;: row_status}}\n    }&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;A variable-length list of points&quot;" data-fields="[&quot;math-exercise-6-dm-P-1-1&quot;,&quot;math-exercise-6-dm-P-1-2&quot;,&quot;math-exercise-6-dm-P-2-1&quot;,&quot;math-exercise-6-dm-P-2-2&quot;]" data-structural-field-labels="[&quot;dm:P:1,1&quot;,&quot;dm:P:1,2&quot;,&quot;dm:P:2,1&quot;,&quot;dm:P:2,2&quot;]">
+<div class="math-exercise-cell" id="math-exercise-8" data-label="dynamic-point-rows" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    P = response[\&quot;inputs\&quot;][\&quot;P\&quot;][\&quot;matrix\&quot;]\n    seen = set()\n    row_status = []\n    for i in range(P.rows):\n        point = tuple(P.row(i))\n        valid = simplify(P[i, 1] - 2*P[i, 0]) == 0 and point not in seen\n        row_status.append(valid)\n        if valid:\n            seen.add(point)\n    score = sum(row_status) / P.rows\n    return {\n        \&quot;score\&quot;: score,\n        \&quot;feedback\&quot;: \&quot;\&quot; if score == 1 else \&quot;Each red row must be changed: it is either off the line or duplicates an earlier point.\&quot;,\n        \&quot;assessment\&quot;: {\&quot;P\&quot;: {\&quot;rows\&quot;: row_status}}\n    }&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;A variable-length list of points&quot;" data-fields="[&quot;math-exercise-8-dm-P-1-1&quot;,&quot;math-exercise-8-dm-P-1-2&quot;,&quot;math-exercise-8-dm-P-2-1&quot;,&quot;math-exercise-8-dm-P-2-2&quot;]" data-structural-field-labels="[&quot;dm:P:1,1&quot;,&quot;dm:P:1,2&quot;,&quot;dm:P:2,1&quot;,&quot;dm:P:2,2&quot;]">
 <div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Choose how many points to submit</div>
 
 <div class="math-exercise-body" style="display:none;">
 <div class="math-exercise-question">Give between two and four distinct points on the line \(y=2x\). Enter one point<br>
 \((x,y)\) per row. Use the row controls to choose how many points to submit:<br>
 <br>
-\(P=\) <span class="math-dynamic-matrix-wrap" data-matrix-name="P"><span class="math-mat math-dynamic-mat" style="--cols:2" data-matrix-name="P" data-rows="2" data-cols="2" data-auto-rows="true" data-auto-cols="false" data-min-rows="2" data-max-rows="4" data-min-cols="2" data-max-cols="2" data-last-rows="2" data-last-cols="2"><input type="text" id="math-exercise-6-dm-P-1-1" data-answer="" data-vars="" data-dynamic-matrix-name="P" data-matrix-row="1" data-matrix-column="1" data-structural-label="dm:P:1,1" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-6-dm-P-1-2" data-answer="" data-vars="" data-dynamic-matrix-name="P" data-matrix-row="1" data-matrix-column="2" data-structural-label="dm:P:1,2" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-6-dm-P-2-1" data-answer="" data-vars="" data-dynamic-matrix-name="P" data-matrix-row="2" data-matrix-column="1" data-structural-label="dm:P:2,1" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-6-dm-P-2-2" data-answer="" data-vars="" data-dynamic-matrix-name="P" data-matrix-row="2" data-matrix-column="2" data-structural-label="dm:P:2,2" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span><span class="math-dynamic-matrix-controls" aria-label="Matrix size controls"><span class="math-dynamic-axis" data-dynamic-axis="row"><span class="math-dynamic-axis-label"></span><button type="button" data-dynamic-action="remove-row">−</button><output></output><button type="button" data-dynamic-action="add-row">+</button></span><span class="math-dynamic-axis" data-dynamic-axis="col"><span class="math-dynamic-axis-label"></span><button type="button" data-dynamic-action="remove-col">−</button><output></output><button type="button" data-dynamic-action="add-col">+</button></span></span></span></div>
+\(P=\) <span class="math-dynamic-matrix-wrap" data-matrix-name="P"><span class="math-mat math-dynamic-mat" style="--cols:2" data-matrix-name="P" data-rows="2" data-cols="2" data-auto-rows="true" data-auto-cols="false" data-min-rows="2" data-max-rows="4" data-min-cols="2" data-max-cols="2" data-last-rows="2" data-last-cols="2"><input type="text" id="math-exercise-8-dm-P-1-1" data-answer="" data-vars="" data-dynamic-matrix-name="P" data-matrix-row="1" data-matrix-column="1" data-structural-label="dm:P:1,1" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-8-dm-P-1-2" data-answer="" data-vars="" data-dynamic-matrix-name="P" data-matrix-row="1" data-matrix-column="2" data-structural-label="dm:P:1,2" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-8-dm-P-2-1" data-answer="" data-vars="" data-dynamic-matrix-name="P" data-matrix-row="2" data-matrix-column="1" data-structural-label="dm:P:2,1" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-8-dm-P-2-2" data-answer="" data-vars="" data-dynamic-matrix-name="P" data-matrix-row="2" data-matrix-column="2" data-structural-label="dm:P:2,2" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span><span class="math-dynamic-matrix-controls" aria-label="Matrix size controls"><span class="math-dynamic-axis" data-dynamic-axis="row"><span class="math-dynamic-axis-label"></span><button type="button" data-dynamic-action="remove-row">−</button><output></output><button type="button" data-dynamic-action="add-row">+</button></span><span class="math-dynamic-axis" data-dynamic-axis="col"><span class="math-dynamic-axis-label"></span><button type="button" data-dynamic-action="remove-col">−</button><output></output><button type="button" data-dynamic-action="add-col">+</button></span></span></span></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -1177,14 +1334,14 @@ $P=$ mat{name=P, rows=auto, cols=2, initial-rows=2, min-rows=2, max-rows=4}
 </section>
 <section id="a-non-square-zero-matrix" class="level3">
 <h3 class="anchored" data-anchor-id="a-non-square-zero-matrix">A non-square zero matrix</h3>
-<div class="math-exercise-cell" id="math-exercise-7" data-label="dynamic-both-dimensions" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    A = response[\&quot;inputs\&quot;][\&quot;A\&quot;][\&quot;matrix\&quot;]\n    non_square = A.rows != A.cols\n    zero = A == zeros(A.rows, A.cols)\n    score = (int(non_square) + int(zero)) / 2\n    return {\n        \&quot;score\&quot;: score,\n        \&quot;feedback\&quot;: \&quot;\&quot; if score == 1 else \&quot;The matrix must have different numbers of rows and columns, and every entry must be zero.\&quot;\n    }&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;A non-square zero matrix&quot;" data-fields="[&quot;math-exercise-7-dm-A-1-1&quot;,&quot;math-exercise-7-dm-A-2-1&quot;]" data-structural-field-labels="[&quot;dm:A:1,1&quot;,&quot;dm:A:2,1&quot;]">
+<div class="math-exercise-cell" id="math-exercise-9" data-label="dynamic-both-dimensions" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    A = response[\&quot;inputs\&quot;][\&quot;A\&quot;][\&quot;matrix\&quot;]\n    non_square = A.rows != A.cols\n    zero = A == zeros(A.rows, A.cols)\n    score = (int(non_square) + int(zero)) / 2\n    return {\n        \&quot;score\&quot;: score,\n        \&quot;feedback\&quot;: \&quot;\&quot; if score == 1 else \&quot;The matrix must have different numbers of rows and columns, and every entry must be zero.\&quot;\n    }&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;A non-square zero matrix&quot;" data-fields="[&quot;math-exercise-9-dm-A-1-1&quot;,&quot;math-exercise-9-dm-A-2-1&quot;]" data-structural-field-labels="[&quot;dm:A:1,1&quot;,&quot;dm:A:2,1&quot;]">
 <div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Choose both dimensions</div>
 
 <div class="math-exercise-body" style="display:none;">
 <div class="math-exercise-question">Give any non-square zero matrix with at least one row and one column. Both its<br>
 size and its entries are part of the answer:<br>
 <br>
-\(A=\) <span class="math-dynamic-matrix-wrap" data-matrix-name="A"><span class="math-mat math-dynamic-mat" style="--cols:1" data-matrix-name="A" data-rows="2" data-cols="1" data-auto-rows="true" data-auto-cols="true" data-min-rows="1" data-max-rows="4" data-min-cols="1" data-max-cols="4" data-last-rows="2" data-last-cols="1"><input type="text" id="math-exercise-7-dm-A-1-1" data-answer="" data-vars="" data-dynamic-matrix-name="A" data-matrix-row="1" data-matrix-column="1" data-structural-label="dm:A:1,1" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-7-dm-A-2-1" data-answer="" data-vars="" data-dynamic-matrix-name="A" data-matrix-row="2" data-matrix-column="1" data-structural-label="dm:A:2,1" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span><span class="math-dynamic-matrix-controls" aria-label="Matrix size controls"><span class="math-dynamic-axis" data-dynamic-axis="row"><span class="math-dynamic-axis-label"></span><button type="button" data-dynamic-action="remove-row">−</button><output></output><button type="button" data-dynamic-action="add-row">+</button></span><span class="math-dynamic-axis" data-dynamic-axis="col"><span class="math-dynamic-axis-label"></span><button type="button" data-dynamic-action="remove-col">−</button><output></output><button type="button" data-dynamic-action="add-col">+</button></span></span></span></div>
+\(A=\) <span class="math-dynamic-matrix-wrap" data-matrix-name="A"><span class="math-mat math-dynamic-mat" style="--cols:1" data-matrix-name="A" data-rows="2" data-cols="1" data-auto-rows="true" data-auto-cols="true" data-min-rows="1" data-max-rows="4" data-min-cols="1" data-max-cols="4" data-last-rows="2" data-last-cols="1"><input type="text" id="math-exercise-9-dm-A-1-1" data-answer="" data-vars="" data-dynamic-matrix-name="A" data-matrix-row="1" data-matrix-column="1" data-structural-label="dm:A:1,1" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-9-dm-A-2-1" data-answer="" data-vars="" data-dynamic-matrix-name="A" data-matrix-row="2" data-matrix-column="1" data-structural-label="dm:A:2,1" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span><span class="math-dynamic-matrix-controls" aria-label="Matrix size controls"><span class="math-dynamic-axis" data-dynamic-axis="row"><span class="math-dynamic-axis-label"></span><button type="button" data-dynamic-action="remove-row">−</button><output></output><button type="button" data-dynamic-action="add-row">+</button></span><span class="math-dynamic-axis" data-dynamic-axis="col"><span class="math-dynamic-axis-label"></span><button type="button" data-dynamic-action="remove-col">−</button><output></output><button type="button" data-dynamic-action="add-col">+</button></span></span></span></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -1228,14 +1385,14 @@ $A=$ mat{name=A, rows=auto, cols=auto, initial-rows=2, initial-cols=1, min-rows=
 <p>The final two exercises test the canonical empty state. A matrix with no entries is shown simply as <strong>Empty matrix</strong>, regardless of whether the last action removed its final row or its final column. Adding a row or column restores the other configured dimension.</p>
 <section id="empty-basis-for-a-trivial-null-space" class="level3">
 <h3 class="anchored" data-anchor-id="empty-basis-for-a-trivial-null-space">Empty basis for a trivial null space</h3>
-<div class="math-exercise-cell" id="math-exercise-8" data-label="dynamic-zero-columns" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    Z = response[\&quot;inputs\&quot;][\&quot;Z0\&quot;][\&quot;matrix\&quot;]\n    correct = Z.rows == 0 and Z.cols == 0\n    return {\n        \&quot;correct\&quot;: correct,\n        \&quot;feedback\&quot;: \&quot;\&quot; if correct else \&quot;The null space contains only the zero vector, so its basis contains no vectors. Remove the remaining column.\&quot;\n    }&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Empty basis for a trivial null space&quot;" data-fields="[&quot;math-exercise-8-dm-Z0-1-1&quot;,&quot;math-exercise-8-dm-Z0-2-1&quot;]" data-structural-field-labels="[&quot;dm:Z0:1,1&quot;,&quot;dm:Z0:2,1&quot;]">
+<div class="math-exercise-cell" id="math-exercise-10" data-label="dynamic-zero-columns" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    Z = response[\&quot;inputs\&quot;][\&quot;Z0\&quot;][\&quot;matrix\&quot;]\n    correct = Z.rows == 0 and Z.cols == 0\n    return {\n        \&quot;correct\&quot;: correct,\n        \&quot;feedback\&quot;: \&quot;\&quot; if correct else \&quot;The null space contains only the zero vector, so its basis contains no vectors. Remove the remaining column.\&quot;\n    }&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Empty basis for a trivial null space&quot;" data-fields="[&quot;math-exercise-10-dm-Z0-1-1&quot;,&quot;math-exercise-10-dm-Z0-2-1&quot;]" data-structural-field-labels="[&quot;dm:Z0:1,1&quot;,&quot;dm:Z0:2,1&quot;]">
 <div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Remove the last basis-vector column</div>
 
 <div class="math-exercise-body" style="display:none;">
 <div class="math-exercise-question">Give a basis for the null space of \(I_2\). Because this null space is trivial,<br>
 its basis is empty. Remove the remaining column:<br>
 <br>
-\(Z_0=\) <span class="math-dynamic-matrix-wrap" data-matrix-name="Z0"><span class="math-mat math-dynamic-mat" style="--cols:1" data-matrix-name="Z0" data-rows="2" data-cols="1" data-auto-rows="false" data-auto-cols="true" data-min-rows="2" data-max-rows="2" data-min-cols="0" data-max-cols="2" data-last-rows="2" data-last-cols="1"><input type="text" id="math-exercise-8-dm-Z0-1-1" data-answer="" data-vars="" data-dynamic-matrix-name="Z0" data-matrix-row="1" data-matrix-column="1" data-structural-label="dm:Z0:1,1" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-8-dm-Z0-2-1" data-answer="" data-vars="" data-dynamic-matrix-name="Z0" data-matrix-row="2" data-matrix-column="1" data-structural-label="dm:Z0:2,1" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span><span class="math-dynamic-matrix-controls" aria-label="Matrix size controls"><span class="math-dynamic-axis" data-dynamic-axis="row"><span class="math-dynamic-axis-label"></span><button type="button" data-dynamic-action="remove-row">−</button><output></output><button type="button" data-dynamic-action="add-row">+</button></span><span class="math-dynamic-axis" data-dynamic-axis="col"><span class="math-dynamic-axis-label"></span><button type="button" data-dynamic-action="remove-col">−</button><output></output><button type="button" data-dynamic-action="add-col">+</button></span></span></span></div>
+\(Z_0=\) <span class="math-dynamic-matrix-wrap" data-matrix-name="Z0"><span class="math-mat math-dynamic-mat" style="--cols:1" data-matrix-name="Z0" data-rows="2" data-cols="1" data-auto-rows="false" data-auto-cols="true" data-min-rows="2" data-max-rows="2" data-min-cols="0" data-max-cols="2" data-last-rows="2" data-last-cols="1"><input type="text" id="math-exercise-10-dm-Z0-1-1" data-answer="" data-vars="" data-dynamic-matrix-name="Z0" data-matrix-row="1" data-matrix-column="1" data-structural-label="dm:Z0:1,1" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-10-dm-Z0-2-1" data-answer="" data-vars="" data-dynamic-matrix-name="Z0" data-matrix-row="2" data-matrix-column="1" data-structural-label="dm:Z0:2,1" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span><span class="math-dynamic-matrix-controls" aria-label="Matrix size controls"><span class="math-dynamic-axis" data-dynamic-axis="row"><span class="math-dynamic-axis-label"></span><button type="button" data-dynamic-action="remove-row">−</button><output></output><button type="button" data-dynamic-action="add-row">+</button></span><span class="math-dynamic-axis" data-dynamic-axis="col"><span class="math-dynamic-axis-label"></span><button type="button" data-dynamic-action="remove-col">−</button><output></output><button type="button" data-dynamic-action="add-col">+</button></span></span></span></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -1273,14 +1430,14 @@ $Z_0=$ mat{name=Z0, rows=2, cols=auto, initial-cols=1, min-cols=0, max-cols=2}
 </section>
 <section id="empty-state-reached-by-removing-rows" class="level3">
 <h3 class="anchored" data-anchor-id="empty-state-reached-by-removing-rows">Empty state reached by removing rows</h3>
-<div class="math-exercise-cell" id="math-exercise-9" data-label="dynamic-zero-rows" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    T = response[\&quot;inputs\&quot;][\&quot;T\&quot;][\&quot;matrix\&quot;]\n    correct = T.rows == 0 and T.cols == 0\n    return {\n        \&quot;correct\&quot;: correct,\n        \&quot;feedback\&quot;: \&quot;\&quot; if correct else \&quot;Remove every row to submit the empty matrix.\&quot;\n    }&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Empty state reached by removing rows&quot;" data-fields="[&quot;math-exercise-9-dm-T-1-1&quot;,&quot;math-exercise-9-dm-T-1-2&quot;]" data-structural-field-labels="[&quot;dm:T:1,1&quot;,&quot;dm:T:1,2&quot;]">
+<div class="math-exercise-cell" id="math-exercise-11" data-label="dynamic-zero-rows" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    T = response[\&quot;inputs\&quot;][\&quot;T\&quot;][\&quot;matrix\&quot;]\n    correct = T.rows == 0 and T.cols == 0\n    return {\n        \&quot;correct\&quot;: correct,\n        \&quot;feedback\&quot;: \&quot;\&quot; if correct else \&quot;Remove every row to submit the empty matrix.\&quot;\n    }&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Empty state reached by removing rows&quot;" data-fields="[&quot;math-exercise-11-dm-T-1-1&quot;,&quot;math-exercise-11-dm-T-1-2&quot;]" data-structural-field-labels="[&quot;dm:T:1,1&quot;,&quot;dm:T:1,2&quot;]">
 <div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Test restoration of a fixed column dimension</div>
 
 <div class="math-exercise-body" style="display:none;">
 <div class="math-exercise-question">Use the row control to remove the only row. After checking the empty state, add<br>
 a row again: the two configured columns should reappear.<br>
 <br>
-\(T=\) <span class="math-dynamic-matrix-wrap" data-matrix-name="T"><span class="math-mat math-dynamic-mat" style="--cols:2" data-matrix-name="T" data-rows="1" data-cols="2" data-auto-rows="true" data-auto-cols="false" data-min-rows="0" data-max-rows="3" data-min-cols="2" data-max-cols="2" data-last-rows="1" data-last-cols="2"><input type="text" id="math-exercise-9-dm-T-1-1" data-answer="" data-vars="" data-dynamic-matrix-name="T" data-matrix-row="1" data-matrix-column="1" data-structural-label="dm:T:1,1" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-9-dm-T-1-2" data-answer="" data-vars="" data-dynamic-matrix-name="T" data-matrix-row="1" data-matrix-column="2" data-structural-label="dm:T:1,2" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span><span class="math-dynamic-matrix-controls" aria-label="Matrix size controls"><span class="math-dynamic-axis" data-dynamic-axis="row"><span class="math-dynamic-axis-label"></span><button type="button" data-dynamic-action="remove-row">−</button><output></output><button type="button" data-dynamic-action="add-row">+</button></span><span class="math-dynamic-axis" data-dynamic-axis="col"><span class="math-dynamic-axis-label"></span><button type="button" data-dynamic-action="remove-col">−</button><output></output><button type="button" data-dynamic-action="add-col">+</button></span></span></span></div>
+\(T=\) <span class="math-dynamic-matrix-wrap" data-matrix-name="T"><span class="math-mat math-dynamic-mat" style="--cols:2" data-matrix-name="T" data-rows="1" data-cols="2" data-auto-rows="true" data-auto-cols="false" data-min-rows="0" data-max-rows="3" data-min-cols="2" data-max-cols="2" data-last-rows="1" data-last-cols="2"><input type="text" id="math-exercise-11-dm-T-1-1" data-answer="" data-vars="" data-dynamic-matrix-name="T" data-matrix-row="1" data-matrix-column="1" data-structural-label="dm:T:1,1" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-11-dm-T-1-2" data-answer="" data-vars="" data-dynamic-matrix-name="T" data-matrix-row="1" data-matrix-column="2" data-structural-label="dm:T:1,2" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span><span class="math-dynamic-matrix-controls" aria-label="Matrix size controls"><span class="math-dynamic-axis" data-dynamic-axis="row"><span class="math-dynamic-axis-label"></span><button type="button" data-dynamic-action="remove-row">−</button><output></output><button type="button" data-dynamic-action="add-row">+</button></span><span class="math-dynamic-axis" data-dynamic-axis="col"><span class="math-dynamic-axis-label"></span><button type="button" data-dynamic-action="remove-col">−</button><output></output><button type="button" data-dynamic-action="add-col">+</button></span></span></span></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -1788,6 +1945,7 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
       resEmpty:     'Please enter an answer.',
       resCorrect:   'Correct!',
       resPartial:   function (pct) { return 'Partially correct (' + pct + '%).'; },
+      resPartialNoScore: 'Partially correct.',
       resScore:     function (pct) { return 'Overall score: ' + pct + '%.'; },
       resWrong:     'Not correct – try again.',
       resRejected:  'Mathematically correct, but not simplified yet. Keep transforming the expression.',
@@ -1944,6 +2102,7 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
       resEmpty:     'Bitte eine Antwort eingeben.',
       resCorrect:   'Richtig!',
       resPartial:   function (pct) { return 'Teilweise richtig (' + pct + '&nbsp;%).'; },
+      resPartialNoScore: 'Teilweise richtig.',
       resScore:     function (pct) { return 'Gesamtpunktzahl: ' + pct + '&nbsp;%.'; },
       resWrong:     'Nicht korrekt – versuche es noch einmal.',
       resRejected:  'Mathematisch korrekt, aber noch nicht vereinfacht. Forme den Ausdruck weiter um.',
@@ -2100,6 +2259,7 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
     resEmpty: 'Skriv inn et svar.',
     resCorrect: 'Riktig!',
     resPartial: function (pct) { return 'Delvis riktig (' + pct + '%).'; },
+    resPartialNoScore: 'Delvis riktig.',
     resScore: function (pct) { return 'Samlet poengsum: ' + pct + ' %.'; },
     resWrong: 'Ikke riktig – prøv igjen.',
     resRejected: 'Matematisk riktig, men ikke forenklet ennå. Fortsett å omforme uttrykket.',
@@ -2562,6 +2722,7 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
       '        statuses = ["incorrect"] * count',
       '        return {',
       '            "score": 1.0 if count == 0 else 0.0,',
+      '            "show_score": False,',
       '            "feedback": "" if count == 0 else f"The {space_name} is trivial, so its basis is empty. Remove every {singular}.",',
       '            "assessment": {name: {axis: statuses}},',
       '        }',
@@ -2596,7 +2757,6 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
       '        score = float(coverage * validity * independence)',
       '',
       '    invalid_count = count - valid_count',
-      '    missing = max(0, target_dimension - rank)',
       '    plural = singular + "s"',
       '    if score >= 1.0 - 1e-9:',
       '        feedback = ""',
@@ -2605,23 +2765,23 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
       '    elif invalid_count and dependent:',
       '        feedback = (f"The red {plural} are zero or outside the {space_name}. "',
       '                    f"The yellow {plural} belong to the {space_name}, but together they are linearly dependent. "',
-      '                    f"Remove or replace {plural}" + (f" and add {missing} missing independent direction(s)." if missing else "."))',
+      '                    f"Remove or replace the red {plural}, choose an independent subset of the yellow {plural}, "',
+      '                    f"and check that the result spans the whole {space_name}.")',
       '    elif invalid_count:',
       '        feedback = f"Remove or replace the red {plural}; each is zero or outside the {space_name}."',
-      '        if missing:',
-      '            feedback += f" Then add {missing} missing independent direction(s)."',
-      '    elif dependent and missing:',
-      '        feedback = (f"Every yellow {singular} belongs to the {space_name}, but the family is linearly dependent "',
-      '                    f"and spans only {rank} of {target_dimension} required directions. "',
-      '                    f"Choose an independent subset, then add {missing} missing direction(s).")',
-      '    elif dependent:',
+      '        if rank < target_dimension:',
+      '            feedback += f" Then add independent {plural} until the family spans the whole {space_name}."',
+      '    elif dependent and rank == target_dimension:',
       '        feedback = (f"Every yellow {singular} belongs to the {space_name}, but the family is linearly dependent. "',
       '                    f"Remove one or more yellow {plural} until an independent basis remains.")',
+      '    elif dependent:',
+      '        feedback = (f"Every yellow {singular} belongs to the {space_name}, but the family is linearly dependent. "',
+      '                    f"Choose an independent subset, then add independent {plural} until it spans the whole {space_name}.")',
       '    else:',
       '        feedback = (f"The green {plural} are valid and independent. "',
-      '                    f"Add {missing} more independent {singular}" + ("s." if missing != 1 else "."))',
+      '                    f"Add more independent {plural} until they span the whole {space_name}.")',
       '',
-      '    return {"score": score, "feedback": feedback, "assessment": {name: {axis: statuses}}}',
+      '    return {"score": score, "show_score": False, "feedback": feedback, "assessment": {name: {axis: statuses}}}',
       '',
       'def _math_check():',
       '    try:',
@@ -2696,6 +2856,7 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
       'def _normalize_custom_result(result):',
       '    feedback = ""',
       '    assessment = {}',
+      '    show_score = True',
       '    if isinstance(result, bool):',
       '        score = 1.0 if result else 0.0',
       '    elif isinstance(result, (int, float)):',
@@ -2703,6 +2864,7 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
       '    elif isinstance(result, dict):',
       '        feedback = str(result.get("feedback", ""))',
       '        assessment = result.get("assessment", {})',
+      '        show_score = bool(result.get("show_score", True))',
       '        if not isinstance(assessment, dict):',
       '            raise TypeError("Custom checker assessment must be a dictionary")',
       '        if "score" in result:',
@@ -2716,7 +2878,7 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
       '    if not 0.0 <= score <= 1.0:',
       '        raise ValueError("Custom checker score must be between 0 and 1")',
       '    status = "correct" if score >= 1.0 - 1e-9 else ("wrong" if score <= 1e-9 else "partial")',
-      '    return {"status": status, "score": score, "feedback": feedback, "assessment": assessment}',
+      '    return {"status": status, "score": score, "show_score": show_score, "feedback": feedback, "assessment": assessment}',
       '',
       'def _math_check_custom():',
       '    try:',
@@ -4344,7 +4506,8 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
           if (custom.status === 'correct')
             parts.push('<div class="math-fb-ok">&#10003;&nbsp;' + L.resCorrect + customMessage + '</div>');
           else if (custom.status === 'partial')
-            parts.push('<div class="math-fb-partial">' + L.resPartial(customPct) + customMessage + '</div>');
+            parts.push('<div class="math-fb-partial">' +
+              (custom.show_score === false ? L.resPartialNoScore : L.resPartial(customPct)) + customMessage + '</div>');
           else if (custom.status === 'wrong')
             parts.push('<div class="math-fb-wrong">&#10007;&nbsp;' + L.resWrong + customMessage + '</div>');
           else if (custom.status === 'empty')

@@ -316,10 +316,15 @@ marked as units, and the structured statuses are also available to AI feedback.
 Besides booleans and numeric scores, an assessment entry may be `correct`,
 `dependent`, `partial`, `incorrect`, `empty`, or `invalid`.
 
-For a matrix basis exercise, use the shared `assess_basis` helper instead of
-assigning vector statuses or partial scores in the checker. Supply the submitted
-matrix, the vector axis, the target dimension, a membership predicate, the
-matrix name, and a student-facing space name:
+Custom result dictionaries may also set `show_score: False`. The numeric score
+is still returned for assessment, but a partial result is displayed as
+“Partially correct” without a percentage. This is useful when a percentage
+would disclose a hidden property of the answer.
+
+#### Shared basis assessment: `assess_basis`
+
+For a matrix basis exercise, use `assess_basis` instead of assigning vector
+statuses or partial scores in each checker:
 
 ```python
 return assess_basis(
@@ -332,11 +337,48 @@ return assess_basis(
 )
 ```
 
-The helper marks zero or out-of-space vectors red. If the locally valid vectors
-are linearly dependent, it marks all of them yellow (`dependent`), because no
-ordering of basis vectors is mathematically preferred. Otherwise the valid
-vectors are green. It also computes permutation-invariant partial credit and
-standard feedback. The same helper supports `axis="rows"`.
+Arguments:
+
+| Argument | Required value |
+|---|---|
+| `matrix` | The submitted SymPy `Matrix`. It may be the canonical empty `Matrix(0, 0, [])`. |
+| `axis` | `"columns"` when each column is a vector, or `"rows"` when each row is a vector. |
+| `target_dimension` | The dimension of the target subspace, computed by the checker. It must be a non-negative integer. |
+| `belongs` | A callable receiving one nonzero SymPy row or column vector and returning whether it belongs to the target subspace. The helper rejects zero vectors before calling it. |
+| `name` | The name from the corresponding `mat{name=..., ...}` marker. Assessment is returned under this key. |
+| `space_name` | A short student-facing noun phrase used in qualitative feedback, such as `"null space"`. It defaults to `"space"`. |
+
+The membership predicate is the only problem-specific vector logic. For
+example, a null-space checker can use `lambda vector: C*vector ==
+zeros(C.rows, 1)`, while a column-space checker can compare the rank before and
+after adjoining `vector`. If a dimension mismatch is possible, include the
+shape check first in the predicate so Python's `and` short-circuits before the
+matrix operation.
+
+Assessment is symmetric under every permutation of the submitted vectors:
+
+- A zero vector or a vector outside the target space is `incorrect` and red.
+- If the locally valid family is dependent, every vector in that family is
+  `dependent` and yellow. No position is treated as the redundant one.
+- If the locally valid family is independent, every vector in it is `correct`
+  and green. An independent but incomplete family remains partially correct at
+  exercise level.
+- The empty submission is correct exactly when `target_dimension == 0`.
+
+For a nontrivial target, let (d) be its dimension, (n) the number of
+submitted vectors, (v) the number of locally valid vectors, and (r) their
+rank. For (n>0), the score is
+
+\[
+\frac{\min(r,d)}{d}\;\frac{v}{n}\;\frac{r}{v},
+\]
+
+with the final factor taken as zero when (v=0). An empty submission scores
+zero for a nontrivial target. The helper returns this score for grading, but
+sets `show_score: False`: student feedback never states the score, rank, target
+dimension, or number of missing vectors. It instead says qualitatively whether
+vectors must be removed, replaced, or added. Complete row/column statuses are
+still included for normal coloring and AI-feedback context.
 
 ````markdown
 ```{math-exercise}
