@@ -1,4 +1,18 @@
-## Transform a cuboid in 3D
+## Coordinate transformations
+
+The final activities connect parameter descriptions to geometry. In each one,
+a small set of algebraic parameters determines a visible object or region.
+Matching a target therefore requires reasoning in both representations: which
+parameter is wrong, and what geometric change will correcting it produce?
+
+### Transform a cuboid in 3D
+
+An affine transformation combines a linear change of shape and orientation
+with a translation. In this activity the map has the form
+$T(p)=sR_z(\theta)p+t$: the cuboid is scaled uniformly by $s$, rotated about
+the $z$-axis by $\theta$, and translated by $t=(t_x,t_y,t_z)$. Matching the
+wireframes builds a geometric understanding of how those parameters affect a
+3D object and how the operations compose.
 
 Match the orange cuboid to the fixed green target. Move the five sliders for
 translation, uniform scale, and rotation about the $z$-axis. The unequal side
@@ -128,88 +142,15 @@ JXG.QuartoAssessment.register({
 Use the sliders to make the orange cuboid coincide with the green cuboid.
 ```
 
-## Identify the order of two 3D rotations
+### Match a polar-coordinate region
 
-The green curve is produced by rotations about the $y$- and $z$-axes. Select
-one of the two buttons to apply that order to the orange curve. The angles are
-the same in both choices, but 3D rotations generally do not commute. You may
-drag the view; the selected order is the answer.
-
-```{.jsxgraph assessment_id="rotation-order-board" width="900" height="570" style="border:1px solid #ddd; border-radius:8px; max-width:100%;"}
-var board = JXG.JSXGraph.initBoard(BOARDID, {
-  boundingbox: [-7, 7, 7, -7], axis: false,
-  pan: { enabled: false }, zoom: { enabled: false }, showNavigation: false
-});
-var view = board.create('view3d', [[-6.3, -1.7], [12.6, 8],
-  [[-3, 3], [-3, 3], [-3, 3]]], {
-  xPlaneRear: { visible: false }, yPlaneRear: { visible: false }
-});
-var selectedOrder = 'z-then-y';
-var alpha = 45 * Math.PI / 180;
-var beta = 60 * Math.PI / 180;
-
-function rotateY(p) {
-  return [Math.cos(alpha)*p[0] + Math.sin(alpha)*p[2], p[1],
-    -Math.sin(alpha)*p[0] + Math.cos(alpha)*p[2]];
-}
-function rotateZ(p) {
-  return [Math.cos(beta)*p[0] - Math.sin(beta)*p[1],
-    Math.sin(beta)*p[0] + Math.cos(beta)*p[1], p[2]];
-}
-function basePoint(t) { return [2*Math.cos(t), 2*Math.sin(t), 0]; }
-function applyOrder(t, order) {
-  var p = basePoint(t);
-  return order === 'y-then-z' ? rotateZ(rotateY(p)) : rotateY(rotateZ(p));
-}
-function coord(t, order, index) { return applyOrder(t, order)[index]; }
-
-view.create('curve3d', [
-  function (t) { return coord(t, 'y-then-z', 0); },
-  function (t) { return coord(t, 'y-then-z', 1); },
-  function (t) { return coord(t, 'y-then-z', 2); }, [0, Math.PI]
-], { strokeColor: '#15803d', strokeWidth: 6, fixed: true, highlight: false });
-view.create('curve3d', [
-  function (t) { return coord(t, selectedOrder, 0); },
-  function (t) { return coord(t, selectedOrder, 1); },
-  function (t) { return coord(t, selectedOrder, 2); }, [0, Math.PI]
-], { strokeColor: '#f97316', strokeWidth: 4, fixed: true, highlight: false });
-
-var status = board.create('text', [-6, -3.0, ''], { fixed: true, fontSize: 17 });
-function choose(order) {
-  selectedOrder = order;
-  status.setText('Selected: ' + (order === 'y-then-z' ? 'y, then z' : 'z, then y'));
-  board.update();
-}
-board.create('button', [-5.8, -4.2, 'Rotate y, then z', function () { choose('y-then-z'); }], { fixed: true });
-board.create('button', [0.4, -4.2, 'Rotate z, then y', function () { choose('z-then-y'); }], { fixed: true });
-choose(selectedOrder);
-
-JXG.QuartoAssessment.register({
-  board: board,
-  response: function () { return { representation: 'rotation-order', selectedOrder: selectedOrder }; },
-  ai: { render: true, summary: function (data) {
-    return { representation: data.representation, selectedOrder: data.selectedOrder,
-      feedbackPolicy: 'Explain composition order and non-commutativity without naming the correct button.' };
-  }}
-});
-```
-
-```{math-exercise}
-#| label: jsxgraph-rotation-order
-#| caption: Choose the rotation order
-#| mode: custom
-#| response: jsxgraph:rotation-order-board
-#| embed-response: true
-#| checker: |
-#|   def check(response, symbols):
-#|       if response.get("selectedOrder") == "y-then-z":
-#|           return {"score": 1, "feedback": "The orange and green curves coincide; the order is correct."}
-#|       return {"score": 0, "feedback": "The same rotations in the opposite order give a different curve."}
-
-Choose the order that makes the orange half-circle coincide with the green one.
-```
-
-## Match a polar-coordinate region
+Polar coordinates describe a point by its distance $r$ from the origin and its
+angle $\varphi$. A rectangle
+$[r_{\min},r_{\max}]\times[\varphi_{\min},\varphi_{\max}]$ in parameter space
+becomes an annular sector under
+$(r,\varphi)\mapsto(r\cos\varphi,r\sin\varphi)$. Matching the boundary makes
+the connection between algebraic bounds and the resulting planar region
+visible.
 
 The blue target is an annular sector. Move the four sliders to match it with
 the orange outline. Radii are ordinary coordinates; the two angle sliders are
@@ -285,7 +226,14 @@ JXG.QuartoAssessment.register({
 Use the sliders so that the orange outline coincides with the blue polar region.
 ```
 
-## Match a cylindrical-coordinate region
+### Match a cylindrical-coordinate region
+
+Cylindrical coordinates add height $z$ to polar coordinates. A parameter box
+$[r_{\min},r_{\max}]\times[\varphi_{\min},\varphi_{\max}]
+\times[z_{\min},z_{\max}]$ becomes a curved 3D sector under
+$(r,\varphi,z)\mapsto(r\cos\varphi,r\sin\varphi,z)$. Adjusting the six bounds
+helps distinguish the radial, angular, and vertical faces of this transformed
+region.
 
 The green wireframe shows a target region under the cylindrical-coordinate
 map $(r,\varphi,z)\mapsto(r\cos\varphi,r\sin\varphi,z)$. Match it with the
@@ -380,4 +328,3 @@ JXG.QuartoAssessment.register({
 Use the six sliders so that the orange wireframe coincides with the green
 cylindrical-coordinate region.
 ```
-

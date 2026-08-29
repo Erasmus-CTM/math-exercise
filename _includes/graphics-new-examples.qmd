@@ -169,7 +169,7 @@ Click every local maximum visible in the pooled function plot.
 
 ## Mark exactly one period
 
-The graph shows five periods. Move the two orange dots labelled **L** and **R**
+The graph shows five periods. Move the two orange dots labelled L and R
 horizontally along the line below the graph. They control the left and right
 edges of the shaded frame. Your answer is accepted anywhere on the graph when
 the frame spans exactly one complete period. Do not draw on the curve; only
@@ -291,7 +291,7 @@ JXG.QuartoAssessment.register({
 #|           "feedback": f"Move one handle to make the frame {direction}; align repeated features to judge one cycle."
 #|       }
 
-Move the orange dots **L** and **R** so that the shaded frame between them spans
+Move the orange dots L and R so that the shaded frame between them spans
 exactly one period. The frame may be placed anywhere on the visible graph.
 ```
 
