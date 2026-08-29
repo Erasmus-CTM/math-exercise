@@ -724,6 +724,13 @@ filters:
   - Erasmus-CTM/math-exercise
 ```
 
+## Rendered examples
+
+The current feature-branch examples are published at
+[the model capability adapter preview](https://erasmus-ctm.github.io/math-exercise/previews/feature-model-capability-adapter/).
+The preview is rebuilt automatically from `examples.qmd` whenever the branch
+changes.
+
 ---
 
 ## Funding
