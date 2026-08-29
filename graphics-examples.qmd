@@ -1,0 +1,14 @@
+---
+title: "Graphical assessment with JSXGraph"
+lang: en
+engine: markdown
+filters:
+  - _filters/example-source.lua
+  - jsxgraph
+  - math-exercise
+---
+
+{{< include _includes/graphics-new-examples.qmd >}}
+
+{{< include _includes/graphics-original-examples.qmd >}}
+

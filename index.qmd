@@ -51,6 +51,14 @@ Five examples of instructor-authored SymPy/Python checkers for properties,
 relationships between fields, partial credit, iterative processes, and matrix
 constraints.
 :::
+
+::: {.g-col-12 .g-col-md-6}
+### [Graphical assessment](graphics-examples.qmd)
+
+Click-based and draggable JSXGraph responses, movable piecewise-linear graphs,
+and freehand polynomial approximations assessed through the generic response
+bridge.
+:::
 :::
 
 ## Extended regression page

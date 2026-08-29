@@ -31,6 +31,7 @@ jobs:
           test -f _site/sympy-examples.html
           test -f _site/ai-feedback.html
           test -f _site/custom-assessment.html
+          test -f _site/graphics-examples.html
           test -f _site/vector-matrix-tests.html
 
       - name: Select deployment directory

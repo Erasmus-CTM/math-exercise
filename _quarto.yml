@@ -6,6 +6,7 @@ project:
     - basic-features.qmd
     - ai-feedback.qmd
     - custom-assessment.qmd
+    - graphics-examples.qmd
     - sympy-examples.qmd
     - vector-matrix-tests.qmd
     - examples.qmd
@@ -24,6 +25,8 @@ website:
         text: AI and context
       - href: custom-assessment.qmd
         text: Custom assessment
+      - href: graphics-examples.qmd
+        text: Graphics
       - href: vector-matrix-tests.qmd
         text: Vektorer og matriser (NB)
     right:
