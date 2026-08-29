@@ -313,9 +313,30 @@ can assess complete row or column vectors with, for example,
 `assessment: {"Z": {"columns": [True, False, True]}}` or
 `assessment: {"R": {"rows": [True, False]}}`; the corresponding vectors are
 marked as units, and the structured statuses are also available to AI feedback.
-For a basis exercise, mark a vector correct only when it belongs to the required
-subspace and adds a new independent direction. A valid but redundant vector
-should not be marked correct merely because it belongs to the subspace.
+Besides booleans and numeric scores, an assessment entry may be `correct`,
+`dependent`, `partial`, `incorrect`, `empty`, or `invalid`.
+
+For a matrix basis exercise, use the shared `assess_basis` helper instead of
+assigning vector statuses or partial scores in the checker. Supply the submitted
+matrix, the vector axis, the target dimension, a membership predicate, the
+matrix name, and a student-facing space name:
+
+```python
+return assess_basis(
+    Z,
+    axis="columns",
+    target_dimension=C.cols - C.rank(),
+    belongs=lambda vector: C * vector == zeros(C.rows, 1),
+    name="Z",
+    space_name="null space",
+)
+```
+
+The helper marks zero or out-of-space vectors red. If the locally valid vectors
+are linearly dependent, it marks all of them yellow (`dependent`), because no
+ordering of basis vectors is mathematically preferred. Otherwise the valid
+vectors are green. It also computes permutation-invariant partial credit and
+standard feedback. The same helper supports `axis="rows"`.
 
 ````markdown
 ```{math-exercise}

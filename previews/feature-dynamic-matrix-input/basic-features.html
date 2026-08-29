@@ -316,6 +316,11 @@ ul.task-list li input[type="checkbox"] {
   background:   #f0fff4 !important;
   color:        #14532d !important;
 }
+.math-input-dependent {
+  border-color: #c58a00 !important;
+  background:   #fff4bf !important;
+  color:        #5f4300 !important;
+}
 .math-input-partial {
   border-color: #d39e00 !important;
   background:   #fffbea !important;
@@ -2251,6 +2256,90 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
       '    _local.setdefault("inf", oo)',
       '    return _local',
       '',
+      'def assess_basis(matrix, *, axis, target_dimension, belongs, name, space_name="space"):',
+      '    """Assess a row- or column-basis submission without privileging vector order.',
+      '',
+      '    ``belongs(vector)`` decides only whether a nonzero vector belongs to the',
+      '    target space.  This helper owns rank, dependence, scoring, assessment',
+      '    colors, and standard feedback so individual checkers do not duplicate them.',
+      '    """',
+      '    if axis not in ("rows", "columns"):',
+      '        raise ValueError("Basis assessment axis must be rows or columns")',
+      '    target_dimension = int(target_dimension)',
+      '    if target_dimension < 0:',
+      '        raise ValueError("Basis target dimension cannot be negative")',
+      '    if not callable(belongs):',
+      '        raise TypeError("Basis membership test must be callable")',
+      '',
+      '    count = matrix.rows if axis == "rows" else matrix.cols',
+      '    singular = "row" if axis == "rows" else "column"',
+      '    vectors = [matrix[i, :] for i in range(count)] if axis == "rows" else [matrix[:, i] for i in range(count)]',
+      '',
+      '    if target_dimension == 0:',
+      '        statuses = ["incorrect"] * count',
+      '        return {',
+      '            "score": 1.0 if count == 0 else 0.0,',
+      '            "feedback": "" if count == 0 else f"The {space_name} is trivial, so its basis is empty. Remove every {singular}.",',
+      '            "assessment": {name: {axis: statuses}},',
+      '        }',
+      '',
+      '    locally_valid = []',
+      '    valid_vectors = []',
+      '    for vector in vectors:',
+      '        zero = vector == zeros(*vector.shape)',
+      '        valid = (not zero) and bool(belongs(vector))',
+      '        locally_valid.append(valid)',
+      '        if valid:',
+      '            valid_vectors.append(vector)',
+      '',
+      '    if valid_vectors:',
+      '        family = Matrix.vstack(*valid_vectors) if axis == "rows" else Matrix.hstack(*valid_vectors)',
+      '        rank = int(family.rank())',
+      '    else:',
+      '        rank = 0',
+      '    valid_count = len(valid_vectors)',
+      '    dependent = rank < valid_count',
+      '    statuses = [',
+      '        ("dependent" if dependent else "correct") if valid else "incorrect"',
+      '        for valid in locally_valid',
+      '    ]',
+      '',
+      '    if count == 0:',
+      '        score = 0.0',
+      '    else:',
+      '        coverage = min(rank, target_dimension) / target_dimension',
+      '        validity = valid_count / count',
+      '        independence = rank / valid_count if valid_count else 0.0',
+      '        score = float(coverage * validity * independence)',
+      '',
+      '    invalid_count = count - valid_count',
+      '    missing = max(0, target_dimension - rank)',
+      '    plural = singular + "s"',
+      '    if score >= 1.0 - 1e-9:',
+      '        feedback = ""',
+      '    elif count == 0:',
+      '        feedback = f"Add one or more basis {plural} for the {space_name}."',
+      '    elif invalid_count and dependent:',
+      '        feedback = (f"The red {plural} are zero or outside the {space_name}. "',
+      '                    f"The yellow {plural} belong to the {space_name}, but together they are linearly dependent. "',
+      '                    f"Remove or replace {plural}" + (f" and add {missing} missing independent direction(s)." if missing else "."))',
+      '    elif invalid_count:',
+      '        feedback = f"Remove or replace the red {plural}; each is zero or outside the {space_name}."',
+      '        if missing:',
+      '            feedback += f" Then add {missing} missing independent direction(s)."',
+      '    elif dependent and missing:',
+      '        feedback = (f"Every yellow {singular} belongs to the {space_name}, but the family is linearly dependent "',
+      '                    f"and spans only {rank} of {target_dimension} required directions. "',
+      '                    f"Choose an independent subset, then add {missing} missing direction(s).")',
+      '    elif dependent:',
+      '        feedback = (f"Every yellow {singular} belongs to the {space_name}, but the family is linearly dependent. "',
+      '                    f"Remove one or more yellow {plural} until an independent basis remains.")',
+      '    else:',
+      '        feedback = (f"The green {plural} are valid and independent. "',
+      '                    f"Add {missing} more independent {singular}" + ("s." if missing != 1 else "."))',
+      '',
+      '    return {"score": score, "feedback": feedback, "assessment": {name: {axis: statuses}}}',
+      '',
       'def _math_check():',
       '    try:',
       '        mode = _math_mode',
@@ -2949,7 +3038,7 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
     if (typeof value === 'number') return value >= 1 - 1e-9 ? 'correct' : (value <= 1e-9 ? 'incorrect' : 'partial');
     var status = String(value || '').toLowerCase();
     if (status === 'wrong') return 'incorrect';
-    return /^(correct|partial|incorrect|empty|invalid)$/.test(status) ? status : '';
+    return /^(correct|dependent|partial|incorrect|empty|invalid)$/.test(status) ? status : '';
   }
 
   function structuredGroupStatus(assessment, name, axis, index) {
@@ -2961,7 +3050,7 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
   function applyCustomAssessment(questionDiv, result) {
     var assessment = result.assessment || {};
     questionDiv.querySelectorAll('input.math-input').forEach(function (input) {
-      input.classList.remove('math-input-ok', 'math-input-partial', 'math-input-wrong', 'math-input-err');
+      input.classList.remove('math-input-ok', 'math-input-dependent', 'math-input-partial', 'math-input-wrong', 'math-input-err');
       var status = '';
       if (input.dataset.dynamicMatrixName) {
         status = structuredGroupStatus(
@@ -2972,6 +3061,7 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
       }
       status = status || result.status;
       if (status === 'correct') input.classList.add('math-input-ok');
+      else if (status === 'dependent') input.classList.add('math-input-dependent');
       else if (status === 'partial') input.classList.add('math-input-partial');
       else if (status === 'error' || status === 'invalid') input.classList.add('math-input-err');
       else if (status !== 'empty') input.classList.add('math-input-wrong');
@@ -3903,7 +3993,7 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
 
     function clearAssessmentAfterResize() {
       questionDiv.querySelectorAll('.math-input').forEach(function (input) {
-        input.classList.remove('math-input-ok', 'math-input-partial', 'math-input-wrong', 'math-input-err');
+        input.classList.remove('math-input-ok', 'math-input-dependent', 'math-input-partial', 'math-input-wrong', 'math-input-err');
       });
       fbDiv.innerHTML = '';
     }
@@ -3988,7 +4078,7 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
           if (!el) continue;
           var prefix = fieldIds.length > 1 ? escHtml(fieldLabel(i)) + ': ' : '';
           var res    = await checkField(el, mode, checkOpts);
-          el.classList.remove('math-input-ok', 'math-input-partial', 'math-input-wrong', 'math-input-err');
+          el.classList.remove('math-input-ok', 'math-input-dependent', 'math-input-partial', 'math-input-wrong', 'math-input-err');
           if (typeof res.score === 'number') { totalScore += res.score; scoredFields++; }
           if      (res.status === 'empty')    { parts.push('<div class="math-fb-empty">'  + prefix + L.resEmpty + '</div>'); }
           else if (res.status === 'correct')  { el.classList.add('math-input-ok');    parts.push('<div class="math-fb-ok">&#10003;&nbsp;'  + prefix + L.resCorrect + '</div>'); }

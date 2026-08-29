@@ -316,6 +316,11 @@ ul.task-list li input[type="checkbox"] {
   background:   #f0fff4 !important;
   color:        #14532d !important;
 }
+.math-input-dependent {
+  border-color: #c58a00 !important;
+  background:   #fff4bf !important;
+  color:        #5f4300 !important;
+}
 .math-input-partial {
   border-color: #d39e00 !important;
   background:   #fffbea !important;
@@ -812,7 +817,7 @@ select.math-modal-input {
 </div>
 <div class="callout-body-container callout-body">
 <p>Use the <strong>−</strong> and <strong>+</strong> buttons beside <strong>Rows</strong> or <strong>Columns</strong> before or while entering the matrix. Only dimensions that the exercise allows you to change are shown. Fill every visible cell, then select <strong>Check</strong>.</p>
-<p>In exercises that assess complete vectors, all cells in a row or column receive the same color. Green means that vector is valid <em>and adds a new independent direction</em>. A red vector may be outside the required space, zero, or redundant. The whole answer is correct only when the submitted vectors form a complete basis.</p>
+<p>In exercises that assess complete vectors, all cells in a row or column receive the same color. Green vectors are valid and form an independent family. Yellow vectors belong to the required space, but the yellow family is linearly dependent; no one vector is singled out as “the redundant one.” A red vector is zero or outside the required space. The whole answer is correct only when the submitted vectors form a complete basis.</p>
 </div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled" title="For exercise authors">
@@ -826,6 +831,7 @@ select.math-modal-input {
 </div>
 <div class="callout-body-container callout-body">
 <p>Write a resizable input as, for example, <code>mat{name=Z, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}</code>. Dynamic matrices use <code>mode: custom</code>. The checker receives the SymPy matrix at <code>response["inputs"][name]["matrix"]</code> and can return whole-vector assessment as <code>{"assessment": {"Z": {"columns": [...]}}}</code> or <code>{"assessment": {"R": {"rows": [...]}}}</code>.</p>
+<p>For basis problems, prefer the shared <code>assess_basis(...)</code> helper. The checker only supplies the submitted matrix, whether vectors are stored as rows or columns, the target dimension, and a test for membership in the target space. The helper calculates rank, permutation-invariant partial credit, colors, and standard feedback.</p>
 </div>
 </div>
 <section id="bases-with-an-unknown-number-of-vectors" class="level2">
@@ -835,13 +841,13 @@ select.math-modal-input {
 <p>To check a proposed basis:</p>
 <ol type="1">
 <li>Verify that every vector belongs to the required subspace.</li>
-<li>Remove zero or redundant vectors; every remaining vector must add a new independent direction.</li>
-<li>Verify that the independent vectors span the entire subspace.</li>
+<li>Verify that the vectors are linearly independent. Dependence is a property of the entire family, not of whichever vector happens to appear last.</li>
+<li>Verify that the independent family spans the entire subspace.</li>
 </ol>
 </div>
 <section id="null-space-basis" class="level3">
 <h3 class="anchored" data-anchor-id="null-space-basis">Null-space basis</h3>
-<div class="math-exercise-cell" id="math-exercise-1" data-label="dynamic-nullspace-basis" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    Z = response[\&quot;inputs\&quot;][\&quot;Z\&quot;][\&quot;matrix\&quot;]\n    C = Matrix([[1, 2, 3], [2, 4, 6]])\n    target_dim = C.cols - C.rank()\n    accepted = []\n    column_status = []\n    for j in range(Z.cols):\n        vector = Z[:, j]\n        belongs = (\n            Z.rows == C.cols\n            and vector != zeros(Z.rows, 1)\n            and C * vector == zeros(C.rows, 1)\n        )\n        trial = accepted + [vector]\n        adds_direction = belongs and Matrix.hstack(*trial).rank() == len(trial)\n        column_status.append(adds_direction)\n        if adds_direction:\n            accepted.append(vector)\n    coverage = min(len(accepted), target_dim) / target_dim\n    precision = len(accepted) / Z.cols if Z.cols else 0\n    score = coverage * precision\n    feedback = \&quot;\&quot; if score == 1 else (\n        \&quot;This null space is not trivial; add basis vectors.\&quot; if Z.cols == 0\n        else \&quot;A red column is zero, outside the null space, or redundant. Keep enough independent columns to span the null space.\&quot;\n    )\n    return {\n        \&quot;score\&quot;: score,\n        \&quot;feedback\&quot;: feedback,\n        \&quot;assessment\&quot;: {\&quot;Z\&quot;: {\&quot;columns\&quot;: column_status}}\n    }&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="explicit" data-context-refs="dynamic-basis-method" data-context="&quot;Null-space basis&quot;" data-fields="[&quot;math-exercise-1-dm-Z-1-1&quot;,&quot;math-exercise-1-dm-Z-2-1&quot;,&quot;math-exercise-1-dm-Z-3-1&quot;]" data-structural-field-labels="[&quot;dm:Z:1,1&quot;,&quot;dm:Z:2,1&quot;,&quot;dm:Z:3,1&quot;]">
+<div class="math-exercise-cell" id="math-exercise-1" data-label="dynamic-nullspace-basis" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    Z = response[\&quot;inputs\&quot;][\&quot;Z\&quot;][\&quot;matrix\&quot;]\n    C = Matrix([[1, 2, 3], [2, 4, 6]])\n    return assess_basis(\n        Z,\n        axis=\&quot;columns\&quot;,\n        target_dimension=C.cols - C.rank(),\n        belongs=lambda vector: Z.rows == C.cols and C * vector == zeros(C.rows, 1),\n        name=\&quot;Z\&quot;,\n        space_name=\&quot;null space\&quot;,\n    )&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="explicit" data-context-refs="dynamic-basis-method" data-context="&quot;Null-space basis&quot;" data-fields="[&quot;math-exercise-1-dm-Z-1-1&quot;,&quot;math-exercise-1-dm-Z-2-1&quot;,&quot;math-exercise-1-dm-Z-3-1&quot;]" data-structural-field-labels="[&quot;dm:Z:1,1&quot;,&quot;dm:Z:2,1&quot;,&quot;dm:Z:3,1&quot;]">
 <div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>A basis without announcing nullity</div>
 
 <div class="math-exercise-body" style="display:none;">
@@ -875,33 +881,14 @@ many vectors are needed:<br>
 #|   def check(response, symbols):
 #|       Z = response["inputs"]["Z"]["matrix"]
 #|       C = Matrix([[1, 2, 3], [2, 4, 6]])
-#|       target_dim = C.cols - C.rank()
-#|       accepted = []
-#|       column_status = []
-#|       for j in range(Z.cols):
-#|           vector = Z[:, j]
-#|           belongs = (
-#|               Z.rows == C.cols
-#|               and vector != zeros(Z.rows, 1)
-#|               and C * vector == zeros(C.rows, 1)
-#|           )
-#|           trial = accepted + [vector]
-#|           adds_direction = belongs and Matrix.hstack(*trial).rank() == len(trial)
-#|           column_status.append(adds_direction)
-#|           if adds_direction:
-#|               accepted.append(vector)
-#|       coverage = min(len(accepted), target_dim) / target_dim
-#|       precision = len(accepted) / Z.cols if Z.cols else 0
-#|       score = coverage * precision
-#|       feedback = "" if score == 1 else (
-#|           "This null space is not trivial; add basis vectors." if Z.cols == 0
-#|           else "A red column is zero, outside the null space, or redundant. Keep enough independent columns to span the null space."
+#|       return assess_basis(
+#|           Z,
+#|           axis="columns",
+#|           target_dimension=C.cols - C.rank(),
+#|           belongs=lambda vector: Z.rows == C.cols and C * vector == zeros(C.rows, 1),
+#|           name="Z",
+#|           space_name="null space",
 #|       )
-#|       return {
-#|           "score": score,
-#|           "feedback": feedback,
-#|           "assessment": {"Z": {"columns": column_status}}
-#|       }
 
 Give a basis for the null space of
 $C=\begin{bmatrix}1&amp;2&amp;3\\2&amp;4&amp;6\end{bmatrix}$.
@@ -914,7 +901,7 @@ $Z=$ mat{name=Z, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}
 </section>
 <section id="column-space-basis" class="level3">
 <h3 class="anchored" data-anchor-id="column-space-basis">Column-space basis</h3>
-<div class="math-exercise-cell" id="math-exercise-2" data-label="dynamic-column-space-basis" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    B = response[\&quot;inputs\&quot;][\&quot;B\&quot;][\&quot;matrix\&quot;]\n    A = Matrix([[1, 2, 0], [0, 1, 1], [1, 3, 1]])\n    target_dim = A.rank()\n    accepted = []\n    column_status = []\n    for j in range(B.cols):\n        vector = B[:, j]\n        belongs = (\n            B.rows == A.rows\n            and vector != zeros(B.rows, 1)\n            and A.row_join(vector).rank() == A.rank()\n        )\n        trial = accepted + [vector]\n        adds_direction = belongs and Matrix.hstack(*trial).rank() == len(trial)\n        column_status.append(adds_direction)\n        if adds_direction:\n            accepted.append(vector)\n    coverage = min(len(accepted), target_dim) / target_dim\n    precision = len(accepted) / B.cols if B.cols else 0\n    score = coverage * precision\n    feedback = \&quot;\&quot; if score == 1 else (\n        \&quot;This column space is not trivial; add basis vectors.\&quot; if B.cols == 0\n        else \&quot;A red column is zero, outside the column space, or redundant. Keep only enough independent columns to span the space.\&quot;\n    )\n    return {\n        \&quot;score\&quot;: score,\n        \&quot;feedback\&quot;: feedback,\n        \&quot;assessment\&quot;: {\&quot;B\&quot;: {\&quot;columns\&quot;: column_status}}\n    }&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="explicit" data-context-refs="dynamic-basis-method" data-context="&quot;Column-space basis&quot;" data-fields="[&quot;math-exercise-2-dm-B-1-1&quot;,&quot;math-exercise-2-dm-B-2-1&quot;,&quot;math-exercise-2-dm-B-3-1&quot;]" data-structural-field-labels="[&quot;dm:B:1,1&quot;,&quot;dm:B:2,1&quot;,&quot;dm:B:3,1&quot;]">
+<div class="math-exercise-cell" id="math-exercise-2" data-label="dynamic-column-space-basis" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    B = response[\&quot;inputs\&quot;][\&quot;B\&quot;][\&quot;matrix\&quot;]\n    A = Matrix([[1, 2, 0], [0, 1, 1], [1, 3, 1]])\n    return assess_basis(\n        B,\n        axis=\&quot;columns\&quot;,\n        target_dimension=A.rank(),\n        belongs=lambda vector: B.rows == A.rows and A.row_join(vector).rank() == A.rank(),\n        name=\&quot;B\&quot;,\n        space_name=\&quot;column space\&quot;,\n    )&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="explicit" data-context-refs="dynamic-basis-method" data-context="&quot;Column-space basis&quot;" data-fields="[&quot;math-exercise-2-dm-B-1-1&quot;,&quot;math-exercise-2-dm-B-2-1&quot;,&quot;math-exercise-2-dm-B-3-1&quot;]" data-structural-field-labels="[&quot;dm:B:1,1&quot;,&quot;dm:B:2,1&quot;,&quot;dm:B:3,1&quot;]">
 <div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Compute a basis for a column space</div>
 
 <div class="math-exercise-body" style="display:none;">
@@ -948,33 +935,14 @@ Enter one basis vector per column of \(B\):<br>
 #|   def check(response, symbols):
 #|       B = response["inputs"]["B"]["matrix"]
 #|       A = Matrix([[1, 2, 0], [0, 1, 1], [1, 3, 1]])
-#|       target_dim = A.rank()
-#|       accepted = []
-#|       column_status = []
-#|       for j in range(B.cols):
-#|           vector = B[:, j]
-#|           belongs = (
-#|               B.rows == A.rows
-#|               and vector != zeros(B.rows, 1)
-#|               and A.row_join(vector).rank() == A.rank()
-#|           )
-#|           trial = accepted + [vector]
-#|           adds_direction = belongs and Matrix.hstack(*trial).rank() == len(trial)
-#|           column_status.append(adds_direction)
-#|           if adds_direction:
-#|               accepted.append(vector)
-#|       coverage = min(len(accepted), target_dim) / target_dim
-#|       precision = len(accepted) / B.cols if B.cols else 0
-#|       score = coverage * precision
-#|       feedback = "" if score == 1 else (
-#|           "This column space is not trivial; add basis vectors." if B.cols == 0
-#|           else "A red column is zero, outside the column space, or redundant. Keep only enough independent columns to span the space."
+#|       return assess_basis(
+#|           B,
+#|           axis="columns",
+#|           target_dimension=A.rank(),
+#|           belongs=lambda vector: B.rows == A.rows and A.row_join(vector).rank() == A.rank(),
+#|           name="B",
+#|           space_name="column space",
 #|       )
-#|       return {
-#|           "score": score,
-#|           "feedback": feedback,
-#|           "assessment": {"B": {"columns": column_status}}
-#|       }
 
 Compute a basis for the column space of
 $A=\begin{bmatrix}1&amp;2&amp;0\\0&amp;1&amp;1\\1&amp;3&amp;1\end{bmatrix}$.
@@ -987,7 +955,7 @@ $B=$ mat{name=B, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}
 </section>
 <section id="row-space-basis" class="level3">
 <h3 class="anchored" data-anchor-id="row-space-basis">Row-space basis</h3>
-<div class="math-exercise-cell" id="math-exercise-3" data-label="dynamic-row-space-basis" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    R = response[\&quot;inputs\&quot;][\&quot;R\&quot;][\&quot;matrix\&quot;]\n    A = Matrix([[1, 0, 1, 2], [0, 1, 1, 1], [1, 1, 2, 3]])\n    target_dim = A.rank()\n    accepted = []\n    row_status = []\n    for i in range(R.rows):\n        vector = R[i, :]\n        belongs = (\n            R.cols == A.cols\n            and vector != zeros(1, R.cols)\n            and A.col_join(vector).rank() == A.rank()\n        )\n        trial = accepted + [vector]\n        adds_direction = belongs and Matrix.vstack(*trial).rank() == len(trial)\n        row_status.append(adds_direction)\n        if adds_direction:\n            accepted.append(vector)\n    coverage = min(len(accepted), target_dim) / target_dim\n    precision = len(accepted) / R.rows if R.rows else 0\n    score = coverage * precision\n    feedback = \&quot;\&quot; if score == 1 else (\n        \&quot;This row space is not trivial; add basis vectors.\&quot; if R.rows == 0\n        else \&quot;A red row is zero, outside the row space, or redundant. Keep only enough independent rows to span the space.\&quot;\n    )\n    return {\n        \&quot;score\&quot;: score,\n        \&quot;feedback\&quot;: feedback,\n        \&quot;assessment\&quot;: {\&quot;R\&quot;: {\&quot;rows\&quot;: row_status}}\n    }&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="explicit" data-context-refs="dynamic-basis-method" data-context="&quot;Row-space basis&quot;" data-fields="[&quot;math-exercise-3-dm-R-1-1&quot;,&quot;math-exercise-3-dm-R-1-2&quot;,&quot;math-exercise-3-dm-R-1-3&quot;,&quot;math-exercise-3-dm-R-1-4&quot;]" data-structural-field-labels="[&quot;dm:R:1,1&quot;,&quot;dm:R:1,2&quot;,&quot;dm:R:1,3&quot;,&quot;dm:R:1,4&quot;]">
+<div class="math-exercise-cell" id="math-exercise-3" data-label="dynamic-row-space-basis" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    R = response[\&quot;inputs\&quot;][\&quot;R\&quot;][\&quot;matrix\&quot;]\n    A = Matrix([[1, 0, 1, 2], [0, 1, 1, 1], [1, 1, 2, 3]])\n    return assess_basis(\n        R,\n        axis=\&quot;rows\&quot;,\n        target_dimension=A.rank(),\n        belongs=lambda vector: R.cols == A.cols and A.col_join(vector).rank() == A.rank(),\n        name=\&quot;R\&quot;,\n        space_name=\&quot;row space\&quot;,\n    )&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="explicit" data-context-refs="dynamic-basis-method" data-context="&quot;Row-space basis&quot;" data-fields="[&quot;math-exercise-3-dm-R-1-1&quot;,&quot;math-exercise-3-dm-R-1-2&quot;,&quot;math-exercise-3-dm-R-1-3&quot;,&quot;math-exercise-3-dm-R-1-4&quot;]" data-structural-field-labels="[&quot;dm:R:1,1&quot;,&quot;dm:R:1,2&quot;,&quot;dm:R:1,3&quot;,&quot;dm:R:1,4&quot;]">
 <div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Compute a basis using row vectors</div>
 
 <div class="math-exercise-body" style="display:none;">
@@ -1021,33 +989,14 @@ many vectors are needed:<br>
 #|   def check(response, symbols):
 #|       R = response["inputs"]["R"]["matrix"]
 #|       A = Matrix([[1, 0, 1, 2], [0, 1, 1, 1], [1, 1, 2, 3]])
-#|       target_dim = A.rank()
-#|       accepted = []
-#|       row_status = []
-#|       for i in range(R.rows):
-#|           vector = R[i, :]
-#|           belongs = (
-#|               R.cols == A.cols
-#|               and vector != zeros(1, R.cols)
-#|               and A.col_join(vector).rank() == A.rank()
-#|           )
-#|           trial = accepted + [vector]
-#|           adds_direction = belongs and Matrix.vstack(*trial).rank() == len(trial)
-#|           row_status.append(adds_direction)
-#|           if adds_direction:
-#|               accepted.append(vector)
-#|       coverage = min(len(accepted), target_dim) / target_dim
-#|       precision = len(accepted) / R.rows if R.rows else 0
-#|       score = coverage * precision
-#|       feedback = "" if score == 1 else (
-#|           "This row space is not trivial; add basis vectors." if R.rows == 0
-#|           else "A red row is zero, outside the row space, or redundant. Keep only enough independent rows to span the space."
+#|       return assess_basis(
+#|           R,
+#|           axis="rows",
+#|           target_dimension=A.rank(),
+#|           belongs=lambda vector: R.cols == A.cols and A.col_join(vector).rank() == A.rank(),
+#|           name="R",
+#|           space_name="row space",
 #|       )
-#|       return {
-#|           "score": score,
-#|           "feedback": feedback,
-#|           "assessment": {"R": {"rows": row_status}}
-#|       }
 
 Compute a basis for the row space of
 $A=\begin{bmatrix}1&amp;0&amp;1&amp;2\\0&amp;1&amp;1&amp;1\\1&amp;1&amp;2&amp;3\end{bmatrix}$.
@@ -2590,6 +2539,90 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
       '    _local.setdefault("inf", oo)',
       '    return _local',
       '',
+      'def assess_basis(matrix, *, axis, target_dimension, belongs, name, space_name="space"):',
+      '    """Assess a row- or column-basis submission without privileging vector order.',
+      '',
+      '    ``belongs(vector)`` decides only whether a nonzero vector belongs to the',
+      '    target space.  This helper owns rank, dependence, scoring, assessment',
+      '    colors, and standard feedback so individual checkers do not duplicate them.',
+      '    """',
+      '    if axis not in ("rows", "columns"):',
+      '        raise ValueError("Basis assessment axis must be rows or columns")',
+      '    target_dimension = int(target_dimension)',
+      '    if target_dimension < 0:',
+      '        raise ValueError("Basis target dimension cannot be negative")',
+      '    if not callable(belongs):',
+      '        raise TypeError("Basis membership test must be callable")',
+      '',
+      '    count = matrix.rows if axis == "rows" else matrix.cols',
+      '    singular = "row" if axis == "rows" else "column"',
+      '    vectors = [matrix[i, :] for i in range(count)] if axis == "rows" else [matrix[:, i] for i in range(count)]',
+      '',
+      '    if target_dimension == 0:',
+      '        statuses = ["incorrect"] * count',
+      '        return {',
+      '            "score": 1.0 if count == 0 else 0.0,',
+      '            "feedback": "" if count == 0 else f"The {space_name} is trivial, so its basis is empty. Remove every {singular}.",',
+      '            "assessment": {name: {axis: statuses}},',
+      '        }',
+      '',
+      '    locally_valid = []',
+      '    valid_vectors = []',
+      '    for vector in vectors:',
+      '        zero = vector == zeros(*vector.shape)',
+      '        valid = (not zero) and bool(belongs(vector))',
+      '        locally_valid.append(valid)',
+      '        if valid:',
+      '            valid_vectors.append(vector)',
+      '',
+      '    if valid_vectors:',
+      '        family = Matrix.vstack(*valid_vectors) if axis == "rows" else Matrix.hstack(*valid_vectors)',
+      '        rank = int(family.rank())',
+      '    else:',
+      '        rank = 0',
+      '    valid_count = len(valid_vectors)',
+      '    dependent = rank < valid_count',
+      '    statuses = [',
+      '        ("dependent" if dependent else "correct") if valid else "incorrect"',
+      '        for valid in locally_valid',
+      '    ]',
+      '',
+      '    if count == 0:',
+      '        score = 0.0',
+      '    else:',
+      '        coverage = min(rank, target_dimension) / target_dimension',
+      '        validity = valid_count / count',
+      '        independence = rank / valid_count if valid_count else 0.0',
+      '        score = float(coverage * validity * independence)',
+      '',
+      '    invalid_count = count - valid_count',
+      '    missing = max(0, target_dimension - rank)',
+      '    plural = singular + "s"',
+      '    if score >= 1.0 - 1e-9:',
+      '        feedback = ""',
+      '    elif count == 0:',
+      '        feedback = f"Add one or more basis {plural} for the {space_name}."',
+      '    elif invalid_count and dependent:',
+      '        feedback = (f"The red {plural} are zero or outside the {space_name}. "',
+      '                    f"The yellow {plural} belong to the {space_name}, but together they are linearly dependent. "',
+      '                    f"Remove or replace {plural}" + (f" and add {missing} missing independent direction(s)." if missing else "."))',
+      '    elif invalid_count:',
+      '        feedback = f"Remove or replace the red {plural}; each is zero or outside the {space_name}."',
+      '        if missing:',
+      '            feedback += f" Then add {missing} missing independent direction(s)."',
+      '    elif dependent and missing:',
+      '        feedback = (f"Every yellow {singular} belongs to the {space_name}, but the family is linearly dependent "',
+      '                    f"and spans only {rank} of {target_dimension} required directions. "',
+      '                    f"Choose an independent subset, then add {missing} missing direction(s).")',
+      '    elif dependent:',
+      '        feedback = (f"Every yellow {singular} belongs to the {space_name}, but the family is linearly dependent. "',
+      '                    f"Remove one or more yellow {plural} until an independent basis remains.")',
+      '    else:',
+      '        feedback = (f"The green {plural} are valid and independent. "',
+      '                    f"Add {missing} more independent {singular}" + ("s." if missing != 1 else "."))',
+      '',
+      '    return {"score": score, "feedback": feedback, "assessment": {name: {axis: statuses}}}',
+      '',
       'def _math_check():',
       '    try:',
       '        mode = _math_mode',
@@ -3288,7 +3321,7 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
     if (typeof value === 'number') return value >= 1 - 1e-9 ? 'correct' : (value <= 1e-9 ? 'incorrect' : 'partial');
     var status = String(value || '').toLowerCase();
     if (status === 'wrong') return 'incorrect';
-    return /^(correct|partial|incorrect|empty|invalid)$/.test(status) ? status : '';
+    return /^(correct|dependent|partial|incorrect|empty|invalid)$/.test(status) ? status : '';
   }
 
   function structuredGroupStatus(assessment, name, axis, index) {
@@ -3300,7 +3333,7 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
   function applyCustomAssessment(questionDiv, result) {
     var assessment = result.assessment || {};
     questionDiv.querySelectorAll('input.math-input').forEach(function (input) {
-      input.classList.remove('math-input-ok', 'math-input-partial', 'math-input-wrong', 'math-input-err');
+      input.classList.remove('math-input-ok', 'math-input-dependent', 'math-input-partial', 'math-input-wrong', 'math-input-err');
       var status = '';
       if (input.dataset.dynamicMatrixName) {
         status = structuredGroupStatus(
@@ -3311,6 +3344,7 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
       }
       status = status || result.status;
       if (status === 'correct') input.classList.add('math-input-ok');
+      else if (status === 'dependent') input.classList.add('math-input-dependent');
       else if (status === 'partial') input.classList.add('math-input-partial');
       else if (status === 'error' || status === 'invalid') input.classList.add('math-input-err');
       else if (status !== 'empty') input.classList.add('math-input-wrong');
@@ -4242,7 +4276,7 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
 
     function clearAssessmentAfterResize() {
       questionDiv.querySelectorAll('.math-input').forEach(function (input) {
-        input.classList.remove('math-input-ok', 'math-input-partial', 'math-input-wrong', 'math-input-err');
+        input.classList.remove('math-input-ok', 'math-input-dependent', 'math-input-partial', 'math-input-wrong', 'math-input-err');
       });
       fbDiv.innerHTML = '';
     }
@@ -4327,7 +4361,7 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
           if (!el) continue;
           var prefix = fieldIds.length > 1 ? escHtml(fieldLabel(i)) + ': ' : '';
           var res    = await checkField(el, mode, checkOpts);
-          el.classList.remove('math-input-ok', 'math-input-partial', 'math-input-wrong', 'math-input-err');
+          el.classList.remove('math-input-ok', 'math-input-dependent', 'math-input-partial', 'math-input-wrong', 'math-input-err');
           if (typeof res.score === 'number') { totalScore += res.score; scoredFields++; }
           if      (res.status === 'empty')    { parts.push('<div class="math-fb-empty">'  + prefix + L.resEmpty + '</div>'); }
           else if (res.status === 'correct')  { el.classList.add('math-input-ok');    parts.push('<div class="math-fb-ok">&#10003;&nbsp;'  + prefix + L.resCorrect + '</div>'); }
