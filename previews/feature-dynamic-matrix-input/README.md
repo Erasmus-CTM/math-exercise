@@ -310,9 +310,9 @@ receives the matrix name, dimensions, and entries as structured answer data.
 The function may return a boolean, a score from `0` to `1`, or a dictionary
 containing `score` (or `correct`) and optional plain-text `feedback`. A checker
 can assess complete row or column vectors with, for example,
-`assessment: {"Z": {"columns": [True, False, True]}}`; the corresponding
-vectors are marked as units, and the structured statuses are also available to
-AI feedback.
+`assessment: {"Z": {"columns": [True, False, True]}}` or
+`assessment: {"R": {"rows": [True, False]}}`; the corresponding vectors are
+marked as units, and the structured statuses are also available to AI feedback.
 
 ````markdown
 ```{math-exercise}

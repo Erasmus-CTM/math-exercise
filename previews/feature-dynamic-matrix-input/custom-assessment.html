@@ -2757,11 +2757,13 @@ $A=$ mat[,;,]
       name: matrix.dataset.matrixName,
       rows: {
         auto: matrix.dataset.autoRows === 'true',
+        initial: Number(matrix.dataset.lastRows),
         min: Number(matrix.dataset.minRows),
         max: Number(matrix.dataset.maxRows),
       },
       cols: {
         auto: matrix.dataset.autoCols === 'true',
+        initial: Number(matrix.dataset.lastCols),
         min: Number(matrix.dataset.minCols),
         max: Number(matrix.dataset.maxCols),
       },
@@ -2816,6 +2818,22 @@ $A=$ mat[,;,]
     return inputs;
   }
 
+  function resizedDynamicMatrixShape(matrix, spec, action) {
+    var rows = Number(matrix.dataset.rows), cols = Number(matrix.dataset.cols);
+    var empty = rows === 0 || cols === 0;
+    if (empty && action === 'add-row') {
+      rows = Math.max(1, spec.rows.min);
+      cols = spec.cols.auto ? Math.max(1, Number(matrix.dataset.lastCols) || spec.cols.initial) : spec.cols.initial;
+    } else if (empty && action === 'add-col') {
+      cols = Math.max(1, spec.cols.min);
+      rows = spec.rows.auto ? Math.max(1, Number(matrix.dataset.lastRows) || spec.rows.initial) : spec.rows.initial;
+    } else if (action === 'add-row' && rows < spec.rows.max) rows++;
+    if (action === 'remove-row' && rows > spec.rows.min) rows--;
+    if (!empty && action === 'add-col' && cols < spec.cols.max) cols++;
+    if (action === 'remove-col' && cols > spec.cols.min) cols--;
+    return { rows: rows, cols: cols };
+  }
+
   function initializeDynamicMatrices(root, exerciseId, vars, onChange) {
     var names = {};
     root.querySelectorAll('.math-dynamic-matrix-wrap').forEach(function (wrap) {
@@ -2852,19 +2870,8 @@ $A=$ mat[,;,]
         });
       }
       function resize(action) {
-        var rows = Number(matrix.dataset.rows), cols = Number(matrix.dataset.cols);
-        var empty = rows === 0 || cols === 0;
-        if (empty && action === 'add-row') {
-          rows = Math.max(1, spec.rows.min);
-          cols = spec.cols.auto ? Math.max(1, Number(matrix.dataset.lastCols) || spec.cols.initial) : spec.cols.initial;
-        } else if (empty && action === 'add-col') {
-          cols = Math.max(1, spec.cols.min);
-          rows = spec.rows.auto ? Math.max(1, Number(matrix.dataset.lastRows) || spec.rows.initial) : spec.rows.initial;
-        } else if (action === 'add-row' && rows < spec.rows.max) rows++;
-        if (action === 'remove-row' && rows > spec.rows.min) rows--;
-        if (!empty && action === 'add-col' && cols < spec.cols.max) cols++;
-        if (action === 'remove-col' && cols > spec.cols.min) cols--;
-        renderDynamicMatrixElement(matrix, exerciseId, vars, rows, cols);
+        var shape = resizedDynamicMatrixShape(matrix, spec, action);
+        renderDynamicMatrixElement(matrix, exerciseId, vars, shape.rows, shape.cols);
         syncControls();
         if (onChange) onChange();
       }
@@ -4247,11 +4254,14 @@ $A=$ mat[,;,]
       loadCapability: loadCapability,
       splitTop: splitTop,
       parseDynamicMatrixSpec: parseDynamicMatrixSpec,
+      dynamicSpecFromElement: dynamicSpecFromElement,
+      resizedDynamicMatrixShape: resizedDynamicMatrixShape,
       renderTaskText: renderTaskText,
       normalizeTaskMathDelimiters: normalizeTaskMathDelimiters,
       localizeStructuralLabel: localizeStructuralLabel,
       expressionAnswersXml: expressionAnswersXml,
       structuredAssessmentXml: structuredAssessmentXml,
+      structuredGroupStatus: structuredGroupStatus,
     };
   }
 
