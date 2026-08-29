@@ -14,8 +14,10 @@ logic, not a secure place for secrets or high-stakes exam answers.
 
 ## 1. Assess a mathematical property
 
-This accepts any function that is non-decreasing on $[0,1]$ and rises overall;
-there is no single canonical answer. Try `x`, `x^2`, or `x^3+x`.
+A function is non-decreasing on $[0,1]$ when
+$f(x_2)\ge f(x_1)$ whenever $0\le x_1<x_2\le1$. This exercise accepts any
+such function whose value at 1 is strictly greater than its value at 0; there
+is no single canonical answer. Examples include `x`, `x^2`, and `x^3+x`.
 
 ```{math-exercise}
 #| label: custom-monotone
@@ -43,8 +45,9 @@ $f(x)=$ ___[]
 
 ## 2. Assess several fields together
 
-Any positive integer Pythagorean triple is accepted, not only $(3,4,5)$. The
-checker also enforces the requested ordering.
+A Pythagorean triple consists of positive integers $(a,b,c)$ satisfying
+$a^2+b^2=c^2$. Any such triple is accepted, not only $(3,4,5)$, provided the
+entries are ordered as $a<b<c$.
 
 ```{math-exercise}
 #| label: custom-pythagorean
@@ -64,13 +67,14 @@ checker also enforces the requested ordering.
 #|       }
 
 Enter positive integers $a<b<c$ satisfying $a^2+b^2=c^2$:
-$a=$ _[] &nbsp; $b=$ _[] &nbsp; $c=$ _[]
+$a=$ _[], $b=$ _[], $c=$ _[]
 ```
 
 ## 3. Check relationships between symbolic answers
 
-The polynomial and its proposed roots are assessed as one response. Any monic
-quadratic with two distinct roots is valid.
+The polynomial and its proposed roots are assessed as one response. A monic
+quadratic has leading coefficient 1, so every valid answer has the form
+$p(x)=(x-r_1)(x-r_2)$ with $r_1\ne r_2$.
 
 ```{math-exercise}
 #| label: custom-polynomial-roots
@@ -96,13 +100,20 @@ quadratic with two distinct roots is valid.
 #|       }
 
 Give a monic quadratic $p(x)$ and two distinct roots:
-$p(x)=$ __[] &nbsp; $r_1=$ _[] &nbsp; $r_2=$ _[]
+$p(x)=$ __[], $r_1=$ _[], $r_2=$ _[]
 ```
 
 ## 4. Validate a numerical process
 
-Here correctness is defined by two successive Newton/Babylonian updates, not
-by one fixed starting value. Try $x_0=1$, then calculate $x_1$ and $x_2$.
+To approximate $\sqrt2$, apply Newton's method to $f(x)=x^2-2$. Its update
+formula simplifies to
+$$
+x_{n+1}=x_n-\frac{x_n^2-2}{2x_n}
+       =\frac12\left(x_n+\frac{2}{x_n}\right).
+$$
+This square-root iteration is also known as the Babylonian method. Choose any
+positive starting value other than the exact root, then apply the displayed
+formula twice. For example, you may begin with $x_0=1$.
 
 ```{math-exercise}
 #| label: custom-newton-sequence
@@ -122,18 +133,20 @@ by one fixed starting value. Try $x_0=1$, then calculate $x_1$ and $x_2$.
 #|           "feedback": "Each new value must equal (x + 2/x)/2 for the preceding value."
 #|       }
 
-Choose a positive $x_0\ne\sqrt2$ and give two updates:
-$x_0=$ _[] &nbsp; $x_1=$ _[] &nbsp; $x_2=$ _[]
+Choose a positive $x_0\ne\sqrt2$ and apply
+$x_{n+1}=(x_n+2/x_n)/2$ twice:
+$x_0=$ _[], $x_1=$ _[], $x_2=$ _[]
 ```
 
 ## 5. Assess a matrix constraint
 
 Every cell is parsed separately, then reconstructed inside the checker. Any
-integer $2\times2$ matrix with determinant 1 is accepted except the identity.
+integer $2\times2$ matrix with determinant 1 is accepted except the identity
+matrix $I_2=\begin{pmatrix}1&0\\0&1\end{pmatrix}$.
 
 ```{math-exercise}
 #| label: custom-special-linear-matrix
-#| caption: An integer matrix in SL(2) other than the identity
+#| caption: A non-identity integer matrix with determinant 1
 #| mode: custom
 #| checker: |
 #|   def check(response, symbols):

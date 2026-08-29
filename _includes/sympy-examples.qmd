@@ -44,7 +44,7 @@ Simplify $\sqrt{72}$: _[6*sqrt(2)]
 ```{math-exercise}
 #| label: sympy-logarithm
 #| vars: x
-Differentiate $\log(x^2)$ formally: __[2/x]
+For $x\ne0$, differentiate $\log(x^2)$: __[2/x]
 ```
 
 ```{math-exercise}
@@ -85,7 +85,8 @@ Give one antiderivative of $3x^2-4$: __[x^3-4*x]
 
 ```{math-exercise}
 #| label: sympy-complex
-Compute $(1+2i)(3-i)$ using `I` for $i$: __[5+5*I]
+Compute $(1+2i)(3-i)$. Enter the imaginary unit $i$ as a capital I:
+__[5+5*I]
 ```
 
 ## Solution sets
@@ -100,6 +101,10 @@ List all roots of $x^3-x=0$: __[-1,0,1]
 ```
 
 ## Numerical checking
+
+The first task accepts answers within a fixed absolute distance of the target;
+the second uses a percentage of the target value. The last two require the
+stated number of decimal places or significant figures.
 
 ```{math-exercise}
 #| label: sympy-absolute-tolerance

@@ -28,13 +28,17 @@ jobs:
           grep -Fq 'Entering answers' _site/basic-features.html
           grep -Fq 'Automatic section context' _site/ai-feedback.html
           grep -Fq 'Assess a mathematical property' _site/custom-assessment.html
+          grep -Fq 'This square-root iteration is also known as the Babylonian method' _site/custom-assessment.html
+          grep -Fq 'A monic quadratic has leading coefficient 1' _site/custom-assessment.html
+          ! grep -Fq '&amp;nbsp;' _site/custom-assessment.html
           grep -Fq 'mode: custom' _site/custom-assessment.html
           grep -Fq 'Click every local maximum' _site/graphics-examples.html
           grep -Fq 'pooled-maxima-board' _site/graphics-examples.html
           grep -Fq 'period-window-board' _site/graphics-examples.html
           grep -Fq 'Move the two orange dots' _site/graphics-examples.html
           ! grep -Fq '**L**' _site/graphics-examples.html
-          grep -Fq 'Draw and refine an increasing curve' _site/graphics-examples.html
+          grep -Fq 'Draw and refine a non-decreasing curve' _site/graphics-examples.html
+          grep -Fq 'A positive number' _site/graphics-examples.html
           grep -Fq 'Coordinate transformations' _site/graphics-examples.html
           grep -Fq 'An affine transformation combines' _site/graphics-examples.html
           grep -Fq 'Polar coordinates describe a point' _site/graphics-examples.html

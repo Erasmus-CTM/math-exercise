@@ -3,11 +3,14 @@ moving handles, or drawing a curve, open the exercise heading below the plot
 and select **Check**. The collapsed source panels show authors how each
 JSXGraph plot and its answer checker are defined.
 
-## Click every local maximum — pooled functions
+## Click every local maximum
 
-Each variant shows four periods of a sinusoid. Click once at every visible
-local maximum; each answer appears as an orange point. Use **Clear clicks** to
-remove all selected points or **New pooled function** to try another variant.
+A local maximum is a point whose function value is at least as large as the
+values at all sufficiently nearby points—a visible crest of the graph. One of
+four sinusoidal functions is selected when the page loads. Click once at every
+visible local maximum; each answer appears as an orange point. Use **Clear
+clicks** to remove all selected points or **Show another function** to try the
+next variant.
 
 ```{.jsxgraph assessment_id="pooled-maxima-board" width="900" height="430" style="border:1px solid #ddd; border-radius:8px; max-width:100%;"}
 var xMax = 8 * Math.PI;
@@ -56,7 +59,7 @@ function drawVariant() {
     fixed: true,
     highlight: false
   });
-  variantText.setText('Pooled function ' + (variantIndex + 1) + ' of ' + variants.length);
+  variantText.setText('Function ' + (variantIndex + 1) + ' of ' + variants.length);
   board.update();
 }
 
@@ -65,7 +68,7 @@ function nextVariant() {
   drawVariant();
 }
 
-board.create('button', [0.6, -1.55, 'New pooled function', nextVariant], {
+board.create('button', [0.6, -1.55, 'Show another function', nextVariant], {
   fixed: true
 });
 board.create('button', [5.3, -1.55, 'Clear clicks', clearClicks], {
@@ -105,7 +108,7 @@ JXG.QuartoAssessment.register({
     summary: function (data) {
       return {
         representation: data.representation,
-        pooledVariant: data.variant + 1,
+        functionVariant: data.variant + 1,
         selectedPointCount: data.clicks.length,
         feedbackPolicy: 'Discuss how local maxima are identified visually. Do not reveal target coordinates.'
       };
@@ -132,7 +135,7 @@ JXG.QuartoAssessment.register({
 #|       variant = int(response.get("variant", -1))
 #|       clicks = response.get("clicks", [])
 #|       if variant < 0 or variant >= len(configs):
-#|           return {"score": 0, "feedback": "The pooled graph variant is invalid."}
+#|           return {"score": 0, "feedback": "The selected function variant is invalid."}
 #|       amplitude, phase, offset = configs[variant]
 #|       targets = []
 #|       k = -2
@@ -164,12 +167,15 @@ JXG.QuartoAssessment.register({
 #|           "feedback": f"{matched} of {len(targets)} maxima are matched; remove extra points and inspect each crest."
 #|       }
 
-Click every local maximum visible in the pooled function plot.
+Click every local maximum visible in the function plot.
 ```
 
 ## Mark exactly one period
 
-The graph shows five periods. Move the two orange dots labelled L and R
+A positive number $T$ is a period of a function $f$ when
+$f(x+T)=f(x)$ for every $x$; one complete period runs between two corresponding
+points in consecutive repetitions of the graph. The graph below shows five
+periods. Move the two orange dots labelled L and R
 horizontally along the line below the graph. They control the left and right
 edges of the shaded frame. Your answer is accepted anywhere on the graph when
 the frame spans exactly one complete period. Do not draw on the curve; only

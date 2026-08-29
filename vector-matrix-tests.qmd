@@ -57,8 +57,9 @@ Skriv gradienten til $f(x,y)=x^2+xy$: $\nabla f=$ vec[2*x+y,x]
 #| label: nb-nestet-komma
 #| caption: Polarkoordinater som vektorkomponenter
 #| vars: x,y
-Skriv vektoren som består av vinkelen `atan2(y,x)` og lengden
-$\sqrt{x^2+y^2}$: vec[atan2(y,x),sqrt(x^2+y^2)]
+Skriv vektoren som består av vinkelen $\operatorname{atan2}(y,x)$ og lengden
+$\sqrt{x^2+y^2}$. Bruk inntastingsformen atan2(y,x) for vinkelen:
+vec[atan2(y,x),sqrt(x^2+y^2)]
 ```
 
 ## Matriser i ulike størrelser

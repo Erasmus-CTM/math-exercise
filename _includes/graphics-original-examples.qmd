@@ -1,5 +1,5 @@
 
-## Construct an increasing piecewise-linear function
+## Construct a non-decreasing piecewise-linear function
 
 Drag the five blue points vertically. Consecutive points are joined by straight
 segments. Flat segments are allowed, but no segment may decrease from left to
@@ -71,7 +71,7 @@ JXG.QuartoAssessment.register({
 
 ```{math-exercise}
 #| label: ex-jsxgraph-pwl-monotonicity
-#| caption: Construct an increasing piecewise-linear function
+#| caption: Construct a non-decreasing piecewise-linear function
 #| mode: custom
 #| response: jsxgraph:pwl-monotonicity-board
 #| embed-response: true
@@ -97,11 +97,11 @@ JXG.QuartoAssessment.register({
 #|           "feedback": f"{nondecreasing} of {len(slopes)} segments are non-decreasing; the graph must also rise overall."
 #|       }
 
-Use the movable points to construct a monotonically increasing
+Use the movable points to construct a non-decreasing
 piecewise-linear function on $[0,1]$.
 ```
 
-## Draw an increasing curve
+## Draw a non-decreasing curve
 
 Draw one continuous stroke from near $x=0$ to near $x=1$. A grey line follows
 your pointer, and a smooth red curve appears when you release it. The red curve
@@ -269,7 +269,7 @@ JXG.QuartoAssessment.register({
 
 ```{math-exercise}
 #| label: ex-jsxgraph-freehand-monotonicity
-#| caption: Draw an increasing curve
+#| caption: Draw a non-decreasing curve
 #| mode: custom
 #| response: jsxgraph:freehand-monotonicity-board
 #| embed-response: true
@@ -301,11 +301,12 @@ JXG.QuartoAssessment.register({
 
 Draw from left to right across $[0,1]$. The grey line is your stroke and the
 smooth red line is the answer that will be checked. Make the red curve
-non-decreasing and ensure that it rises overall.
+non-decreasing, meaning it never falls as $x$ increases, and make its final
+value greater than its initial value.
 ```
 
 
-## Draw and refine an increasing curve
+## Draw and refine a non-decreasing curve
 
 First draw one continuous stroke from near $x=0$ to near $x=1$. A smooth red
 curve and blue adjustment points then appear. Drag the blue points vertically
@@ -531,7 +532,7 @@ JXG.QuartoAssessment.register({
 
 ```{math-exercise}
 #| label: ex-jsxgraph-editable-freehand-monotonicity
-#| caption: Draw and refine an increasing curve
+#| caption: Draw and refine a non-decreasing curve
 #| mode: custom
 #| response: jsxgraph:editable-freehand-monotonicity-board
 #| embed-response: true
@@ -563,5 +564,6 @@ JXG.QuartoAssessment.register({
 
 Draw from left to right across $[0,1]$, then move the blue points vertically as
 needed. The smooth red curve is the answer that will be checked. Make it
-non-decreasing and ensure that it rises overall; flat portions are allowed.
+non-decreasing, meaning it never falls as $x$ increases. Its final value must
+be greater than its initial value; flat portions are allowed.
 ```
