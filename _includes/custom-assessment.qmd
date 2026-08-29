@@ -1,0 +1,166 @@
+These tasks accept a family of valid answers rather than one predetermined
+expression. A trusted, instructor-authored checker evaluates the complete
+response and can award partial credit.
+
+For authors, `mode: custom` provides the checker with the parsed expressions and
+declared symbols. The collapsed source below each example shows the complete
+Python/SymPy checker and its feedback rules.
+
+::: {.callout-warning}
+Checker code is included in the generated HTML and executes in browser-side
+Pyodide. It must come only from trusted document authors. It is assessment
+logic, not a secure place for secrets or high-stakes exam answers.
+:::
+
+## 1. Assess a mathematical property
+
+A function is non-decreasing on $[0,1]$ when
+$f(x_2)\ge f(x_1)$ whenever $0\le x_1<x_2\le1$. This exercise accepts any
+such function whose value at 1 is strictly greater than its value at 0; there
+is no single canonical answer. Examples include `x`, `x^2`, and `x^3+x`.
+
+```{math-exercise}
+#| label: custom-monotone
+#| caption: Any non-decreasing function that rises overall
+#| vars: x
+#| mode: custom
+#| checker: |
+#|   def check(response, symbols):
+#|       f = response["expressions"][0]
+#|       x = symbols["x"]
+#|       derivative_min = minimum(diff(f, x), x, Interval(0, 1))
+#|       rise = simplify(f.subs(x, 1) - f.subs(x, 0))
+#|       valid = (
+#|           derivative_min.is_nonnegative is True
+#|           and rise.is_positive is True
+#|       )
+#|       return {
+#|           "correct": valid,
+#|           "feedback": "The derivative must stay non-negative and the endpoint value must increase."
+#|       }
+
+Give a function that is non-decreasing on $[0,1]$ and satisfies $f(1)>f(0)$:
+$f(x)=$ ___[]
+```
+
+## 2. Assess several fields together
+
+A Pythagorean triple consists of positive integers $(a,b,c)$ satisfying
+$a^2+b^2=c^2$. Any such triple is accepted, not only $(3,4,5)$, provided the
+entries are ordered as $a<b<c$.
+
+```{math-exercise}
+#| label: custom-pythagorean
+#| caption: A positive integer Pythagorean triple
+#| mode: custom
+#| field-labels: a, b, c
+#| checker: |
+#|   def check(response, symbols):
+#|       a, b, c = response["expressions"]
+#|       integers = all(v.is_integer is True and v.is_positive is True for v in (a, b, c))
+#|       ordered = (a < b) is S.true and (b < c) is S.true
+#|       equation = simplify(a**2 + b**2 - c**2) == 0
+#|       score = (int(integers) + int(ordered) + int(equation)) / 3
+#|       return {
+#|           "score": score,
+#|           "feedback": "Check positivity, a < b < c, and the equation a²+b²=c²."
+#|       }
+
+Enter positive integers $a<b<c$ satisfying $a^2+b^2=c^2$:
+$a=$ _[], $b=$ _[], $c=$ _[]
+```
+
+## 3. Check relationships between symbolic answers
+
+The polynomial and its proposed roots are assessed as one response. A monic
+quadratic has leading coefficient 1, so every valid answer has the form
+$p(x)=(x-r_1)(x-r_2)$ with $r_1\ne r_2$.
+
+```{math-exercise}
+#| label: custom-polynomial-roots
+#| caption: A polynomial consistent with two proposed roots
+#| vars: x
+#| mode: custom
+#| field-labels: Polynomial, First root, Second root
+#| checker: |
+#|   def check(response, symbols):
+#|       p, r1, r2 = response["expressions"]
+#|       x = symbols["x"]
+#|       try:
+#|           polynomial = Poly(p, x)
+#|           monic_quadratic = polynomial.degree() == 2 and polynomial.LC() == 1
+#|       except Exception:
+#|           monic_quadratic = False
+#|       distinct = simplify(r1 - r2) != 0
+#|       consistent = simplify(p - (x-r1)*(x-r2)) == 0
+#|       score = (int(monic_quadratic) + int(distinct) + int(consistent)) / 3
+#|       return {
+#|           "score": score,
+#|           "feedback": "The polynomial must be monic, quadratic, and equal to (x-r₁)(x-r₂)."
+#|       }
+
+Give a monic quadratic $p(x)$ and two distinct roots:
+$p(x)=$ __[], $r_1=$ _[], $r_2=$ _[]
+```
+
+## 4. Validate a numerical process
+
+To approximate $\sqrt2$, apply Newton's method to $f(x)=x^2-2$. Its update
+formula simplifies to
+$$
+x_{n+1}=x_n-\frac{x_n^2-2}{2x_n}
+       =\frac12\left(x_n+\frac{2}{x_n}\right).
+$$
+This square-root iteration is also known as the Babylonian method. Choose any
+positive starting value other than the exact root, then apply the displayed
+formula twice. For example, you may begin with $x_0=1$.
+
+```{math-exercise}
+#| label: custom-newton-sequence
+#| caption: Two consistent iterations toward sqrt(2)
+#| mode: custom
+#| field-labels: x₀, x₁, x₂
+#| checker: |
+#|   def check(response, symbols):
+#|       x0, x1, x2 = response["expressions"]
+#|       step = lambda value: (value + 2/value) / 2
+#|       start_ok = x0.is_positive is True and simplify(x0**2 - 2) != 0
+#|       first_ok = simplify(x1 - step(x0)) == 0
+#|       second_ok = simplify(x2 - step(x1)) == 0
+#|       score = (int(start_ok) + int(first_ok) + int(second_ok)) / 3
+#|       return {
+#|           "score": score,
+#|           "feedback": "Each new value must equal (x + 2/x)/2 for the preceding value."
+#|       }
+
+Choose a positive $x_0\ne\sqrt2$ and apply
+$x_{n+1}=(x_n+2/x_n)/2$ twice:
+$x_0=$ _[], $x_1=$ _[], $x_2=$ _[]
+```
+
+## 5. Assess a matrix constraint
+
+Every cell is parsed separately, then reconstructed inside the checker. Any
+integer $2\times2$ matrix with determinant 1 is accepted except the identity
+matrix $I_2=\begin{pmatrix}1&0\\0&1\end{pmatrix}$.
+
+```{math-exercise}
+#| label: custom-special-linear-matrix
+#| caption: A non-identity integer matrix with determinant 1
+#| mode: custom
+#| checker: |
+#|   def check(response, symbols):
+#|       values = response["expressions"]
+#|       A = Matrix(2, 2, values)
+#|       integer_entries = all(value.is_integer is True for value in values)
+#|       determinant_one = simplify(A.det() - 1) == 0
+#|       nonidentity = A != eye(2)
+#|       score = (int(integer_entries) + int(determinant_one) + int(nonidentity)) / 3
+#|       return {
+#|           "score": score,
+#|           "feedback": "Require integer entries, determinant 1, and a matrix different from I₂."
+#|       }
+
+Enter an integer matrix $A\ne I_2$ with $\det(A)=1$:
+$A=$ mat[,;,]
+```

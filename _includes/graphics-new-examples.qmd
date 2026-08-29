@@ -1,0 +1,308 @@
+These exercises are answered directly in the plots. After placing points,
+moving handles, or drawing a curve, open the exercise heading below the plot
+and select **Check**. The collapsed source panels show authors how each
+JSXGraph plot and its answer checker are defined.
+
+## Click every local maximum
+
+A local maximum is a point whose function value is at least as large as the
+values at all sufficiently nearby points—a visible crest of the graph. One of
+four sinusoidal functions is selected when the page loads. Click once at every
+visible local maximum; each answer appears as an orange point. Use **Clear
+clicks** to remove all selected points or **Show another function** to try the
+next variant.
+
+```{.jsxgraph assessment_id="pooled-maxima-board" width="900" height="430" style="border:1px solid #ddd; border-radius:8px; max-width:100%;"}
+var xMax = 8 * Math.PI;
+var variants = [
+  { amplitude: 1.00, phase: 0.00, offset: 0.00, color: '#2563eb' },
+  { amplitude: 0.75, phase: 0.55, offset: 0.20, color: '#dc2626' },
+  { amplitude: 1.10, phase: -0.70, offset: -0.10, color: '#059669' },
+  { amplitude: 0.85, phase: 1.05, offset: 0.10, color: '#7c3aed' }
+];
+var variantIndex = Math.floor(Math.random() * variants.length);
+
+var board = JXG.JSXGraph.initBoard(BOARDID, {
+  boundingbox: [-0.8, 1.9, xMax + 0.8, -1.9],
+  axis: true,
+  pan: { enabled: false },
+  zoom: { enabled: false },
+  showNavigation: false
+});
+
+var graph = null;
+var selectedPoints = [];
+var variantText = board.create('text', [0.6, 1.55, ''], {
+  fixed: true,
+  fontSize: 16,
+  color: '#475569'
+});
+
+function currentFunction(x) {
+  var cfg = variants[variantIndex];
+  return cfg.offset + cfg.amplitude * Math.sin(x + cfg.phase);
+}
+
+function clearClicks() {
+  selectedPoints.forEach(function (point) { board.removeObject(point); });
+  selectedPoints = [];
+  board.update();
+}
+
+function drawVariant() {
+  clearClicks();
+  if (graph) board.removeObject(graph);
+  var cfg = variants[variantIndex];
+  graph = board.create('functiongraph', [currentFunction, 0, xMax], {
+    strokeColor: cfg.color,
+    strokeWidth: 3,
+    fixed: true,
+    highlight: false
+  });
+  variantText.setText('Function ' + (variantIndex + 1) + ' of ' + variants.length);
+  board.update();
+}
+
+function nextVariant() {
+  variantIndex = (variantIndex + 1) % variants.length;
+  drawVariant();
+}
+
+board.create('button', [0.6, -1.55, 'Show another function', nextVariant], {
+  fixed: true
+});
+board.create('button', [5.3, -1.55, 'Clear clicks', clearClicks], {
+  fixed: true
+});
+
+board.on('down', function (event) {
+  if (event.target && event.target.closest && event.target.closest('button')) return;
+  var screen = board.getMousePosition(event);
+  var coords = new JXG.Coords(JXG.COORDS_BY_SCREEN, screen, board);
+  var x = coords.usrCoords[1];
+  var y = coords.usrCoords[2];
+  if (x < 0 || x > xMax || y < -1.35 || y > 1.35) return;
+  selectedPoints.push(board.create('point', [x, y], {
+    name: '',
+    size: 4,
+    fixed: true,
+    color: '#f59e0b',
+    strokeColor: '#92400e',
+    showInfobox: false
+  }));
+});
+
+drawVariant();
+
+JXG.QuartoAssessment.register({
+  board: board,
+  response: function () {
+    return {
+      representation: 'clicked-local-maxima',
+      variant: variantIndex,
+      clicks: selectedPoints.map(function (point) { return [point.X(), point.Y()]; })
+    };
+  },
+  ai: {
+    render: true,
+    summary: function (data) {
+      return {
+        representation: data.representation,
+        functionVariant: data.variant + 1,
+        selectedPointCount: data.clicks.length,
+        feedbackPolicy: 'Discuss how local maxima are identified visually. Do not reveal target coordinates.'
+      };
+    }
+  }
+});
+```
+
+```{math-exercise}
+#| label: jsxgraph-pooled-maxima
+#| caption: Click every visible local maximum
+#| mode: custom
+#| response: jsxgraph:pooled-maxima-board
+#| embed-response: true
+#| checker: |
+#|   def check(response, symbols):
+#|       import math
+#|       configs = [
+#|           (1.00, 0.00, 0.00),
+#|           (0.75, 0.55, 0.20),
+#|           (1.10, -0.70, -0.10),
+#|           (0.85, 1.05, 0.10),
+#|       ]
+#|       variant = int(response.get("variant", -1))
+#|       clicks = response.get("clicks", [])
+#|       if variant < 0 or variant >= len(configs):
+#|           return {"score": 0, "feedback": "The selected function variant is invalid."}
+#|       amplitude, phase, offset = configs[variant]
+#|       targets = []
+#|       k = -2
+#|       while True:
+#|           x = math.pi/2 - phase + 2*math.pi*k
+#|           if x > 8*math.pi:
+#|               break
+#|           if x >= 0:
+#|               targets.append((x, offset + amplitude))
+#|           k += 1
+#|       remaining = [[float(p[0]), float(p[1])] for p in clicks if len(p) == 2]
+#|       matched = 0
+#|       for tx, ty in targets:
+#|           candidates = [
+#|               (i, abs(px-tx) + abs(py-ty))
+#|               for i, (px, py) in enumerate(remaining)
+#|               if abs(px-tx) <= 0.35 and abs(py-ty) <= 0.30
+#|           ]
+#|           if candidates:
+#|               index = min(candidates, key=lambda item: item[1])[0]
+#|               remaining.pop(index)
+#|               matched += 1
+#|       extras = len(remaining)
+#|       score = max(0, (matched - 0.5*extras) / len(targets))
+#|       if matched == len(targets) and extras == 0:
+#|           return {"score": 1, "feedback": "Every visible local maximum is selected."}
+#|       return {
+#|           "score": score,
+#|           "feedback": f"{matched} of {len(targets)} maxima are matched; remove extra points and inspect each crest."
+#|       }
+
+Click every local maximum visible in the function plot.
+```
+
+## Mark exactly one period
+
+A positive number $T$ is a period of a function $f$ when
+$f(x+T)=f(x)$ for every $x$; one complete period runs between two corresponding
+points in consecutive repetitions of the graph. The graph below shows five
+periods. Move the two orange dots labelled L and R
+horizontally along the line below the graph. They control the left and right
+edges of the shaded frame. Your answer is accepted anywhere on the graph when
+the frame spans exactly one complete period. Do not draw on the curve; only
+move the two orange dots.
+
+```{.jsxgraph assessment_id="period-window-board" width="900" height="430" style="border:1px solid #ddd; border-radius:8px; max-width:100%;"}
+var truePeriod = 2.5;
+var plotEnd = 5 * truePeriod;
+var yLow = -1.25;
+var yHigh = 1.25;
+
+var board = JXG.JSXGraph.initBoard(BOARDID, {
+  boundingbox: [-0.5, 1.85, plotEnd + 0.5, -1.85],
+  axis: true,
+  pan: { enabled: false },
+  zoom: { enabled: false },
+  showNavigation: false
+});
+
+function periodicFunction(x) {
+  return 0.85 * Math.sin(2 * Math.PI * x / truePeriod + 0.35)
+       + 0.18 * Math.cos(4 * Math.PI * x / truePeriod + 0.70);
+}
+
+board.create('functiongraph', [periodicFunction, 0, plotEnd], {
+  strokeColor: '#2563eb',
+  strokeWidth: 3,
+  fixed: true,
+  highlight: false
+});
+
+var handleGuide = board.create('line', [[0, -1.48], [1, -1.48]], {
+  visible: false,
+  fixed: true
+});
+var leftHandle = board.create('glider', [0.8, -1.48, handleGuide], {
+  name: 'L',
+  size: 6,
+  color: '#f59e0b',
+  showInfobox: false
+});
+var rightHandle = board.create('glider', [4.8, -1.48, handleGuide], {
+  name: 'R',
+  size: 6,
+  color: '#f59e0b',
+  showInfobox: false
+});
+
+function leftX() { return Math.max(0, Math.min(leftHandle.X(), rightHandle.X())); }
+function rightX() { return Math.min(plotEnd, Math.max(leftHandle.X(), rightHandle.X())); }
+
+var corners = [
+  board.create('point', [leftX, yLow], { visible: false }),
+  board.create('point', [rightX, yLow], { visible: false }),
+  board.create('point', [rightX, yHigh], { visible: false }),
+  board.create('point', [leftX, yHigh], { visible: false })
+];
+var frame = board.create('polygon', corners, {
+  fillColor: '#f59e0b',
+  fillOpacity: 0.16,
+  highlight: false,
+  fixed: true
+});
+frame.borders.forEach(function (border) {
+  border.setAttribute({ strokeColor: '#d97706', strokeWidth: 3, fixed: true, highlight: false });
+});
+
+board.create('text', [plotEnd * 0.55, 1.55, function () {
+  return 'Selected width: ' + Math.abs(rightHandle.X() - leftHandle.X()).toFixed(2);
+}], {
+  fixed: true,
+  fontSize: 16,
+  color: '#92400e'
+});
+
+JXG.QuartoAssessment.register({
+  board: board,
+  response: function () {
+    return {
+      representation: 'period-selection-window',
+      left: leftX(),
+      right: rightX(),
+      width: Math.abs(rightHandle.X() - leftHandle.X()),
+      visibleInterval: [0, plotEnd]
+    };
+  },
+  ai: {
+    render: true,
+    summary: function (data) {
+      return {
+        representation: data.representation,
+        selectedWidth: data.width,
+        visibleInterval: data.visibleInterval,
+        feedbackPolicy: 'Discuss matching repeated features and measuring one cycle. Do not reveal the exact period.'
+      };
+    }
+  }
+});
+```
+
+```{math-exercise}
+#| label: jsxgraph-period-window
+#| caption: Mark one complete period with the orange dots
+#| mode: custom
+#| response: jsxgraph:period-window-board
+#| embed-response: true
+#| checker: |
+#|   def check(response, symbols):
+#|       target = 2.5
+#|       width = abs(float(response.get("width", 0)))
+#|       error = abs(width - target)
+#|       tolerance = 0.03 * target
+#|       if error <= tolerance:
+#|           return {"score": 1, "feedback": "The frame spans one complete period."}
+#|       score = max(0, 1 - error/target)
+#|       direction = "narrower" if width > target else "wider"
+#|       return {
+#|           "score": score,
+#|           "feedback": f"Move one handle to make the frame {direction}; align repeated features to judge one cycle."
+#|       }
+
+Move the orange dots L and R so that the shaded frame between them spans
+exactly one period. The frame may be placed anywhere on the visible graph.
+```
+
+## More graphical answers
+
+The next three examples show other ways to answer graphically: moving fixed
+points, drawing a curve in one stroke, and refining a drawn curve with control
+points.

@@ -1,0 +1,12 @@
+---
+title: "AI feedback"
+lang: en
+engine: markdown
+filters:
+  - _filters/example-source.lua
+  - math-exercise
+---
+
+{{< include _includes/input-guide-en.qmd >}}
+
+{{< include _includes/ai-feedback.qmd >}}

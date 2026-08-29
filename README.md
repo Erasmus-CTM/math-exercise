@@ -46,9 +46,25 @@ Question text with an input field: _[correct_answer]
 | `_[answer]` | narrow (~10 chars) | `<input>` |
 | `__[answer]` | medium (~20 chars) | `<input>` |
 | `___[answer]` | wide, 2-row | `<textarea>` |
+| `vec[a,b,c]` | bracketed vector | one `<input>` per component |
+| `mat[a,b;c,d]` | bracketed matrix | one `<input>` per cell |
 
 Multiple fields in one exercise are checked together when clicking **Check**.
 The answer inside `[...]` is a SymPy expression, e.g. `pi * 9`, `x**2 + 2*x + 1`.
+
+Vector components are separated by commas. Matrix columns are separated by
+commas and rows by semicolons. Separators nested inside parentheses, brackets,
+or braces are preserved, so `vec[atan2(y,x),sqrt(x)]` has two components.
+Vectors are columns by default; add `#| vecdir: row` for a row vector. Each
+component or cell is checked independently, highlighted independently, and
+receives a localized label in feedback. Explicit `field-labels` override those
+generated labels.
+
+```{math-exercise}
+#| vars: x
+Enter a vector: vec[x+1,2*x]
+Enter a matrix: mat[1,0;0,x]
+```
 
 ---
 
@@ -71,6 +87,7 @@ The answer inside `[...]` is a SymPy expression, e.g. `pi * 9`, `x**2 + 2*x + 1`
 | `partial-credit` | `true` / `false` | `false` | average multiple fields, partially score sets, and award `form-credit` for equivalent answers in the wrong form |
 | `form-credit` | number from `0` to `1` | `0.5` | score for an equivalent answer that fails `mode: exact` or the requested `form` |
 | `pool` | `true` / `false` | `false` | enable a task pool |
+| `vecdir` | `col` / `row` | `col` | orientation of every `vec[...]` marker in the exercise |
 | `field-labels` | comma-separated | — | optional human-readable labels for answer fields, e.g. `S, E, M`; missing labels fall back to `Answer` or numbered field names |
 | `context` | comma-separated element IDs, or `none` | — | AI-feedback context: reference explicit `.math-exercise-context` block(s) by id, or `none` to disable the automatic context. See [AI feedback context](#ai-feedback-context) |
 
@@ -732,10 +749,16 @@ filters:
 
 ## Rendered examples
 
-The examples from `main` are published at the
-[math-exercise examples site](https://erasmus-ctm.github.io/math-exercise/).
-The site is rebuilt automatically from `examples.qmd` whenever `main`
-changes. Feature branches matching `feature/**` are published under
+The examples from `main` are published as a small navigable
+[math-exercise examples site](https://erasmus-ctm.github.io/math-exercise/),
+with focused pages for basic exercise features, expressions and equivalence,
+AI feedback and context, open-ended assessment, graphical JSXGraph responses,
+and Norwegian vector/matrix input. Every rendered exercise and graph has a
+collapsed panel containing its complete source. The graphics page includes
+pooled point selection, a draggable one-period window, movable piecewise-linear
+graphs, and freehand-curve assessment. The original all-in-one regression page remains
+available from the site. The complete Quarto project is rebuilt automatically
+whenever `main` changes. Feature branches matching `feature/**` are published under
 `previews/<branch-slug>/`; obsolete previews are removed by the next main
 deployment.
 

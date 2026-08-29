@@ -25,8 +25,14 @@ jobs:
 
       - name: Render examples
         run: |
-          quarto render examples.qmd --output-dir _site
-          cp _site/examples.html _site/index.html
+          quarto render
+          test -f _site/index.html
+          test -f _site/basic-features.html
+          test -f _site/sympy-examples.html
+          test -f _site/ai-feedback.html
+          test -f _site/custom-assessment.html
+          test -f _site/graphics-examples.html
+          test -f _site/vector-matrix-tests.html
 
       - name: Select deployment directory
         id: destination

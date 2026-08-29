@@ -1,0 +1,86 @@
+---
+title: "math-exercise examples"
+subtitle: "Interactive answer checking for Quarto"
+lang: en
+toc: false
+---
+
+`math-exercise` turns ordinary Quarto content into browser-based practice
+activities. Authors write the task, expected answer, and checking policy in a
+short `{math-exercise}` block. During rendering, the extension replaces answer
+markers with input fields and connects them to a checker. When a student
+selects **Check**, Pyodide and SymPy run locally in the browser; a grading
+server is not required.
+
+The extension supports symbolic equivalence, required algebraic forms,
+numerical tolerances, vectors and matrices, author-defined Python/SymPy
+checkers, and structured answers from JSXGraph. Optional AI feedback can use
+the task, the current answer, the checker result, and relevant page context to
+give a progressive hint without replacing deterministic answer checking.
+
+It is well suited to self-study notes, formative exercises, interactive
+textbooks, laboratory instructions, and visual mathematical exploration on a
+static Quarto website. It is not intended as a secure high-stakes examination
+system: expected answers and checker code are delivered to the student's
+browser.
+
+Choose a page below to try common exercise types and see the corresponding
+Quarto source. Every source example is collapsed until you choose **Show
+source**.
+
+::: {.callout-tip title="Trying the exercises"}
+Type in the empty answer fields and select **Check**. Some exercises are hidden
+under a clickable heading. For mathematical input, use forms such as `x^2`,
+`2*x`, `sqrt(2)`, `sin(x)`, and `pi`; **Input help** provides a complete
+reference. Graphical exercises explain directly which points or curves to move.
+:::
+
+::: {.callout-note}
+All answer checking runs locally in the browser through SymPy and Pyodide.
+AI-generated progressive feedback is optional and works with OpenAI-compatible
+providers configured by the user.
+:::
+
+::: {.grid}
+::: {.g-col-12 .g-col-md-6}
+### [Basic exercise features](basic-features.qmd)
+
+Input widths, captions, multiple fields, labels, partial credit, forms, and
+random task pools.
+:::
+
+::: {.g-col-12 .g-col-md-6}
+### [Expressions and equivalence](sympy-examples.qmd)
+
+Equivalent expressions, required algebraic forms, exact answers, numerical
+tolerances, solution sets, derivatives, and integrals.
+:::
+
+::: {.g-col-12 .g-col-md-6}
+### [AI feedback](ai-feedback.qmd)
+
+Automatic section context, reusable explicit context, context opt-out,
+meaningful field labels, and the model capability adapter.
+:::
+
+::: {.g-col-12 .g-col-md-6}
+### [Vektorer og matriser](vector-matrix-tests.qmd)
+
+En fullstendig norsk testside for rad- og kolonnevektorer, matriser, symbolske
+uttrykk, numerisk toleranse og oppgavepooler.
+:::
+
+::: {.g-col-12 .g-col-md-6}
+### [Open-ended assessment](custom-assessment.qmd)
+
+Five tasks where many answers can be correct: mathematical properties,
+relationships between fields, iterative processes, and matrix constraints.
+:::
+
+::: {.g-col-12 .g-col-md-6}
+### [Graphical answers](graphics-examples.qmd)
+
+Click points, move graph handles, select one period, and draw or refine curves
+directly in JSXGraph.
+:::
+:::

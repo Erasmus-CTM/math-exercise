@@ -1,0 +1,8 @@
+::: {.callout-tip title="Entering answers"}
+Type answers in the empty fields, then select **Check**. Use `*` for
+multiplication, `^` for powers, and parentheses to make grouping clear. Common
+forms include `sqrt(2)`, `sin(x)`, `exp(x)`, and `pi`. Enter an exact value
+unless the question asks for a decimal approximation. Algebraically equivalent
+expressions are normally accepted; when a particular form is required, the
+question says so. **Input help** shows the full notation reference.
+:::

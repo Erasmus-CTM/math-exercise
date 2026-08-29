@@ -1,0 +1,330 @@
+## Coordinate transformations
+
+The final activities connect parameter descriptions to geometry. In each one,
+a small set of algebraic parameters determines a visible object or region.
+Matching a target therefore requires reasoning in both representations: which
+parameter is wrong, and what geometric change will correcting it produce?
+
+### Transform a cuboid in 3D
+
+An affine transformation combines a linear change of shape and orientation
+with a translation. In this activity the map has the form
+$T(p)=sR_z(\theta)p+t$: the cuboid is scaled uniformly by $s$, rotated about
+the $z$-axis by $\theta$, and translated by $t=(t_x,t_y,t_z)$. Matching the
+wireframes builds a geometric understanding of how those parameters affect a
+3D object and how the operations compose.
+
+Match the orange cuboid to the fixed green target. Move the five sliders for
+translation, uniform scale, and rotation about the $z$-axis. The unequal side
+lengths make the orientation visible. You may drag the 3D view to inspect the
+result; only the sliders are assessed.
+
+```{.jsxgraph assessment_id="cube-transform-board" width="900" height="650" style="border:1px solid #ddd; border-radius:8px; max-width:100%;"}
+var board = JXG.JSXGraph.initBoard(BOARDID, {
+  boundingbox: [-8, 8, 8, -8],
+  axis: false,
+  pan: { enabled: false },
+  zoom: { enabled: false },
+  showNavigation: false
+});
+var view = board.create('view3d', [[-7.3, -2.2], [14.6, 9.5],
+  [[-4, 4], [-4, 4], [-3, 4]]], {
+  xPlaneRear: { visible: false },
+  yPlaneRear: { visible: false },
+  zPlaneRear: { fillOpacity: 0.08 }
+});
+
+var tx = board.create('slider', [[-7, -3.4], [-1.5, -3.4], [-2, -0.5, 2]], {
+  name: 'x', snapWidth: 0.25, precision: 2
+});
+var ty = board.create('slider', [[1, -3.4], [6.5, -3.4], [-2, 0.75, 2]], {
+  name: 'y', snapWidth: 0.25, precision: 2
+});
+var tz = board.create('slider', [[-7, -4.7], [-1.5, -4.7], [-1, 0, 2]], {
+  name: 'z', snapWidth: 0.25, precision: 2
+});
+var scale = board.create('slider', [[1, -4.7], [6.5, -4.7], [0.5, 0.75, 1.75]], {
+  name: 'scale', snapWidth: 0.05, precision: 2
+});
+var angle = board.create('slider', [[-4.5, -6.0], [4.5, -6.0], [-90, -30, 90]], {
+  name: 'angle (degrees)', snapWidth: 5, precision: 0
+});
+
+var base = [
+  [-1, -0.65, -0.45], [1, -0.65, -0.45], [1, 0.65, -0.45], [-1, 0.65, -0.45],
+  [-1, -0.65, 0.45], [1, -0.65, 0.45], [1, 0.65, 0.45], [-1, 0.65, 0.45]
+];
+var edges = [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+var target = { tx: 1, ty: -1, tz: 1, scale: 1.25, angle: 45 };
+
+function transformed(vertex, values) {
+  var radians = values.angle * Math.PI / 180;
+  var x = values.scale * vertex[0];
+  var y = values.scale * vertex[1];
+  return [
+    values.tx + x * Math.cos(radians) - y * Math.sin(radians),
+    values.ty + x * Math.sin(radians) + y * Math.cos(radians),
+    values.tz + values.scale * vertex[2]
+  ];
+}
+function current() {
+  return { tx: tx.Value(), ty: ty.Value(), tz: tz.Value(),
+    scale: scale.Value(), angle: angle.Value() };
+}
+function addWireframe(values, color, dynamic) {
+  edges.forEach(function (edge) {
+    view.create('curve3d', [
+      function (t) {
+        var v = dynamic ? current() : values;
+        var a = transformed(base[edge[0]], v);
+        var b = transformed(base[edge[1]], v);
+        return a[0] + t * (b[0] - a[0]);
+      },
+      function (t) {
+        var v = dynamic ? current() : values;
+        var a = transformed(base[edge[0]], v);
+        var b = transformed(base[edge[1]], v);
+        return a[1] + t * (b[1] - a[1]);
+      },
+      function (t) {
+        var v = dynamic ? current() : values;
+        var a = transformed(base[edge[0]], v);
+        var b = transformed(base[edge[1]], v);
+        return a[2] + t * (b[2] - a[2]);
+      }, [0, 1]
+    ], { strokeColor: color, strokeWidth: dynamic ? 4 : 5, fixed: true, highlight: false });
+  });
+}
+addWireframe(target, '#15803d', false);
+addWireframe(null, '#f97316', true);
+board.create('text', [-7, 7.2, '<b>Green:</b> target &nbsp; <b style="color:#c2410c">Orange:</b> your cuboid'], {
+  fixed: true, fontSize: 16
+});
+
+JXG.QuartoAssessment.register({
+  board: board,
+  response: function () {
+    var v = current();
+    return { representation: 'cuboid-transform', translation: [v.tx, v.ty, v.tz],
+      scale: v.scale, zRotationDegrees: v.angle };
+  },
+  ai: { render: true, summary: function (data) {
+    return { representation: data.representation, translation: data.translation,
+      scale: data.scale, zRotationDegrees: data.zRotationDegrees,
+      feedbackPolicy: 'Explain which transformation parameter to adjust without revealing target values.' };
+  }}
+});
+```
+
+```{math-exercise}
+#| label: jsxgraph-cube-transform
+#| caption: Match the 3D cuboid
+#| mode: custom
+#| response: jsxgraph:cube-transform-board
+#| embed-response: true
+#| checker: |
+#|   def check(response, symbols):
+#|       target = [1.0, -1.0, 1.0, 1.25, 45.0]
+#|       try:
+#|           values = [*map(float, response["translation"]),
+#|                     float(response["scale"]), float(response["zRotationDegrees"])]
+#|       except (KeyError, TypeError, ValueError):
+#|           return {"score": 0, "feedback": "The transformation controls returned invalid data."}
+#|       tolerances = [0.13, 0.13, 0.13, 0.04, 3.0]
+#|       correct = [abs(value-goal) <= tol for value, goal, tol in zip(values, target, tolerances)]
+#|       if all(correct):
+#|           return {"score": 1, "feedback": "The cuboids match in position, scale, and orientation."}
+#|       names = ["x-translation", "y-translation", "z-translation", "scale", "rotation"]
+#|       remaining = [name for name, ok in zip(names, correct) if not ok]
+#|       return {"score": sum(correct)/len(correct),
+#|               "feedback": "Still adjust: " + ", ".join(remaining) + "."}
+
+Use the sliders to make the orange cuboid coincide with the green cuboid.
+```
+
+### Match a polar-coordinate region
+
+Polar coordinates describe a point by its distance $r$ from the origin and its
+angle $\varphi$. A rectangle
+$[r_{\min},r_{\max}]\times[\varphi_{\min},\varphi_{\max}]$ in parameter space
+becomes an annular sector under
+$(r,\varphi)\mapsto(r\cos\varphi,r\sin\varphi)$. Matching the boundary makes
+the connection between algebraic bounds and the resulting planar region
+visible.
+
+The blue target is an annular sector. Move the four sliders to match it with
+the orange outline. Radii are ordinary coordinates; the two angle sliders are
+multiples of $\pi$ (for example, `0.5` means $\pi/2$). Only the slider values
+are assessed.
+
+```{.jsxgraph assessment_id="polar-sector-board" width="900" height="570" style="border:1px solid #ddd; border-radius:8px; max-width:100%;"}
+var board = JXG.JSXGraph.initBoard(BOARDID, {
+  boundingbox: [-5.2, 5.2, 5.2, -6.2], axis: true,
+  pan: { enabled: false }, zoom: { enabled: false }, showNavigation: false
+});
+var rMin = board.create('slider', [[-4.7,-4.2],[-0.5,-4.2],[0,0.75,3.5]], { name:'r min', snapWidth:0.25, precision:2 });
+var rMax = board.create('slider', [[0.6,-4.2],[4.8,-4.2],[0.5,2.25,4]], { name:'r max', snapWidth:0.25, precision:2 });
+var aMin = board.create('slider', [[-4.7,-5.25],[-0.5,-5.25],[0,0.1,1.75]], { name:'angle min / pi', snapWidth:0.05, precision:2 });
+var aMax = board.create('slider', [[0.6,-5.25],[4.8,-5.25],[0.25,0.65,2]], { name:'angle max / pi', snapWidth:0.05, precision:2 });
+var target = { r0: 1.5, r1: 3, a0: 0.25, a1: 0.75 };
+
+function addSector(getBounds, color, width) {
+  function angle(t) { var b=getBounds(); return Math.PI*(b.a0+t*(b.a1-b.a0)); }
+  function radius(t) { var b=getBounds(); return b.r0+t*(b.r1-b.r0); }
+  [0,1].forEach(function (outer) {
+    board.create('curve', [
+      function (t) { var b=getBounds(); var r=outer ? b.r1 : b.r0; return r*Math.cos(angle(t)); },
+      function (t) { var b=getBounds(); var r=outer ? b.r1 : b.r0; return r*Math.sin(angle(t)); },
+      0, 1
+    ], { strokeColor:color, strokeWidth:width, fixed:true, highlight:false });
+  });
+  [0,1].forEach(function (upper) {
+    board.create('curve', [
+      function (t) { var b=getBounds(); return radius(t)*Math.cos(Math.PI*(upper ? b.a1 : b.a0)); },
+      function (t) { var b=getBounds(); return radius(t)*Math.sin(Math.PI*(upper ? b.a1 : b.a0)); },
+      0, 1
+    ], { strokeColor:color, strokeWidth:width, fixed:true, highlight:false });
+  });
+}
+addSector(function () { return target; }, '#2563eb', 7);
+addSector(function () { return { r0:rMin.Value(), r1:rMax.Value(), a0:aMin.Value(), a1:aMax.Value() }; }, '#f97316', 4);
+board.create('text', [-4.8,4.65,'<b style="color:#1d4ed8">Blue:</b> target &nbsp; <b style="color:#c2410c">Orange:</b> your region'], { fixed:true, fontSize:16 });
+
+JXG.QuartoAssessment.register({
+  board: board,
+  response: function () { return { representation:'polar-sector-bounds',
+    radius:[rMin.Value(),rMax.Value()], anglePi:[aMin.Value(),aMax.Value()] }; },
+  ai: { render:true, summary:function (data) { return {
+    representation:data.representation, radius:data.radius, anglePi:data.anglePi,
+    feedbackPolicy:'Discuss radial and angular bounds separately without revealing target values.'
+  }; }}
+});
+```
+
+```{math-exercise}
+#| label: jsxgraph-polar-sector
+#| caption: Match the annular sector
+#| mode: custom
+#| response: jsxgraph:polar-sector-board
+#| embed-response: true
+#| checker: |
+#|   def check(response, symbols):
+#|       try:
+#|           values = [*map(float, response["radius"]), *map(float, response["anglePi"])]
+#|       except (KeyError, TypeError, ValueError):
+#|           return {"score": 0, "feedback": "The sliders returned invalid bounds."}
+#|       target = [1.5, 3.0, 0.25, 0.75]
+#|       tolerance = [0.13, 0.13, 0.026, 0.026]
+#|       correct = [abs(x-y) <= t for x,y,t in zip(values,target,tolerance)]
+#|       if all(correct):
+#|           return {"score": 1, "feedback": "The radial and angular bounds match the target sector."}
+#|       groups = []
+#|       if not all(correct[:2]): groups.append("radial bounds")
+#|       if not all(correct[2:]): groups.append("angular bounds")
+#|       return {"score": sum(correct)/4, "feedback": "Still adjust the " + " and ".join(groups) + "."}
+
+Use the sliders so that the orange outline coincides with the blue polar region.
+```
+
+### Match a cylindrical-coordinate region
+
+Cylindrical coordinates add height $z$ to polar coordinates. A parameter box
+$[r_{\min},r_{\max}]\times[\varphi_{\min},\varphi_{\max}]
+\times[z_{\min},z_{\max}]$ becomes a curved 3D sector under
+$(r,\varphi,z)\mapsto(r\cos\varphi,r\sin\varphi,z)$. Adjusting the six bounds
+helps distinguish the radial, angular, and vertical faces of this transformed
+region.
+
+The green wireframe shows a target region under the cylindrical-coordinate
+map $(r,\varphi,z)\mapsto(r\cos\varphi,r\sin\varphi,z)$. Match it with the
+orange wireframe using six sliders. Angle values are multiples of $\pi$. Drag
+the 3D view to inspect hidden edges; only the sliders are assessed.
+
+```{.jsxgraph assessment_id="cylindrical-sector-board" width="900" height="760" style="border:1px solid #ddd; border-radius:8px; max-width:100%;"}
+var board = JXG.JSXGraph.initBoard(BOARDID, {
+  boundingbox: [-8, 9, 8, -12], axis:false,
+  pan:{enabled:false}, zoom:{enabled:false}, showNavigation:false
+});
+var view = board.create('view3d', [[-7.2,-1.5],[14.4,9.5], [[-4,4],[-4,4],[-3,4]]], {
+  xPlaneRear:{visible:false}, yPlaneRear:{visible:false}
+});
+var r0 = board.create('slider',[[-7,-3.1],[-1.2,-3.1],[0,0.5,3]],{name:'r min',snapWidth:0.25,precision:2});
+var r1 = board.create('slider',[[1,-3.1],[6.8,-3.1],[0.5,2,3.5]],{name:'r max',snapWidth:0.25,precision:2});
+var a0 = board.create('slider',[[-7,-4.6],[-1.2,-4.6],[0,0.1,1.5]],{name:'angle min / pi',snapWidth:0.05,precision:2});
+var a1 = board.create('slider',[[1,-4.6],[6.8,-4.6],[0.25,0.6,2]],{name:'angle max / pi',snapWidth:0.05,precision:2});
+var z0 = board.create('slider',[[-7,-6.1],[-1.2,-6.1],[-2,0,2]],{name:'z min',snapWidth:0.25,precision:2});
+var z1 = board.create('slider',[[1,-6.1],[6.8,-6.1],[-1,1,3]],{name:'z max',snapWidth:0.25,precision:2});
+var target = {r0:1,r1:2.5,a0:0.25,a1:0.9,z0:-0.5,z1:1.5};
+function current(){return {r0:r0.Value(),r1:r1.Value(),a0:a0.Value(),a1:a1.Value(),z0:z0.Value(),z1:z1.Value()};}
+
+function addVolume(getBounds,color,width){
+  function point(kind,t,b){
+    var angle=Math.PI*(b.a0+t*(b.a1-b.a0));
+    var radius=kind.outer ? b.r1 : b.r0;
+    return [radius*Math.cos(angle),radius*Math.sin(angle),kind.top ? b.z1 : b.z0];
+  }
+  [{outer:false,top:false},{outer:true,top:false},{outer:false,top:true},{outer:true,top:true}].forEach(function(kind){
+    view.create('curve3d',[
+      function(t){return point(kind,t,getBounds())[0];},
+      function(t){return point(kind,t,getBounds())[1];},
+      function(t){return point(kind,t,getBounds())[2];},[0,1]
+    ],{strokeColor:color,strokeWidth:width,fixed:true,highlight:false});
+  });
+  [0,1].forEach(function(side){
+    [0,1].forEach(function(outer){
+      view.create('curve3d',[
+        function(){var b=getBounds(),a=Math.PI*(side?b.a1:b.a0),r=outer?b.r1:b.r0;return r*Math.cos(a);},
+        function(){var b=getBounds(),a=Math.PI*(side?b.a1:b.a0),r=outer?b.r1:b.r0;return r*Math.sin(a);},
+        function(t){var b=getBounds();return b.z0+t*(b.z1-b.z0);},[0,1]
+      ],{strokeColor:color,strokeWidth:width,fixed:true,highlight:false});
+    });
+    [0,1].forEach(function(top){
+      view.create('curve3d',[
+        function(t){var b=getBounds(),a=Math.PI*(side?b.a1:b.a0),r=b.r0+t*(b.r1-b.r0);return r*Math.cos(a);},
+        function(t){var b=getBounds(),a=Math.PI*(side?b.a1:b.a0),r=b.r0+t*(b.r1-b.r0);return r*Math.sin(a);},
+        function(){var b=getBounds();return top?b.z1:b.z0;},[0,1]
+      ],{strokeColor:color,strokeWidth:width,fixed:true,highlight:false});
+    });
+  });
+}
+addVolume(function(){return target;},'#15803d',6);
+addVolume(current,'#f97316',3);
+board.create('text',[-7.1,8.2,'<b style="color:#15803d">Green:</b> target &nbsp; <b style="color:#c2410c">Orange:</b> your region'],{fixed:true,fontSize:16});
+
+JXG.QuartoAssessment.register({
+  board:board,
+  response:function(){var b=current();return {representation:'cylindrical-sector-bounds',
+    radius:[b.r0,b.r1],anglePi:[b.a0,b.a1],height:[b.z0,b.z1]};},
+  ai:{render:true,summary:function(data){return {representation:data.representation,
+    radius:data.radius,anglePi:data.anglePi,height:data.height,
+    feedbackPolicy:'Discuss radius, angle, and height intervals separately without revealing target values.'};}}
+});
+```
+
+```{math-exercise}
+#| label: jsxgraph-cylindrical-sector
+#| caption: Match the cylindrical-coordinate region
+#| mode: custom
+#| response: jsxgraph:cylindrical-sector-board
+#| embed-response: true
+#| checker: |
+#|   def check(response, symbols):
+#|       try:
+#|           values = [*map(float,response["radius"]), *map(float,response["anglePi"]),
+#|                     *map(float,response["height"])]
+#|       except (KeyError, TypeError, ValueError):
+#|           return {"score": 0, "feedback": "The sliders returned invalid bounds."}
+#|       target = [1,2.5,0.25,0.9,-0.5,1.5]
+#|       tolerance = [0.13,0.13,0.026,0.026,0.13,0.13]
+#|       correct = [abs(x-y)<=t for x,y,t in zip(values,target,tolerance)]
+#|       if all(correct):
+#|           return {"score": 1, "feedback": "All cylindrical-coordinate bounds match."}
+#|       groups=[]
+#|       if not all(correct[:2]): groups.append("radius")
+#|       if not all(correct[2:4]): groups.append("angle")
+#|       if not all(correct[4:]): groups.append("height")
+#|       return {"score":sum(correct)/6,"feedback":"Still adjust the " + ", ".join(groups) + " interval(s)."}
+
+Use the six sliders so that the orange wireframe coincides with the green
+cylindrical-coordinate region.
+```
