@@ -62,6 +62,11 @@
 --   _[answer]   → short  input
 --   __[answer]  → medium input
 --   ___[answer] → 2-row  textarea
+--   vec[a,b,c]  → bracketed vector with one field per component
+--   mat[a,b;c,d] → bracketed matrix; semicolons separate rows
+--
+-- Vector orientation defaults to a column and can be changed per exercise:
+--   #| vecdir: row
 --
 -- Context for AI feedback (hybrid: automatic + optional explicit):
 --
@@ -252,6 +257,28 @@ local function splitCsv(s)
   return result
 end
 
+-- Split on a separator only at the top nesting level. This preserves commas
+-- inside expressions such as atan2(y, x).
+local function splitTop(s, sep)
+  local parts, depth, current = {}, 0, {}
+  for i = 1, #s do
+    local ch = s:sub(i, i)
+    if ch == "(" or ch == "[" or ch == "{" then
+      depth = depth + 1
+    elseif ch == ")" or ch == "]" or ch == "}" then
+      depth = depth - 1
+    end
+    if ch == sep and depth == 0 then
+      table.insert(parts, table.concat(current):match("^%s*(.-)%s*$"))
+      current = {}
+    else
+      table.insert(current, ch)
+    end
+  end
+  table.insert(parts, table.concat(current):match("^%s*(.-)%s*$"))
+  return parts
+end
+
 ----
 -- AI-feedback auto-context helpers
 --
@@ -273,32 +300,119 @@ local function truncate(text, n)
 end
 
 ----
--- Replace _+[answer] markers with HTML input/textarea elements.
--- Returns: processed HTML string, list of generated field IDs.
-----
-local function processMarkers(text, exerciseId, vars)
-  local count    = 0
-  local fieldIds = {}
+local function scalarFieldHtml(fid, answer, vars, underscoreCount)
+  local base = ' id="'          .. fid             .. '"'
+             .. ' data-answer="' .. attrEsc(answer) .. '"'
+             .. ' data-vars="'   .. attrEsc(vars)   .. '"'
+             .. ' autocomplete="off" autocorrect="off" spellcheck="false"'
+  if underscoreCount >= 3 then
+    return '<textarea' .. base .. ' class="math-input math-input-large" rows="2"></textarea>'
+  elseif underscoreCount == 2 then
+    return '<input type="text"' .. base .. ' class="math-input math-input-medium">'
+  end
+  return '<input type="text"' .. base .. ' class="math-input math-input-small">'
+end
 
-  local result = text:gsub("(_+)%[(.-)%]", function(underscores, answer)
+local function matrixCellHtml(fid, answer, vars)
+  return '<input type="text" id="' .. fid .. '"'
+       .. ' data-answer="' .. attrEsc(answer) .. '"'
+       .. ' data-vars="'   .. attrEsc(vars)   .. '"'
+       .. ' autocomplete="off" autocorrect="off" spellcheck="false"'
+       .. ' class="math-input math-mat-cell">'
+end
+
+local function buildVector(exerciseId, count, content, vars, vecdir)
+  local components = splitTop(content, ",")
+  local ids, labels, cells = {}, {}, {}
+  for index, answer in ipairs(components) do
     count = count + 1
-    local fid  = exerciseId .. "-f" .. count
-    table.insert(fieldIds, fid)
-    local n    = #underscores
-    local base = ' id="'          .. fid             .. '"'
-               .. ' data-answer="' .. attrEsc(answer) .. '"'
-               .. ' data-vars="'   .. attrEsc(vars)   .. '"'
-               .. ' autocomplete="off" autocorrect="off" spellcheck="false"'
-    if n >= 3 then
-      return '<textarea' .. base .. ' class="math-input math-input-large" rows="2"></textarea>'
-    elseif n == 2 then
-      return '<input type="text"' .. base .. ' class="math-input math-input-medium">'
-    else
-      return '<input type="text"' .. base .. ' class="math-input math-input-small">'
-    end
-  end)
+    local fid = exerciseId .. "-f" .. count
+    table.insert(ids, fid)
+    table.insert(labels, "v" .. index)
+    table.insert(cells, matrixCellHtml(fid, answer, vars))
+  end
+  local rowClass = vecdir == "row" and " math-vec-row" or ""
+  local html = '<span class="math-vec' .. rowClass .. '" style="--n:' .. #components .. '">'
+            .. table.concat(cells) .. '</span>'
+  return html, ids, labels, count
+end
 
-  return result, fieldIds
+local function buildMatrix(exerciseId, count, content, vars)
+  local rawRows = splitTop(content, ";")
+  local rows, columnCount = {}, nil
+  for _, rawRow in ipairs(rawRows) do
+    local columns = splitTop(rawRow, ",")
+    if columnCount == nil then
+      columnCount = #columns
+    elseif #columns ~= columnCount then
+      error("math-exercise: mat[...] rows must have the same number of columns")
+    end
+    table.insert(rows, columns)
+  end
+
+  local ids, labels, cells = {}, {}, {}
+  for row, columns in ipairs(rows) do
+    for column, answer in ipairs(columns) do
+      count = count + 1
+      local fid = exerciseId .. "-f" .. count
+      table.insert(ids, fid)
+      table.insert(labels, "m" .. row .. "," .. column)
+      table.insert(cells, matrixCellHtml(fid, answer, vars))
+    end
+  end
+  local html = '<span class="math-mat" style="--cols:' .. columnCount .. '">'
+            .. table.concat(cells) .. '</span>'
+  return html, ids, labels, count
+end
+
+local function atWordBoundary(text, position)
+  if position <= 1 then return true end
+  return not text:sub(position - 1, position - 1):match("[%w_]")
+end
+
+-- Replace scalar, vector, and matrix markers with HTML input elements.
+-- The third return value contains structural label tokens used by the browser
+-- for localized component/cell feedback. Author-supplied field-labels still
+-- take precedence.
+----
+local function processMarkers(text, exerciseId, vars, vecdir)
+  local count, fieldIds, structuralLabels = 0, {}, {}
+  local output, position = {}, 1
+
+  while position <= #text do
+    local rest = text:sub(position)
+    local scalarHead = rest:match("^_+%[")
+    local vectorHead, matrixHead
+    if not scalarHead and atWordBoundary(text, position) then
+      vectorHead = rest:match("^vec%[")
+      if not vectorHead then matrixHead = rest:match("^mat%[") end
+    end
+    local head = scalarHead or vectorHead or matrixHead
+    local bracket = head and text:sub(position + #head - 1):match("^%b[]")
+
+    if bracket then
+      local content = bracket:sub(2, -2)
+      local html, ids, labels
+      if scalarHead then
+        count = count + 1
+        local fid = exerciseId .. "-f" .. count
+        html, ids, labels = scalarFieldHtml(fid, content, vars, #scalarHead - 1), { fid }, { "" }
+      elseif vectorHead then
+        html, ids, labels, count = buildVector(exerciseId, count, content, vars, vecdir)
+      else
+        html, ids, labels, count = buildMatrix(exerciseId, count, content, vars)
+      end
+      for _, fid in ipairs(ids) do table.insert(fieldIds, fid) end
+      for _, label in ipairs(labels) do table.insert(structuralLabels, label) end
+      table.insert(output, html)
+      position = position + #head - 1 + #bracket
+    else
+      table.insert(output, text:sub(position, position))
+      position = position + 1
+    end
+  end
+
+  return table.concat(output), fieldIds, structuralLabels
 end
 
 ----
@@ -377,6 +491,7 @@ local function buildExercise(el, state)
   local formCredit = opts["form-credit"] or "0.5"
   local fieldLabels = splitCsv(opts["field-labels"] or "")
   local isPool    = (opts["pool"]     == "true")
+  local vecdir    = opts["vecdir"] == "row" and "row" or "col"
 
   local captionHtml = ""
   if caption then
@@ -401,6 +516,7 @@ local function buildExercise(el, state)
              .. ' data-partial-credit="' .. tostring(partialCredit) .. '"'
              .. ' data-form-credit="' .. attrEsc(formCredit) .. '"'
              .. ' data-field-labels="' .. jsonArrAttr(fieldLabels) .. '"'
+             .. ' data-vecdir="' .. vecdir .. '"'
              .. ' data-context-mode="' .. contextMode(opts) .. '"'
              .. ' data-context-refs="' .. attrEsc(opts["context"] or "") .. '"'
              .. ' data-context="'      .. jsonStrAttr(truncate(state.sectionCtx, MAX_CONTEXT_CHARS)) .. '"'
@@ -411,12 +527,14 @@ local function buildExercise(el, state)
     local tasks = splitTasks(questionText)
     attrs        = attrs .. ' data-pool="'   .. jsonArrAttr(tasks) .. '"'
                          .. ' data-fields="[]"'
+                         .. ' data-structural-field-labels="[]"'
     questionHtml = '<button type="button" class="math-pool-reload" title="' .. uiT("poolReload") .. '">&#8635;</button>\n'
                 .. '<div class="math-exercise-question"></div>'
   else
-    local body, fieldIds = processMarkers(questionText, eid, vars)
+    local body, fieldIds, structuralLabels = processMarkers(questionText, eid, vars, vecdir)
     body         = body:gsub("\n", "<br>\n")
     attrs        = attrs .. ' data-fields="' .. jsonArrAttr(fieldIds) .. '"'
+                         .. ' data-structural-field-labels="' .. jsonArrAttr(structuralLabels) .. '"'
     questionHtml = '<div class="math-exercise-question">' .. body .. '</div>'
   end
 

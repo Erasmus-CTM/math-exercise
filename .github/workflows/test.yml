@@ -19,5 +19,11 @@ jobs:
         run: |
           quarto render examples.qmd
           quarto render nb-render.qmd
+          quarto render vector-matrix-tests.qmd
           grep -Fq '"lang":"nb"' nb-render.html
           grep -Fq 'Tilbakemelding' nb-render.html
+          grep -Fq 'class="math-vec' vector-matrix-tests.html
+          grep -Fq 'class="math-mat"' vector-matrix-tests.html
+          grep -Fq 'data-structural-field-labels=' vector-matrix-tests.html
+          grep -Fq 'Komponent ' vector-matrix-tests.html
+          grep -Fq 'Rad ' vector-matrix-tests.html

@@ -50,6 +50,8 @@
 
       // Check results
       fieldPrefix:  function (n) { return 'Field&nbsp;' + n + ': '; },
+      vecComponent: function (n) { return 'Component ' + n; },
+      matCell: function (row, column) { return 'Row ' + row + ', column ' + column; },
       resEmpty:     'Please enter an answer.',
       resCorrect:   'Correct!',
       resPartial:   function (pct) { return 'Partially correct (' + pct + '%).'; },
@@ -196,6 +198,8 @@
 
       // Check results
       fieldPrefix:  function (n) { return 'Feld&nbsp;' + n + ': '; },
+      vecComponent: function (n) { return 'Komponente ' + n; },
+      matCell: function (row, column) { return 'Zeile ' + row + ', Spalte ' + column; },
       resEmpty:     'Bitte eine Antwort eingeben.',
       resCorrect:   'Richtig!',
       resPartial:   function (pct) { return 'Teilweise richtig (' + pct + '&nbsp;%).'; },
@@ -342,6 +346,8 @@
     errGeneric: 'Inntastingen kunne ikke behandles – bruk inntastingshjelpen for å finne riktig skrivemåte.',
 
     fieldPrefix: function (n) { return 'Felt&nbsp;' + n + ': '; },
+    vecComponent: function (n) { return 'Komponent ' + n; },
+    matCell: function (row, column) { return 'Rad ' + row + ', kolonne ' + column; },
     resEmpty: 'Skriv inn et svar.',
     resCorrect: 'Riktig!',
     resPartial: function (pct) { return 'Delvis riktig (' + pct + '%).'; },
@@ -947,25 +953,132 @@
   }
 
   // ---------------------------------------------------------------------------
-  // Task-text renderer  (used by pool mode: parses _[answer] markers in JS)
+  // Task-text renderer. Pool exercises are rendered in the browser, so this
+  // mirrors the scalar/vector/matrix parser in math-exercise.lua.
   // ---------------------------------------------------------------------------
 
-  function renderTaskText(text, exerciseId, vars) {
-    var count = 0, fieldIds = [];
-    var html = text.replace(/(_+)\[([^\]]*)\]/g, function (_, underscores, answer) {
+  function splitTop(text, separator) {
+    var parts = [], depth = 0, current = '';
+    for (var i = 0; i < text.length; i++) {
+      var ch = text.charAt(i);
+      if (ch === '(' || ch === '[' || ch === '{') depth++;
+      else if (ch === ')' || ch === ']' || ch === '}') depth--;
+      if (ch === separator && depth === 0) { parts.push(current.trim()); current = ''; }
+      else current += ch;
+    }
+    parts.push(current.trim());
+    return parts;
+  }
+
+  function scalarFieldHtml(fid, answer, vars, underscoreCount) {
+    var base = ' id="' + fid + '"'
+             + ' data-answer="' + escHtml(answer) + '"'
+             + ' data-vars="'   + escHtml(vars)   + '"'
+             + ' autocomplete="off" autocorrect="off" spellcheck="false"';
+    if (underscoreCount >= 3) return '<textarea' + base + ' class="math-input math-input-large" rows="2"></textarea>';
+    if (underscoreCount === 2) return '<input type="text"' + base + ' class="math-input math-input-medium">';
+    return '<input type="text"' + base + ' class="math-input math-input-small">';
+  }
+
+  function matrixCellHtml(fid, answer, vars) {
+    return '<input type="text" id="' + fid + '"'
+         + ' data-answer="' + escHtml(answer) + '"'
+         + ' data-vars="'   + escHtml(vars)   + '"'
+         + ' autocomplete="off" autocorrect="off" spellcheck="false"'
+         + ' class="math-input math-mat-cell">';
+  }
+
+  function buildVector(exerciseId, count, content, vars, vecdir) {
+    var components = splitTop(content, ',');
+    var ids = [], labels = [], cells = [];
+    components.forEach(function (answer, index) {
       count++;
-      var fid  = exerciseId + '-f' + count;
-      fieldIds.push(fid);
-      var n    = underscores.length;
-      var base = ' id="' + fid + '"'
-               + ' data-answer="' + escHtml(answer) + '"'
-               + ' data-vars="'   + escHtml(vars)   + '"'
-               + ' autocomplete="off" autocorrect="off" spellcheck="false"';
-      if (n >= 3) return '<textarea' + base + ' class="math-input math-input-large" rows="2"></textarea>';
-      if (n >= 2) return '<input type="text"' + base + ' class="math-input math-input-medium">';
-      return '<input type="text"' + base + ' class="math-input math-input-small">';
+      var fid = exerciseId + '-f' + count;
+      ids.push(fid);
+      labels.push('v' + (index + 1));
+      cells.push(matrixCellHtml(fid, answer, vars));
     });
-    return { html: html.replace(/\n/g, '<br>\n'), fieldIds: fieldIds };
+    var rowClass = vecdir === 'row' ? ' math-vec-row' : '';
+    return {
+      html: '<span class="math-vec' + rowClass + '" style="--n:' + components.length + '">' + cells.join('') + '</span>',
+      ids: ids, labels: labels, count: count
+    };
+  }
+
+  function buildMatrix(exerciseId, count, content, vars) {
+    var rows = splitTop(content, ';').map(function (row) { return splitTop(row, ','); });
+    var columnCount = rows.length ? rows[0].length : 0;
+    if (!columnCount || rows.some(function (row) { return row.length !== columnCount; })) {
+      throw new Error('math-exercise: mat[...] rows must have the same number of columns');
+    }
+    var ids = [], labels = [], cells = [];
+    rows.forEach(function (row, rowIndex) {
+      row.forEach(function (answer, columnIndex) {
+        count++;
+        var fid = exerciseId + '-f' + count;
+        ids.push(fid);
+        labels.push('m' + (rowIndex + 1) + ',' + (columnIndex + 1));
+        cells.push(matrixCellHtml(fid, answer, vars));
+      });
+    });
+    return {
+      html: '<span class="math-mat" style="--cols:' + columnCount + '">' + cells.join('') + '</span>',
+      ids: ids, labels: labels, count: count
+    };
+  }
+
+  function matchBalancedBracket(text, position) {
+    if (text.charAt(position) !== '[') return null;
+    var depth = 0;
+    for (var i = position; i < text.length; i++) {
+      if (text.charAt(i) === '[') depth++;
+      else if (text.charAt(i) === ']' && --depth === 0) return text.slice(position, i + 1);
+    }
+    return null;
+  }
+
+  function renderTaskText(text, exerciseId, vars, vecdir) {
+    var count = 0, fieldIds = [], structuralLabels = [], output = [], position = 0;
+    while (position < text.length) {
+      var scalar = /^_+\[/.exec(text.slice(position));
+      var boundary = !scalar && (position === 0 || !/[\w]/.test(text.charAt(position - 1)));
+      var vector = !scalar && boundary && text.slice(position, position + 4) === 'vec[';
+      var matrix = !scalar && !vector && boundary && text.slice(position, position + 4) === 'mat[';
+      var headLength = scalar ? scalar[0].length : (vector || matrix ? 4 : 0);
+      var bracket = headLength ? matchBalancedBracket(text, position + headLength - 1) : null;
+
+      if (!bracket) { output.push(text.charAt(position++)); continue; }
+
+      var content = bracket.slice(1, -1), rendered;
+      if (scalar) {
+        count++;
+        var fid = exerciseId + '-f' + count;
+        output.push(scalarFieldHtml(fid, content, vars, scalar[0].length - 1));
+        fieldIds.push(fid);
+        structuralLabels.push('');
+      } else {
+        rendered = vector
+          ? buildVector(exerciseId, count, content, vars, vecdir)
+          : buildMatrix(exerciseId, count, content, vars);
+        output.push(rendered.html);
+        fieldIds = fieldIds.concat(rendered.ids);
+        structuralLabels = structuralLabels.concat(rendered.labels);
+        count = rendered.count;
+      }
+      position += headLength - 1 + bracket.length;
+    }
+    return {
+      html: output.join('').replace(/\n/g, '<br>\n'),
+      fieldIds: fieldIds,
+      structuralLabels: structuralLabels
+    };
+  }
+
+  function localizeStructuralLabel(token) {
+    if (!token) return '';
+    if (/^v\d+$/.test(token)) return L.vecComponent(token.slice(1));
+    var matrix = /^m(\d+),(\d+)$/.exec(token);
+    return matrix ? L.matCell(matrix[1], matrix[2]) : '';
   }
 
   // ---------------------------------------------------------------------------
@@ -1853,8 +1966,11 @@
     var mode   = cell.dataset.mode   || 'equivalent';
     var reject = cell.dataset.reject || '';
     var label  = cell.dataset.label  || cell.id;
+    var vecdir = cell.dataset.vecdir || 'col';
     var configuredFieldLabels = [];
     try { configuredFieldLabels = JSON.parse(cell.dataset.fieldLabels || '[]'); } catch (e) {}
+    var structuralFieldLabels = [];
+    try { structuralFieldLabels = JSON.parse(cell.dataset.structuralFieldLabels || '[]'); } catch (e) {}
     var checker = '';
     try { checker = JSON.parse(cell.dataset.checker || '""'); } catch (e) {}
     var formCredit = Number(cell.dataset.formCredit || '0.5');
@@ -1895,10 +2011,12 @@
         idx = Math.floor(Math.random() * poolTasks.length);
         try { sessionStorage.setItem(poolKey, String(idx)); } catch(e) {}
       }
-      var r = renderTaskText(poolTasks[idx], cell.id, vars);
+      var r = renderTaskText(poolTasks[idx], cell.id, vars, vecdir);
       var qDiv = cell.querySelector('.math-exercise-question');
       qDiv.innerHTML = r.html;
       cell.dataset.fields = JSON.stringify(r.fieldIds);
+      cell.dataset.structuralFieldLabels = JSON.stringify(r.structuralLabels);
+      structuralFieldLabels = r.structuralLabels;
       renderMathInQuestion(qDiv);
     } else {
       renderMathInQuestion(cell.querySelector('.math-exercise-question'));
@@ -1931,6 +2049,8 @@
     function fieldLabel(index) {
       var supplied = configuredFieldLabels[index];
       if (typeof supplied === 'string' && supplied.trim()) return supplied.trim();
+      var structural = localizeStructuralLabel(structuralFieldLabels[index]);
+      if (structural) return structural;
       return fieldIds.length === 1 ? L.feedbackFieldSingle : L.feedbackFieldNumbered(index + 1);
     }
 
@@ -2043,11 +2163,13 @@
         }
         try { sessionStorage.setItem(poolKey, String(next)); } catch(e) {}
 
-        var r = renderTaskText(poolTasks[next], cell.id, vars);
+        var r = renderTaskText(poolTasks[next], cell.id, vars, vecdir);
         var qDivR = cell.querySelector('.math-exercise-question');
         qDivR.innerHTML = r.html;
         cell.dataset.fields = JSON.stringify(r.fieldIds);
+        cell.dataset.structuralFieldLabels = JSON.stringify(r.structuralLabels);
         fieldIds = r.fieldIds;
+        structuralFieldLabels = r.structuralLabels;
         warnExtraFieldLabels();
         renderMathInQuestion(qDivR);
 
@@ -2191,6 +2313,9 @@
       displayErrorMessage: displayErrorMessage,
       modelPolicy: modelPolicy,
       loadCapability: loadCapability,
+      splitTop: splitTop,
+      renderTaskText: renderTaskText,
+      localizeStructuralLabel: localizeStructuralLabel,
     };
   }
 
