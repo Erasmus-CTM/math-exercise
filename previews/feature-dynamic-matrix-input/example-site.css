@@ -1,0 +1,33 @@
+.math-example-source {
+  margin: -.7rem 0 1.6rem;
+  border: 1px solid var(--bs-border-color, #dee2e6);
+  border-radius: .4rem;
+  background: var(--bs-tertiary-bg, #f8f9fa);
+}
+
+.math-example-source > summary {
+  padding: .55rem .8rem;
+  cursor: pointer;
+  color: var(--bs-primary, #0d6efd);
+  font-weight: 600;
+  user-select: none;
+}
+
+.math-example-source[open] > summary {
+  border-bottom: 1px solid var(--bs-border-color, #dee2e6);
+}
+
+.math-example-source pre {
+  margin: 0;
+  padding: .85rem 1rem;
+  border: 0;
+  border-radius: 0 0 .4rem .4rem;
+  max-height: 34rem;
+  overflow: auto;
+  white-space: pre;
+}
+
+.math-example-source code {
+  font-size: .82rem;
+}
+
