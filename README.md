@@ -566,9 +566,38 @@ still leaks internal reasoning, a localized error is displayed instead. Failed
 requests do not consume a hint attempt. The automatic retry can result in one
 additional provider request.
 
+### Provider and model portability
+
+See [Reliable AI feedback across OpenAI-compatible providers](docs/model-capability-adapter.md)
+for the problem statement, design decisions, compatibility guarantees, and
+test strategy behind the adapter.
+
+The normal request body deliberately uses only the portable OpenAI-compatible
+fields `model`, `messages`, and `max_tokens`. A small capability adapter adds
+optional low-reasoning controls only for model families with documented
+support. Currently this covers Kimi K2.5/K2.6, GLM-5.2, and GPT-OSS.
+
+OpenAI-compatible gateways do not expose these controls consistently. If a
+provider rejects an optional control with HTTP 400, 415, or 422, the extension
+removes it and retries once with the portable body. The result is cached for 30
+days per base URL and model, so later feedback requests avoid the rejected
+field. Image compatibility is tested separately: a provider that rejects image
+content can still retain an accepted reasoning control.
+
+The model picker is advisory rather than authoritative. Known instant and
+instruction models are listed first, models whose names clearly indicate
+reasoning are marked as potentially slow, and obvious embedding models are
+removed because they cannot generate feedback. Unknown model names remain
+available and receive the portable request without guessed provider fields.
+The extension never silently changes the selected model. A request is stopped
+after 60 seconds with a localized suggestion to choose an instant or
+non-reasoning model; timeouts are not automatically retried.
+
 Compatible with any **OpenAI-compatible API** (Cerebras, OpenRouter, OpenAI,
 Ollama, …). AI responses support a small safe Markdown subset and render
-LaTeX written with `\(...\)` or `\[...\]`.
+LaTeX written with `\(...\)` or `\[...\]`. The prompt asks models to prefer
+short paragraphs and lists; a strict, HTML-escaped fallback renders valid
+Markdown tables responsively when a model emits one anyway.
 
 ### AI feedback context
 
@@ -700,6 +729,13 @@ filters:
   - Erasmus-CTM/pyodide-feedback
   - Erasmus-CTM/math-exercise
 ```
+
+## Rendered examples
+
+The current feature-branch examples are published at
+[the model capability adapter preview](https://erasmus-ctm.github.io/math-exercise/previews/feature-model-capability-adapter/).
+The preview is rebuilt automatically from `examples.qmd` whenever the branch
+changes.
 
 ---
 

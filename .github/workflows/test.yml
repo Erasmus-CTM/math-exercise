@@ -12,8 +12,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Test feedback language handling
-        run: node --test tests/nb-language.test.mjs
+      - name: Test feedback and provider compatibility
+        run: node --test tests/*.test.mjs
       - uses: quarto-dev/quarto-actions/setup@v2
       - name: Render example and Norwegian regression pages
         run: |

@@ -1,0 +1,48 @@
+name: Build and publish examples
+
+on:
+  push:
+    branches:
+      - main
+      - "feature/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Every branch writes to gh-pages. Serializing the deployments prevents one
+# preview from racing another even though each has its own destination folder.
+concurrency:
+  group: math-exercise-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: quarto-dev/quarto-actions/setup@v2
+
+      - name: Render examples
+        run: |
+          quarto render examples.qmd --output-dir _site
+          cp _site/examples.html _site/index.html
+
+      - name: Select deployment directory
+        id: destination
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
+            echo "dir=." >> "${GITHUB_OUTPUT}"
+          else
+            branch_slug="${GITHUB_REF_NAME//\//-}"
+            echo "dir=previews/${branch_slug}" >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Publish examples
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_site
+          destination_dir: ${{ steps.destination.outputs.dir }}
+          keep_files: true
