@@ -1,10 +1,12 @@
 ---
-title: "General SymPy examples"
+title: "Expressions and equivalence"
 lang: en
 engine: markdown
 filters:
   - _filters/example-source.lua
   - math-exercise
 ---
+
+{{< include _includes/input-guide-en.qmd >}}
 
 {{< include _includes/sympy-examples.qmd >}}

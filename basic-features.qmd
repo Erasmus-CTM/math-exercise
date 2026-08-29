@@ -1,10 +1,12 @@
 ---
-title: "Basic features"
+title: "Basic exercise features"
 lang: en
 engine: markdown
 filters:
   - _filters/example-source.lua
   - math-exercise
 ---
+
+{{< include _includes/input-guide-en.qmd >}}
 
 {{< include _includes/basic-features.qmd >}}

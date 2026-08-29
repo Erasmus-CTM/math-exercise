@@ -1,13 +1,20 @@
 ---
-title: "Interactive examples"
-subtitle: "A test and demonstration site for the math-exercise Quarto extension"
+title: "math-exercise examples"
+subtitle: "Interactive answer checking for Quarto"
 lang: en
 toc: false
 ---
 
-This site is built automatically from the repository's example sources. It is
-both documentation for authors and a browser-level regression suite for the
-extension.
+Choose a page below to try common exercise types and see the corresponding
+Quarto source. Every source example is collapsed until you choose **Show
+source**.
+
+::: {.callout-tip title="Trying the exercises"}
+Type in the empty answer fields and select **Check**. Some exercises are hidden
+under a clickable heading. For mathematical input, use forms such as `x^2`,
+`2*x`, `sqrt(2)`, `sin(x)`, and `pi`; **Input help** provides a complete
+reference. Graphical exercises explain directly which points or curves to move.
+:::
 
 ::: {.callout-note}
 All answer checking runs locally in the browser through SymPy and Pyodide.
@@ -17,21 +24,21 @@ providers configured by the user.
 
 ::: {.grid}
 ::: {.g-col-12 .g-col-md-6}
-### [Basic features](basic-features.qmd)
+### [Basic exercise features](basic-features.qmd)
 
 Input widths, captions, multiple fields, labels, partial credit, forms, and
 random task pools.
 :::
 
 ::: {.g-col-12 .g-col-md-6}
-### [General SymPy examples](sympy-examples.qmd)
+### [Expressions and equivalence](sympy-examples.qmd)
 
-Algebra, functions, trigonometry, exact forms, numerical tolerances, sets, and
-more involved symbolic answers.
+Equivalent expressions, required algebraic forms, exact answers, numerical
+tolerances, solution sets, derivatives, and integrals.
 :::
 
 ::: {.g-col-12 .g-col-md-6}
-### [AI feedback and context](ai-feedback.qmd)
+### [AI feedback](ai-feedback.qmd)
 
 Automatic section context, reusable explicit context, context opt-out,
 meaningful field labels, and the model capability adapter.
@@ -45,24 +52,16 @@ uttrykk, numerisk toleranse og oppgavepooler.
 :::
 
 ::: {.g-col-12 .g-col-md-6}
-### [Custom assessment](custom-assessment.qmd)
+### [Open-ended assessment](custom-assessment.qmd)
 
-Five examples of instructor-authored SymPy/Python checkers for properties,
-relationships between fields, partial credit, iterative processes, and matrix
-constraints.
+Five tasks where many answers can be correct: mathematical properties,
+relationships between fields, iterative processes, and matrix constraints.
 :::
 
 ::: {.g-col-12 .g-col-md-6}
-### [Graphical assessment](graphics-examples.qmd)
+### [Graphical answers](graphics-examples.qmd)
 
-Click-based and draggable JSXGraph responses, movable piecewise-linear graphs,
-and freehand polynomial approximations assessed through the generic response
-bridge.
+Click points, move graph handles, select one period, and draw or refine curves
+directly in JSXGraph.
 :::
 :::
-
-## Extended regression page
-
-The original [all-in-one examples page](examples.qmd) remains available. It
-contains the large JSXGraph response examples and serves as compatibility
-coverage while the focused pages above provide the primary navigation.

@@ -1,13 +1,13 @@
-The JSXGraph bridge lets an instructor assess graphical responses with the same
-`mode: custom` contract used for expression fields. The board returns a small
-JSON response; trusted author code decides how that response is scored.
+These exercises are answered directly in the plots. After placing points,
+moving handles, or drawing a curve, open the exercise heading below the plot
+and select **Check**. The collapsed source panels show authors how each
+JSXGraph plot and its answer checker are defined.
 
 ## Click every local maximum — pooled functions
 
-Each pool variant shows four periods of a sinusoid with a different phase,
-amplitude, and vertical shift. Click all four visible local maxima. Use
-**Clear clicks** to correct a mistake or **New pooled function** for another
-variant.
+Each variant shows four periods of a sinusoid. Click once at every visible
+local maximum; each answer appears as an orange point. Use **Clear clicks** to
+remove all selected points or **New pooled function** to try another variant.
 
 ```{.jsxgraph assessment_id="pooled-maxima-board" width="900" height="430" style="border:1px solid #ddd; border-radius:8px; max-width:100%;"}
 var xMax = 8 * Math.PI;
@@ -167,11 +167,13 @@ JXG.QuartoAssessment.register({
 Click every local maximum visible in the pooled function plot.
 ```
 
-## Select exactly one period with a movable frame
+## Mark exactly one period
 
-The graph shows five periods. Drag the two orange handles to position and resize
-the translucent frame. Any location is accepted when the frame width equals
-exactly one fundamental period.
+The graph shows five periods. Move the two orange dots labelled **L** and **R**
+horizontally along the line below the graph. They control the left and right
+edges of the shaded frame. Your answer is accepted anywhere on the graph when
+the frame spans exactly one complete period. Do not draw on the curve; only
+move the two orange dots.
 
 ```{.jsxgraph assessment_id="period-window-board" width="900" height="430" style="border:1px solid #ddd; border-radius:8px; max-width:100%;"}
 var truePeriod = 2.5;
@@ -270,7 +272,7 @@ JXG.QuartoAssessment.register({
 
 ```{math-exercise}
 #| label: jsxgraph-period-window
-#| caption: Position a frame spanning exactly one period
+#| caption: Mark one complete period with the orange dots
 #| mode: custom
 #| response: jsxgraph:period-window-board
 #| embed-response: true
@@ -289,13 +291,12 @@ JXG.QuartoAssessment.register({
 #|           "feedback": f"Move one handle to make the frame {direction}; align repeated features to judge one cycle."
 #|       }
 
-Drag the frame so that its width represents exactly one period of the plotted
-function. The frame may be placed anywhere on the visible graph.
+Move the orange dots **L** and **R** so that the shaded frame between them spans
+exactly one period. The frame may be placed anywhere on the visible graph.
 ```
 
-## Three advanced bridge examples
+## More graphical answers
 
-The remaining examples are retained from the original all-in-one regression
-page. They demonstrate movable piecewise-linear responses, freehand polynomial
-regression, and an editable freehand approximation.
-
+The next three examples show other ways to answer graphically: moving fixed
+points, drawing a curve in one stroke, and refining a drawn curve with control
+points.

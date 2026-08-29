@@ -1,5 +1,5 @@
 ---
-title: "Graphical assessment with JSXGraph"
+title: "Graphical answers with JSXGraph"
 lang: en
 engine: markdown
 filters:
@@ -11,4 +11,3 @@ filters:
 {{< include _includes/graphics-new-examples.qmd >}}
 
 {{< include _includes/graphics-original-examples.qmd >}}
-

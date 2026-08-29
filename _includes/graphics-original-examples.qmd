@@ -1,9 +1,9 @@
 
-## JSXGraph response — movable piecewise-linear function
+## Construct an increasing piecewise-linear function
 
-Move the points vertically. Full credit allows flat segments, but requires no
-decreasing segment and a genuine overall rise. The JSXGraph iframe sends its
-point coordinates as arbitrary JSON when **Check** or **Feedback** is clicked.
+Drag the five blue points vertically. Consecutive points are joined by straight
+segments. Flat segments are allowed, but no segment may decrease from left to
+right, and the final point must be higher than the first.
 
 ```{.jsxgraph assessment_id="pwl-monotonicity-board" width="800" height="420" style="border:1px solid #ddd; border-radius:8px; max-width:100%;"}
 var board = JXG.JSXGraph.initBoard(BOARDID, {
@@ -71,7 +71,7 @@ JXG.QuartoAssessment.register({
 
 ```{math-exercise}
 #| label: ex-jsxgraph-pwl-monotonicity
-#| caption: Draw a monotonically increasing piecewise-linear function
+#| caption: Construct an increasing piecewise-linear function
 #| mode: custom
 #| response: jsxgraph:pwl-monotonicity-board
 #| embed-response: true
@@ -101,12 +101,12 @@ Use the movable points to construct a monotonically increasing
 piecewise-linear function on $[0,1]$.
 ```
 
-## JSXGraph response — freehand drawing and polynomial approximation
+## Draw an increasing curve
 
-Draw a curve across $[0,1]$. JSXGraph bins the captured pointer samples, fits a
-degree-five regression polynomial, and displays the approximation. Assessment
-uses dense samples of the fitted polynomial rather than the original noisy
-stroke.
+Draw one continuous stroke from near $x=0$ to near $x=1$. A grey line follows
+your pointer, and a smooth red curve appears when you release it. The red curve
+is the submitted answer: it must cover almost the whole interval, never
+decrease, and finish above where it starts. Flat portions are allowed.
 
 ```{.jsxgraph assessment_id="freehand-monotonicity-board" width="800" height="440" style="border:1px solid #ddd; border-radius:8px; max-width:100%;"}
 var board = JXG.JSXGraph.initBoard(BOARDID, {
@@ -269,7 +269,7 @@ JXG.QuartoAssessment.register({
 
 ```{math-exercise}
 #| label: ex-jsxgraph-freehand-monotonicity
-#| caption: Draw and fit a monotonically increasing function
+#| caption: Draw an increasing curve
 #| mode: custom
 #| response: jsxgraph:freehand-monotonicity-board
 #| embed-response: true
@@ -299,18 +299,18 @@ JXG.QuartoAssessment.register({
 #|           "feedback": "Extend the drawing across the interval and remove decreasing parts; flat portions are allowed."
 #|       }
 
-Draw a function on $[0,1]$ whose polynomial approximation is monotonically
-increasing, allowing flat portions. The grey line is your stroke and the red line is the
-degree-five fit that will be assessed.
+Draw from left to right across $[0,1]$. The grey line is your stroke and the
+smooth red line is the answer that will be checked. Make the red curve
+non-decreasing and ensure that it rises overall.
 ```
 
 
-## JSXGraph response — editable freehand polynomial approximation
+## Draw and refine an increasing curve
 
-Draw a curve across $[0,1]$. JSXGraph simplifies the captured pointer samples
-to nine fixed-x adjustment points and fits a degree-five regression polynomial.
-After you move one blue point, all blue points are projected back onto the new
-red polynomial. Assessment uses dense samples of that polynomial.
+First draw one continuous stroke from near $x=0$ to near $x=1$. A smooth red
+curve and blue adjustment points then appear. Drag the blue points vertically
+to refine the red curve. The red curve is the submitted answer: it must cover
+almost the whole interval, never decrease, and rise overall.
 
 ```{.jsxgraph assessment_id="editable-freehand-monotonicity-board" width="800" height="440" style="border:1px solid #ddd; border-radius:8px; max-width:100%;"}
 var board = JXG.JSXGraph.initBoard(BOARDID, {
@@ -531,7 +531,7 @@ JXG.QuartoAssessment.register({
 
 ```{math-exercise}
 #| label: ex-jsxgraph-editable-freehand-monotonicity
-#| caption: Draw, adjust, and fit a monotonically increasing function
+#| caption: Draw and refine an increasing curve
 #| mode: custom
 #| response: jsxgraph:editable-freehand-monotonicity-board
 #| embed-response: true
@@ -561,8 +561,7 @@ JXG.QuartoAssessment.register({
 #|           "feedback": "Extend the drawing across the interval and remove decreasing parts; flat portions are allowed."
 #|       }
 
-Draw a function on $[0,1]$ whose polynomial approximation is monotonically
-increasing, allowing flat portions. After drawing, adjust the blue points as needed.
-Their x-coordinates stay fixed; when you release a point, every blue point is
-snapped onto the recomputed red degree-five polynomial that will be assessed.
+Draw from left to right across $[0,1]$, then move the blue points vertically as
+needed. The smooth red curve is the answer that will be checked. Make it
+non-decreasing and ensure that it rises overall; flat portions are allowed.
 ```

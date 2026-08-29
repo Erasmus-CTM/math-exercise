@@ -1,6 +1,6 @@
-This page covers the authoring features that are independent of a particular
-branch of mathematics. Enter a few deliberately wrong answers as well as the
-correct ones to inspect field highlighting and feedback labels.
+These examples introduce the main exercise controls: one or several answer
+fields, required answer forms, text answers, partial credit, collapsible tasks,
+and pools of alternative questions.
 
 ## A single answer field
 
@@ -12,7 +12,7 @@ What is $7\cdot 6$? _[42]
 The expression inside the brackets is the expected answer. It is not shown to
 the student in the rendered page.
 
-## Input widths
+## Answer fields of different widths
 
 ```{math-exercise}
 #| label: basic-widths
@@ -24,7 +24,7 @@ Medium: __[123456]
 Long mathematical expression: ___[(1+2+3+4+5)^2]
 ```
 
-## Collapsible caption
+## A collapsible exercise
 
 ```{math-exercise}
 #| label: basic-caption
@@ -42,7 +42,7 @@ For the numbers $7$ and $3$, enter their sum _[10], product _[21], and
 difference _[4].
 ```
 
-## Representation requirements
+## Requiring a particular form
 
 ```{math-exercise}
 #| label: basic-factored
@@ -81,7 +81,7 @@ $9\cdot6=$ _[54]
 $2^8=$ _[256]
 ```
 
-## Rejecting an unfinished representation
+## Rejecting a specific unfinished form
 
 ```{math-exercise}
 #| label: basic-reject

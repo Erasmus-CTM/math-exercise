@@ -1,5 +1,5 @@
 ---
-title: "Custom assessment with SymPy"
+title: "Open-ended and custom assessment"
 lang: en
 engine: markdown
 filters:
@@ -7,5 +7,6 @@ filters:
   - math-exercise
 ---
 
-{{< include _includes/custom-assessment.qmd >}}
+{{< include _includes/input-guide-en.qmd >}}
 
+{{< include _includes/custom-assessment.qmd >}}

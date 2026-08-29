@@ -1,11 +1,10 @@
-The **Feedback** button can request progressive hints from an
-OpenAI-compatible model. Credentials and model choice are stored only in the
-student's browser. Ordinary answer checking does not require an AI service.
+The **Feedback** button can request progressive hints from a configured AI
+model. **Check** still works without an AI service. API credentials and the
+chosen model remain in the student's browser.
 
-The extension sends the exact task, the student's current work, private checker
-results, the current hint level, and the relevant learning context. It asks the
-model to preserve the document language and to return concise student-facing
-feedback without exposing internal reasoning.
+When feedback is requested, the model receives the task, the student's current
+work, the checker result, the current hint level, and relevant explanatory text
+from the page. The examples below show how an author controls that context.
 
 ## Automatic section context
 
@@ -76,7 +75,7 @@ For $f(x)=x^3$, enter $f'(x)=$ _[3*x^2], $f'(2)=$ _[12], and the slope of the
 tangent at $x=2$: _[12].
 ```
 
-## Provider compatibility
+## Working with different AI providers
 
 The model capability adapter uses a portable request body for unknown
 OpenAI-compatible providers. It adds low-reasoning controls only for recognised
@@ -84,4 +83,3 @@ model families and retries once with the portable baseline if a provider
 rejects optional parameters. See the
 [adapter design notes](docs/model-capability-adapter.md) for the policy and
 known limitations.
-

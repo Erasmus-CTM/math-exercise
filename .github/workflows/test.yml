@@ -21,19 +21,23 @@ jobs:
           quarto render nb-render.qmd
           grep -Fq '"lang":"nb"' nb-render.html
           grep -Fq 'Tilbakemelding' nb-render.html
-          grep -Fq 'Basic features' _site/index.html
-          grep -Fq 'General SymPy examples' _site/sympy-examples.html
+          grep -Fq 'Basic exercise features' _site/index.html
+          grep -Fq 'Expressions and equivalence' _site/sympy-examples.html
+          grep -Fq 'Entering answers' _site/basic-features.html
           grep -Fq 'Automatic section context' _site/ai-feedback.html
           grep -Fq 'Assess a mathematical property' _site/custom-assessment.html
           grep -Fq 'mode: custom' _site/custom-assessment.html
           grep -Fq 'Click every local maximum' _site/graphics-examples.html
           grep -Fq 'pooled-maxima-board' _site/graphics-examples.html
           grep -Fq 'period-window-board' _site/graphics-examples.html
+          grep -Fq 'Move the two orange dots' _site/graphics-examples.html
+          grep -Fq 'Draw and refine an increasing curve' _site/graphics-examples.html
           grep -Fq 'Show JSXGraph source' _site/graphics-examples.html
           test "$(grep -Fc 'class="math-example-source"' _site/graphics-examples.html)" -eq 10
           grep -Fq 'class="math-example-source"' _site/basic-features.html
           grep -Fq 'Show source' _site/sympy-examples.html
           grep -Fq 'Vis kildekode' _site/vector-matrix-tests.html
+          grep -Fq 'Slik skriver du svar' _site/vector-matrix-tests.html
           grep -Fq 'class="math-vec' _site/vector-matrix-tests.html
           grep -Fq 'class="math-mat"' _site/vector-matrix-tests.html
           grep -Fq 'data-structural-field-labels=' _site/vector-matrix-tests.html

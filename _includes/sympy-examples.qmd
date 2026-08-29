@@ -1,6 +1,7 @@
-These exercises exercise a broader range of SymPy parsing and equivalence
-checking. Unless a stricter mode or form is requested, any algebraically
-equivalent expression is accepted.
+These exercises show how mathematical equivalence and answer-format
+requirements work. Unless the question requests a particular form or a
+numerical approximation, any algebraically equivalent expression is accepted.
+For example, `2*(x+1)` and `2*x+2` represent the same answer.
 
 ## Polynomial algebra
 
@@ -89,8 +90,8 @@ Compute $(1+2i)(3-i)$ using `I` for $i$: __[5+5*I]
 
 ## Solution sets
 
-Order does not matter in `set` mode, and repeated items are compared as a
-multiset.
+Enter the roots separated by commas. Their order does not matter; repeated
+values are counted.
 
 ```{math-exercise}
 #| label: sympy-roots-set
@@ -128,7 +129,7 @@ Give $\pi$ to three decimal places: _[pi]
 Give $1/7$ to four significant figures: _[1/7]
 ```
 
-## Exact representation
+## Requiring an exact representation
 
 ```{math-exercise}
 #| label: sympy-exact

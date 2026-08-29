@@ -1,5 +1,5 @@
 ---
-title: "Testside for vektor- og matriseinput"
+title: "Vektorer og matriser"
 lang: nb
 format:
   html:
@@ -11,10 +11,17 @@ filters:
   - math-exercise
 ---
 
-Denne siden tester vektor- og matriseinput på norsk. Hver komponent er et eget
-svarfelt og kontrolleres med de samme reglene som vanlige svarfelt. Prøv både
-riktige og gale verdier, trykk **Sjekk**, og åpne **Inntastingshjelp** og
-**Tilbakemelding** for å kontrollere at hele grensesnittet er på bokmål.
+Her skriver du vektorer og matriser direkte i ferdig oppstilte svarfelt. Hver
+komponent eller matriseinngang har sitt eget felt. Fyll inn alle feltene og
+trykk **Sjekk**.
+
+::: {.callout-tip title="Slik skriver du svar"}
+Skriv bare innholdet i hver komponent eller matriseinngang; klammer og komma er
+allerede vist. Bruk `*` for multiplikasjon, `^` for potenser og parenteser for
+gruppering. Vanlige uttrykk er for eksempel `sqrt(2)`, `sin(x)`, `exp(x)` og
+`pi`. Algebraisk ekvivalente uttrykk godtas normalt. Åpne
+**Inntastingshjelp** for en fullstendig oversikt.
+:::
 
 ## Grunnleggende vektorer
 
@@ -44,13 +51,14 @@ Skriv inn vektoren $(2,-1,3)$: $v=$ vec[2,-1,3]
 Skriv gradienten til $f(x,y)=x^2+xy$: $\nabla f=$ vec[2*x+y,x]
 ```
 
-### Komma inne i en funksjon
+### Funksjoner med flere argumenter
 
 ```{math-exercise}
 #| label: nb-nestet-komma
-#| caption: Parseren må bevare kommaet i atan2
+#| caption: Polarkoordinater som vektorkomponenter
 #| vars: x,y
-Fyll inn vektoren: vec[atan2(y,x),sqrt(x^2+y^2)]
+Skriv vektoren som består av vinkelen `atan2(y,x)` og lengden
+$\sqrt{x^2+y^2}$: vec[atan2(y,x),sqrt(x^2+y^2)]
 ```
 
 ## Matriser i ulike størrelser
@@ -91,7 +99,7 @@ Skriv matrisen $\begin{bmatrix}(x+1)^2&0\\0&x^2-1\end{bmatrix}$:
 mat[(x+1)^2,0;0,(x-1)*(x+1)]
 ```
 
-## Kontrollmoduser og blandede felt
+## Ulike typer svar
 
 ### Numerisk toleranse
 
@@ -114,19 +122,18 @@ Fyll inn skalaren $s=$ _[2], vektoren $v=$ vec[1,2] og matrisen
 $A=$ mat[1,0;0,1].
 ```
 
-### Egne feltnavn overstyrer standardnavnene
+### Navngitte koordinater
 
 ```{math-exercise}
 #| label: nb-egne-feltnavn
-#| caption: field-labels har høyere prioritet enn komponentnavn
+#| caption: Et punkt med navngitte koordinater
 #| field-labels: Første koordinat, Andre koordinat
 Skriv punktet $(4,5)$ som vektor: vec[4,5]
 ```
 
 ## Oppgavepool
 
-Last inn en ny tilfeldig oppgave med omlastingsknappen. Dette tester at
-vektorene og matrisene også bygges riktig i nettleseren.
+Bruk omlastingsknappen i oppgaven for å få en annen variant.
 
 ```{math-exercise}
 #| label: nb-vektor-matrise-pool
@@ -144,14 +151,12 @@ Skriv nullmatrisen på $2\times2$: mat[0,0;0,0]
 Skriv matrisen med radene $(1,0)$ og $(2,3)$: mat[1,0;2,3]
 ```
 
-## Responsivitet
+## En bred radmatrise
 
-Den brede matrisen nedenfor er med for å kontrollere små skjermer. Hele
-oppgaven skal fortsatt være tilgjengelig ved vannrett rulling uten at feltene
-eller klammene forsvinner.
+På en smal skjerm kan du rulle vannrett for å nå alle feltene.
 
 ```{math-exercise}
 #| label: nb-bred-matrise
-#| caption: Bred matrise for mobiltest
+#| caption: Radmatrise med seks komponenter
 Skriv radmatrisen: mat[1,2,3,4,5,6]
 ```

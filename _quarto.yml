@@ -20,13 +20,13 @@ website:
       - href: basic-features.qmd
         text: Basic features
       - href: sympy-examples.qmd
-        text: SymPy examples
+        text: Expressions and equivalence
       - href: ai-feedback.qmd
-        text: AI and context
+        text: AI feedback
       - href: custom-assessment.qmd
-        text: Custom assessment
+        text: Open-ended assessment
       - href: graphics-examples.qmd
-        text: Graphics
+        text: Graphical answers
       - href: vector-matrix-tests.qmd
         text: Vektorer og matriser (NB)
     right:

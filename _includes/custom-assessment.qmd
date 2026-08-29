@@ -1,11 +1,10 @@
-`mode: custom` runs trusted, instructor-authored SymPy/Python once for the
-complete response. This is useful when correctness means satisfying a property
-or a relationship rather than matching one predetermined expression.
+These tasks accept a family of valid answers rather than one predetermined
+expression. A trusted, instructor-authored checker evaluates the complete
+response and can award partial credit.
 
-The checker receives `response["expressions"]`, an ordered list of parsed SymPy
-expressions, and `symbols`, a dictionary containing the names declared in
-`vars`. It may return a boolean, a score from 0 to 1, or a dictionary containing
-`score` or `correct` and optional plain-text `feedback`.
+For authors, `mode: custom` provides the checker with the parsed expressions and
+declared symbols. The collapsed source below each example shows the complete
+Python/SymPy checker and its feedback rules.
 
 ::: {.callout-warning}
 Checker code is included in the generated HTML and executes in browser-side
