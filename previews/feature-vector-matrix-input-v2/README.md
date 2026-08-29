@@ -752,9 +752,11 @@ filters:
 The examples from `main` are published as a small navigable
 [math-exercise examples site](https://erasmus-ctm.github.io/math-exercise/),
 with focused pages for basic features, general SymPy coverage, AI feedback and
-context, instructor-authored custom assessment, and Norwegian vector/matrix
-input. Every rendered exercise has a collapsed panel containing its complete
-`{math-exercise}` source. The original all-in-one regression page remains
+context, instructor-authored custom assessment, graphical JSXGraph responses,
+and Norwegian vector/matrix input. Every rendered exercise and graph has a
+collapsed panel containing its complete source. The graphics page includes
+pooled point selection, a draggable one-period window, movable piecewise-linear
+graphs, and freehand-curve assessment. The original all-in-one regression page remains
 available from the site. The complete Quarto project is rebuilt automatically
 whenever `main` changes. Feature branches matching `feature/**` are published under
 `previews/<branch-slug>/`; obsolete previews are removed by the next main
