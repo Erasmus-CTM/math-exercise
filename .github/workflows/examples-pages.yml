@@ -45,4 +45,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./_site
           destination_dir: ${{ steps.destination.outputs.dir }}
-          keep_files: true
+          # A main deployment is canonical and removes previews left by merged
+          # or deleted feature branches. Feature deployments preserve the root
+          # site and any other active previews.
+          keep_files: ${{ github.ref_name != 'main' }}

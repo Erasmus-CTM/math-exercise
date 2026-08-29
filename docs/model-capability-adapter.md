@@ -113,9 +113,12 @@ The tests cover:
 - localized error-label normalization; and
 - prompt formatting requirements in English, German, and Norwegian Bokmål.
 
-GitHub Actions also renders `examples.qmd` and `nb-render.qmd`. Feature-branch
-examples are published at the
-[model capability adapter preview](https://erasmus-ctm.github.io/math-exercise/previews/feature-model-capability-adapter/).
+GitHub Actions also renders `examples.qmd` and `nb-render.qmd`. The current
+main-branch examples are published at the
+[math-exercise examples site](https://erasmus-ctm.github.io/math-exercise/).
+Feature branches matching `feature/**` are published under
+`previews/<branch-slug>/`; the next main deployment removes previews left by
+merged or deleted branches.
 
 ## Known limitations
 

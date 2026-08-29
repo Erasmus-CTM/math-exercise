@@ -732,10 +732,12 @@ filters:
 
 ## Rendered examples
 
-The current feature-branch examples are published at
-[the model capability adapter preview](https://erasmus-ctm.github.io/math-exercise/previews/feature-model-capability-adapter/).
-The preview is rebuilt automatically from `examples.qmd` whenever the branch
-changes.
+The examples from `main` are published at the
+[math-exercise examples site](https://erasmus-ctm.github.io/math-exercise/).
+The site is rebuilt automatically from `examples.qmd` whenever `main`
+changes. Feature branches matching `feature/**` are published under
+`previews/<branch-slug>/`; obsolete previews are removed by the next main
+deployment.
 
 ---
 
