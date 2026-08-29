@@ -1,0 +1,23 @@
+name: Test math-exercise
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Test feedback language handling
+        run: node --test tests/nb-language.test.mjs
+      - uses: quarto-dev/quarto-actions/setup@v2
+      - name: Render example and Norwegian regression pages
+        run: |
+          quarto render examples.qmd
+          quarto render tests/nb-render.qmd
+          grep -Fq '"lang":"nb"' tests/nb-render.html
+          grep -Fq 'Tilbakemelding' tests/nb-render.html
