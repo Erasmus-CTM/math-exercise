@@ -839,7 +839,7 @@ Simplify $\sqrt{72}$: _[6*sqrt(2)]
 ```</code></pre>
 </details>
 <div class="math-exercise-cell" id="math-exercise-6" data-label="sympy-logarithm" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Powers, roots, and constants&quot;" data-fields="[&quot;math-exercise-6-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
-<div class="math-exercise-question">Differentiate $\log(x^2)$ formally: <input type="text" id="math-exercise-6-f1" data-answer="2/x" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
+<div class="math-exercise-question">For $x\ne0$, differentiate $\log(x^2)$: <input type="text" id="math-exercise-6-f1" data-answer="2/x" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -857,7 +857,7 @@ Simplify $\sqrt{72}$: _[6*sqrt(2)]
   <pre><code class="language-markdown">```{math-exercise}
 #| label: sympy-logarithm
 #| vars: x
-Differentiate $\log(x^2)$ formally: __[2/x]
+For $x\ne0$, differentiate $\log(x^2)$: __[2/x]
 ```</code></pre>
 </details>
 <div class="math-exercise-cell" id="math-exercise-7" data-label="sympy-exponential" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Powers, roots, and constants&quot;" data-fields="[&quot;math-exercise-7-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
@@ -981,7 +981,8 @@ Give one antiderivative of $3x^2-4$: __[x^3-4*x]
 <section id="complex-numbers" class="level2">
 <h2 class="anchored" data-anchor-id="complex-numbers">Complex numbers</h2>
 <div class="math-exercise-cell" id="math-exercise-12" data-label="sympy-complex" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Complex numbers&quot;" data-fields="[&quot;math-exercise-12-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
-<div class="math-exercise-question">Compute $(1+2i)(3-i)$ using `I` for $i$: <input type="text" id="math-exercise-12-f1" data-answer="5+5*I" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
+<div class="math-exercise-question">Compute $(1+2i)(3-i)$. Enter the imaginary unit $i$ as a capital I:<br>
+<input type="text" id="math-exercise-12-f1" data-answer="5+5*I" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -998,7 +999,8 @@ Give one antiderivative of $3x^2-4$: __[x^3-4*x]
   <summary>Show source</summary>
   <pre><code class="language-markdown">```{math-exercise}
 #| label: sympy-complex
-Compute $(1+2i)(3-i)$ using `I` for $i$: __[5+5*I]
+Compute $(1+2i)(3-i)$. Enter the imaginary unit $i$ as a capital I:
+__[5+5*I]
 ```</code></pre>
 </details>
 </section>
@@ -1030,7 +1032,8 @@ List all roots of $x^3-x=0$: __[-1,0,1]
 </section>
 <section id="numerical-checking" class="level2">
 <h2 class="anchored" data-anchor-id="numerical-checking">Numerical checking</h2>
-<div class="math-exercise-cell" id="math-exercise-14" data-label="sympy-absolute-tolerance" data-mode="numeric" data-reject="" data-vars="" data-tolerance="0.001" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Numerical checking&quot;" data-fields="[&quot;math-exercise-14-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<p>The first task accepts answers within a fixed absolute distance of the target; the second uses a percentage of the target value. The last two require the stated number of decimal places or significant figures.</p>
+<div class="math-exercise-cell" id="math-exercise-14" data-label="sympy-absolute-tolerance" data-mode="numeric" data-reject="" data-vars="" data-tolerance="0.001" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Numerical checking The first task accepts answers within a fixed absolute distance of the target; the second uses a percentage of the target value. The last two require the stated number of decimal places or significant figures.&quot;" data-fields="[&quot;math-exercise-14-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div class="math-exercise-question">Approximate $\sqrt{2}$: <input type="text" id="math-exercise-14-f1" data-answer="sqrt(2)" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
@@ -1053,7 +1056,7 @@ List all roots of $x^3-x=0$: __[-1,0,1]
 Approximate $\sqrt{2}$: _[sqrt(2)]
 ```</code></pre>
 </details>
-<div class="math-exercise-cell" id="math-exercise-15" data-label="sympy-relative-tolerance" data-mode="numeric" data-reject="" data-vars="" data-tolerance="1%" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Numerical checking&quot;" data-fields="[&quot;math-exercise-15-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" id="math-exercise-15" data-label="sympy-relative-tolerance" data-mode="numeric" data-reject="" data-vars="" data-tolerance="1%" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Numerical checking The first task accepts answers within a fixed absolute distance of the target; the second uses a percentage of the target value. The last two require the stated number of decimal places or significant figures.&quot;" data-fields="[&quot;math-exercise-15-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div class="math-exercise-question">Approximate $e^5$: <input type="text" id="math-exercise-15-f1" data-answer="exp(5)" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
@@ -1076,7 +1079,7 @@ Approximate $\sqrt{2}$: _[sqrt(2)]
 Approximate $e^5$: _[exp(5)]
 ```</code></pre>
 </details>
-<div class="math-exercise-cell" id="math-exercise-16" data-label="sympy-decimal-places" data-mode="numeric" data-reject="" data-vars="" data-tolerance="" data-decplaces="3" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Numerical checking&quot;" data-fields="[&quot;math-exercise-16-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" id="math-exercise-16" data-label="sympy-decimal-places" data-mode="numeric" data-reject="" data-vars="" data-tolerance="" data-decplaces="3" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Numerical checking The first task accepts answers within a fixed absolute distance of the target; the second uses a percentage of the target value. The last two require the stated number of decimal places or significant figures.&quot;" data-fields="[&quot;math-exercise-16-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div class="math-exercise-question">Give $\pi$ to three decimal places: <input type="text" id="math-exercise-16-f1" data-answer="pi" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
@@ -1099,7 +1102,7 @@ Approximate $e^5$: _[exp(5)]
 Give $\pi$ to three decimal places: _[pi]
 ```</code></pre>
 </details>
-<div class="math-exercise-cell" id="math-exercise-17" data-label="sympy-significant-figures" data-mode="numeric" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="4" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Numerical checking&quot;" data-fields="[&quot;math-exercise-17-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" id="math-exercise-17" data-label="sympy-significant-figures" data-mode="numeric" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="4" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Numerical checking The first task accepts answers within a fixed absolute distance of the target; the second uses a percentage of the target value. The last two require the stated number of decimal places or significant figures.&quot;" data-fields="[&quot;math-exercise-17-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div class="math-exercise-question">Give $1/7$ to four significant figures: <input type="text" id="math-exercise-17-f1" data-answer="1/7" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
