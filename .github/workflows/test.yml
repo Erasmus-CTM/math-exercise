@@ -24,6 +24,11 @@ jobs:
           grep -Fq 'Basic features' _site/index.html
           grep -Fq 'General SymPy examples' _site/sympy-examples.html
           grep -Fq 'Automatic section context' _site/ai-feedback.html
+          grep -Fq 'Assess a mathematical property' _site/custom-assessment.html
+          grep -Fq 'mode: custom' _site/custom-assessment.html
+          grep -Fq 'class="math-example-source"' _site/basic-features.html
+          grep -Fq 'Show source' _site/sympy-examples.html
+          grep -Fq 'Vis kildekode' _site/vector-matrix-tests.html
           grep -Fq 'class="math-vec' _site/vector-matrix-tests.html
           grep -Fq 'class="math-mat"' _site/vector-matrix-tests.html
           grep -Fq 'data-structural-field-labels=' _site/vector-matrix-tests.html

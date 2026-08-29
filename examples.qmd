@@ -6,6 +6,7 @@ format:
     toc: true
 engine: markdown
 filters:
+  - _filters/example-source.lua
   - jsxgraph
   - math-exercise
 ---

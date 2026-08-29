@@ -5,6 +5,7 @@ project:
     - index.qmd
     - basic-features.qmd
     - ai-feedback.qmd
+    - custom-assessment.qmd
     - sympy-examples.qmd
     - vector-matrix-tests.qmd
     - examples.qmd
@@ -21,6 +22,8 @@ website:
         text: SymPy examples
       - href: ai-feedback.qmd
         text: AI and context
+      - href: custom-assessment.qmd
+        text: Custom assessment
       - href: vector-matrix-tests.qmd
         text: Vektorer og matriser (NB)
     right:
@@ -31,4 +34,4 @@ format:
   html:
     toc: true
     theme: cosmo
-
+    css: example-site.css

@@ -1,0 +1,154 @@
+`mode: custom` runs trusted, instructor-authored SymPy/Python once for the
+complete response. This is useful when correctness means satisfying a property
+or a relationship rather than matching one predetermined expression.
+
+The checker receives `response["expressions"]`, an ordered list of parsed SymPy
+expressions, and `symbols`, a dictionary containing the names declared in
+`vars`. It may return a boolean, a score from 0 to 1, or a dictionary containing
+`score` or `correct` and optional plain-text `feedback`.
+
+::: {.callout-warning}
+Checker code is included in the generated HTML and executes in browser-side
+Pyodide. It must come only from trusted document authors. It is assessment
+logic, not a secure place for secrets or high-stakes exam answers.
+:::
+
+## 1. Assess a mathematical property
+
+This accepts any function that is non-decreasing on $[0,1]$ and rises overall;
+there is no single canonical answer. Try `x`, `x^2`, or `x^3+x`.
+
+```{math-exercise}
+#| label: custom-monotone
+#| caption: Any non-decreasing function that rises overall
+#| vars: x
+#| mode: custom
+#| checker: |
+#|   def check(response, symbols):
+#|       f = response["expressions"][0]
+#|       x = symbols["x"]
+#|       derivative_min = minimum(diff(f, x), x, Interval(0, 1))
+#|       rise = simplify(f.subs(x, 1) - f.subs(x, 0))
+#|       valid = (
+#|           derivative_min.is_nonnegative is True
+#|           and rise.is_positive is True
+#|       )
+#|       return {
+#|           "correct": valid,
+#|           "feedback": "The derivative must stay non-negative and the endpoint value must increase."
+#|       }
+
+Give a function that is non-decreasing on $[0,1]$ and satisfies $f(1)>f(0)$:
+$f(x)=$ ___[]
+```
+
+## 2. Assess several fields together
+
+Any positive integer Pythagorean triple is accepted, not only $(3,4,5)$. The
+checker also enforces the requested ordering.
+
+```{math-exercise}
+#| label: custom-pythagorean
+#| caption: A positive integer Pythagorean triple
+#| mode: custom
+#| field-labels: a, b, c
+#| checker: |
+#|   def check(response, symbols):
+#|       a, b, c = response["expressions"]
+#|       integers = all(v.is_integer is True and v.is_positive is True for v in (a, b, c))
+#|       ordered = (a < b) is S.true and (b < c) is S.true
+#|       equation = simplify(a**2 + b**2 - c**2) == 0
+#|       score = (int(integers) + int(ordered) + int(equation)) / 3
+#|       return {
+#|           "score": score,
+#|           "feedback": "Check positivity, a < b < c, and the equation a²+b²=c²."
+#|       }
+
+Enter positive integers $a<b<c$ satisfying $a^2+b^2=c^2$:
+$a=$ _[] &nbsp; $b=$ _[] &nbsp; $c=$ _[]
+```
+
+## 3. Check relationships between symbolic answers
+
+The polynomial and its proposed roots are assessed as one response. Any monic
+quadratic with two distinct roots is valid.
+
+```{math-exercise}
+#| label: custom-polynomial-roots
+#| caption: A polynomial consistent with two proposed roots
+#| vars: x
+#| mode: custom
+#| field-labels: Polynomial, First root, Second root
+#| checker: |
+#|   def check(response, symbols):
+#|       p, r1, r2 = response["expressions"]
+#|       x = symbols["x"]
+#|       try:
+#|           polynomial = Poly(p, x)
+#|           monic_quadratic = polynomial.degree() == 2 and polynomial.LC() == 1
+#|       except Exception:
+#|           monic_quadratic = False
+#|       distinct = simplify(r1 - r2) != 0
+#|       consistent = simplify(p - (x-r1)*(x-r2)) == 0
+#|       score = (int(monic_quadratic) + int(distinct) + int(consistent)) / 3
+#|       return {
+#|           "score": score,
+#|           "feedback": "The polynomial must be monic, quadratic, and equal to (x-r₁)(x-r₂)."
+#|       }
+
+Give a monic quadratic $p(x)$ and two distinct roots:
+$p(x)=$ __[] &nbsp; $r_1=$ _[] &nbsp; $r_2=$ _[]
+```
+
+## 4. Validate a numerical process
+
+Here correctness is defined by two successive Newton/Babylonian updates, not
+by one fixed starting value. Try $x_0=1$, then calculate $x_1$ and $x_2$.
+
+```{math-exercise}
+#| label: custom-newton-sequence
+#| caption: Two consistent iterations toward sqrt(2)
+#| mode: custom
+#| field-labels: x₀, x₁, x₂
+#| checker: |
+#|   def check(response, symbols):
+#|       x0, x1, x2 = response["expressions"]
+#|       step = lambda value: (value + 2/value) / 2
+#|       start_ok = x0.is_positive is True and simplify(x0**2 - 2) != 0
+#|       first_ok = simplify(x1 - step(x0)) == 0
+#|       second_ok = simplify(x2 - step(x1)) == 0
+#|       score = (int(start_ok) + int(first_ok) + int(second_ok)) / 3
+#|       return {
+#|           "score": score,
+#|           "feedback": "Each new value must equal (x + 2/x)/2 for the preceding value."
+#|       }
+
+Choose a positive $x_0\ne\sqrt2$ and give two updates:
+$x_0=$ _[] &nbsp; $x_1=$ _[] &nbsp; $x_2=$ _[]
+```
+
+## 5. Assess a matrix constraint
+
+Every cell is parsed separately, then reconstructed inside the checker. Any
+integer $2\times2$ matrix with determinant 1 is accepted except the identity.
+
+```{math-exercise}
+#| label: custom-special-linear-matrix
+#| caption: An integer matrix in SL(2) other than the identity
+#| mode: custom
+#| checker: |
+#|   def check(response, symbols):
+#|       values = response["expressions"]
+#|       A = Matrix(2, 2, values)
+#|       integer_entries = all(value.is_integer is True for value in values)
+#|       determinant_one = simplify(A.det() - 1) == 0
+#|       nonidentity = A != eye(2)
+#|       score = (int(integer_entries) + int(determinant_one) + int(nonidentity)) / 3
+#|       return {
+#|           "score": score,
+#|           "feedback": "Require integer entries, determinant 1, and a matrix different from I₂."
+#|       }
+
+Enter an integer matrix $A\ne I_2$ with $\det(A)=1$:
+$A=$ mat[,;,]
+```

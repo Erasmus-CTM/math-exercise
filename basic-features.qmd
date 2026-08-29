@@ -3,8 +3,8 @@ title: "Basic features"
 lang: en
 engine: markdown
 filters:
+  - _filters/example-source.lua
   - math-exercise
 ---
 
 {{< include _includes/basic-features.qmd >}}
-

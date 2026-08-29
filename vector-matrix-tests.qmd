@@ -7,6 +7,7 @@ format:
     toc-title: "Innhold"
 engine: markdown
 filters:
+  - _filters/example-source.lua
   - math-exercise
 ---
 

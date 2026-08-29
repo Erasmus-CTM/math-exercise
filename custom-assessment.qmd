@@ -1,5 +1,5 @@
 ---
-title: "General SymPy examples"
+title: "Custom assessment with SymPy"
 lang: en
 engine: markdown
 filters:
@@ -7,4 +7,5 @@ filters:
   - math-exercise
 ---
 
-{{< include _includes/sympy-examples.qmd >}}
+{{< include _includes/custom-assessment.qmd >}}
+

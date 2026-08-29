@@ -43,6 +43,14 @@ meaningful field labels, and the model capability adapter.
 En fullstendig norsk testside for rad- og kolonnevektorer, matriser, symbolske
 uttrykk, numerisk toleranse og oppgavepooler.
 :::
+
+::: {.g-col-12 .g-col-md-6}
+### [Custom assessment](custom-assessment.qmd)
+
+Five examples of instructor-authored SymPy/Python checkers for properties,
+relationships between fields, partial credit, iterative processes, and matrix
+constraints.
+:::
 :::
 
 ## Extended regression page
@@ -50,4 +58,3 @@ uttrykk, numerisk toleranse og oppgavepooler.
 The original [all-in-one examples page](examples.qmd) remains available. It
 contains the large JSXGraph response examples and serves as compatibility
 coverage while the focused pages above provide the primary navigation.
-
