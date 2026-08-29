@@ -116,6 +116,24 @@ test('canonicalizes every matrix without entries to the empty matrix', () => {
   assert.match(zeroRows.html, /data-last-rows="0" data-last-cols="2"/);
 });
 
+test('retains configured dimensions when restoring the empty matrix', () => {
+  const api = loadBundle();
+  const matrix = { dataset: {
+    matrixName: 'Z', autoRows: 'false', autoCols: 'true',
+    minRows: '3', maxRows: '3', minCols: '0', maxCols: '3',
+    lastRows: '3', lastCols: '2', rows: '0', cols: '0',
+  }};
+  const spec = api.dynamicSpecFromElement(matrix);
+  assert.equal(spec.rows.initial, 3);
+  assert.equal(spec.cols.initial, 2);
+  assert.equal(spec.rows.auto, false);
+  assert.equal(spec.cols.auto, true);
+  assert.deepEqual(
+    { ...api.resizedDynamicMatrixShape(matrix, spec, 'add-col') },
+    { rows: 3, cols: 1 },
+  );
+});
+
 test('validates dynamic matrix declarations and custom-only use', () => {
   const api = loadBundle();
   assert.throws(
@@ -148,14 +166,20 @@ test('dynamic matrix labels and AI answer summaries include shape', () => {
 });
 
 test('custom matrix assessment records complete vector statuses for AI feedback', () => {
-  const xml = loadBundle().structuredAssessmentXml({
+  const api = loadBundle();
+  const assessment = {
     Z: { columns: [true, false, 0.5, 'empty'] },
-  });
+    R: { rows: ['correct', 'wrong'] },
+  };
+  const xml = api.structuredAssessmentXml(assessment);
   assert.match(xml, /<matrix name="Z">/);
   assert.match(xml, /<column index="1" status="correct"\/>/);
   assert.match(xml, /<column index="2" status="incorrect"\/>/);
   assert.match(xml, /<column index="3" status="partial"\/>/);
   assert.match(xml, /<column index="4" status="empty"\/>/);
+  assert.match(xml, /<matrix name="R"><row index="1" status="correct"\/><row index="2" status="incorrect"\/><\/matrix>/);
+  assert.equal(api.structuredGroupStatus(assessment, 'R', 'rows', 1), 'correct');
+  assert.equal(api.structuredGroupStatus(assessment, 'R', 'rows', 2), 'incorrect');
 });
 
 test('normalizes task dollar math before raw HTML rendering', () => {

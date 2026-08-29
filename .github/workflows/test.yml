@@ -68,4 +68,7 @@ jobs:
           grep -Fq 'data-auto-rows="true"' _site/dynamic-matrix-tests.html
           grep -Fq 'data-min-cols="0"' _site/dynamic-matrix-tests.html
           grep -Fq 'Empty by removing rows' _site/dynamic-matrix-tests.html
-          test "$(grep -Fc 'class="math-example-source"' _site/dynamic-matrix-tests.html)" -eq 5
+          grep -Fq 'A row-space basis' _site/dynamic-matrix-tests.html
+          grep -Fq 'Build a 3 × 3 Hessian' _site/dynamic-matrix-tests.html
+          grep -Fq 'Choose a path graph' _site/dynamic-matrix-tests.html
+          test "$(grep -Fc 'class="math-example-source"' _site/dynamic-matrix-tests.html)" -eq 9

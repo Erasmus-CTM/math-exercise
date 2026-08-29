@@ -147,3 +147,126 @@ Use the row control to submit the empty matrix:
 
 $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
 ```
+
+## 6. A column-space basis
+
+```{math-exercise}
+#| label: dynamic-column-space-basis
+#| caption: Compute a basis for a column space
+#| mode: custom
+#| context: dynamic-matrix-method
+#| checker: |
+#|   def check(response, symbols):
+#|       B = response["inputs"]["B"]["matrix"]
+#|       A = Matrix([[1, 2, 0], [0, 1, 1], [1, 3, 1]])
+#|       right_height = B.rows == A.rows
+#|       valid_columns = [
+#|           B[:, j] != zeros(B.rows, 1) and A.row_join(B[:, j]).rank() == A.rank()
+#|           for j in range(B.cols)
+#|       ] if right_height else [False] * B.cols
+#|       contained = right_height and all(valid_columns)
+#|       independent = right_height and B.rank() == B.cols
+#|       complete = independent and B.cols == A.rank()
+#|       return {
+#|           "score": (int(contained) + int(independent) + int(complete)) / 3,
+#|           "feedback": "Use nonzero vectors from the column space, keep them independent, and span the complete column space.",
+#|           "assessment": {"B": {"columns": valid_columns}}
+#|       }
+
+Compute a basis for the column space of
+$A=\begin{bmatrix}1&2&0\\0&1&1\\1&3&1\end{bmatrix}$.
+Enter your basis vectors as columns of $B$:
+
+$B=$ mat{name=B, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}
+```
+
+## 7. A row-space basis
+
+```{math-exercise}
+#| label: dynamic-row-space-basis
+#| caption: Compute a basis using row vectors
+#| mode: custom
+#| context: dynamic-matrix-method
+#| checker: |
+#|   def check(response, symbols):
+#|       R = response["inputs"]["R"]["matrix"]
+#|       A = Matrix([[1, 0, 1, 2], [0, 1, 1, 1], [1, 1, 2, 3]])
+#|       right_width = R.cols == A.cols
+#|       valid_rows = [
+#|           R[i, :] != zeros(1, R.cols) and A.col_join(R[i, :]).rank() == A.rank()
+#|           for i in range(R.rows)
+#|       ] if right_width else [False] * R.rows
+#|       contained = right_width and all(valid_rows)
+#|       independent = right_width and R.rank() == R.rows
+#|       complete = independent and R.rows == A.rank()
+#|       return {
+#|           "score": (int(contained) + int(independent) + int(complete)) / 3,
+#|           "feedback": "Each row should be a nonzero row-space vector; the rows must be independent and complete.",
+#|           "assessment": {"R": {"rows": valid_rows}}
+#|       }
+
+Compute a basis for the row space of
+$A=\begin{bmatrix}1&0&1&2\\0&1&1&1\\1&1&2&3\end{bmatrix}$.
+Enter one basis vector per row of $R$:
+
+$R=$ mat{name=R, rows=auto, cols=4, initial-rows=1, min-rows=0, max-rows=3}
+```
+
+## 8. Build a 3 × 3 Hessian
+
+```{math-exercise}
+#| label: dynamic-hessian
+#| caption: Notice and repair the initial matrix size
+#| mode: custom
+#| context: dynamic-matrix-method
+#| checker: |
+#|   def check(response, symbols):
+#|       H = response["inputs"]["H"]["matrix"]
+#|       target = Matrix([[2, 1, 0], [1, 4, 1], [0, 1, 6]])
+#|       shape_ok = H.shape == target.shape
+#|       valid_rows = [
+#|           shape_ok and all(simplify(H[i, j] - target[i, j]) == 0 for j in range(3))
+#|           for i in range(H.rows)
+#|       ]
+#|       row_credit = sum(valid_rows) / 3
+#|       return {
+#|           "score": (int(shape_ok) + row_credit) / 2,
+#|           "feedback": "A Hessian has one row and column for every variable; then check each second derivative.",
+#|           "assessment": {"H": {"rows": valid_rows}}
+#|       }
+
+Find the Hessian of
+$f(x,y,z)=x^2+xy+2y^2+yz+3z^2$.
+The input deliberately starts too small:
+
+$H_f=$ mat{name=H, rows=auto, cols=auto, initial-rows=2, initial-cols=2, min-rows=1, max-rows=3, min-cols=1, max-cols=3}
+```
+
+## 9. Choose a path graph
+
+```{math-exercise}
+#| label: dynamic-path-adjacency
+#| caption: Let the matrix size choose the graph
+#| mode: custom
+#| context: dynamic-matrix-method
+#| checker: |
+#|   def check(response, symbols):
+#|       P = response["inputs"]["Pth"]["matrix"]
+#|       square = P.rows == P.cols
+#|       target = Matrix(P.rows, P.cols, lambda i, j: int(abs(i-j) == 1)) if square else None
+#|       valid_rows = [
+#|           square and all(simplify(P[i, j] - target[i, j]) == 0 for j in range(P.cols))
+#|           for i in range(P.rows)
+#|       ]
+#|       row_credit = sum(valid_rows) / P.rows if P.rows else 0
+#|       return {
+#|           "score": (int(square) + row_credit) / 2,
+#|           "feedback": "A path adjacency matrix is square, has zeros on the diagonal, and joins only consecutive vertices.",
+#|           "assessment": {"Pth": {"rows": valid_rows}}
+#|       }
+
+Choose between two and five ordered vertices and enter the adjacency matrix of
+the path $v_1-v_2-\cdots-v_n$. The size of your matrix chooses $n$:
+
+$P_n=$ mat{name=Pth, rows=auto, cols=auto, initial-rows=2, initial-cols=2, min-rows=2, max-rows=5, min-cols=2, max-cols=5}
+```

@@ -80,7 +80,7 @@ relationships between fields, iterative processes, and matrix constraints.
 ::: {.g-col-12 .g-col-md-6}
 ### [Dynamic matrix input](dynamic-matrix-tests.qmd)
 
-Five custom-assessment examples with student-selected dimensions, including
+Nine custom-assessment examples with student-selected dimensions, including
 the canonical empty matrix and whole-vector assessment.
 :::
 
