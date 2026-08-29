@@ -253,11 +253,29 @@ ul.task-list li input[type="checkbox"] {
 }
 
 .math-dynamic-matrix-controls {
-  display: inline-flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: .25em;
-  margin-top: .15em;
+  display: grid;
+  gap: .32em;
+  margin-top: .3em;
+  min-width: 9.5em;
+}
+
+.math-dynamic-axis {
+  display: grid;
+  grid-template-columns: minmax(4.5em, 1fr) 2em 2em 2em;
+  align-items: center;
+  gap: .2em;
+}
+
+.math-dynamic-axis-label {
+  color: var(--bs-secondary-color, #495057);
+  font-size: .76em;
+  text-align: left;
+}
+
+.math-dynamic-axis output {
+  font-variant-numeric: tabular-nums;
+  font-size: .8em;
+  text-align: center;
 }
 
 .math-dynamic-matrix-controls button {
@@ -265,9 +283,11 @@ ul.task-list li input[type="checkbox"] {
   border-radius: .3em;
   background: var(--bs-tertiary-bg, #f8f9fa);
   color: var(--bs-body-color, #212529);
-  padding: .12em .4em;
-  font-size: .72em;
-  line-height: 1.25;
+  min-width: 2em;
+  min-height: 2em;
+  padding: .05em .3em;
+  font-size: .8em;
+  line-height: 1;
   cursor: pointer;
 }
 
@@ -775,7 +795,7 @@ select.math-modal-input {
 <section id="polynomial-algebra" class="level2">
 <h2 class="anchored" data-anchor-id="polynomial-algebra">Polynomial algebra</h2>
 <div class="math-exercise-cell" id="math-exercise-1" data-label="sympy-expand" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Polynomial algebra&quot;" data-fields="[&quot;math-exercise-1-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
-<div class="math-exercise-question">Expand $(2x-3)(x+4)$: <input type="text" id="math-exercise-1-f1" data-answer="2*x^2+5*x-12" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
+<div class="math-exercise-question">Expand \((2x-3)(x+4)\): <input type="text" id="math-exercise-1-f1" data-answer="2*x^2+5*x-12" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -797,7 +817,7 @@ Expand $(2x-3)(x+4)$: __[2*x^2+5*x-12]
 ```</code></pre>
 </details>
 <div class="math-exercise-cell" id="math-exercise-2" data-label="sympy-factor" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="factored" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Polynomial algebra&quot;" data-fields="[&quot;math-exercise-2-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
-<div class="math-exercise-question">Factor $x^3-4x$: <input type="text" id="math-exercise-2-f1" data-answer="x*(x-2)*(x+2)" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
+<div class="math-exercise-question">Factor \(x^3-4x\): <input type="text" id="math-exercise-2-f1" data-answer="x*(x-2)*(x+2)" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -823,7 +843,7 @@ Factor $x^3-4x$: __[x*(x-2)*(x+2)]
 <section id="rational-expressions" class="level2">
 <h2 class="anchored" data-anchor-id="rational-expressions">Rational expressions</h2>
 <div class="math-exercise-cell" id="math-exercise-3" data-label="sympy-rational" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="single_fraction" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Rational expressions&quot;" data-fields="[&quot;math-exercise-3-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
-<div class="math-exercise-question">Write $\frac{1}{x} + \frac{1}{x+1}$ as one fraction:<br>
+<div class="math-exercise-question">Write \(\frac{1}{x} + \frac{1}{x+1}\) as one fraction:<br>
 <input type="text" id="math-exercise-3-f1" data-answer="(2*x+1)/(x*(x+1))" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
 
 <div class="math-exercise-controls">
@@ -848,7 +868,7 @@ __[(2*x+1)/(x*(x+1))]
 ```</code></pre>
 </details>
 <div class="math-exercise-cell" id="math-exercise-4" data-label="sympy-lowest-terms" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="lowest_terms" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Rational expressions&quot;" data-fields="[&quot;math-exercise-4-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
-<div class="math-exercise-question">Reduce $84/126$ fully: <input type="text" id="math-exercise-4-f1" data-answer="2/3" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
+<div class="math-exercise-question">Reduce \(84/126\) fully: <input type="text" id="math-exercise-4-f1" data-answer="2/3" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -873,7 +893,7 @@ Reduce $84/126$ fully: _[2/3]
 <section id="powers-roots-and-constants" class="level2">
 <h2 class="anchored" data-anchor-id="powers-roots-and-constants">Powers, roots, and constants</h2>
 <div class="math-exercise-cell" id="math-exercise-5" data-label="sympy-radicals" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Powers, roots, and constants&quot;" data-fields="[&quot;math-exercise-5-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
-<div class="math-exercise-question">Simplify $\sqrt{72}$: <input type="text" id="math-exercise-5-f1" data-answer="6*sqrt(2)" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
+<div class="math-exercise-question">Simplify \(\sqrt{72}\): <input type="text" id="math-exercise-5-f1" data-answer="6*sqrt(2)" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -894,7 +914,7 @@ Simplify $\sqrt{72}$: _[6*sqrt(2)]
 ```</code></pre>
 </details>
 <div class="math-exercise-cell" id="math-exercise-6" data-label="sympy-logarithm" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Powers, roots, and constants&quot;" data-fields="[&quot;math-exercise-6-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
-<div class="math-exercise-question">For $x\ne0$, differentiate $\log(x^2)$: <input type="text" id="math-exercise-6-f1" data-answer="2/x" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
+<div class="math-exercise-question">For \(x\ne0\), differentiate \(\log(x^2)\): <input type="text" id="math-exercise-6-f1" data-answer="2/x" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -916,7 +936,7 @@ For $x\ne0$, differentiate $\log(x^2)$: __[2/x]
 ```</code></pre>
 </details>
 <div class="math-exercise-cell" id="math-exercise-7" data-label="sympy-exponential" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Powers, roots, and constants&quot;" data-fields="[&quot;math-exercise-7-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
-<div class="math-exercise-question">Differentiate $e^{3x}$: <input type="text" id="math-exercise-7-f1" data-answer="3*exp(3*x)" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
+<div class="math-exercise-question">Differentiate \(e^{3x}\): <input type="text" id="math-exercise-7-f1" data-answer="3*exp(3*x)" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -941,7 +961,7 @@ Differentiate $e^{3x}$: __[3*exp(3*x)]
 <section id="trigonometry" class="level2">
 <h2 class="anchored" data-anchor-id="trigonometry">Trigonometry</h2>
 <div class="math-exercise-cell" id="math-exercise-8" data-label="sympy-trig-identity" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Trigonometry&quot;" data-fields="[&quot;math-exercise-8-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
-<div class="math-exercise-question">Simplify $\sin^2(x)+\cos^2(x)$: <input type="text" id="math-exercise-8-f1" data-answer="1" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
+<div class="math-exercise-question">Simplify \(\sin^2(x)+\cos^2(x)\): <input type="text" id="math-exercise-8-f1" data-answer="1" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -963,7 +983,7 @@ Simplify $\sin^2(x)+\cos^2(x)$: _[1]
 ```</code></pre>
 </details>
 <div class="math-exercise-cell" id="math-exercise-9" data-label="sympy-trig-value" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Trigonometry&quot;" data-fields="[&quot;math-exercise-9-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
-<div class="math-exercise-question">Give the exact value of $\sin(\pi/6)$: <input type="text" id="math-exercise-9-f1" data-answer="1/2" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
+<div class="math-exercise-question">Give the exact value of \(\sin(\pi/6)\): <input type="text" id="math-exercise-9-f1" data-answer="1/2" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -987,7 +1007,7 @@ Give the exact value of $\sin(\pi/6)$: _[1/2]
 <section id="derivatives-and-integrals" class="level2">
 <h2 class="anchored" data-anchor-id="derivatives-and-integrals">Derivatives and integrals</h2>
 <div class="math-exercise-cell" id="math-exercise-10" data-label="sympy-derivative" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Derivatives and integrals&quot;" data-fields="[&quot;math-exercise-10-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
-<div class="math-exercise-question">Differentiate $x^2\sin(x)$:<br>
+<div class="math-exercise-question">Differentiate \(x^2\sin(x)\):<br>
 <input type="text" id="math-exercise-10-f1" data-answer="2*x*sin(x)+x^2*cos(x)" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
 
 <div class="math-exercise-controls">
@@ -1011,7 +1031,7 @@ __[2*x*sin(x)+x^2*cos(x)]
 ```</code></pre>
 </details>
 <div class="math-exercise-cell" id="math-exercise-11" data-label="sympy-antiderivative" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Derivatives and integrals&quot;" data-fields="[&quot;math-exercise-11-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
-<div class="math-exercise-question">Give one antiderivative of $3x^2-4$: <input type="text" id="math-exercise-11-f1" data-answer="x^3-4*x" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
+<div class="math-exercise-question">Give one antiderivative of \(3x^2-4\): <input type="text" id="math-exercise-11-f1" data-answer="x^3-4*x" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -1036,7 +1056,7 @@ Give one antiderivative of $3x^2-4$: __[x^3-4*x]
 <section id="complex-numbers" class="level2">
 <h2 class="anchored" data-anchor-id="complex-numbers">Complex numbers</h2>
 <div class="math-exercise-cell" id="math-exercise-12" data-label="sympy-complex" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Complex numbers&quot;" data-fields="[&quot;math-exercise-12-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
-<div class="math-exercise-question">Compute $(1+2i)(3-i)$. Enter the imaginary unit $i$ as a capital I:<br>
+<div class="math-exercise-question">Compute \((1+2i)(3-i)\). Enter the imaginary unit \(i\) as a capital I:<br>
 <input type="text" id="math-exercise-12-f1" data-answer="5+5*I" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
 
 <div class="math-exercise-controls">
@@ -1063,7 +1083,7 @@ __[5+5*I]
 <h2 class="anchored" data-anchor-id="solution-sets">Solution sets</h2>
 <p>Enter the roots separated by commas. Their order does not matter; repeated values are counted.</p>
 <div class="math-exercise-cell" id="math-exercise-13" data-label="sympy-roots-set" data-mode="set" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Solution sets Enter the roots separated by commas. Their order does not matter; repeated values are counted.&quot;" data-fields="[&quot;math-exercise-13-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
-<div class="math-exercise-question">List all roots of $x^3-x=0$: <input type="text" id="math-exercise-13-f1" data-answer="-1,0,1" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
+<div class="math-exercise-question">List all roots of \(x^3-x=0\): <input type="text" id="math-exercise-13-f1" data-answer="-1,0,1" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -1089,7 +1109,7 @@ List all roots of $x^3-x=0$: __[-1,0,1]
 <h2 class="anchored" data-anchor-id="numerical-checking">Numerical checking</h2>
 <p>The first task accepts answers within a fixed absolute distance of the target; the second uses a percentage of the target value. The last two require the stated number of decimal places or significant figures.</p>
 <div class="math-exercise-cell" id="math-exercise-14" data-label="sympy-absolute-tolerance" data-mode="numeric" data-reject="" data-vars="" data-tolerance="0.001" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Numerical checking The first task accepts answers within a fixed absolute distance of the target; the second uses a percentage of the target value. The last two require the stated number of decimal places or significant figures.&quot;" data-fields="[&quot;math-exercise-14-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
-<div class="math-exercise-question">Approximate $\sqrt{2}$: <input type="text" id="math-exercise-14-f1" data-answer="sqrt(2)" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
+<div class="math-exercise-question">Approximate \(\sqrt{2}\): <input type="text" id="math-exercise-14-f1" data-answer="sqrt(2)" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -1112,7 +1132,7 @@ Approximate $\sqrt{2}$: _[sqrt(2)]
 ```</code></pre>
 </details>
 <div class="math-exercise-cell" id="math-exercise-15" data-label="sympy-relative-tolerance" data-mode="numeric" data-reject="" data-vars="" data-tolerance="1%" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Numerical checking The first task accepts answers within a fixed absolute distance of the target; the second uses a percentage of the target value. The last two require the stated number of decimal places or significant figures.&quot;" data-fields="[&quot;math-exercise-15-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
-<div class="math-exercise-question">Approximate $e^5$: <input type="text" id="math-exercise-15-f1" data-answer="exp(5)" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
+<div class="math-exercise-question">Approximate \(e^5\): <input type="text" id="math-exercise-15-f1" data-answer="exp(5)" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -1135,7 +1155,7 @@ Approximate $e^5$: _[exp(5)]
 ```</code></pre>
 </details>
 <div class="math-exercise-cell" id="math-exercise-16" data-label="sympy-decimal-places" data-mode="numeric" data-reject="" data-vars="" data-tolerance="" data-decplaces="3" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Numerical checking The first task accepts answers within a fixed absolute distance of the target; the second uses a percentage of the target value. The last two require the stated number of decimal places or significant figures.&quot;" data-fields="[&quot;math-exercise-16-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
-<div class="math-exercise-question">Give $\pi$ to three decimal places: <input type="text" id="math-exercise-16-f1" data-answer="pi" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
+<div class="math-exercise-question">Give \(\pi\) to three decimal places: <input type="text" id="math-exercise-16-f1" data-answer="pi" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -1158,7 +1178,7 @@ Give $\pi$ to three decimal places: _[pi]
 ```</code></pre>
 </details>
 <div class="math-exercise-cell" id="math-exercise-17" data-label="sympy-significant-figures" data-mode="numeric" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="4" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Numerical checking The first task accepts answers within a fixed absolute distance of the target; the second uses a percentage of the target value. The last two require the stated number of decimal places or significant figures.&quot;" data-fields="[&quot;math-exercise-17-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
-<div class="math-exercise-question">Give $1/7$ to four significant figures: <input type="text" id="math-exercise-17-f1" data-answer="1/7" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
+<div class="math-exercise-question">Give \(1/7\) to four significant figures: <input type="text" id="math-exercise-17-f1" data-answer="1/7" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -1184,7 +1204,7 @@ Give $1/7$ to four significant figures: _[1/7]
 <section id="requiring-an-exact-representation" class="level2">
 <h2 class="anchored" data-anchor-id="requiring-an-exact-representation">Requiring an exact representation</h2>
 <div class="math-exercise-cell" id="math-exercise-18" data-label="sympy-exact" data-mode="exact" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Requiring an exact representation&quot;" data-fields="[&quot;math-exercise-18-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
-<div class="math-exercise-question">Enter the canonical expanded expression $x^2+2x+1$:<br>
+<div class="math-exercise-question">Enter the canonical expanded expression \(x^2+2x+1\):<br>
 <input type="text" id="math-exercise-18-f1" data-answer="x^2+2*x+1" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
 
 <div class="math-exercise-controls">
@@ -1674,7 +1694,9 @@ __[x^2+2*x+1]
       matrixRemoveRow: 'Remove row',
       matrixAddColumn: 'Add column',
       matrixRemoveColumn: 'Remove column',
-      emptyMatrix: function (rows, columns) { return rows + ' × ' + columns + ' matrix'; },
+      matrixRows: 'Rows',
+      matrixColumns: 'Columns',
+      emptyMatrix: 'Empty matrix',
       resEmpty:     'Please enter an answer.',
       resCorrect:   'Correct!',
       resPartial:   function (pct) { return 'Partially correct (' + pct + '%).'; },
@@ -1828,7 +1850,9 @@ __[x^2+2*x+1]
       matrixRemoveRow: 'Zeile entfernen',
       matrixAddColumn: 'Spalte hinzufügen',
       matrixRemoveColumn: 'Spalte entfernen',
-      emptyMatrix: function (rows, columns) { return rows + ' × ' + columns + '-Matrix'; },
+      matrixRows: 'Zeilen',
+      matrixColumns: 'Spalten',
+      emptyMatrix: 'Leere Matrix',
       resEmpty:     'Bitte eine Antwort eingeben.',
       resCorrect:   'Richtig!',
       resPartial:   function (pct) { return 'Teilweise richtig (' + pct + '&nbsp;%).'; },
@@ -1982,7 +2006,9 @@ __[x^2+2*x+1]
     matrixRemoveRow: 'Fjern rad',
     matrixAddColumn: 'Legg til kolonne',
     matrixRemoveColumn: 'Fjern kolonne',
-    emptyMatrix: function (rows, columns) { return rows + ' × ' + columns + '-matrise'; },
+    matrixRows: 'Rader',
+    matrixColumns: 'Kolonner',
+    emptyMatrix: 'Tom matrise',
     resEmpty: 'Skriv inn et svar.',
     resCorrect: 'Riktig!',
     resPartial: function (pct) { return 'Delvis riktig (' + pct + '%).'; },
@@ -2497,12 +2523,16 @@ __[x^2+2*x+1]
       '',
       'def _normalize_custom_result(result):',
       '    feedback = ""',
+      '    assessment = {}',
       '    if isinstance(result, bool):',
       '        score = 1.0 if result else 0.0',
       '    elif isinstance(result, (int, float)):',
       '        score = float(result)',
       '    elif isinstance(result, dict):',
       '        feedback = str(result.get("feedback", ""))',
+      '        assessment = result.get("assessment", {})',
+      '        if not isinstance(assessment, dict):',
+      '            raise TypeError("Custom checker assessment must be a dictionary")',
       '        if "score" in result:',
       '            score = float(result["score"])',
       '        elif "correct" in result:',
@@ -2514,7 +2544,7 @@ __[x^2+2*x+1]
       '    if not 0.0 <= score <= 1.0:',
       '        raise ValueError("Custom checker score must be between 0 and 1")',
       '    status = "correct" if score >= 1.0 - 1e-9 else ("wrong" if score <= 1e-9 else "partial")',
-      '    return {"status": status, "score": score, "feedback": feedback}',
+      '    return {"status": status, "score": score, "feedback": feedback, "assessment": assessment}',
       '',
       'def _math_check_custom():',
       '    try:',
@@ -2741,7 +2771,9 @@ __[x^2+2*x+1]
   function buildDynamicMatrix(exerciseId, content, vars, mode) {
     if (mode !== 'custom') throw new Error('math-exercise: mat{...} currently requires mode: custom');
     var spec = parseDynamicMatrixSpec(content);
-    var rows = spec.rows.initial, cols = spec.cols.initial;
+    var configuredRows = spec.rows.initial, configuredCols = spec.cols.initial;
+    var rows = configuredRows, cols = configuredCols;
+    if (rows === 0 || cols === 0) { rows = 0; cols = 0; }
     var ids = [], labels = [], cells = [];
     for (var row = 1; row <= rows; row++) {
       for (var column = 1; column <= cols; column++) {
@@ -2753,13 +2785,16 @@ __[x^2+2*x+1]
       + ' data-matrix-name="' + escHtml(spec.name) + '" data-rows="' + rows + '" data-cols="' + cols + '"'
       + ' data-auto-rows="' + spec.rows.auto + '" data-auto-cols="' + spec.cols.auto + '"'
       + ' data-min-rows="' + spec.rows.min + '" data-max-rows="' + spec.rows.max + '"'
-      + ' data-min-cols="' + spec.cols.min + '" data-max-cols="' + spec.cols.max + '">'
+      + ' data-min-cols="' + spec.cols.min + '" data-max-cols="' + spec.cols.max + '"'
+      + ' data-last-rows="' + configuredRows + '" data-last-cols="' + configuredCols + '">'
       + cells.join('') + '</span>';
     var controls = '<span class="math-dynamic-matrix-controls" aria-label="Matrix size controls">'
-      + '<button type="button" data-dynamic-action="remove-row">− row</button>'
-      + '<button type="button" data-dynamic-action="add-row">+ row</button>'
-      + '<button type="button" data-dynamic-action="remove-col">− column</button>'
-      + '<button type="button" data-dynamic-action="add-col">+ column</button>'
+      + '<span class="math-dynamic-axis" data-dynamic-axis="row"><span class="math-dynamic-axis-label"></span>'
+      + '<button type="button" data-dynamic-action="remove-row">−</button><output></output>'
+      + '<button type="button" data-dynamic-action="add-row">+</button></span>'
+      + '<span class="math-dynamic-axis" data-dynamic-axis="col"><span class="math-dynamic-axis-label"></span>'
+      + '<button type="button" data-dynamic-action="remove-col">−</button><output></output>'
+      + '<button type="button" data-dynamic-action="add-col">+</button></span>'
       + '</span>';
     return {
       html: '<span class="math-dynamic-matrix-wrap" data-matrix-name="' + escHtml(spec.name) + '">' + matrix + controls + '</span>',
@@ -2779,7 +2814,39 @@ __[x^2+2*x+1]
     return null;
   }
 
+  // Raw exercise bodies bypass Pandoc's Markdown math handling. Normalize
+  // paired dollar delimiters before inserting HTML so a page-level MathJax
+  // pass cannot claim a bare \\begin{...} environment and strand the dollars.
+  function normalizeTaskMathDelimiters(text) {
+    var output = '', position = 0;
+    function unescapedAt(needle, start) {
+      var found = text.indexOf(needle, start);
+      while (found >= 0) {
+        var slashes = 0;
+        for (var i = found - 1; i >= 0 && text.charAt(i) === '\\'; i--) slashes++;
+        if (slashes % 2 === 0) return found;
+        found = text.indexOf(needle, found + needle.length);
+      }
+      return -1;
+    }
+    while (position < text.length) {
+      if (text.charAt(position) !== '$' || (position > 0 && text.charAt(position - 1) === '\\')) {
+        output += text.charAt(position++);
+        continue;
+      }
+      var display = text.slice(position, position + 2) === '$$';
+      var delimiter = display ? '$$' : '$';
+      var close = unescapedAt(delimiter, position + delimiter.length);
+      if (close < 0) { output += text.charAt(position++); continue; }
+      output += (display ? '\\[' : '\\(') + text.slice(position + delimiter.length, close) +
+        (display ? '\\]' : '\\)');
+      position = close + delimiter.length;
+    }
+    return output;
+  }
+
   function renderTaskText(text, exerciseId, vars, vecdir, mode) {
+    text = normalizeTaskMathDelimiters(text);
     mode = mode || 'equivalent';
     var count = 0, fieldIds = [], structuralLabels = [], output = [], position = 0;
     var dynamicNames = {};
@@ -2860,6 +2927,11 @@ __[x^2+2*x+1]
       oldValues[input.dataset.matrixRow + ',' + input.dataset.matrixColumn] = input.value;
     });
     var spec = dynamicSpecFromElement(matrix);
+    if (rows === 0 || cols === 0) { rows = 0; cols = 0; }
+    else {
+      matrix.dataset.lastRows = String(rows);
+      matrix.dataset.lastCols = String(cols);
+    }
     var cells = [];
     for (var row = 1; row <= rows; row++) {
       for (var column = 1; column <= cols; column++) {
@@ -2872,7 +2944,7 @@ __[x^2+2*x+1]
     matrix.style.setProperty('--cols', String(Math.max(cols, 1)));
     matrix.innerHTML = cells.length
       ? cells.join('')
-      : '<span class="math-dynamic-matrix-empty" aria-live="polite">' + escHtml(L.emptyMatrix(rows, cols)) + '</span>';
+      : '<span class="math-dynamic-matrix-empty" aria-live="polite">' + escHtml(L.emptyMatrix) + '</span>';
     matrix.querySelectorAll('input[data-matrix-row][data-matrix-column]').forEach(function (input) {
       var key = input.dataset.matrixRow + ',' + input.dataset.matrixColumn;
       if (Object.prototype.hasOwnProperty.call(oldValues, key)) input.value = oldValues[key];
@@ -2916,12 +2988,17 @@ __[x^2+2*x+1]
       };
       function syncControls() {
         var rows = Number(matrix.dataset.rows), cols = Number(matrix.dataset.cols);
+        controls.querySelectorAll('.math-dynamic-axis').forEach(function (axisControl) {
+          var isRow = axisControl.dataset.dynamicAxis === 'row';
+          var axis = isRow ? spec.rows : spec.cols;
+          axisControl.style.display = axis.auto ? '' : 'none';
+          axisControl.querySelector('.math-dynamic-axis-label').textContent = isRow ? L.matrixRows : L.matrixColumns;
+          axisControl.querySelector('output').textContent = String(isRow ? rows : cols);
+        });
         controls.querySelectorAll('button[data-dynamic-action]').forEach(function (button) {
           var action = button.dataset.dynamicAction;
           var rowAction = action.indexOf('row') !== -1;
           var axis = rowAction ? spec.rows : spec.cols;
-          button.style.display = axis.auto ? '' : 'none';
-          button.textContent = (action.indexOf('add') === 0 ? '+ ' : '− ') + labels[action];
           button.setAttribute('aria-label', labels[action] + ' ' + spec.name);
           var value = rowAction ? rows : cols;
           button.disabled = action.indexOf('add') === 0 ? value >= axis.max : value <= axis.min;
@@ -2929,9 +3006,16 @@ __[x^2+2*x+1]
       }
       function resize(action) {
         var rows = Number(matrix.dataset.rows), cols = Number(matrix.dataset.cols);
-        if (action === 'add-row' && rows < spec.rows.max) rows++;
+        var empty = rows === 0 || cols === 0;
+        if (empty && action === 'add-row') {
+          rows = Math.max(1, spec.rows.min);
+          cols = spec.cols.auto ? Math.max(1, Number(matrix.dataset.lastCols) || spec.cols.initial) : spec.cols.initial;
+        } else if (empty && action === 'add-col') {
+          cols = Math.max(1, spec.cols.min);
+          rows = spec.rows.auto ? Math.max(1, Number(matrix.dataset.lastRows) || spec.rows.initial) : spec.rows.initial;
+        } else if (action === 'add-row' && rows < spec.rows.max) rows++;
         if (action === 'remove-row' && rows > spec.rows.min) rows--;
-        if (action === 'add-col' && cols < spec.cols.max) cols++;
+        if (!empty && action === 'add-col' && cols < spec.cols.max) cols++;
         if (action === 'remove-col' && cols > spec.cols.min) cols--;
         renderDynamicMatrixElement(matrix, exerciseId, vars, rows, cols);
         syncControls();
@@ -3050,6 +3134,58 @@ __[x^2+2*x+1]
     if (!ai || ai.summary === undefined || ai.summary === null) return '';
     var text = typeof ai.summary === 'string' ? ai.summary : JSON.stringify(ai.summary);
     return String(text || '').slice(0, 4000);
+  }
+
+  function normalizedAssessmentStatus(value) {
+    if (value === true) return 'correct';
+    if (value === false) return 'incorrect';
+    if (typeof value === 'number') return value >= 1 - 1e-9 ? 'correct' : (value <= 1e-9 ? 'incorrect' : 'partial');
+    var status = String(value || '').toLowerCase();
+    if (status === 'wrong') return 'incorrect';
+    return /^(correct|partial|incorrect|empty|invalid)$/.test(status) ? status : '';
+  }
+
+  function structuredGroupStatus(assessment, name, axis, index) {
+    var matrix = assessment && assessment[name];
+    var values = matrix && matrix[axis];
+    return Array.isArray(values) ? normalizedAssessmentStatus(values[index - 1]) : '';
+  }
+
+  function applyCustomAssessment(questionDiv, result) {
+    var assessment = result.assessment || {};
+    questionDiv.querySelectorAll('input.math-input').forEach(function (input) {
+      input.classList.remove('math-input-ok', 'math-input-partial', 'math-input-wrong', 'math-input-err');
+      var status = '';
+      if (input.dataset.dynamicMatrixName) {
+        status = structuredGroupStatus(
+          assessment, input.dataset.dynamicMatrixName, 'columns', Number(input.dataset.matrixColumn)
+        ) || structuredGroupStatus(
+          assessment, input.dataset.dynamicMatrixName, 'rows', Number(input.dataset.matrixRow)
+        );
+      }
+      status = status || result.status;
+      if (status === 'correct') input.classList.add('math-input-ok');
+      else if (status === 'partial') input.classList.add('math-input-partial');
+      else if (status === 'error' || status === 'invalid') input.classList.add('math-input-err');
+      else if (status !== 'empty') input.classList.add('math-input-wrong');
+    });
+  }
+
+  function structuredAssessmentXml(structuredAssessment) {
+    return Object.keys(structuredAssessment || {}).map(function (name) {
+      var assessment = structuredAssessment[name];
+      var groups = [];
+      ['rows', 'columns'].forEach(function (axis) {
+        var values = assessment && assessment[axis];
+        if (!Array.isArray(values)) return;
+        values.forEach(function (value, index) {
+          var status = normalizedAssessmentStatus(value);
+          if (status) groups.push('<' + axis.slice(0, -1) + ' index="' + (index + 1) +
+            '" status="' + status + '"/>');
+        });
+      });
+      return groups.length ? '<matrix name="' + promptXmlEsc(name) + '">' + groups.join('') + '</matrix>' : '';
+    }).filter(Boolean).join('\n');
   }
 
   function expressionAnswersXml(responses, structuredInputs) {
@@ -4022,14 +4158,7 @@ __[x^2+2*x+1]
           var custom = (await collectAndCheckCustom(
             fieldIds, checkOpts, false, collectDynamicMatrixInputs(questionDiv)
           )).result;
-          fieldElements.forEach(function (el) {
-            if (!el) return;
-            el.classList.remove('math-input-ok', 'math-input-partial', 'math-input-wrong', 'math-input-err');
-            if (custom.status === 'correct') el.classList.add('math-input-ok');
-            else if (custom.status === 'partial') el.classList.add('math-input-partial');
-            else if (custom.status === 'error') el.classList.add('math-input-err');
-            else if (custom.status !== 'empty') el.classList.add('math-input-wrong');
-          });
+          applyCustomAssessment(questionDiv, custom);
           var customMessage = custom.feedback ? ' ' + escHtml(custom.feedback) : '';
           var customPct = Math.round((Number(custom.score) || 0) * 100);
           if (custom.status === 'correct')
@@ -4162,11 +4291,13 @@ __[x^2+2*x+1]
           try {
             await ensureSympy();
             var overallAssessment = '';
+            var structuredAssessment = {};
             var externalAI = null;
             if (mode === 'custom') {
               var customOutcome = await collectAndCheckCustom(fieldIds, checkOpts, true, structuredInputs);
               externalAI = customOutcome.transport.ai;
               var customResult = customOutcome.result;
+              structuredAssessment = customResult.assessment || {};
               responses.forEach(function (field) {
                 field.status = field.value === '' ? 'empty' : 'submitted';
               });
@@ -4200,11 +4331,16 @@ __[x^2+2*x+1]
             var answers = checkOpts.responseSource
               ? '<jsxgraph_response>' + promptXmlEsc(summary || 'Interactive graphical response submitted.') + '</jsxgraph_response>'
               : expressionAnswersXml(responses, structuredInputs);
-            var assessment = responses.map(function (field) {
+            var assessment = responses.filter(function (field) {
+              return !(field.element && field.element.dataset.dynamicMatrixName);
+            }).map(function (field) {
               var scoreAttr = typeof field.score === 'number' ? ' score="' + promptXmlEsc(field.score) + '"' : '';
               return '<field label="' + promptXmlEsc(field.label) + '"' + scoreAttr + '>' +
                 field.status + '</field>';
-            }).join('\n') + (overallAssessment ? '\n' + overallAssessment : '');
+            }).join('\n');
+            var matrixAssessment = structuredAssessmentXml(structuredAssessment);
+            if (matrixAssessment) assessment += (assessment ? '\n' : '') + matrixAssessment;
+            if (overallAssessment) assessment += (assessment ? '\n' : '') + overallAssessment;
             var reply = await callLLM(question, answers, assessment, contexts, n, cfg, externalAI);
             incCnt(label);
             fbDiv.innerHTML =
@@ -4265,8 +4401,10 @@ __[x^2+2*x+1]
       splitTop: splitTop,
       parseDynamicMatrixSpec: parseDynamicMatrixSpec,
       renderTaskText: renderTaskText,
+      normalizeTaskMathDelimiters: normalizeTaskMathDelimiters,
       localizeStructuralLabel: localizeStructuralLabel,
       expressionAnswersXml: expressionAnswersXml,
+      structuredAssessmentXml: structuredAssessmentXml,
     };
   }
 

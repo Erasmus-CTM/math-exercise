@@ -253,11 +253,29 @@ ul.task-list li input[type="checkbox"] {
 }
 
 .math-dynamic-matrix-controls {
-  display: inline-flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: .25em;
-  margin-top: .15em;
+  display: grid;
+  gap: .32em;
+  margin-top: .3em;
+  min-width: 9.5em;
+}
+
+.math-dynamic-axis {
+  display: grid;
+  grid-template-columns: minmax(4.5em, 1fr) 2em 2em 2em;
+  align-items: center;
+  gap: .2em;
+}
+
+.math-dynamic-axis-label {
+  color: var(--bs-secondary-color, #495057);
+  font-size: .76em;
+  text-align: left;
+}
+
+.math-dynamic-axis output {
+  font-variant-numeric: tabular-nums;
+  font-size: .8em;
+  text-align: center;
 }
 
 .math-dynamic-matrix-controls button {
@@ -265,9 +283,11 @@ ul.task-list li input[type="checkbox"] {
   border-radius: .3em;
   background: var(--bs-tertiary-bg, #f8f9fa);
   color: var(--bs-body-color, #212529);
-  padding: .12em .4em;
-  font-size: .72em;
-  line-height: 1.25;
+  min-width: 2em;
+  min-height: 2em;
+  padding: .05em .3em;
+  font-size: .8em;
+  line-height: 1;
   cursor: pointer;
 }
 
@@ -774,7 +794,7 @@ select.math-modal-input {
 <section id="a-single-answer-field" class="level2">
 <h2 class="anchored" data-anchor-id="a-single-answer-field">A single answer field</h2>
 <div class="math-exercise-cell" id="math-exercise-1" data-label="basic-single" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;A single answer field&quot;" data-fields="[&quot;math-exercise-1-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
-<div class="math-exercise-question">What is $7\cdot 6$? <input type="text" id="math-exercise-1-f1" data-answer="42" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
+<div class="math-exercise-question">What is \(7\cdot 6\)? <input type="text" id="math-exercise-1-f1" data-answer="42" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -799,11 +819,11 @@ What is $7\cdot 6$? _[42]
 <section id="answer-fields-of-different-widths" class="level2">
 <h2 class="anchored" data-anchor-id="answer-fields-of-different-widths">Answer fields of different widths</h2>
 <div class="math-exercise-cell" id="math-exercise-2" data-label="basic-widths" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[&quot;Short answer&quot;,&quot;Medium answer&quot;,&quot;Long answer&quot;]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Answer fields of different widths&quot;" data-fields="[&quot;math-exercise-2-f1&quot;,&quot;math-exercise-2-f2&quot;,&quot;math-exercise-2-f3&quot;]" data-structural-field-labels="[&quot;&quot;,&quot;&quot;,&quot;&quot;]">
-<div class="math-exercise-question">Enter $2$: <input type="text" id="math-exercise-2-f1" data-answer="2" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"><br>
+<div class="math-exercise-question">Enter \(2\): <input type="text" id="math-exercise-2-f1" data-answer="2" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"><br>
 <br>
-Enter the six-digit number $123456$: <input type="text" id="math-exercise-2-f2" data-answer="123456" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"><br>
+Enter the six-digit number \(123456\): <input type="text" id="math-exercise-2-f2" data-answer="123456" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"><br>
 <br>
-Enter the expression $(1+2+3+4+5)^2$: <textarea id="math-exercise-2-f3" data-answer="(1+2+3+4+5)^2" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-large" rows="2"></textarea></div>
+Enter the expression \((1+2+3+4+5)^2\): <textarea id="math-exercise-2-f3" data-answer="(1+2+3+4+5)^2" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-large" rows="2"></textarea></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -835,7 +855,7 @@ Enter the expression $(1+2+3+4+5)^2$: ___[(1+2+3+4+5)^2]
 <div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Click this heading to open the exercise</div>
 
 <div class="math-exercise-body" style="display:none;">
-<div class="math-exercise-question">Compute $5^2$: <input type="text" id="math-exercise-3-f1" data-answer="25" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
+<div class="math-exercise-question">Compute \(5^2\): <input type="text" id="math-exercise-3-f1" data-answer="25" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -861,7 +881,7 @@ Compute $5^2$: _[25]
 <section id="multiple-fields-and-meaningful-labels" class="level2">
 <h2 class="anchored" data-anchor-id="multiple-fields-and-meaningful-labels">Multiple fields and meaningful labels</h2>
 <div class="math-exercise-cell" id="math-exercise-4" data-label="basic-labels" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="true" data-form-credit="0.5" data-field-labels="[&quot;Sum&quot;,&quot;Product&quot;,&quot;Difference&quot;]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Multiple fields and meaningful labels&quot;" data-fields="[&quot;math-exercise-4-f1&quot;,&quot;math-exercise-4-f2&quot;,&quot;math-exercise-4-f3&quot;]" data-structural-field-labels="[&quot;&quot;,&quot;&quot;,&quot;&quot;]">
-<div class="math-exercise-question">For the numbers $7$ and $3$, enter their sum <input type="text" id="math-exercise-4-f1" data-answer="10" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">, product <input type="text" id="math-exercise-4-f2" data-answer="21" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">, and<br>
+<div class="math-exercise-question">For the numbers \(7\) and \(3\), enter their sum <input type="text" id="math-exercise-4-f1" data-answer="10" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">, product <input type="text" id="math-exercise-4-f2" data-answer="21" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">, and<br>
 difference <input type="text" id="math-exercise-4-f3" data-answer="4" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">.</div>
 
 <div class="math-exercise-controls">
@@ -892,7 +912,7 @@ difference _[4].
 <div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Equivalent is not enough when a form is requested</div>
 
 <div class="math-exercise-body" style="display:none;">
-<div class="math-exercise-question">Factor $x^2+5x+6$: <input type="text" id="math-exercise-5-f1" data-answer="(x+2)*(x+3)" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
+<div class="math-exercise-question">Factor \(x^2+5x+6\): <input type="text" id="math-exercise-5-f1" data-answer="(x+2)*(x+3)" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -920,7 +940,7 @@ Factor $x^2+5x+6$: __[(x+2)*(x+3)]
 <section id="case-insensitive-text" class="level2">
 <h2 class="anchored" data-anchor-id="case-insensitive-text">Case-insensitive text</h2>
 <div class="math-exercise-cell" id="math-exercise-6" data-label="basic-text" data-mode="string_ci" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Case-insensitive text&quot;" data-fields="[&quot;math-exercise-6-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
-<div class="math-exercise-question">Write the conventional name of the constant $\pi$: <input type="text" id="math-exercise-6-f1" data-answer="pi" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
+<div class="math-exercise-question">Write the conventional name of the constant \(\pi\): <input type="text" id="math-exercise-6-f1" data-answer="pi" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -986,7 +1006,7 @@ $2^8=$ _[256]
 <section id="rejecting-a-specific-unfinished-form" class="level2">
 <h2 class="anchored" data-anchor-id="rejecting-a-specific-unfinished-form">Rejecting a specific unfinished form</h2>
 <div class="math-exercise-cell" id="math-exercise-8" data-label="basic-reject" data-mode="equivalent" data-reject="(x+1)^2" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Rejecting a specific unfinished form&quot;" data-fields="[&quot;math-exercise-8-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
-<div class="math-exercise-question">Expand $(x+1)^2$: <input type="text" id="math-exercise-8-f1" data-answer="x^2+2*x+1" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
+<div class="math-exercise-question">Expand \((x+1)^2\): <input type="text" id="math-exercise-8-f1" data-answer="x^2+2*x+1" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -1474,7 +1494,9 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
       matrixRemoveRow: 'Remove row',
       matrixAddColumn: 'Add column',
       matrixRemoveColumn: 'Remove column',
-      emptyMatrix: function (rows, columns) { return rows + ' × ' + columns + ' matrix'; },
+      matrixRows: 'Rows',
+      matrixColumns: 'Columns',
+      emptyMatrix: 'Empty matrix',
       resEmpty:     'Please enter an answer.',
       resCorrect:   'Correct!',
       resPartial:   function (pct) { return 'Partially correct (' + pct + '%).'; },
@@ -1628,7 +1650,9 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
       matrixRemoveRow: 'Zeile entfernen',
       matrixAddColumn: 'Spalte hinzufügen',
       matrixRemoveColumn: 'Spalte entfernen',
-      emptyMatrix: function (rows, columns) { return rows + ' × ' + columns + '-Matrix'; },
+      matrixRows: 'Zeilen',
+      matrixColumns: 'Spalten',
+      emptyMatrix: 'Leere Matrix',
       resEmpty:     'Bitte eine Antwort eingeben.',
       resCorrect:   'Richtig!',
       resPartial:   function (pct) { return 'Teilweise richtig (' + pct + '&nbsp;%).'; },
@@ -1782,7 +1806,9 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
     matrixRemoveRow: 'Fjern rad',
     matrixAddColumn: 'Legg til kolonne',
     matrixRemoveColumn: 'Fjern kolonne',
-    emptyMatrix: function (rows, columns) { return rows + ' × ' + columns + '-matrise'; },
+    matrixRows: 'Rader',
+    matrixColumns: 'Kolonner',
+    emptyMatrix: 'Tom matrise',
     resEmpty: 'Skriv inn et svar.',
     resCorrect: 'Riktig!',
     resPartial: function (pct) { return 'Delvis riktig (' + pct + '%).'; },
@@ -2297,12 +2323,16 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
       '',
       'def _normalize_custom_result(result):',
       '    feedback = ""',
+      '    assessment = {}',
       '    if isinstance(result, bool):',
       '        score = 1.0 if result else 0.0',
       '    elif isinstance(result, (int, float)):',
       '        score = float(result)',
       '    elif isinstance(result, dict):',
       '        feedback = str(result.get("feedback", ""))',
+      '        assessment = result.get("assessment", {})',
+      '        if not isinstance(assessment, dict):',
+      '            raise TypeError("Custom checker assessment must be a dictionary")',
       '        if "score" in result:',
       '            score = float(result["score"])',
       '        elif "correct" in result:',
@@ -2314,7 +2344,7 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
       '    if not 0.0 <= score <= 1.0:',
       '        raise ValueError("Custom checker score must be between 0 and 1")',
       '    status = "correct" if score >= 1.0 - 1e-9 else ("wrong" if score <= 1e-9 else "partial")',
-      '    return {"status": status, "score": score, "feedback": feedback}',
+      '    return {"status": status, "score": score, "feedback": feedback, "assessment": assessment}',
       '',
       'def _math_check_custom():',
       '    try:',
@@ -2541,7 +2571,9 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
   function buildDynamicMatrix(exerciseId, content, vars, mode) {
     if (mode !== 'custom') throw new Error('math-exercise: mat{...} currently requires mode: custom');
     var spec = parseDynamicMatrixSpec(content);
-    var rows = spec.rows.initial, cols = spec.cols.initial;
+    var configuredRows = spec.rows.initial, configuredCols = spec.cols.initial;
+    var rows = configuredRows, cols = configuredCols;
+    if (rows === 0 || cols === 0) { rows = 0; cols = 0; }
     var ids = [], labels = [], cells = [];
     for (var row = 1; row <= rows; row++) {
       for (var column = 1; column <= cols; column++) {
@@ -2553,13 +2585,16 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
       + ' data-matrix-name="' + escHtml(spec.name) + '" data-rows="' + rows + '" data-cols="' + cols + '"'
       + ' data-auto-rows="' + spec.rows.auto + '" data-auto-cols="' + spec.cols.auto + '"'
       + ' data-min-rows="' + spec.rows.min + '" data-max-rows="' + spec.rows.max + '"'
-      + ' data-min-cols="' + spec.cols.min + '" data-max-cols="' + spec.cols.max + '">'
+      + ' data-min-cols="' + spec.cols.min + '" data-max-cols="' + spec.cols.max + '"'
+      + ' data-last-rows="' + configuredRows + '" data-last-cols="' + configuredCols + '">'
       + cells.join('') + '</span>';
     var controls = '<span class="math-dynamic-matrix-controls" aria-label="Matrix size controls">'
-      + '<button type="button" data-dynamic-action="remove-row">− row</button>'
-      + '<button type="button" data-dynamic-action="add-row">+ row</button>'
-      + '<button type="button" data-dynamic-action="remove-col">− column</button>'
-      + '<button type="button" data-dynamic-action="add-col">+ column</button>'
+      + '<span class="math-dynamic-axis" data-dynamic-axis="row"><span class="math-dynamic-axis-label"></span>'
+      + '<button type="button" data-dynamic-action="remove-row">−</button><output></output>'
+      + '<button type="button" data-dynamic-action="add-row">+</button></span>'
+      + '<span class="math-dynamic-axis" data-dynamic-axis="col"><span class="math-dynamic-axis-label"></span>'
+      + '<button type="button" data-dynamic-action="remove-col">−</button><output></output>'
+      + '<button type="button" data-dynamic-action="add-col">+</button></span>'
       + '</span>';
     return {
       html: '<span class="math-dynamic-matrix-wrap" data-matrix-name="' + escHtml(spec.name) + '">' + matrix + controls + '</span>',
@@ -2579,7 +2614,39 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
     return null;
   }
 
+  // Raw exercise bodies bypass Pandoc's Markdown math handling. Normalize
+  // paired dollar delimiters before inserting HTML so a page-level MathJax
+  // pass cannot claim a bare \\begin{...} environment and strand the dollars.
+  function normalizeTaskMathDelimiters(text) {
+    var output = '', position = 0;
+    function unescapedAt(needle, start) {
+      var found = text.indexOf(needle, start);
+      while (found >= 0) {
+        var slashes = 0;
+        for (var i = found - 1; i >= 0 && text.charAt(i) === '\\'; i--) slashes++;
+        if (slashes % 2 === 0) return found;
+        found = text.indexOf(needle, found + needle.length);
+      }
+      return -1;
+    }
+    while (position < text.length) {
+      if (text.charAt(position) !== '$' || (position > 0 && text.charAt(position - 1) === '\\')) {
+        output += text.charAt(position++);
+        continue;
+      }
+      var display = text.slice(position, position + 2) === '$$';
+      var delimiter = display ? '$$' : '$';
+      var close = unescapedAt(delimiter, position + delimiter.length);
+      if (close < 0) { output += text.charAt(position++); continue; }
+      output += (display ? '\\[' : '\\(') + text.slice(position + delimiter.length, close) +
+        (display ? '\\]' : '\\)');
+      position = close + delimiter.length;
+    }
+    return output;
+  }
+
   function renderTaskText(text, exerciseId, vars, vecdir, mode) {
+    text = normalizeTaskMathDelimiters(text);
     mode = mode || 'equivalent';
     var count = 0, fieldIds = [], structuralLabels = [], output = [], position = 0;
     var dynamicNames = {};
@@ -2660,6 +2727,11 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
       oldValues[input.dataset.matrixRow + ',' + input.dataset.matrixColumn] = input.value;
     });
     var spec = dynamicSpecFromElement(matrix);
+    if (rows === 0 || cols === 0) { rows = 0; cols = 0; }
+    else {
+      matrix.dataset.lastRows = String(rows);
+      matrix.dataset.lastCols = String(cols);
+    }
     var cells = [];
     for (var row = 1; row <= rows; row++) {
       for (var column = 1; column <= cols; column++) {
@@ -2672,7 +2744,7 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
     matrix.style.setProperty('--cols', String(Math.max(cols, 1)));
     matrix.innerHTML = cells.length
       ? cells.join('')
-      : '<span class="math-dynamic-matrix-empty" aria-live="polite">' + escHtml(L.emptyMatrix(rows, cols)) + '</span>';
+      : '<span class="math-dynamic-matrix-empty" aria-live="polite">' + escHtml(L.emptyMatrix) + '</span>';
     matrix.querySelectorAll('input[data-matrix-row][data-matrix-column]').forEach(function (input) {
       var key = input.dataset.matrixRow + ',' + input.dataset.matrixColumn;
       if (Object.prototype.hasOwnProperty.call(oldValues, key)) input.value = oldValues[key];
@@ -2716,12 +2788,17 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
       };
       function syncControls() {
         var rows = Number(matrix.dataset.rows), cols = Number(matrix.dataset.cols);
+        controls.querySelectorAll('.math-dynamic-axis').forEach(function (axisControl) {
+          var isRow = axisControl.dataset.dynamicAxis === 'row';
+          var axis = isRow ? spec.rows : spec.cols;
+          axisControl.style.display = axis.auto ? '' : 'none';
+          axisControl.querySelector('.math-dynamic-axis-label').textContent = isRow ? L.matrixRows : L.matrixColumns;
+          axisControl.querySelector('output').textContent = String(isRow ? rows : cols);
+        });
         controls.querySelectorAll('button[data-dynamic-action]').forEach(function (button) {
           var action = button.dataset.dynamicAction;
           var rowAction = action.indexOf('row') !== -1;
           var axis = rowAction ? spec.rows : spec.cols;
-          button.style.display = axis.auto ? '' : 'none';
-          button.textContent = (action.indexOf('add') === 0 ? '+ ' : '− ') + labels[action];
           button.setAttribute('aria-label', labels[action] + ' ' + spec.name);
           var value = rowAction ? rows : cols;
           button.disabled = action.indexOf('add') === 0 ? value >= axis.max : value <= axis.min;
@@ -2729,9 +2806,16 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
       }
       function resize(action) {
         var rows = Number(matrix.dataset.rows), cols = Number(matrix.dataset.cols);
-        if (action === 'add-row' && rows < spec.rows.max) rows++;
+        var empty = rows === 0 || cols === 0;
+        if (empty && action === 'add-row') {
+          rows = Math.max(1, spec.rows.min);
+          cols = spec.cols.auto ? Math.max(1, Number(matrix.dataset.lastCols) || spec.cols.initial) : spec.cols.initial;
+        } else if (empty && action === 'add-col') {
+          cols = Math.max(1, spec.cols.min);
+          rows = spec.rows.auto ? Math.max(1, Number(matrix.dataset.lastRows) || spec.rows.initial) : spec.rows.initial;
+        } else if (action === 'add-row' && rows < spec.rows.max) rows++;
         if (action === 'remove-row' && rows > spec.rows.min) rows--;
-        if (action === 'add-col' && cols < spec.cols.max) cols++;
+        if (!empty && action === 'add-col' && cols < spec.cols.max) cols++;
         if (action === 'remove-col' && cols > spec.cols.min) cols--;
         renderDynamicMatrixElement(matrix, exerciseId, vars, rows, cols);
         syncControls();
@@ -2850,6 +2934,58 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
     if (!ai || ai.summary === undefined || ai.summary === null) return '';
     var text = typeof ai.summary === 'string' ? ai.summary : JSON.stringify(ai.summary);
     return String(text || '').slice(0, 4000);
+  }
+
+  function normalizedAssessmentStatus(value) {
+    if (value === true) return 'correct';
+    if (value === false) return 'incorrect';
+    if (typeof value === 'number') return value >= 1 - 1e-9 ? 'correct' : (value <= 1e-9 ? 'incorrect' : 'partial');
+    var status = String(value || '').toLowerCase();
+    if (status === 'wrong') return 'incorrect';
+    return /^(correct|partial|incorrect|empty|invalid)$/.test(status) ? status : '';
+  }
+
+  function structuredGroupStatus(assessment, name, axis, index) {
+    var matrix = assessment && assessment[name];
+    var values = matrix && matrix[axis];
+    return Array.isArray(values) ? normalizedAssessmentStatus(values[index - 1]) : '';
+  }
+
+  function applyCustomAssessment(questionDiv, result) {
+    var assessment = result.assessment || {};
+    questionDiv.querySelectorAll('input.math-input').forEach(function (input) {
+      input.classList.remove('math-input-ok', 'math-input-partial', 'math-input-wrong', 'math-input-err');
+      var status = '';
+      if (input.dataset.dynamicMatrixName) {
+        status = structuredGroupStatus(
+          assessment, input.dataset.dynamicMatrixName, 'columns', Number(input.dataset.matrixColumn)
+        ) || structuredGroupStatus(
+          assessment, input.dataset.dynamicMatrixName, 'rows', Number(input.dataset.matrixRow)
+        );
+      }
+      status = status || result.status;
+      if (status === 'correct') input.classList.add('math-input-ok');
+      else if (status === 'partial') input.classList.add('math-input-partial');
+      else if (status === 'error' || status === 'invalid') input.classList.add('math-input-err');
+      else if (status !== 'empty') input.classList.add('math-input-wrong');
+    });
+  }
+
+  function structuredAssessmentXml(structuredAssessment) {
+    return Object.keys(structuredAssessment || {}).map(function (name) {
+      var assessment = structuredAssessment[name];
+      var groups = [];
+      ['rows', 'columns'].forEach(function (axis) {
+        var values = assessment && assessment[axis];
+        if (!Array.isArray(values)) return;
+        values.forEach(function (value, index) {
+          var status = normalizedAssessmentStatus(value);
+          if (status) groups.push('<' + axis.slice(0, -1) + ' index="' + (index + 1) +
+            '" status="' + status + '"/>');
+        });
+      });
+      return groups.length ? '<matrix name="' + promptXmlEsc(name) + '">' + groups.join('') + '</matrix>' : '';
+    }).filter(Boolean).join('\n');
   }
 
   function expressionAnswersXml(responses, structuredInputs) {
@@ -3822,14 +3958,7 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
           var custom = (await collectAndCheckCustom(
             fieldIds, checkOpts, false, collectDynamicMatrixInputs(questionDiv)
           )).result;
-          fieldElements.forEach(function (el) {
-            if (!el) return;
-            el.classList.remove('math-input-ok', 'math-input-partial', 'math-input-wrong', 'math-input-err');
-            if (custom.status === 'correct') el.classList.add('math-input-ok');
-            else if (custom.status === 'partial') el.classList.add('math-input-partial');
-            else if (custom.status === 'error') el.classList.add('math-input-err');
-            else if (custom.status !== 'empty') el.classList.add('math-input-wrong');
-          });
+          applyCustomAssessment(questionDiv, custom);
           var customMessage = custom.feedback ? ' ' + escHtml(custom.feedback) : '';
           var customPct = Math.round((Number(custom.score) || 0) * 100);
           if (custom.status === 'correct')
@@ -3962,11 +4091,13 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
           try {
             await ensureSympy();
             var overallAssessment = '';
+            var structuredAssessment = {};
             var externalAI = null;
             if (mode === 'custom') {
               var customOutcome = await collectAndCheckCustom(fieldIds, checkOpts, true, structuredInputs);
               externalAI = customOutcome.transport.ai;
               var customResult = customOutcome.result;
+              structuredAssessment = customResult.assessment || {};
               responses.forEach(function (field) {
                 field.status = field.value === '' ? 'empty' : 'submitted';
               });
@@ -4000,11 +4131,16 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
             var answers = checkOpts.responseSource
               ? '<jsxgraph_response>' + promptXmlEsc(summary || 'Interactive graphical response submitted.') + '</jsxgraph_response>'
               : expressionAnswersXml(responses, structuredInputs);
-            var assessment = responses.map(function (field) {
+            var assessment = responses.filter(function (field) {
+              return !(field.element && field.element.dataset.dynamicMatrixName);
+            }).map(function (field) {
               var scoreAttr = typeof field.score === 'number' ? ' score="' + promptXmlEsc(field.score) + '"' : '';
               return '<field label="' + promptXmlEsc(field.label) + '"' + scoreAttr + '>' +
                 field.status + '</field>';
-            }).join('\n') + (overallAssessment ? '\n' + overallAssessment : '');
+            }).join('\n');
+            var matrixAssessment = structuredAssessmentXml(structuredAssessment);
+            if (matrixAssessment) assessment += (assessment ? '\n' : '') + matrixAssessment;
+            if (overallAssessment) assessment += (assessment ? '\n' : '') + overallAssessment;
             var reply = await callLLM(question, answers, assessment, contexts, n, cfg, externalAI);
             incCnt(label);
             fbDiv.innerHTML =
@@ -4065,8 +4201,10 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
       splitTop: splitTop,
       parseDynamicMatrixSpec: parseDynamicMatrixSpec,
       renderTaskText: renderTaskText,
+      normalizeTaskMathDelimiters: normalizeTaskMathDelimiters,
       localizeStructuralLabel: localizeStructuralLabel,
       expressionAnswersXml: expressionAnswersXml,
+      structuredAssessmentXml: structuredAssessmentXml,
     };
   }
 
