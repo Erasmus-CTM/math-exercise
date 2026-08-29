@@ -9,6 +9,7 @@ project:
     - graphics-examples.qmd
     - sympy-examples.qmd
     - vector-matrix-tests.qmd
+    - dynamic-matrix-tests.qmd
     - examples.qmd
 
 website:
@@ -29,6 +30,8 @@ website:
         text: Graphical answers
       - href: vector-matrix-tests.qmd
         text: Vektorer og matriser (NB)
+      - href: dynamic-matrix-tests.qmd
+        text: Dynamic matrices
     right:
       - href: https://github.com/Erasmus-CTM/math-exercise
         text: GitHub

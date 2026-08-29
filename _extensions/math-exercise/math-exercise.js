@@ -52,9 +52,18 @@
       fieldPrefix:  function (n) { return 'Field&nbsp;' + n + ': '; },
       vecComponent: function (n) { return 'Component ' + n; },
       matCell: function (row, column) { return 'Row ' + row + ', column ' + column; },
+      dynamicMatCell: function (name, row, column) { return name + ', row ' + row + ', column ' + column; },
+      matrixAddRow: 'Add row',
+      matrixRemoveRow: 'Remove row',
+      matrixAddColumn: 'Add column',
+      matrixRemoveColumn: 'Remove column',
+      matrixRows: 'Rows',
+      matrixColumns: 'Columns',
+      emptyMatrix: 'Empty matrix',
       resEmpty:     'Please enter an answer.',
       resCorrect:   'Correct!',
       resPartial:   function (pct) { return 'Partially correct (' + pct + '%).'; },
+      resPartialNoScore: 'Partially correct.',
       resScore:     function (pct) { return 'Overall score: ' + pct + '%.'; },
       resWrong:     'Not correct – try again.',
       resRejected:  'Mathematically correct, but not simplified yet. Keep transforming the expression.',
@@ -200,9 +209,18 @@
       fieldPrefix:  function (n) { return 'Feld&nbsp;' + n + ': '; },
       vecComponent: function (n) { return 'Komponente ' + n; },
       matCell: function (row, column) { return 'Zeile ' + row + ', Spalte ' + column; },
+      dynamicMatCell: function (name, row, column) { return name + ', Zeile ' + row + ', Spalte ' + column; },
+      matrixAddRow: 'Zeile hinzufügen',
+      matrixRemoveRow: 'Zeile entfernen',
+      matrixAddColumn: 'Spalte hinzufügen',
+      matrixRemoveColumn: 'Spalte entfernen',
+      matrixRows: 'Zeilen',
+      matrixColumns: 'Spalten',
+      emptyMatrix: 'Leere Matrix',
       resEmpty:     'Bitte eine Antwort eingeben.',
       resCorrect:   'Richtig!',
       resPartial:   function (pct) { return 'Teilweise richtig (' + pct + '&nbsp;%).'; },
+      resPartialNoScore: 'Teilweise richtig.',
       resScore:     function (pct) { return 'Gesamtpunktzahl: ' + pct + '&nbsp;%.'; },
       resWrong:     'Nicht korrekt – versuche es noch einmal.',
       resRejected:  'Mathematisch korrekt, aber noch nicht vereinfacht. Forme den Ausdruck weiter um.',
@@ -348,9 +366,18 @@
     fieldPrefix: function (n) { return 'Felt&nbsp;' + n + ': '; },
     vecComponent: function (n) { return 'Komponent ' + n; },
     matCell: function (row, column) { return 'Rad ' + row + ', kolonne ' + column; },
+    dynamicMatCell: function (name, row, column) { return name + ', rad ' + row + ', kolonne ' + column; },
+    matrixAddRow: 'Legg til rad',
+    matrixRemoveRow: 'Fjern rad',
+    matrixAddColumn: 'Legg til kolonne',
+    matrixRemoveColumn: 'Fjern kolonne',
+    matrixRows: 'Rader',
+    matrixColumns: 'Kolonner',
+    emptyMatrix: 'Tom matrise',
     resEmpty: 'Skriv inn et svar.',
     resCorrect: 'Riktig!',
     resPartial: function (pct) { return 'Delvis riktig (' + pct + '%).'; },
+    resPartialNoScore: 'Delvis riktig.',
     resScore: function (pct) { return 'Samlet poengsum: ' + pct + ' %.'; },
     resWrong: 'Ikke riktig – prøv igjen.',
     resRejected: 'Matematisk riktig, men ikke forenklet ennå. Fortsett å omforme uttrykket.',
@@ -790,6 +817,90 @@
       '    _local.setdefault("inf", oo)',
       '    return _local',
       '',
+      'def assess_basis(matrix, *, axis, target_dimension, belongs, name, space_name="space"):',
+      '    """Assess a row- or column-basis submission without privileging vector order.',
+      '',
+      '    ``belongs(vector)`` decides only whether a nonzero vector belongs to the',
+      '    target space.  This helper owns rank, dependence, scoring, assessment',
+      '    colors, and standard feedback so individual checkers do not duplicate them.',
+      '    """',
+      '    if axis not in ("rows", "columns"):',
+      '        raise ValueError("Basis assessment axis must be rows or columns")',
+      '    target_dimension = int(target_dimension)',
+      '    if target_dimension < 0:',
+      '        raise ValueError("Basis target dimension cannot be negative")',
+      '    if not callable(belongs):',
+      '        raise TypeError("Basis membership test must be callable")',
+      '',
+      '    count = matrix.rows if axis == "rows" else matrix.cols',
+      '    singular = "row" if axis == "rows" else "column"',
+      '    vectors = [matrix[i, :] for i in range(count)] if axis == "rows" else [matrix[:, i] for i in range(count)]',
+      '',
+      '    if target_dimension == 0:',
+      '        statuses = ["incorrect"] * count',
+      '        return {',
+      '            "score": 1.0 if count == 0 else 0.0,',
+      '            "show_score": False,',
+      '            "feedback": "" if count == 0 else f"The {space_name} is trivial, so its basis is empty. Remove every {singular}.",',
+      '            "assessment": {name: {axis: statuses}},',
+      '        }',
+      '',
+      '    locally_valid = []',
+      '    valid_vectors = []',
+      '    for vector in vectors:',
+      '        zero = vector == zeros(*vector.shape)',
+      '        valid = (not zero) and bool(belongs(vector))',
+      '        locally_valid.append(valid)',
+      '        if valid:',
+      '            valid_vectors.append(vector)',
+      '',
+      '    if valid_vectors:',
+      '        family = Matrix.vstack(*valid_vectors) if axis == "rows" else Matrix.hstack(*valid_vectors)',
+      '        rank = int(family.rank())',
+      '    else:',
+      '        rank = 0',
+      '    valid_count = len(valid_vectors)',
+      '    dependent = rank < valid_count',
+      '    statuses = [',
+      '        ("dependent" if dependent else "correct") if valid else "incorrect"',
+      '        for valid in locally_valid',
+      '    ]',
+      '',
+      '    if count == 0:',
+      '        score = 0.0',
+      '    else:',
+      '        coverage = min(rank, target_dimension) / target_dimension',
+      '        validity = valid_count / count',
+      '        independence = rank / valid_count if valid_count else 0.0',
+      '        score = float(coverage * validity * independence)',
+      '',
+      '    invalid_count = count - valid_count',
+      '    plural = singular + "s"',
+      '    if score >= 1.0 - 1e-9:',
+      '        feedback = ""',
+      '    elif count == 0:',
+      '        feedback = f"Add one or more basis {plural} for the {space_name}."',
+      '    elif invalid_count and dependent:',
+      '        feedback = (f"The red {plural} are zero or outside the {space_name}. "',
+      '                    f"The yellow {plural} belong to the {space_name}, but together they are linearly dependent. "',
+      '                    f"Remove or replace the red {plural}, choose an independent subset of the yellow {plural}, "',
+      '                    f"and check that the result spans the whole {space_name}.")',
+      '    elif invalid_count:',
+      '        feedback = f"Remove or replace the red {plural}; each is zero or outside the {space_name}."',
+      '        if rank < target_dimension:',
+      '            feedback += f" Then add independent {plural} until the family spans the whole {space_name}."',
+      '    elif dependent and rank == target_dimension:',
+      '        feedback = (f"Every yellow {singular} belongs to the {space_name}, but the family is linearly dependent. "',
+      '                    f"Remove one or more yellow {plural} until an independent basis remains.")',
+      '    elif dependent:',
+      '        feedback = (f"Every yellow {singular} belongs to the {space_name}, but the family is linearly dependent. "',
+      '                    f"Choose an independent subset, then add independent {plural} until it spans the whole {space_name}.")',
+      '    else:',
+      '        feedback = (f"The green {plural} are valid and independent. "',
+      '                    f"Add more independent {plural} until they span the whole {space_name}.")',
+      '',
+      '    return {"score": score, "show_score": False, "feedback": feedback, "assessment": {name: {axis: statuses}}}',
+      '',
       'def _math_check():',
       '    try:',
       '        mode = _math_mode',
@@ -862,12 +973,18 @@
       '',
       'def _normalize_custom_result(result):',
       '    feedback = ""',
+      '    assessment = {}',
+      '    show_score = True',
       '    if isinstance(result, bool):',
       '        score = 1.0 if result else 0.0',
       '    elif isinstance(result, (int, float)):',
       '        score = float(result)',
       '    elif isinstance(result, dict):',
       '        feedback = str(result.get("feedback", ""))',
+      '        assessment = result.get("assessment", {})',
+      '        show_score = bool(result.get("show_score", True))',
+      '        if not isinstance(assessment, dict):',
+      '            raise TypeError("Custom checker assessment must be a dictionary")',
       '        if "score" in result:',
       '            score = float(result["score"])',
       '        elif "correct" in result:',
@@ -879,7 +996,7 @@
       '    if not 0.0 <= score <= 1.0:',
       '        raise ValueError("Custom checker score must be between 0 and 1")',
       '    status = "correct" if score >= 1.0 - 1e-9 else ("wrong" if score <= 1e-9 else "partial")',
-      '    return {"status": status, "score": score, "feedback": feedback}',
+      '    return {"status": status, "score": score, "show_score": show_score, "feedback": feedback, "assessment": assessment}',
       '',
       'def _math_check_custom():',
       '    try:',
@@ -890,6 +1007,18 @@
       '        if isinstance(response, dict) and response.get("kind") == "expressions":',
       '            raw_values = response.get("raw", [])',
       '            response["expressions"] = [parse_expr(v, local_dict=_local, transformations=_math_tf) for v in raw_values]',
+      '            for name, item in response.get("inputs", {}).items():',
+      '                if not isinstance(item, dict) or item.get("type") != "matrix":',
+      '                    continue',
+      '                rows, cols = int(item.get("rows", -1)), int(item.get("cols", -1))',
+      '                if rows < 0 or cols < 0:',
+      '                    raise ValueError(f"Invalid matrix dimensions for {name}")',
+      '                matrix_raw = item.get("raw", [])',
+      '                if len(matrix_raw) != rows * cols:',
+      '                    raise ValueError(f"Matrix {name} has inconsistent dimensions")',
+      '                matrix_expressions = [parse_expr(v, local_dict=_local, transformations=_math_tf) for v in matrix_raw]',
+      '                item["expressions"] = matrix_expressions',
+      '                item["matrix"] = Matrix(rows, cols, matrix_expressions)',
       '        checker_symbols = {k: v for k, v in _local.items() if isinstance(v, Symbol)}',
       '        namespace = dict(globals())',
       '        exec(_math_checker, namespace)',
@@ -1027,36 +1156,173 @@
     };
   }
 
-  function matchBalancedBracket(text, position) {
-    if (text.charAt(position) !== '[') return null;
+  var MAX_DYNAMIC_DIMENSION = 12;
+
+  function parseDynamicMatrixSpec(content) {
+    var raw = {};
+    splitTop(content, ',').forEach(function (part) {
+      var match = /^\s*([\w-]+)\s*=\s*(.*?)\s*$/.exec(part);
+      if (!match || !match[2]) throw new Error('math-exercise: mat{...} entries must use key=value');
+      if (Object.prototype.hasOwnProperty.call(raw, match[1]))
+        throw new Error('math-exercise: duplicate mat{...} option ' + match[1]);
+      raw[match[1]] = match[2];
+    });
+    var allowed = {
+      name: true, rows: true, cols: true,
+      'initial-rows': true, 'initial-cols': true,
+      'min-rows': true, 'max-rows': true,
+      'min-cols': true, 'max-cols': true,
+    };
+    Object.keys(raw).forEach(function (key) {
+      if (!allowed[key]) throw new Error('math-exercise: unknown mat{...} option ' + key);
+    });
+    var name = raw.name || '';
+    if (!/^[A-Za-z][A-Za-z0-9_-]*$/.test(name))
+      throw new Error('math-exercise: mat{...} requires name beginning with a letter');
+
+    function integerOption(key, fallback) {
+      if (raw[key] === undefined) return fallback;
+      var value = Number(raw[key]);
+      if (!Number.isInteger(value) || value < 0 || value > MAX_DYNAMIC_DIMENSION)
+        throw new Error('math-exercise: ' + key + ' must be an integer from 0 to ' + MAX_DYNAMIC_DIMENSION);
+      return value;
+    }
+    function axis(axisName) {
+      if (raw[axisName] === undefined) throw new Error('math-exercise: mat{...} requires ' + axisName);
+      if (raw[axisName] !== 'auto') {
+        var fixed = integerOption(axisName, null);
+        return { auto: false, initial: fixed, min: fixed, max: fixed };
+      }
+      var min = integerOption('min-' + axisName, 0);
+      var max = integerOption('max-' + axisName, 8);
+      if (min > max) throw new Error('math-exercise: min-' + axisName + ' cannot exceed max-' + axisName);
+      var initial = integerOption('initial-' + axisName, Math.min(max, Math.max(1, min)));
+      if (initial < min || initial > max)
+        throw new Error('math-exercise: initial-' + axisName + ' must lie between min-' + axisName + ' and max-' + axisName);
+      return { auto: true, initial: initial, min: min, max: max };
+    }
+    return { name: name, rows: axis('rows'), cols: axis('cols') };
+  }
+
+  function dynamicMatrixCellHtml(exerciseId, spec, row, column, vars) {
+    var fid = exerciseId + '-dm-' + spec.name + '-' + row + '-' + column;
+    var label = 'dm:' + spec.name + ':' + row + ',' + column;
+    return {
+      id: fid,
+      label: label,
+      html: '<input type="text" id="' + fid + '" data-answer=""'
+          + ' data-vars="' + escHtml(vars) + '"'
+          + ' data-dynamic-matrix-name="' + escHtml(spec.name) + '"'
+          + ' data-matrix-row="' + row + '" data-matrix-column="' + column + '"'
+          + ' data-structural-label="' + escHtml(label) + '"'
+          + ' autocomplete="off" autocorrect="off" spellcheck="false"'
+          + ' class="math-input math-mat-cell">',
+    };
+  }
+
+  function buildDynamicMatrix(exerciseId, content, vars, mode) {
+    if (mode !== 'custom') throw new Error('math-exercise: mat{...} currently requires mode: custom');
+    var spec = parseDynamicMatrixSpec(content);
+    var configuredRows = spec.rows.initial, configuredCols = spec.cols.initial;
+    var rows = configuredRows, cols = configuredCols;
+    if (rows === 0 || cols === 0) { rows = 0; cols = 0; }
+    var ids = [], labels = [], cells = [];
+    for (var row = 1; row <= rows; row++) {
+      for (var column = 1; column <= cols; column++) {
+        var cell = dynamicMatrixCellHtml(exerciseId, spec, row, column, vars);
+        ids.push(cell.id); labels.push(cell.label); cells.push(cell.html);
+      }
+    }
+    var matrix = '<span class="math-mat math-dynamic-mat" style="--cols:' + Math.max(cols, 1) + '"'
+      + ' data-matrix-name="' + escHtml(spec.name) + '" data-rows="' + rows + '" data-cols="' + cols + '"'
+      + ' data-auto-rows="' + spec.rows.auto + '" data-auto-cols="' + spec.cols.auto + '"'
+      + ' data-min-rows="' + spec.rows.min + '" data-max-rows="' + spec.rows.max + '"'
+      + ' data-min-cols="' + spec.cols.min + '" data-max-cols="' + spec.cols.max + '"'
+      + ' data-last-rows="' + configuredRows + '" data-last-cols="' + configuredCols + '">'
+      + cells.join('') + '</span>';
+    var controls = '<span class="math-dynamic-matrix-controls" aria-label="Matrix size controls">'
+      + '<span class="math-dynamic-axis" data-dynamic-axis="row"><span class="math-dynamic-axis-label"></span>'
+      + '<button type="button" data-dynamic-action="remove-row">−</button><output></output>'
+      + '<button type="button" data-dynamic-action="add-row">+</button></span>'
+      + '<span class="math-dynamic-axis" data-dynamic-axis="col"><span class="math-dynamic-axis-label"></span>'
+      + '<button type="button" data-dynamic-action="remove-col">−</button><output></output>'
+      + '<button type="button" data-dynamic-action="add-col">+</button></span>'
+      + '</span>';
+    return {
+      html: '<span class="math-dynamic-matrix-wrap" data-matrix-name="' + escHtml(spec.name) + '">' + matrix + controls + '</span>',
+      ids: ids,
+      labels: labels,
+      count: 0,
+    };
+  }
+
+  function matchBalanced(text, position, open, close) {
+    if (text.charAt(position) !== open) return null;
     var depth = 0;
     for (var i = position; i < text.length; i++) {
-      if (text.charAt(i) === '[') depth++;
-      else if (text.charAt(i) === ']' && --depth === 0) return text.slice(position, i + 1);
+      if (text.charAt(i) === open) depth++;
+      else if (text.charAt(i) === close && --depth === 0) return text.slice(position, i + 1);
     }
     return null;
   }
 
-  function renderTaskText(text, exerciseId, vars, vecdir) {
+  // Raw exercise bodies bypass Pandoc's Markdown math handling. Normalize
+  // paired dollar delimiters before inserting HTML so a page-level MathJax
+  // pass cannot claim a bare \\begin{...} environment and strand the dollars.
+  function normalizeTaskMathDelimiters(text) {
+    var output = '', position = 0;
+    function unescapedAt(needle, start) {
+      var found = text.indexOf(needle, start);
+      while (found >= 0) {
+        var slashes = 0;
+        for (var i = found - 1; i >= 0 && text.charAt(i) === '\\'; i--) slashes++;
+        if (slashes % 2 === 0) return found;
+        found = text.indexOf(needle, found + needle.length);
+      }
+      return -1;
+    }
+    while (position < text.length) {
+      if (text.charAt(position) !== '$' || (position > 0 && text.charAt(position - 1) === '\\')) {
+        output += text.charAt(position++);
+        continue;
+      }
+      var display = text.slice(position, position + 2) === '$$';
+      var delimiter = display ? '$$' : '$';
+      var close = unescapedAt(delimiter, position + delimiter.length);
+      if (close < 0) { output += text.charAt(position++); continue; }
+      output += (display ? '\\[' : '\\(') + text.slice(position + delimiter.length, close) +
+        (display ? '\\]' : '\\)');
+      position = close + delimiter.length;
+    }
+    return output;
+  }
+
+  function renderTaskText(text, exerciseId, vars, vecdir, mode) {
+    text = normalizeTaskMathDelimiters(text);
+    mode = mode || 'equivalent';
     var count = 0, fieldIds = [], structuralLabels = [], output = [], position = 0;
+    var dynamicNames = {};
     while (position < text.length) {
       var scalar = /^_+\[/.exec(text.slice(position));
       var boundary = !scalar && (position === 0 || !/[\w]/.test(text.charAt(position - 1)));
       var vector = !scalar && boundary && text.slice(position, position + 4) === 'vec[';
       var matrix = !scalar && !vector && boundary && text.slice(position, position + 4) === 'mat[';
-      var headLength = scalar ? scalar[0].length : (vector || matrix ? 4 : 0);
-      var bracket = headLength ? matchBalancedBracket(text, position + headLength - 1) : null;
+      var dynamicMatrix = !scalar && !vector && !matrix && boundary && text.slice(position, position + 4) === 'mat{';
+      var headLength = scalar ? scalar[0].length : (vector || matrix || dynamicMatrix ? 4 : 0);
+      var bracket = headLength && !dynamicMatrix ? matchBalanced(text, position + headLength - 1, '[', ']') : null;
+      var brace = dynamicMatrix ? matchBalanced(text, position + headLength - 1, '{', '}') : null;
+      var balanced = bracket || brace;
 
-      if (!bracket) { output.push(text.charAt(position++)); continue; }
+      if (!balanced) { output.push(text.charAt(position++)); continue; }
 
-      var content = bracket.slice(1, -1), rendered;
+      var content = balanced.slice(1, -1), rendered;
       if (scalar) {
         count++;
         var fid = exerciseId + '-f' + count;
         output.push(scalarFieldHtml(fid, content, vars, scalar[0].length - 1));
         fieldIds.push(fid);
         structuralLabels.push('');
-      } else {
+      } else if (vector || matrix) {
         rendered = vector
           ? buildVector(exerciseId, count, content, vars, vecdir)
           : buildMatrix(exerciseId, count, content, vars);
@@ -1064,8 +1330,16 @@
         fieldIds = fieldIds.concat(rendered.ids);
         structuralLabels = structuralLabels.concat(rendered.labels);
         count = rendered.count;
+      } else {
+        var spec = parseDynamicMatrixSpec(content);
+        if (dynamicNames[spec.name]) throw new Error('math-exercise: duplicate dynamic matrix name ' + spec.name);
+        dynamicNames[spec.name] = true;
+        rendered = buildDynamicMatrix(exerciseId, content, vars, mode);
+        output.push(rendered.html);
+        fieldIds = fieldIds.concat(rendered.ids);
+        structuralLabels = structuralLabels.concat(rendered.labels);
       }
-      position += headLength - 1 + bracket.length;
+      position += headLength - 1 + balanced.length;
     }
     return {
       html: output.join('').replace(/\n/g, '<br>\n'),
@@ -1077,8 +1351,143 @@
   function localizeStructuralLabel(token) {
     if (!token) return '';
     if (/^v\d+$/.test(token)) return L.vecComponent(token.slice(1));
+    var dynamicMatrix = /^dm:([A-Za-z][A-Za-z0-9_-]*):(\d+),(\d+)$/.exec(token);
+    if (dynamicMatrix) return L.dynamicMatCell(dynamicMatrix[1], dynamicMatrix[2], dynamicMatrix[3]);
     var matrix = /^m(\d+),(\d+)$/.exec(token);
     return matrix ? L.matCell(matrix[1], matrix[2]) : '';
+  }
+
+  function dynamicSpecFromElement(matrix) {
+    return {
+      name: matrix.dataset.matrixName,
+      rows: {
+        auto: matrix.dataset.autoRows === 'true',
+        initial: Number(matrix.dataset.lastRows),
+        min: Number(matrix.dataset.minRows),
+        max: Number(matrix.dataset.maxRows),
+      },
+      cols: {
+        auto: matrix.dataset.autoCols === 'true',
+        initial: Number(matrix.dataset.lastCols),
+        min: Number(matrix.dataset.minCols),
+        max: Number(matrix.dataset.maxCols),
+      },
+    };
+  }
+
+  function renderDynamicMatrixElement(matrix, exerciseId, vars, rows, cols) {
+    var oldValues = {};
+    matrix.querySelectorAll('input[data-matrix-row][data-matrix-column]').forEach(function (input) {
+      oldValues[input.dataset.matrixRow + ',' + input.dataset.matrixColumn] = input.value;
+    });
+    var spec = dynamicSpecFromElement(matrix);
+    if (rows === 0 || cols === 0) { rows = 0; cols = 0; }
+    else {
+      matrix.dataset.lastRows = String(rows);
+      matrix.dataset.lastCols = String(cols);
+    }
+    var cells = [];
+    for (var row = 1; row <= rows; row++) {
+      for (var column = 1; column <= cols; column++) {
+        var cell = dynamicMatrixCellHtml(exerciseId, spec, row, column, vars);
+        cells.push(cell.html);
+      }
+    }
+    matrix.dataset.rows = String(rows);
+    matrix.dataset.cols = String(cols);
+    matrix.style.setProperty('--cols', String(Math.max(cols, 1)));
+    matrix.innerHTML = cells.length
+      ? cells.join('')
+      : '<span class="math-dynamic-matrix-empty" aria-live="polite">' + escHtml(L.emptyMatrix) + '</span>';
+    matrix.querySelectorAll('input[data-matrix-row][data-matrix-column]').forEach(function (input) {
+      var key = input.dataset.matrixRow + ',' + input.dataset.matrixColumn;
+      if (Object.prototype.hasOwnProperty.call(oldValues, key)) input.value = oldValues[key];
+    });
+  }
+
+  function collectDynamicMatrixInputs(root) {
+    var inputs = {};
+    root.querySelectorAll('.math-dynamic-mat').forEach(function (matrix) {
+      var name = matrix.dataset.matrixName;
+      var rows = Number(matrix.dataset.rows), cols = Number(matrix.dataset.cols);
+      var raw = [];
+      for (var row = 1; row <= rows; row++) {
+        for (var column = 1; column <= cols; column++) {
+          var selector = 'input[data-matrix-row="' + row + '"][data-matrix-column="' + column + '"]';
+          var input = matrix.querySelector(selector);
+          raw.push(input ? input.value.trim() : '');
+        }
+      }
+      inputs[name] = { type: 'matrix', rows: rows, cols: cols, raw: raw };
+    });
+    return inputs;
+  }
+
+  function resizedDynamicMatrixShape(matrix, spec, action) {
+    var rows = Number(matrix.dataset.rows), cols = Number(matrix.dataset.cols);
+    var empty = rows === 0 || cols === 0;
+    if (empty && action === 'add-row') {
+      rows = Math.max(1, spec.rows.min);
+      cols = spec.cols.auto ? Math.max(1, Number(matrix.dataset.lastCols) || spec.cols.initial) : spec.cols.initial;
+    } else if (empty && action === 'add-col') {
+      cols = Math.max(1, spec.cols.min);
+      rows = spec.rows.auto ? Math.max(1, Number(matrix.dataset.lastRows) || spec.rows.initial) : spec.rows.initial;
+    } else if (action === 'add-row' && rows < spec.rows.max) rows++;
+    if (action === 'remove-row' && rows > spec.rows.min) rows--;
+    if (!empty && action === 'add-col' && cols < spec.cols.max) cols++;
+    if (action === 'remove-col' && cols > spec.cols.min) cols--;
+    return { rows: rows, cols: cols };
+  }
+
+  function initializeDynamicMatrices(root, exerciseId, vars, onChange) {
+    var names = {};
+    root.querySelectorAll('.math-dynamic-matrix-wrap').forEach(function (wrap) {
+      var matrix = wrap.querySelector('.math-dynamic-mat');
+      if (!matrix) return;
+      var spec = dynamicSpecFromElement(matrix);
+      if (names[spec.name]) throw new Error('math-exercise: duplicate dynamic matrix name ' + spec.name);
+      names[spec.name] = true;
+      var controls = wrap.querySelector('.math-dynamic-matrix-controls');
+      if (!controls) return;
+
+      var labels = {
+        'add-row': L.matrixAddRow,
+        'remove-row': L.matrixRemoveRow,
+        'add-col': L.matrixAddColumn,
+        'remove-col': L.matrixRemoveColumn,
+      };
+      function syncControls() {
+        var rows = Number(matrix.dataset.rows), cols = Number(matrix.dataset.cols);
+        controls.querySelectorAll('.math-dynamic-axis').forEach(function (axisControl) {
+          var isRow = axisControl.dataset.dynamicAxis === 'row';
+          var axis = isRow ? spec.rows : spec.cols;
+          axisControl.style.display = axis.auto ? '' : 'none';
+          axisControl.querySelector('.math-dynamic-axis-label').textContent = isRow ? L.matrixRows : L.matrixColumns;
+          axisControl.querySelector('output').textContent = String(isRow ? rows : cols);
+        });
+        controls.querySelectorAll('button[data-dynamic-action]').forEach(function (button) {
+          var action = button.dataset.dynamicAction;
+          var rowAction = action.indexOf('row') !== -1;
+          var axis = rowAction ? spec.rows : spec.cols;
+          button.setAttribute('aria-label', labels[action] + ' ' + spec.name);
+          var value = rowAction ? rows : cols;
+          button.disabled = action.indexOf('add') === 0 ? value >= axis.max : value <= axis.min;
+        });
+      }
+      function resize(action) {
+        var shape = resizedDynamicMatrixShape(matrix, spec, action);
+        renderDynamicMatrixElement(matrix, exerciseId, vars, shape.rows, shape.cols);
+        syncControls();
+        if (onChange) onChange();
+      }
+      controls.querySelectorAll('button[data-dynamic-action]').forEach(function (button) {
+        button.addEventListener('click', function () { resize(button.dataset.dynamicAction); });
+      });
+      if (Number(matrix.dataset.rows) === 0 || Number(matrix.dataset.cols) === 0) {
+        renderDynamicMatrixElement(matrix, exerciseId, vars, Number(matrix.dataset.rows), Number(matrix.dataset.cols));
+      }
+      syncControls();
+    });
   }
 
   // ---------------------------------------------------------------------------
@@ -1156,22 +1565,24 @@
     });
   }
 
-  async function collectCustomResponse(fieldIds, opts, includeAI) {
+  async function collectCustomResponse(fieldIds, opts, includeAI, structuredInputs) {
     if (opts.responseSource) return requestExternalResponse(opts.responseSource, includeAI);
     var values = fieldIds.map(function (id) {
       var el = document.getElementById(id);
       return el ? el.value.trim() : '';
     });
-    if (!values.length || values.some(function (value) { return value === ''; })) {
-      return { empty: true, response: { kind: 'expressions', raw: values }, ai: null };
+    var hasStructuredInput = structuredInputs && Object.keys(structuredInputs).length > 0;
+    var response = { kind: 'expressions', raw: values, inputs: structuredInputs || {} };
+    if ((!values.length && !hasStructuredInput) || values.some(function (value) { return value === ''; })) {
+      return { empty: true, response: response, ai: null };
     }
-    return { response: { kind: 'expressions', raw: values }, ai: null };
+    return { response: response, ai: null };
   }
 
   // Shared by runCheck and doFeedback so the empty/score-0 fallback and the
   // collect-then-check sequence for mode: custom exist in exactly one place.
-  async function collectAndCheckCustom(fieldIds, opts, includeAI) {
-    var transport = await collectCustomResponse(fieldIds, opts, includeAI);
+  async function collectAndCheckCustom(fieldIds, opts, includeAI, structuredInputs) {
+    var transport = await collectCustomResponse(fieldIds, opts, includeAI, structuredInputs);
     var result = transport.empty
       ? { status: 'empty', score: 0 }
       : await checkCustom(transport.response, opts);
@@ -1182,6 +1593,82 @@
     if (!ai || ai.summary === undefined || ai.summary === null) return '';
     var text = typeof ai.summary === 'string' ? ai.summary : JSON.stringify(ai.summary);
     return String(text || '').slice(0, 4000);
+  }
+
+  function normalizedAssessmentStatus(value) {
+    if (value === true) return 'correct';
+    if (value === false) return 'incorrect';
+    if (typeof value === 'number') return value >= 1 - 1e-9 ? 'correct' : (value <= 1e-9 ? 'incorrect' : 'partial');
+    var status = String(value || '').toLowerCase();
+    if (status === 'wrong') return 'incorrect';
+    return /^(correct|dependent|partial|incorrect|empty|invalid)$/.test(status) ? status : '';
+  }
+
+  function structuredGroupStatus(assessment, name, axis, index) {
+    var matrix = assessment && assessment[name];
+    var values = matrix && matrix[axis];
+    return Array.isArray(values) ? normalizedAssessmentStatus(values[index - 1]) : '';
+  }
+
+  function applyCustomAssessment(questionDiv, result) {
+    var assessment = result.assessment || {};
+    questionDiv.querySelectorAll('input.math-input').forEach(function (input) {
+      input.classList.remove('math-input-ok', 'math-input-dependent', 'math-input-partial', 'math-input-wrong', 'math-input-err');
+      var status = '';
+      if (input.dataset.dynamicMatrixName) {
+        status = structuredGroupStatus(
+          assessment, input.dataset.dynamicMatrixName, 'columns', Number(input.dataset.matrixColumn)
+        ) || structuredGroupStatus(
+          assessment, input.dataset.dynamicMatrixName, 'rows', Number(input.dataset.matrixRow)
+        );
+      }
+      status = status || result.status;
+      if (status === 'correct') input.classList.add('math-input-ok');
+      else if (status === 'dependent') input.classList.add('math-input-dependent');
+      else if (status === 'partial') input.classList.add('math-input-partial');
+      else if (status === 'error' || status === 'invalid') input.classList.add('math-input-err');
+      else if (status !== 'empty') input.classList.add('math-input-wrong');
+    });
+  }
+
+  function structuredAssessmentXml(structuredAssessment) {
+    return Object.keys(structuredAssessment || {}).map(function (name) {
+      var assessment = structuredAssessment[name];
+      var groups = [];
+      ['rows', 'columns'].forEach(function (axis) {
+        var values = assessment && assessment[axis];
+        if (!Array.isArray(values)) return;
+        values.forEach(function (value, index) {
+          var status = normalizedAssessmentStatus(value);
+          if (status) groups.push('<' + axis.slice(0, -1) + ' index="' + (index + 1) +
+            '" status="' + status + '"/>');
+        });
+      });
+      return groups.length ? '<matrix name="' + promptXmlEsc(name) + '">' + groups.join('') + '</matrix>' : '';
+    }).filter(Boolean).join('\n');
+  }
+
+  function expressionAnswersXml(responses, structuredInputs) {
+    var parts = responses.filter(function (field) {
+      return !(field.element && field.element.dataset.dynamicMatrixName);
+    }).map(function (field) {
+      return '<field label="' + promptXmlEsc(field.label) + '">' +
+        promptXmlEsc(field.value) + '</field>';
+    });
+    Object.keys(structuredInputs || {}).forEach(function (name) {
+      var matrix = structuredInputs[name];
+      var entries = [];
+      for (var row = 0; row < matrix.rows; row++) {
+        var values = matrix.raw.slice(row * matrix.cols, (row + 1) * matrix.cols);
+        entries.push('<row index="' + (row + 1) + '">' +
+          values.map(function (value, column) {
+            return '<entry column="' + (column + 1) + '">' + promptXmlEsc(value) + '</entry>';
+          }).join('') + '</row>');
+      }
+      parts.push('<matrix name="' + promptXmlEsc(name) + '" rows="' + matrix.rows +
+        '" columns="' + matrix.cols + '">' + entries.join('') + '</matrix>');
+    });
+    return parts.join('\n');
   }
 
   // ---------------------------------------------------------------------------
@@ -2011,7 +2498,7 @@
         idx = Math.floor(Math.random() * poolTasks.length);
         try { sessionStorage.setItem(poolKey, String(idx)); } catch(e) {}
       }
-      var r = renderTaskText(poolTasks[idx], cell.id, vars, vecdir);
+      var r = renderTaskText(poolTasks[idx], cell.id, vars, vecdir, mode);
       var qDiv = cell.querySelector('.math-exercise-question');
       qDiv.innerHTML = r.html;
       cell.dataset.fields = JSON.stringify(r.fieldIds);
@@ -2045,6 +2532,46 @@
     var legendPanel = cell.querySelector('.math-legend-panel');
     var fbDiv       = cell.querySelector('.math-feedback-area');
     var legendBuilt = false;
+    var questionDiv = cell.querySelector('.math-exercise-question');
+    var structuralLabelById = {};
+
+    function rememberCurrentLabels() {
+      fieldIds.forEach(function (id, index) {
+        structuralLabelById[id] = structuralFieldLabels[index] || '';
+      });
+    }
+
+    function refreshFields() {
+      var ids = [], labels = [];
+      questionDiv.querySelectorAll('input.math-input, textarea.math-input').forEach(function (input) {
+        ids.push(input.id);
+        labels.push(input.dataset.structuralLabel || structuralLabelById[input.id] || '');
+      });
+      fieldIds = ids;
+      structuralFieldLabels = labels;
+      rememberCurrentLabels();
+      cell.dataset.fields = JSON.stringify(fieldIds);
+      cell.dataset.structuralFieldLabels = JSON.stringify(structuralFieldLabels);
+    }
+
+    function clearAssessmentAfterResize() {
+      questionDiv.querySelectorAll('.math-input').forEach(function (input) {
+        input.classList.remove('math-input-ok', 'math-input-dependent', 'math-input-partial', 'math-input-wrong', 'math-input-err');
+      });
+      fbDiv.innerHTML = '';
+    }
+
+    function setupDynamicMatrices() {
+      initializeDynamicMatrices(questionDiv, cell.id, vars, function () {
+        refreshFields();
+        attachKeyListeners();
+        clearAssessmentAfterResize();
+      });
+      refreshFields();
+    }
+
+    rememberCurrentLabels();
+    setupDynamicMatrices();
 
     function fieldLabel(index) {
       var supplied = configuredFieldLabels[index];
@@ -2079,6 +2606,7 @@
 
     // ---- Check ----
     async function runCheck() {
+      refreshFields();
       checkBtn.disabled = true;
       if (feedbackBtn) feedbackBtn.disabled = true;
       fbDiv.innerHTML = '<div class="math-fb-checking">' + L.checking + '</div>';
@@ -2087,21 +2615,17 @@
         var parts = [];
         var fieldElements = fieldIds.map(function (id) { return document.getElementById(id); });
         if (mode === 'custom') {
-          var custom = (await collectAndCheckCustom(fieldIds, checkOpts, false)).result;
-          fieldElements.forEach(function (el) {
-            if (!el) return;
-            el.classList.remove('math-input-ok', 'math-input-partial', 'math-input-wrong', 'math-input-err');
-            if (custom.status === 'correct') el.classList.add('math-input-ok');
-            else if (custom.status === 'partial') el.classList.add('math-input-partial');
-            else if (custom.status === 'error') el.classList.add('math-input-err');
-            else if (custom.status !== 'empty') el.classList.add('math-input-wrong');
-          });
+          var custom = (await collectAndCheckCustom(
+            fieldIds, checkOpts, false, collectDynamicMatrixInputs(questionDiv)
+          )).result;
+          applyCustomAssessment(questionDiv, custom);
           var customMessage = custom.feedback ? ' ' + escHtml(custom.feedback) : '';
           var customPct = Math.round((Number(custom.score) || 0) * 100);
           if (custom.status === 'correct')
             parts.push('<div class="math-fb-ok">&#10003;&nbsp;' + L.resCorrect + customMessage + '</div>');
           else if (custom.status === 'partial')
-            parts.push('<div class="math-fb-partial">' + L.resPartial(customPct) + customMessage + '</div>');
+            parts.push('<div class="math-fb-partial">' +
+              (custom.show_score === false ? L.resPartialNoScore : L.resPartial(customPct)) + customMessage + '</div>');
           else if (custom.status === 'wrong')
             parts.push('<div class="math-fb-wrong">&#10007;&nbsp;' + L.resWrong + customMessage + '</div>');
           else if (custom.status === 'empty')
@@ -2118,7 +2642,7 @@
           if (!el) continue;
           var prefix = fieldIds.length > 1 ? escHtml(fieldLabel(i)) + ': ' : '';
           var res    = await checkField(el, mode, checkOpts);
-          el.classList.remove('math-input-ok', 'math-input-partial', 'math-input-wrong', 'math-input-err');
+          el.classList.remove('math-input-ok', 'math-input-dependent', 'math-input-partial', 'math-input-wrong', 'math-input-err');
           if (typeof res.score === 'number') { totalScore += res.score; scoredFields++; }
           if      (res.status === 'empty')    { parts.push('<div class="math-fb-empty">'  + prefix + L.resEmpty + '</div>'); }
           else if (res.status === 'correct')  { el.classList.add('math-input-ok');    parts.push('<div class="math-fb-ok">&#10003;&nbsp;'  + prefix + L.resCorrect + '</div>'); }
@@ -2144,8 +2668,10 @@
     function attachKeyListeners() {
       fieldIds.forEach(function (id) {
         var el = document.getElementById(id);
-        if (el && el.tagName === 'INPUT')
+        if (el && el.tagName === 'INPUT' && el.dataset.mathEnterListener !== 'true') {
+          el.dataset.mathEnterListener = 'true';
           el.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); runCheck(); } });
+        }
       });
     }
 
@@ -2163,13 +2689,16 @@
         }
         try { sessionStorage.setItem(poolKey, String(next)); } catch(e) {}
 
-        var r = renderTaskText(poolTasks[next], cell.id, vars, vecdir);
+        var r = renderTaskText(poolTasks[next], cell.id, vars, vecdir, mode);
         var qDivR = cell.querySelector('.math-exercise-question');
         qDivR.innerHTML = r.html;
         cell.dataset.fields = JSON.stringify(r.fieldIds);
         cell.dataset.structuralFieldLabels = JSON.stringify(r.structuralLabels);
         fieldIds = r.fieldIds;
         structuralFieldLabels = r.structuralLabels;
+        structuralLabelById = {};
+        rememberCurrentLabels();
+        setupDynamicMatrices();
         warnExtraFieldLabels();
         renderMathInQuestion(qDivR);
 
@@ -2181,21 +2710,34 @@
     // ---- AI Feedback ----
     if (feedbackBtn) {
       feedbackBtn.addEventListener('click', function () {
+        refreshFields();
+        var structuredInputs = collectDynamicMatrixInputs(questionDiv);
         var responses = fieldIds.map(function (id, index) {
           var el = document.getElementById(id);
           return { index: index + 1, label: fieldLabel(index), value: el ? el.value.trim() : '', element: el };
         });
-        if (!checkOpts.responseSource && !responses.some(function (field) { return field.value !== ''; })) {
+        var zeroSizedMatrixSubmitted = Object.keys(structuredInputs).some(function (name) {
+          return structuredInputs[name].rows === 0 || structuredInputs[name].cols === 0;
+        });
+        if (!checkOpts.responseSource && !zeroSizedMatrixSubmitted &&
+            !responses.some(function (field) { return field.value !== ''; })) {
           fbDiv.innerHTML = '<div class="math-fb-empty">' + L.needAnswerFirst + '</div>';
           return;
         }
         var qDiv   = cell.querySelector('.math-exercise-question');
         var capEl  = cell.querySelector('.math-exercise-caption');
         var clone  = qDiv.cloneNode(true);
+        clone.querySelectorAll('.math-dynamic-matrix-wrap').forEach(function (wrap) {
+          var marker = document.createElement('span');
+          marker.textContent = '[Matrix ' + (wrap.dataset.matrixName || '') + ']';
+          wrap.parentNode.replaceChild(marker, wrap);
+        });
+        clone.querySelectorAll('.math-dynamic-matrix-controls').forEach(function (controls) { controls.remove(); });
         var clonedFields = clone.querySelectorAll('input, textarea');
-        clonedFields.forEach(function (el, index) {
+        clonedFields.forEach(function (el) {
           var s = document.createElement('span');
-          s.textContent = '[' + fieldLabel(index) + ']';
+          var originalIndex = fieldIds.indexOf(el.id);
+          s.textContent = '[' + fieldLabel(originalIndex >= 0 ? originalIndex : 0) + ']';
           el.parentNode.replaceChild(s, el);
         });
         var question = (capEl ? capEl.textContent + '\n' : '') + clone.textContent.replace(/\s+/g, ' ').trim();
@@ -2210,11 +2752,13 @@
           try {
             await ensureSympy();
             var overallAssessment = '';
+            var structuredAssessment = {};
             var externalAI = null;
             if (mode === 'custom') {
-              var customOutcome = await collectAndCheckCustom(fieldIds, checkOpts, true);
+              var customOutcome = await collectAndCheckCustom(fieldIds, checkOpts, true, structuredInputs);
               externalAI = customOutcome.transport.ai;
               var customResult = customOutcome.result;
+              structuredAssessment = customResult.assessment || {};
               responses.forEach(function (field) {
                 field.status = field.value === '' ? 'empty' : 'submitted';
               });
@@ -2247,15 +2791,17 @@
             var summary = externalAISummary(externalAI);
             var answers = checkOpts.responseSource
               ? '<jsxgraph_response>' + promptXmlEsc(summary || 'Interactive graphical response submitted.') + '</jsxgraph_response>'
-              : responses.map(function (field) {
-                  return '<field label="' + promptXmlEsc(field.label) + '">' +
-                    promptXmlEsc(field.value) + '</field>';
-                }).join('\n');
-            var assessment = responses.map(function (field) {
+              : expressionAnswersXml(responses, structuredInputs);
+            var assessment = responses.filter(function (field) {
+              return !(field.element && field.element.dataset.dynamicMatrixName);
+            }).map(function (field) {
               var scoreAttr = typeof field.score === 'number' ? ' score="' + promptXmlEsc(field.score) + '"' : '';
               return '<field label="' + promptXmlEsc(field.label) + '"' + scoreAttr + '>' +
                 field.status + '</field>';
-            }).join('\n') + (overallAssessment ? '\n' + overallAssessment : '');
+            }).join('\n');
+            var matrixAssessment = structuredAssessmentXml(structuredAssessment);
+            if (matrixAssessment) assessment += (assessment ? '\n' : '') + matrixAssessment;
+            if (overallAssessment) assessment += (assessment ? '\n' : '') + overallAssessment;
             var reply = await callLLM(question, answers, assessment, contexts, n, cfg, externalAI);
             incCnt(label);
             fbDiv.innerHTML =
@@ -2314,8 +2860,15 @@
       modelPolicy: modelPolicy,
       loadCapability: loadCapability,
       splitTop: splitTop,
+      parseDynamicMatrixSpec: parseDynamicMatrixSpec,
+      dynamicSpecFromElement: dynamicSpecFromElement,
+      resizedDynamicMatrixShape: resizedDynamicMatrixShape,
       renderTaskText: renderTaskText,
+      normalizeTaskMathDelimiters: normalizeTaskMathDelimiters,
       localizeStructuralLabel: localizeStructuralLabel,
+      expressionAnswersXml: expressionAnswersXml,
+      structuredAssessmentXml: structuredAssessmentXml,
+      structuredGroupStatus: structuredGroupStatus,
     };
   }
 

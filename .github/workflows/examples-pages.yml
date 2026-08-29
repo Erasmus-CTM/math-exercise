@@ -33,6 +33,7 @@ jobs:
           test -f _site/custom-assessment.html
           test -f _site/graphics-examples.html
           test -f _site/vector-matrix-tests.html
+          test -f _site/dynamic-matrix-tests.html
 
       - name: Select deployment directory
         id: destination

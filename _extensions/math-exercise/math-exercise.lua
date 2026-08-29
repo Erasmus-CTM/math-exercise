@@ -64,6 +64,7 @@
 --   ___[answer] → 2-row  textarea
 --   vec[a,b,c]  → bracketed vector with one field per component
 --   mat[a,b;c,d] → bracketed matrix; semicolons separate rows
+--   mat{name=A, rows=3, cols=auto, ...} → named resizable matrix for custom mode
 --
 -- Vector orientation defaults to a column and can be changed per exercise:
 --   #| vecdir: row
@@ -321,6 +322,120 @@ local function matrixCellHtml(fid, answer, vars)
        .. ' class="math-input math-mat-cell">'
 end
 
+local MAX_DYNAMIC_DIMENSION = 12
+
+local function parseDynamicMatrixSpec(content)
+  local spec = {}
+  for _, part in ipairs(splitTop(content, ",")) do
+    local key, value = part:match("^%s*([%w%-]+)%s*=%s*(.-)%s*$")
+    if not key or value == "" then
+      error("math-exercise: mat{...} entries must use key=value")
+    end
+    if spec[key] ~= nil then
+      error("math-exercise: duplicate mat{...} option " .. key)
+    end
+    spec[key] = value
+  end
+
+  local allowed = {
+    name=true, rows=true, cols=true,
+    ["initial-rows"]=true, ["initial-cols"]=true,
+    ["min-rows"]=true, ["max-rows"]=true,
+    ["min-cols"]=true, ["max-cols"]=true,
+  }
+  for key, _ in pairs(spec) do
+    if not allowed[key] then
+      error("math-exercise: unknown mat{...} option " .. key)
+    end
+  end
+
+  local name = spec.name or ""
+  if not name:match("^[A-Za-z][A-Za-z0-9_%-]*$") then
+    error("math-exercise: mat{...} requires name beginning with a letter")
+  end
+
+  local function integerOption(key, default)
+    if spec[key] == nil then return default end
+    local value = tonumber(spec[key])
+    if not value or value % 1 ~= 0 or value < 0 or value > MAX_DYNAMIC_DIMENSION then
+      error("math-exercise: " .. key .. " must be an integer from 0 to " .. MAX_DYNAMIC_DIMENSION)
+    end
+    return value
+  end
+
+  local function axis(name)
+    local raw = spec[name]
+    if raw == nil then error("math-exercise: mat{...} requires " .. name) end
+    if raw ~= "auto" then
+      local fixed = integerOption(name, nil)
+      return { auto=false, initial=fixed, min=fixed, max=fixed }
+    end
+    local min = integerOption("min-" .. name, 0)
+    local max = integerOption("max-" .. name, 8)
+    if min > max then error("math-exercise: min-" .. name .. " cannot exceed max-" .. name) end
+    local initial = integerOption("initial-" .. name, math.min(max, math.max(1, min)))
+    if initial < min or initial > max then
+      error("math-exercise: initial-" .. name .. " must lie between min-" .. name .. " and max-" .. name)
+    end
+    return { auto=true, initial=initial, min=min, max=max }
+  end
+
+  return { name=name, rows=axis("rows"), cols=axis("cols") }
+end
+
+local function dynamicMatrixCellHtml(exerciseId, spec, row, column, vars)
+  local fid = exerciseId .. "-dm-" .. spec.name .. "-" .. row .. "-" .. column
+  local label = "dm:" .. spec.name .. ":" .. row .. "," .. column
+  local html = '<input type="text" id="' .. fid .. '"'
+             .. ' data-answer="" data-vars="' .. attrEsc(vars) .. '"'
+             .. ' data-dynamic-matrix-name="' .. attrEsc(spec.name) .. '"'
+             .. ' data-matrix-row="' .. row .. '" data-matrix-column="' .. column .. '"'
+             .. ' data-structural-label="' .. attrEsc(label) .. '"'
+             .. ' autocomplete="off" autocorrect="off" spellcheck="false"'
+             .. ' class="math-input math-mat-cell">'
+  return html, fid, label
+end
+
+local function buildDynamicMatrix(exerciseId, content, vars, mode)
+  if mode ~= "custom" then
+    error("math-exercise: mat{...} currently requires mode: custom")
+  end
+  local spec = parseDynamicMatrixSpec(content)
+  local configuredRows, configuredCols = spec.rows.initial, spec.cols.initial
+  local rows, cols = configuredRows, configuredCols
+  if rows == 0 or cols == 0 then rows, cols = 0, 0 end
+  local ids, labels, cells = {}, {}, {}
+  for row = 1, rows do
+    for column = 1, cols do
+      local html, fid, label = dynamicMatrixCellHtml(exerciseId, spec, row, column, vars)
+      table.insert(cells, html)
+      table.insert(ids, fid)
+      table.insert(labels, label)
+    end
+  end
+  local matrix = '<span class="math-mat math-dynamic-mat"'
+               .. ' style="--cols:' .. math.max(cols, 1) .. '"'
+               .. ' data-matrix-name="' .. attrEsc(spec.name) .. '"'
+               .. ' data-rows="' .. rows .. '" data-cols="' .. cols .. '"'
+               .. ' data-auto-rows="' .. tostring(spec.rows.auto) .. '"'
+               .. ' data-auto-cols="' .. tostring(spec.cols.auto) .. '"'
+               .. ' data-min-rows="' .. spec.rows.min .. '" data-max-rows="' .. spec.rows.max .. '"'
+               .. ' data-min-cols="' .. spec.cols.min .. '" data-max-cols="' .. spec.cols.max .. '"'
+               .. ' data-last-rows="' .. configuredRows .. '" data-last-cols="' .. configuredCols .. '">'
+               .. table.concat(cells) .. '</span>'
+  local controls = '<span class="math-dynamic-matrix-controls" aria-label="Matrix size controls">'
+                 .. '<span class="math-dynamic-axis" data-dynamic-axis="row"><span class="math-dynamic-axis-label"></span>'
+                 .. '<button type="button" data-dynamic-action="remove-row">−</button><output></output>'
+                 .. '<button type="button" data-dynamic-action="add-row">+</button></span>'
+                 .. '<span class="math-dynamic-axis" data-dynamic-axis="col"><span class="math-dynamic-axis-label"></span>'
+                 .. '<button type="button" data-dynamic-action="remove-col">−</button><output></output>'
+                 .. '<button type="button" data-dynamic-action="add-col">+</button></span>'
+                 .. '</span>'
+  local html = '<span class="math-dynamic-matrix-wrap" data-matrix-name="' .. attrEsc(spec.name) .. '">'
+             .. matrix .. controls .. '</span>'
+  return html, ids, labels
+end
+
 local function buildVector(exerciseId, count, content, vars, vecdir)
   local components = splitTop(content, ",")
   local ids, labels, cells = {}, {}, {}
@@ -370,28 +485,41 @@ local function atWordBoundary(text, position)
   return not text:sub(position - 1, position - 1):match("[%w_]")
 end
 
+-- Exercise bodies are inserted as raw HTML, outside Pandoc's Markdown math
+-- parser. Canonical delimiters keep page-level MathJax from consuming a bare
+-- \\begin{...} environment and leaving literal dollar signs behind.
+local function normalizeTaskMathDelimiters(text)
+  text = text:gsub("%$%$(.-)%$%$", "\\[%1\\]")
+  return text:gsub("%$(.-)%$", "\\(%1\\)")
+end
+
 -- Replace scalar, vector, and matrix markers with HTML input elements.
 -- The third return value contains structural label tokens used by the browser
 -- for localized component/cell feedback. Author-supplied field-labels still
 -- take precedence.
 ----
-local function processMarkers(text, exerciseId, vars, vecdir)
+local function processMarkers(text, exerciseId, vars, vecdir, mode)
+  text = normalizeTaskMathDelimiters(text)
   local count, fieldIds, structuralLabels = 0, {}, {}
+  local dynamicNames = {}
   local output, position = {}, 1
 
   while position <= #text do
     local rest = text:sub(position)
     local scalarHead = rest:match("^_+%[")
-    local vectorHead, matrixHead
+    local vectorHead, matrixHead, dynamicMatrixHead
     if not scalarHead and atWordBoundary(text, position) then
       vectorHead = rest:match("^vec%[")
       if not vectorHead then matrixHead = rest:match("^mat%[") end
+      if not vectorHead and not matrixHead then dynamicMatrixHead = rest:match("^mat{") end
     end
-    local head = scalarHead or vectorHead or matrixHead
+    local head = scalarHead or vectorHead or matrixHead or dynamicMatrixHead
     local bracket = head and text:sub(position + #head - 1):match("^%b[]")
+    local brace = dynamicMatrixHead and text:sub(position + #dynamicMatrixHead - 1):match("^%b{}")
 
-    if bracket then
-      local content = bracket:sub(2, -2)
+    if bracket or brace then
+      local balanced = bracket or brace
+      local content = balanced:sub(2, -2)
       local html, ids, labels
       if scalarHead then
         count = count + 1
@@ -399,13 +527,20 @@ local function processMarkers(text, exerciseId, vars, vecdir)
         html, ids, labels = scalarFieldHtml(fid, content, vars, #scalarHead - 1), { fid }, { "" }
       elseif vectorHead then
         html, ids, labels, count = buildVector(exerciseId, count, content, vars, vecdir)
-      else
+      elseif matrixHead then
         html, ids, labels, count = buildMatrix(exerciseId, count, content, vars)
+      else
+        local dynamicSpec = parseDynamicMatrixSpec(content)
+        if dynamicNames[dynamicSpec.name] then
+          error("math-exercise: duplicate dynamic matrix name " .. dynamicSpec.name)
+        end
+        dynamicNames[dynamicSpec.name] = true
+        html, ids, labels = buildDynamicMatrix(exerciseId, content, vars, mode)
       end
       for _, fid in ipairs(ids) do table.insert(fieldIds, fid) end
       for _, label in ipairs(labels) do table.insert(structuralLabels, label) end
       table.insert(output, html)
-      position = position + #head - 1 + #bracket
+      position = position + #head - 1 + #balanced
     else
       table.insert(output, text:sub(position, position))
       position = position + 1
@@ -531,7 +666,7 @@ local function buildExercise(el, state)
     questionHtml = '<button type="button" class="math-pool-reload" title="' .. uiT("poolReload") .. '">&#8635;</button>\n'
                 .. '<div class="math-exercise-question"></div>'
   else
-    local body, fieldIds, structuralLabels = processMarkers(questionText, eid, vars, vecdir)
+    local body, fieldIds, structuralLabels = processMarkers(questionText, eid, vars, vecdir, mode)
     body         = body:gsub("\n", "<br>\n")
     attrs        = attrs .. ' data-fields="' .. jsonArrAttr(fieldIds) .. '"'
                          .. ' data-structural-field-labels="' .. jsonArrAttr(structuralLabels) .. '"'

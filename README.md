@@ -48,6 +48,7 @@ Question text with an input field: _[correct_answer]
 | `___[answer]` | wide, 2-row | `<textarea>` |
 | `vec[a,b,c]` | bracketed vector | one `<input>` per component |
 | `mat[a,b;c,d]` | bracketed matrix | one `<input>` per cell |
+| `mat{name=A, rows=2, cols=auto, ...}` | resizable matrix | student chooses an `auto` dimension |
 
 Multiple fields in one exercise are checked together when clicking **Check**.
 The answer inside `[...]` is a SymPy expression, e.g. `pi * 9`, `x**2 + 2*x + 1`.
@@ -59,6 +60,28 @@ Vectors are columns by default; add `#| vecdir: row` for a row vector. Each
 component or cell is checked independently, highlighted independently, and
 receives a localized label in feedback. Explicit `field-labels` override those
 generated labels.
+
+Dynamic matrices use `mat{...}` and currently require `mode: custom`. Each
+matrix needs a unique `name`; `rows` and `cols` are either a fixed non-negative
+integer or `auto`. For an automatic axis, configure `initial-rows` or
+`initial-cols` and optional `min-*`/`max-*` bounds. A minimum of zero lets the
+student select the single canonical empty matrix.
+
+```{math-exercise}
+#| mode: custom
+#| checker: |
+#|   def check(response, symbols):
+#|       Z = response["inputs"]["Z"]["matrix"]
+#|       return Z == Matrix(0, 0, [])
+
+Enter a matrix whose number of columns is part of the answer:
+mat{name=Z, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}
+```
+
+The checker receives a SymPy `Matrix` at
+`response["inputs"][name]["matrix"]`, plus `rows`, `cols`, `raw`, and parsed
+`expressions` in the same named input record. The legacy flattened
+`response["expressions"]` remains available for backward compatibility.
 
 ```{math-exercise}
 #| vars: x
@@ -280,8 +303,82 @@ The checker must define `check(response, symbols)`. For ordinary expression
 fields, `response` contains `kind`, `raw`, and an ordered `expressions` list of
 parsed SymPy values. `symbols` maps names from `vars` to SymPy symbols. Normal
 SymPy names such as `diff`, `minimum`, `Interval`, and `Matrix` are available.
+Named dynamic matrices additionally appear in `response["inputs"]`; their
+current shape and entries are preserved while they are nonempty. Removing the
+final row or column produces the canonical empty `Matrix(0, 0, [])`. AI feedback
+receives the matrix name, dimensions, and entries as structured answer data.
 The function may return a boolean, a score from `0` to `1`, or a dictionary
-containing `score` (or `correct`) and optional plain-text `feedback`.
+containing `score` (or `correct`) and optional plain-text `feedback`. A checker
+can assess complete row or column vectors with, for example,
+`assessment: {"Z": {"columns": [True, False, True]}}` or
+`assessment: {"R": {"rows": [True, False]}}`; the corresponding vectors are
+marked as units, and the structured statuses are also available to AI feedback.
+Besides booleans and numeric scores, an assessment entry may be `correct`,
+`dependent`, `partial`, `incorrect`, `empty`, or `invalid`.
+
+Custom result dictionaries may also set `show_score: False`. The numeric score
+is still returned for assessment, but a partial result is displayed as
+“Partially correct” without a percentage. This is useful when a percentage
+would disclose a hidden property of the answer.
+
+#### Shared basis assessment: `assess_basis`
+
+For a matrix basis exercise, use `assess_basis` instead of assigning vector
+statuses or partial scores in each checker:
+
+```python
+return assess_basis(
+    Z,
+    axis="columns",
+    target_dimension=C.cols - C.rank(),
+    belongs=lambda vector: C * vector == zeros(C.rows, 1),
+    name="Z",
+    space_name="null space",
+)
+```
+
+Arguments:
+
+| Argument | Required value |
+|---|---|
+| `matrix` | The submitted SymPy `Matrix`. It may be the canonical empty `Matrix(0, 0, [])`. |
+| `axis` | `"columns"` when each column is a vector, or `"rows"` when each row is a vector. |
+| `target_dimension` | The dimension of the target subspace, computed by the checker. It must be a non-negative integer. |
+| `belongs` | A callable receiving one nonzero SymPy row or column vector and returning whether it belongs to the target subspace. The helper rejects zero vectors before calling it. |
+| `name` | The name from the corresponding `mat{name=..., ...}` marker. Assessment is returned under this key. |
+| `space_name` | A short student-facing noun phrase used in qualitative feedback, such as `"null space"`. It defaults to `"space"`. |
+
+The membership predicate is the only problem-specific vector logic. For
+example, a null-space checker can use `lambda vector: C*vector ==
+zeros(C.rows, 1)`, while a column-space checker can compare the rank before and
+after adjoining `vector`. If a dimension mismatch is possible, include the
+shape check first in the predicate so Python's `and` short-circuits before the
+matrix operation.
+
+Assessment is symmetric under every permutation of the submitted vectors:
+
+- A zero vector or a vector outside the target space is `incorrect` and red.
+- If the locally valid family is dependent, every vector in that family is
+  `dependent` and yellow. No position is treated as the redundant one.
+- If the locally valid family is independent, every vector in it is `correct`
+  and green. An independent but incomplete family remains partially correct at
+  exercise level.
+- The empty submission is correct exactly when `target_dimension == 0`.
+
+For a nontrivial target, let (d) be its dimension, (n) the number of
+submitted vectors, (v) the number of locally valid vectors, and (r) their
+rank. For (n>0), the score is
+
+\[
+\frac{\min(r,d)}{d}\;\frac{v}{n}\;\frac{r}{v},
+\]
+
+with the final factor taken as zero when (v=0). An empty submission scores
+zero for a nontrivial target. The helper returns this score for grading, but
+sets `show_score: False`: student feedback never states the score, rank, target
+dimension, or number of missing vectors. It instead says qualitatively whether
+vectors must be removed, replaced, or added. Complete row/column statuses are
+still included for normal coloring and AI-feedback context.
 
 ````markdown
 ```{math-exercise}
