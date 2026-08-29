@@ -9,19 +9,20 @@ and pools of alternative questions.
 What is $7\cdot 6$? _[42]
 ```
 
-The expression inside the brackets is the expected answer. It is not shown to
-the student in the rendered page.
+Open **Show source** below the exercise to see its authoring syntax. The value
+inside the square brackets is the expected answer; the rendered exercise shows
+an empty field instead.
 
 ## Answer fields of different widths
 
 ```{math-exercise}
 #| label: basic-widths
 #| field-labels: Short answer, Medium answer, Long answer
-Short: _[2]
+Enter $2$: _[2]
 
-Medium: __[123456]
+Enter the six-digit number $123456$: __[123456]
 
-Long mathematical expression: ___[(1+2+3+4+5)^2]
+Enter the expression $(1+2+3+4+5)^2$: ___[(1+2+3+4+5)^2]
 ```
 
 ## A collapsible exercise

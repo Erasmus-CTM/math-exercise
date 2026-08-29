@@ -158,5 +158,5 @@ På en smal skjerm kan du rulle vannrett for å nå alle feltene.
 ```{math-exercise}
 #| label: nb-bred-matrise
 #| caption: Radmatrise med seks komponenter
-Skriv radmatrisen: mat[1,2,3,4,5,6]
+Skriv radmatrisen $(1,2,3,4,5,6)$: mat[1,2,3,4,5,6]
 ```
