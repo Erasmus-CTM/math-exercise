@@ -1,0 +1,13 @@
+---
+title: "Norwegian Bokmål regression"
+lang: nb
+engine: markdown
+filters:
+  - math-exercise
+---
+
+```{math-exercise}
+#| label: nb-render-test
+#| caption: Norsk språk
+Hva er \(2+2\)? _[4]
+```
