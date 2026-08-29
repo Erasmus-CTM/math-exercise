@@ -1,0 +1,394 @@
+[
+  {
+    "objectID": "examples.html",
+    "href": "examples.html",
+    "title": "math-exercise – Overview of All Check Modes",
+    "section": "",
+    "text": "This page briefly introduces and lets you try out every check mode of the math-exercise extension. See the README for full option details."
+  },
+  {
+    "objectID": "examples.html#mode-equivalent-default",
+    "href": "examples.html#mode-equivalent-default",
+    "title": "math-exercise – Overview of All Check Modes",
+    "section": "mode: equivalent (default)",
+    "text": "mode: equivalent (default)\nAccepts any mathematically equivalent representation.\n\nequivalent\n\n\nCompute the area of a circle with r = 3 cm.\nA =  cm²\n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\n\nTry pi*9, 9*pi, and 3**2*pi – all are accepted."
+  },
+  {
+    "objectID": "examples.html#mode-exact",
+    "href": "examples.html#mode-exact",
+    "title": "math-exercise – Overview of All Check Modes",
+    "section": "mode: exact",
+    "text": "mode: exact\nThe strictest check mode: accepts only the canonical SymPy representation.\n\nexact (numeric fraction)\n\n\nGive 6/8 fully reduced: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\n\n3/4 is accepted. 6/8 is rejected – even though SymPy reduces 6/8 and 3/4 to the same internal object on parse, mode: exact additionally checks the raw text you typed for un-reduced numeric fractions (including ones hidden inside expressions like 1/4 + 2/4).\n\nexact (algebraic)\n\n\nGive the factored form of x² + 2x + 1: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\n\n(x+1)**2 is accepted. x**2+2*x+1 is mathematically equivalent but a different representation, so it’s rejected as “correct, but not in the requested form”."
+  },
+  {
+    "objectID": "examples.html#reject-add-on-for-equivalent",
+    "href": "examples.html#reject-add-on-for-equivalent",
+    "title": "math-exercise – Overview of All Check Modes",
+    "section": "reject (add-on for equivalent)",
+    "text": "reject (add-on for equivalent)\nRejects one specific – mathematically equivalent – expression. Useful for simplification tasks.\n\nequivalent + reject\n\n\nSimplify (x+1)²: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\n\n(x+1)^2 and (1+x)^2 are rejected; x^2 + 2x + 1 is accepted."
+  },
+  {
+    "objectID": "examples.html#mode-numeric-tolerance",
+    "href": "examples.html#mode-numeric-tolerance",
+    "title": "math-exercise – Overview of All Check Modes",
+    "section": "mode: numeric – tolerance",
+    "text": "mode: numeric – tolerance\nCompares numeric values instead of expressions, with an absolute or relative (%) tolerance.\n\nnumeric + tolerance\n\n\nApproximate π (2 decimal places): \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\n\n3.14 is accepted; 3.10 is not (deviation &gt; 0.01)."
+  },
+  {
+    "objectID": "examples.html#mode-numeric-decplaces",
+    "href": "examples.html#mode-numeric-decplaces",
+    "title": "math-exercise – Overview of All Check Modes",
+    "section": "mode: numeric – decplaces",
+    "text": "mode: numeric – decplaces\nRounds both values to N decimal places before comparing.\n\nnumeric + decplaces\n\n\nCompute 1/3 to 2 decimal places: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\n\n0.33 is accepted; 0.3 is not."
+  },
+  {
+    "objectID": "examples.html#mode-numeric-sigfigs",
+    "href": "examples.html#mode-numeric-sigfigs",
+    "title": "math-exercise – Overview of All Check Modes",
+    "section": "mode: numeric – sigfigs",
+    "text": "mode: numeric – sigfigs\nRounds both values to N significant figures before comparing.\n\nnumeric + sigfigs\n\n\nMeasure the length of a segment (3 significant figures): \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\n\n1230 is accepted (both round to 1.23e3); 1200 is not."
+  },
+  {
+    "objectID": "examples.html#mode-string",
+    "href": "examples.html#mode-string",
+    "title": "math-exercise – Overview of All Check Modes",
+    "section": "mode: string",
+    "text": "mode: string\nLiteral text comparison, no SymPy parsing. Useful for terms rather than expressions.\n\nstring\n\n\nWhat is the name of Euler's number in SymPy notation (exact case)? \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\n\nOnly E is accepted – e or Euler is not."
+  },
+  {
+    "objectID": "examples.html#mode-string_ci",
+    "href": "examples.html#mode-string_ci",
+    "title": "math-exercise – Overview of All Check Modes",
+    "section": "mode: string_ci",
+    "text": "mode: string_ci\nLike string, but case-insensitive.\n\nstring_ci\n\n\nWhat is the name of pi in SymPy notation? \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\n\npi, Pi, and PI are all accepted."
+  },
+  {
+    "objectID": "examples.html#mode-set",
+    "href": "examples.html#mode-set",
+    "title": "math-exercise – Overview of All Check Modes",
+    "section": "mode: set",
+    "text": "mode: set\nComma-separated list, order doesn’t matter, each element is checked individually like equivalent. Useful for “list all solutions” tasks.\n\nset\n\n\nSolve x² = 4. All solutions (comma-separated): \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\n\n-2, 2, 2,-2, and sqrt(4), -2 are all accepted; a missing or duplicate solution is rejected."
+  },
+  {
+    "objectID": "examples.html#partial-credit-for-a-set",
+    "href": "examples.html#partial-credit-for-a-set",
+    "title": "math-exercise – Overview of All Check Modes",
+    "section": "Partial credit for a set",
+    "text": "Partial credit for a set\nWith partial credit enabled, correctly matched items earn credit while missing items and extra guesses both lower the score.\n\nset with partial credit\n\n\nList all integer solutions of $(x-1)(x-2)(x-3)(x-4)=0$: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\n\nTry 1, 2, then 1, 2, 5, and finally all four solutions."
+  },
+  {
+    "objectID": "examples.html#mode-custom-monotone-increasing-with-flat-points-allowed",
+    "href": "examples.html#mode-custom-monotone-increasing-with-flat-points-allowed",
+    "title": "math-exercise – Overview of All Check Modes",
+    "section": "mode: custom — monotone increasing with flat points allowed",
+    "text": "mode: custom — monotone increasing with flat points allowed\nThis checker receives the student’s parsed SymPy expression and verifies that its derivative is non-negative on \\([0,1]\\) and that the function rises overall.\n\ncustom SymPy checker\n\n\nGive an example of a monotonically increasing function on $[0,1]$:\n\n$f(x) =$ \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\n\nTry x, x**2 + x, and x**2. All three are accepted; isolated zero derivatives and flat portions are allowed, provided the function never decreases and rises overall."
+  },
+  {
+    "objectID": "examples.html#jsxgraph-response-movable-piecewise-linear-function",
+    "href": "examples.html#jsxgraph-response-movable-piecewise-linear-function",
+    "title": "math-exercise – Overview of All Check Modes",
+    "section": "JSXGraph response — movable piecewise-linear function",
+    "text": "JSXGraph response — movable piecewise-linear function\nMove the points vertically. Full credit allows flat segments, but requires no decreasing segment and a genuine overall rise. The JSXGraph iframe sends its point coordinates as arbitrary JSON when Check or Feedback is clicked.\n\n\nDraw a monotonically increasing piecewise-linear function\n\n\nUse the movable points to construct a monotonically increasing\npiecewise-linear function on $[0,1]$.\n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙"
+  },
+  {
+    "objectID": "examples.html#jsxgraph-response-freehand-drawing-and-polynomial-approximation",
+    "href": "examples.html#jsxgraph-response-freehand-drawing-and-polynomial-approximation",
+    "title": "math-exercise – Overview of All Check Modes",
+    "section": "JSXGraph response — freehand drawing and polynomial approximation",
+    "text": "JSXGraph response — freehand drawing and polynomial approximation\nDraw a curve across \\([0,1]\\). JSXGraph bins the captured pointer samples, fits a degree-five regression polynomial, and displays the approximation. Assessment uses dense samples of the fitted polynomial rather than the original noisy stroke.\n\n\nDraw and fit a monotonically increasing function\n\n\nDraw a function on $[0,1]$ whose polynomial approximation is monotonically\nincreasing, allowing flat portions. The grey line is your stroke and the red line is the\ndegree-five fit that will be assessed.\n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙"
+  },
+  {
+    "objectID": "examples.html#jsxgraph-response-editable-freehand-polynomial-approximation",
+    "href": "examples.html#jsxgraph-response-editable-freehand-polynomial-approximation",
+    "title": "math-exercise – Overview of All Check Modes",
+    "section": "JSXGraph response — editable freehand polynomial approximation",
+    "text": "JSXGraph response — editable freehand polynomial approximation\nDraw a curve across \\([0,1]\\). JSXGraph simplifies the captured pointer samples to nine fixed-x adjustment points and fits a degree-five regression polynomial. After you move one blue point, all blue points are projected back onto the new red polynomial. Assessment uses dense samples of that polynomial.\n\n\nDraw, adjust, and fit a monotonically increasing function\n\n\nDraw a function on $[0,1]$ whose polynomial approximation is monotonically\nincreasing, allowing flat portions. After drawing, adjust the blue points as needed.\nTheir x-coordinates stay fixed; when you release a point, every blue point is\nsnapped onto the recomputed red degree-five polynomial that will be assessed.\n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙"
+  },
+  {
+    "objectID": "examples.html#form-factored",
+    "href": "examples.html#form-factored",
+    "title": "math-exercise – Overview of All Check Modes",
+    "section": "form: factored",
+    "text": "form: factored\nIn addition to correctness, requires the factored form.\n\nform: factored\n\n\nFactor x² + 3x + 2: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\n\n(x+1)*(x+2) is accepted; x**2+3*x+2 is correct but not factored."
+  },
+  {
+    "objectID": "examples.html#form-expanded",
+    "href": "examples.html#form-expanded",
+    "title": "math-exercise – Overview of All Check Modes",
+    "section": "form: expanded",
+    "text": "form: expanded\nRequires the fully expanded (multiplied-out) form.\n\nform: expanded\n\n\nExpand: (x-1)(x+1) = \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\n\nx**2 - 1 is accepted; (x-1)*(x+1) is not (not expanded)."
+  },
+  {
+    "objectID": "examples.html#form-single_fraction",
+    "href": "examples.html#form-single_fraction",
+    "title": "math-exercise – Overview of All Check Modes",
+    "section": "form: single_fraction",
+    "text": "form: single_fraction\nRequires a single fraction instead of a sum of fractions.\n\nform: single_fraction\n\n\nCombine 1/x + 1/y into a single fraction: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\n\n(x+y)/(x*y) is accepted; 1/x + 1/y (correct, but a sum of two fractions) is not."
+  },
+  {
+    "objectID": "examples.html#form-lowest_terms",
+    "href": "examples.html#form-lowest_terms",
+    "title": "math-exercise – Overview of All Check Modes",
+    "section": "form: lowest_terms",
+    "text": "form: lowest_terms\nRequires a fully reduced fraction.\n\nform: lowest_terms\n\n\nReduce (x² − 1) / (x² − x) fully: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\n\n(x+1)/x is accepted; (x**2-1)/(x**2-x) (correct, but not reduced) is not.\nform: lowest_terms also works for plain numeric fractions – here the raw text is checked directly, independent of SymPy’s automatic reduction at parse time:\n\nform: lowest_terms (numeric fraction)\n\n\nReduce 6/8 fully: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\n\n3/4 is accepted; 6/8 (mathematically equal, but not fully reduced) is rejected.\nDifference from mode: exact above: form: lowest_terms + equivalent accepts any value-equal, reduced notation (including 0.75) without requiring the exact string of the correct field – mode: exact requires that exact string too."
+  },
+  {
+    "objectID": "examples.html#bonus-task-pool",
+    "href": "examples.html#bonus-task-pool",
+    "title": "math-exercise – Overview of All Check Modes",
+    "section": "Bonus: task pool",
+    "text": "Bonus: task pool\nNot a check mode of its own, but an orthogonal option: pool: true randomly picks one of several variants per page load.\n\npool (combined with numeric + tolerance)\n\n\n↻\n\n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙"
+  },
+  {
+    "objectID": "examples.html#bonus-ai-feedback-context",
+    "href": "examples.html#bonus-ai-feedback-context",
+    "title": "math-exercise – Overview of All Check Modes",
+    "section": "Bonus: AI feedback context",
+    "text": "Bonus: AI feedback context\nClick Feedback below without reading this section first, then again after – the surrounding prose is what turns “wrong” into a useful hint. This paragraph is auto-collected as context because it sits directly above the exercise, in the same section: convert the given decimal integer into 8-bit two’s complement, not a plain unsigned binary conversion.\n\ntwo's complement (auto context from this section)\n\n\nConvert -5 to 8-bit two's complement (as 8 binary digits): \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\n\nThe next exercise instead uses explicit context blocks, referenced by id and combinable – handy when a scheme is defined once, outside the exercise’s own section, and reused by several exercises anywhere on the page:\n\nIEEE-754 half precision: 1 sign bit, 5 exponent bits (bias 15), 10 mantissa bits.\n\n\nThe biased exponent stores the true exponent plus the bias (here 15), so it can be represented without a separate sign bit for the exponent itself.\n\n\nIEEE-754 half precision (explicit, multiple context blocks)\n\n\nWhat does the biased exponent field store instead of directly – the true\nexponent, or the true exponent plus 15? \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙"
+  },
+  {
+    "objectID": "examples.html#ai-feedback-with-reusable-mini-machine-context",
+    "href": "examples.html#ai-feedback-with-reusable-mini-machine-context",
+    "title": "math-exercise – Overview of All Check Modes",
+    "section": "AI feedback with reusable mini-machine context",
+    "text": "AI feedback with reusable mini-machine context\nThis example is adapted and translated from the mini-machine exercises.\n\n\nMini-machine number representation\nThe mini-machine uses the simplified floating-point format\n\\[\n\\boxed{S}\\quad\\boxed{EEE}\\quad\\boxed{MMMM},\n\\]\nwhere:\n\n\\(S\\) is one sign bit;\n\\(E\\) is a three-bit exponent field;\n\\(M\\) is a four-bit mantissa field;\nthe exponent bias is \\(3\\).\n\nOnly normalized numbers with \\(E=1,2,\\ldots,6\\) are used. The bit patterns \\(E=0\\) and \\(E=7\\) are excluded, so this mini-machine ignores subnormal numbers, infinities, and NaNs.\nA bit pattern represents the number\n\\[\n(-1)^S\\left(1+\\frac{M}{16}\\right)2^{E-3},\n\\]\nwhere \\(M\\) is the integer value of the four mantissa bits.\nFor example,\n\\[\n0\\;|\\;100\\;|\\;0110\n\\]\nhas \\(S=0\\), \\(E=(100)_2=4\\), \\(e=4-3=1\\), and \\(M=(0110)_2=6\\). Therefore,\n\\[\nx=(1+6/16)2^1=2.75.\n\\]\nTo encode a representable number, first write it as\n\\[\n\\pm(1.MMMM)_2\\,2^e.\n\\]\nThen determine the sign bit, calculate the stored exponent \\(E=e+3\\), and write \\(S\\), \\(E\\), and \\(M\\) as bit fields.\n\n\n\nProblem 1A — decode a bit pattern\nCalculate the value represented by the bit pattern.\n\nDecode a mini floating-point number\n\n\n↻\n\n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\n\n\n\nProblem 1B — encode a number\nFill in the sign, exponent, and mantissa fields.\n\nEncode a number in the mini-machine format\n\n\n↻\n\n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙"
+  },
+  {
+    "objectID": "sympy-examples.html",
+    "href": "sympy-examples.html",
+    "title": "General SymPy examples",
+    "section": "",
+    "text": "These exercises exercise a broader range of SymPy parsing and equivalence checking. Unless a stricter mode or form is requested, any algebraically equivalent expression is accepted."
+  },
+  {
+    "objectID": "sympy-examples.html#polynomial-algebra",
+    "href": "sympy-examples.html#polynomial-algebra",
+    "title": "General SymPy examples",
+    "section": "Polynomial algebra",
+    "text": "Polynomial algebra\n\nExpand $(2x-3)(x+4)$: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\n\nFactor $x^3-4x$: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙"
+  },
+  {
+    "objectID": "sympy-examples.html#rational-expressions",
+    "href": "sympy-examples.html#rational-expressions",
+    "title": "General SymPy examples",
+    "section": "Rational expressions",
+    "text": "Rational expressions\n\nWrite $\\frac{1}{x} + \\frac{1}{x+1}$ as one fraction:\n\n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\n\nReduce $84/126$ fully: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙"
+  },
+  {
+    "objectID": "sympy-examples.html#powers-roots-and-constants",
+    "href": "sympy-examples.html#powers-roots-and-constants",
+    "title": "General SymPy examples",
+    "section": "Powers, roots, and constants",
+    "text": "Powers, roots, and constants\n\nSimplify $\\sqrt{72}$: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\n\nDifferentiate $\\log(x^2)$ formally: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\n\nDifferentiate $e^{3x}$: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙"
+  },
+  {
+    "objectID": "sympy-examples.html#trigonometry",
+    "href": "sympy-examples.html#trigonometry",
+    "title": "General SymPy examples",
+    "section": "Trigonometry",
+    "text": "Trigonometry\n\nSimplify $\\sin^2(x)+\\cos^2(x)$: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\n\nGive the exact value of $\\sin(\\pi/6)$: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙"
+  },
+  {
+    "objectID": "sympy-examples.html#derivatives-and-integrals",
+    "href": "sympy-examples.html#derivatives-and-integrals",
+    "title": "General SymPy examples",
+    "section": "Derivatives and integrals",
+    "text": "Derivatives and integrals\n\nDifferentiate $x^2\\sin(x)$:\n\n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\n\nGive one antiderivative of $3x^2-4$: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙"
+  },
+  {
+    "objectID": "sympy-examples.html#complex-numbers",
+    "href": "sympy-examples.html#complex-numbers",
+    "title": "General SymPy examples",
+    "section": "Complex numbers",
+    "text": "Complex numbers\n\nCompute $(1+2i)(3-i)$ using `I` for $i$: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙"
+  },
+  {
+    "objectID": "sympy-examples.html#solution-sets",
+    "href": "sympy-examples.html#solution-sets",
+    "title": "General SymPy examples",
+    "section": "Solution sets",
+    "text": "Solution sets\nOrder does not matter in set mode, and repeated items are compared as a multiset.\n\nList all roots of $x^3-x=0$: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙"
+  },
+  {
+    "objectID": "sympy-examples.html#numerical-checking",
+    "href": "sympy-examples.html#numerical-checking",
+    "title": "General SymPy examples",
+    "section": "Numerical checking",
+    "text": "Numerical checking\n\nApproximate $\\sqrt{2}$: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\n\nApproximate $e^5$: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\n\nGive $\\pi$ to three decimal places: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\n\nGive $1/7$ to four significant figures: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙"
+  },
+  {
+    "objectID": "sympy-examples.html#exact-representation",
+    "href": "sympy-examples.html#exact-representation",
+    "title": "General SymPy examples",
+    "section": "Exact representation",
+    "text": "Exact representation\n\nEnter the canonical expanded expression $x^2+2x+1$:\n\n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙"
+  },
+  {
+    "objectID": "basic-features.html",
+    "href": "basic-features.html",
+    "title": "Basic features",
+    "section": "",
+    "text": "This page covers the authoring features that are independent of a particular branch of mathematics. Enter a few deliberately wrong answers as well as the correct ones to inspect field highlighting and feedback labels."
+  },
+  {
+    "objectID": "basic-features.html#a-single-answer-field",
+    "href": "basic-features.html#a-single-answer-field",
+    "title": "Basic features",
+    "section": "A single answer field",
+    "text": "A single answer field\n\nWhat is $7\\cdot 6$? \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\nThe expression inside the brackets is the expected answer. It is not shown to the student in the rendered page."
+  },
+  {
+    "objectID": "basic-features.html#input-widths",
+    "href": "basic-features.html#input-widths",
+    "title": "Basic features",
+    "section": "Input widths",
+    "text": "Input widths\n\nShort: \n\nMedium: \n\nLong mathematical expression: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙"
+  },
+  {
+    "objectID": "basic-features.html#collapsible-caption",
+    "href": "basic-features.html#collapsible-caption",
+    "title": "Basic features",
+    "section": "Collapsible caption",
+    "text": "Collapsible caption\n\nClick this heading to open the exercise\n\n\nCompute $5^2$: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙"
+  },
+  {
+    "objectID": "basic-features.html#multiple-fields-and-meaningful-labels",
+    "href": "basic-features.html#multiple-fields-and-meaningful-labels",
+    "title": "Basic features",
+    "section": "Multiple fields and meaningful labels",
+    "text": "Multiple fields and meaningful labels\n\nFor the numbers $7$ and $3$, enter their sum , product , and\ndifference .\n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙"
+  },
+  {
+    "objectID": "basic-features.html#representation-requirements",
+    "href": "basic-features.html#representation-requirements",
+    "title": "Basic features",
+    "section": "Representation requirements",
+    "text": "Representation requirements\n\nEquivalent is not enough when a form is requested\n\n\nFactor $x^2+5x+6$: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙"
+  },
+  {
+    "objectID": "basic-features.html#case-insensitive-text",
+    "href": "basic-features.html#case-insensitive-text",
+    "title": "Basic features",
+    "section": "Case-insensitive text",
+    "text": "Case-insensitive text\n\nWrite the conventional name of the constant $\\pi$: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙"
+  },
+  {
+    "objectID": "basic-features.html#a-random-task-pool",
+    "href": "basic-features.html#a-random-task-pool",
+    "title": "Basic features",
+    "section": "A random task pool",
+    "text": "A random task pool\nThe selected task is stable during a browser session. Use the reload button in the corner to request another variant.\n\nRandom arithmetic task\n\n\n↻\n\n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙"
+  },
+  {
+    "objectID": "basic-features.html#rejecting-an-unfinished-representation",
+    "href": "basic-features.html#rejecting-an-unfinished-representation",
+    "title": "Basic features",
+    "section": "Rejecting an unfinished representation",
+    "text": "Rejecting an unfinished representation\n\nExpand $(x+1)^2$: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Interactive examples",
+    "section": "",
+    "text": "This site is built automatically from the repository’s example sources. It is both documentation for authors and a browser-level regression suite for the extension."
+  },
+  {
+    "objectID": "index.html#extended-regression-page",
+    "href": "index.html#extended-regression-page",
+    "title": "Interactive examples",
+    "section": "Extended regression page",
+    "text": "Extended regression page\nThe original all-in-one examples page remains available. It contains the large JSXGraph response examples and serves as compatibility coverage while the focused pages above provide the primary navigation."
+  },
+  {
+    "objectID": "ai-feedback.html",
+    "href": "ai-feedback.html",
+    "title": "AI feedback and learning context",
+    "section": "",
+    "text": "The Feedback button can request progressive hints from an OpenAI-compatible model. Credentials and model choice are stored only in the student’s browser. Ordinary answer checking does not require an AI service.\nThe extension sends the exact task, the student’s current work, private checker results, the current hint level, and the relevant learning context. It asks the model to preserve the document language and to return concise student-facing feedback without exposing internal reasoning."
+  },
+  {
+    "objectID": "ai-feedback.html#automatic-section-context",
+    "href": "ai-feedback.html#automatic-section-context",
+    "title": "AI feedback and learning context",
+    "section": "Automatic section context",
+    "text": "Automatic section context\nNormal prose since the most recent heading is collected automatically. In the exercise below, the explanation of the discriminant is therefore available to the feedback model without an extra author option.\nFor \\(ax^2+bx+c=0\\), the discriminant is \\(D=b^2-4ac\\). The sign of \\(D\\) determines the number of real roots.\n\nFor $2x^2+3x-2=0$, compute the discriminant: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙"
+  },
+  {
+    "objectID": "ai-feedback.html#reusable-explicit-context",
+    "href": "ai-feedback.html#reusable-explicit-context",
+    "title": "AI feedback and learning context",
+    "section": "Reusable explicit context",
+    "text": "Reusable explicit context\nAn explicitly identified context block can be reused by exercises elsewhere on the page. The block remains visible to students.\n\nNewton’s method uses \\(x_{k+1}=x_k-f(x_k)/f'(x_k)\\). Evaluate the function and derivative at the current iterate before forming the next iterate.\n\n\nFor $f(x)=x^2-2$ and $x_0=1.5$, compute $x_1$: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙"
+  },
+  {
+    "objectID": "ai-feedback.html#several-exercises-sharing-one-context",
+    "href": "ai-feedback.html#several-exercises-sharing-one-context",
+    "title": "AI feedback and learning context",
+    "section": "Several exercises sharing one context",
+    "text": "Several exercises sharing one context\n\nFor $f(x)=x^3-1$, write the Newton update as a function of $x_k$:\n\n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙"
+  },
+  {
+    "objectID": "ai-feedback.html#opting-out-of-context",
+    "href": "ai-feedback.html#opting-out-of-context",
+    "title": "AI feedback and learning context",
+    "section": "Opting out of context",
+    "text": "Opting out of context\nUse context: none when surrounding prose should not be sent with a feedback request.\n\nCompute $12/3$: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙"
+  },
+  {
+    "objectID": "ai-feedback.html#multi-field-feedback",
+    "href": "ai-feedback.html#multi-field-feedback",
+    "title": "AI feedback and learning context",
+    "section": "Multi-field feedback",
+    "text": "Multi-field feedback\nMeaningful labels make hints clearer and prevent generic references such as “field 2”.\n\nFor $f(x)=x^3$, enter $f'(x)=$ , $f'(2)=$ , and the slope of the\ntangent at $x=2$: .\n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙"
+  },
+  {
+    "objectID": "ai-feedback.html#provider-compatibility",
+    "href": "ai-feedback.html#provider-compatibility",
+    "title": "AI feedback and learning context",
+    "section": "Provider compatibility",
+    "text": "Provider compatibility\nThe model capability adapter uses a portable request body for unknown OpenAI-compatible providers. It adds low-reasoning controls only for recognised model families and retries once with the portable baseline if a provider rejects optional parameters. See the adapter design notes for the policy and known limitations."
+  },
+  {
+    "objectID": "vector-matrix-tests.html",
+    "href": "vector-matrix-tests.html",
+    "title": "Testside for vektor- og matriseinput",
+    "section": "",
+    "text": "Denne siden tester vektor- og matriseinput på norsk. Hver komponent er et eget svarfelt og kontrolleres med de samme reglene som vanlige svarfelt. Prøv både riktige og gale verdier, trykk Sjekk, og åpne Inntastingshjelp og Tilbakemelding for å kontrollere at hele grensesnittet er på bokmål."
+  },
+  {
+    "objectID": "vector-matrix-tests.html#grunnleggende-vektorer",
+    "href": "vector-matrix-tests.html#grunnleggende-vektorer",
+    "title": "Testside for vektor- og matriseinput",
+    "section": "Grunnleggende vektorer",
+    "text": "Grunnleggende vektorer\n\nKolonnevektor\n\nEn kolonnevektor med tre komponenter\n\n\nSkriv inn vektoren $(2,-1,3)$: $v=$ \n\n\n  ✓ Sjekk\n  ⓘ Inntastingshjelp\n  \n    💬 Tilbakemelding\n    ⚙\n  \n\n\n\n\n\n\n\nRadvektor\n\nDen samme vektoren som radvektor\n\n\nSkriv inn vektoren $(2,-1,3)$: $v=$ \n\n\n  ✓ Sjekk\n  ⓘ Inntastingshjelp\n  \n    💬 Tilbakemelding\n    ⚙\n  \n\n\n\n\n\n\n\nSymbolske komponenter\n\nAlgebraisk ekvivalente komponenter\n\n\nSkriv gradienten til $f(x,y)=x^2+xy$: $\\nabla f=$ \n\n\n  ✓ Sjekk\n  ⓘ Inntastingshjelp\n  \n    💬 Tilbakemelding\n    ⚙\n  \n\n\n\n\n\n\n\nKomma inne i en funksjon\n\nParseren må bevare kommaet i atan2\n\n\nFyll inn vektoren: \n\n\n  ✓ Sjekk\n  ⓘ Inntastingshjelp\n  \n    💬 Tilbakemelding\n    ⚙"
+  },
+  {
+    "objectID": "vector-matrix-tests.html#matriser-i-ulike-størrelser",
+    "href": "vector-matrix-tests.html#matriser-i-ulike-størrelser",
+    "title": "Testside for vektor- og matriseinput",
+    "section": "Matriser i ulike størrelser",
+    "text": "Matriser i ulike størrelser\n\nIdentitetsmatrise\n\nEn matrise på 2 × 2\n\n\nSkriv identitetsmatrisen: $I_2=$ \n\n\n  ✓ Sjekk\n  ⓘ Inntastingshjelp\n  \n    💬 Tilbakemelding\n    ⚙\n  \n\n\n\n\n\n\n\nRektangulær matrise\n\nTo rader og tre kolonner\n\n\nSkriv matrisen med radene $(1,2,3)$ og $(4,5,6)$:\n$A=$ \n\n\n  ✓ Sjekk\n  ⓘ Inntastingshjelp\n  \n    💬 Tilbakemelding\n    ⚙\n  \n\n\n\n\n\n\n\nStørre matrise\n\nEn matrise på 3 × 3\n\n\nSkriv diagonalmatrisen med diagonal $(1,2,3)$:\n$D=$ \n\n\n  ✓ Sjekk\n  ⓘ Inntastingshjelp\n  \n    💬 Tilbakemelding\n    ⚙\n  \n\n\n\n\n\n\n\nSymbolsk matrise\n\nSymbolske uttrykk og ekvivalenskontroll\n\n\nSkriv matrisen $\\begin{bmatrix}(x+1)^2&0\\\\0&x^2-1\\end{bmatrix}$:\n\n\n\n  ✓ Sjekk\n  ⓘ Inntastingshjelp\n  \n    💬 Tilbakemelding\n    ⚙"
+  },
+  {
+    "objectID": "vector-matrix-tests.html#kontrollmoduser-og-blandede-felt",
+    "href": "vector-matrix-tests.html#kontrollmoduser-og-blandede-felt",
+    "title": "Testside for vektor- og matriseinput",
+    "section": "Kontrollmoduser og blandede felt",
+    "text": "Kontrollmoduser og blandede felt\n\nNumerisk toleranse\n\nNumeriske celler med absolutt toleranse\n\n\nOppgi rotasjonsmatrisen for $90^\\circ$ med desimaltall:\n\n\n\n  ✓ Sjekk\n  ⓘ Inntastingshjelp\n  \n    💬 Tilbakemelding\n    ⚙\n  \n\n\n\n\n\n\n\nSkalar, vektor og matrise i samme oppgave\n\nAlle markørtypene nummereres i riktig rekkefølge\n\n\nFyll inn skalaren $s=$ , vektoren $v=$  og matrisen\n$A=$ .\n\n\n  ✓ Sjekk\n  ⓘ Inntastingshjelp\n  \n    💬 Tilbakemelding\n    ⚙\n  \n\n\n\n\n\n\n\nEgne feltnavn overstyrer standardnavnene\n\nfield-labels har høyere prioritet enn komponentnavn\n\n\nSkriv punktet $(4,5)$ som vektor: \n\n\n  ✓ Sjekk\n  ⓘ Inntastingshjelp\n  \n    💬 Tilbakemelding\n    ⚙"
+  },
+  {
+    "objectID": "vector-matrix-tests.html#oppgavepool",
+    "href": "vector-matrix-tests.html#oppgavepool",
+    "title": "Testside for vektor- og matriseinput",
+    "section": "Oppgavepool",
+    "text": "Oppgavepool\nLast inn en ny tilfeldig oppgave med omlastingsknappen. Dette tester at vektorene og matrisene også bygges riktig i nettleseren.\n\nTilfeldig vektor- eller matriseoppgave\n\n\n↻\n\n\n\n  ✓ Sjekk\n  ⓘ Inntastingshjelp\n  \n    💬 Tilbakemelding\n    ⚙"
+  },
+  {
+    "objectID": "vector-matrix-tests.html#responsivitet",
+    "href": "vector-matrix-tests.html#responsivitet",
+    "title": "Testside for vektor- og matriseinput",
+    "section": "Responsivitet",
+    "text": "Responsivitet\nDen brede matrisen nedenfor er med for å kontrollere små skjermer. Hele oppgaven skal fortsatt være tilgjengelig ved vannrett rulling uten at feltene eller klammene forsvinner.\n\nBred matrise for mobiltest\n\n\nSkriv radmatrisen: \n\n\n  ✓ Sjekk\n  ⓘ Inntastingshjelp\n  \n    💬 Tilbakemelding\n    ⚙"
+  }
+]

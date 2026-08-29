@@ -749,11 +749,13 @@ filters:
 
 ## Rendered examples
 
-The examples from `main` are published at the
-[math-exercise examples site](https://erasmus-ctm.github.io/math-exercise/).
-The build also publishes the dedicated Norwegian vector/matrix regression
-page. Both pages are rebuilt automatically whenever `main` changes. Feature
-branches matching `feature/**` are published under
+The examples from `main` are published as a small navigable
+[math-exercise examples site](https://erasmus-ctm.github.io/math-exercise/),
+with focused pages for basic features, general SymPy coverage, AI feedback and
+context, and Norwegian vector/matrix input. The original all-in-one regression
+page remains available from the site. The complete Quarto project is rebuilt
+automatically whenever `main` changes. Feature branches matching `feature/**`
+are published under
 `previews/<branch-slug>/`; obsolete previews are removed by the next main
 deployment.
 
