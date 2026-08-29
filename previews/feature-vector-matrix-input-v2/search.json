@@ -277,14 +277,14 @@
     "href": "basic-features.html#a-single-answer-field",
     "title": "Basic exercise features",
     "section": "A single answer field",
-    "text": "A single answer field\n\nWhat is $7\\cdot 6$? \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\n\n  Show source\n  ```{math-exercise}\n#| label: basic-single\nWhat is $7\\cdot 6$? _[42]\n```\n\nThe expression inside the brackets is the expected answer. It is not shown to the student in the rendered page."
+    "text": "A single answer field\n\nWhat is $7\\cdot 6$? \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\n\n  Show source\n  ```{math-exercise}\n#| label: basic-single\nWhat is $7\\cdot 6$? _[42]\n```\n\nOpen Show source below the exercise to see its authoring syntax. The value inside the square brackets is the expected answer; the rendered exercise shows an empty field instead."
   },
   {
     "objectID": "basic-features.html#answer-fields-of-different-widths",
     "href": "basic-features.html#answer-fields-of-different-widths",
     "title": "Basic exercise features",
     "section": "Answer fields of different widths",
-    "text": "Answer fields of different widths\n\nShort: \n\nMedium: \n\nLong mathematical expression: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\n\n  Show source\n  ```{math-exercise}\n#| label: basic-widths\n#| field-labels: Short answer, Medium answer, Long answer\nShort: _[2]\n\nMedium: __[123456]\n\nLong mathematical expression: ___[(1+2+3+4+5)^2]\n```"
+    "text": "Answer fields of different widths\n\nEnter $2$: \n\nEnter the six-digit number $123456$: \n\nEnter the expression $(1+2+3+4+5)^2$: \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙\n  \n\n\n\n\n\n  Show source\n  ```{math-exercise}\n#| label: basic-widths\n#| field-labels: Short answer, Medium answer, Long answer\nEnter $2$: _[2]\n\nEnter the six-digit number $123456$: __[123456]\n\nEnter the expression $(1+2+3+4+5)^2$: ___[(1+2+3+4+5)^2]\n```"
   },
   {
     "objectID": "basic-features.html#a-collapsible-exercise",
@@ -473,6 +473,6 @@
     "href": "vector-matrix-tests.html#en-bred-radmatrise",
     "title": "Vektorer og matriser",
     "section": "En bred radmatrise",
-    "text": "En bred radmatrise\nPå en smal skjerm kan du rulle vannrett for å nå alle feltene.\n\nRadmatrise med seks komponenter\n\n\nSkriv radmatrisen: \n\n\n  ✓ Sjekk\n  ⓘ Inntastingshjelp\n  \n    💬 Tilbakemelding\n    ⚙\n  \n\n\n\n\n\n\n  Vis kildekode\n  ```{math-exercise}\n#| label: nb-bred-matrise\n#| caption: Radmatrise med seks komponenter\nSkriv radmatrisen: mat[1,2,3,4,5,6]\n```"
+    "text": "En bred radmatrise\nPå en smal skjerm kan du rulle vannrett for å nå alle feltene.\n\nRadmatrise med seks komponenter\n\n\nSkriv radmatrisen $(1,2,3,4,5,6)$: \n\n\n  ✓ Sjekk\n  ⓘ Inntastingshjelp\n  \n    💬 Tilbakemelding\n    ⚙\n  \n\n\n\n\n\n\n  Vis kildekode\n  ```{math-exercise}\n#| label: nb-bred-matrise\n#| caption: Radmatrise med seks komponenter\nSkriv radmatrisen $(1,2,3,4,5,6)$: mat[1,2,3,4,5,6]\n```"
   }
 ]
