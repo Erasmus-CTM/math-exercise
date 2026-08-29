@@ -49,7 +49,7 @@ jobs:
           grep -Fq 'Show JSXGraph source' _site/graphics-examples.html
           ! grep -Fq 'rotation-order-board' _site/graphics-examples.html
           test "$(grep -Fc 'class="math-example-source"' _site/graphics-examples.html)" -eq 16
-          original_line="$(grep -n 'Draw and refine an increasing curve' _site/graphics-examples.html | head -1 | cut -d: -f1)"
+          original_line="$(grep -n 'Draw and refine a non-decreasing curve' _site/graphics-examples.html | head -1 | cut -d: -f1)"
           imported_line="$(grep -n 'Coordinate transformations' _site/graphics-examples.html | head -1 | cut -d: -f1)"
           test "$original_line" -lt "$imported_line"
           grep -Fq 'Automatically collected context' _site/ai-feedback.html
