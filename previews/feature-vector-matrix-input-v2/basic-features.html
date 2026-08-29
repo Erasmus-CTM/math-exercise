@@ -598,6 +598,7 @@ select.math-modal-input {
 </style>
 
 
+<link rel="stylesheet" href="example-site.css">
 </head>
 
 <body class="nav-fixed quarto-light">
@@ -632,6 +633,10 @@ select.math-modal-input {
   <li class="nav-item">
     <a class="nav-link" href="./ai-feedback.html"> 
 <span class="menu-text">AI and context</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./custom-assessment.html"> 
+<span class="menu-text">Custom assessment</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./vector-matrix-tests.html"> 
@@ -710,6 +715,13 @@ select.math-modal-input {
 <div class="math-legend-panel" style="display:none;"></div>
 <div class="math-feedback-area"></div>
 </div>
+<details class="math-example-source">
+  <summary>Show source</summary>
+  <pre><code class="language-markdown">```{math-exercise}
+#| label: basic-single
+What is $7\cdot 6$? _[42]
+```</code></pre>
+</details>
 <p>The expression inside the brackets is the expected answer. It is not shown to the student in the rendered page.</p>
 </section>
 <section id="input-widths" class="level2">
@@ -732,6 +744,18 @@ Long mathematical expression: <textarea id="math-exercise-2-f3" data-answer="(1+
 <div class="math-legend-panel" style="display:none;"></div>
 <div class="math-feedback-area"></div>
 </div>
+<details class="math-example-source">
+  <summary>Show source</summary>
+  <pre><code class="language-markdown">```{math-exercise}
+#| label: basic-widths
+#| field-labels: Short answer, Medium answer, Long answer
+Short: _[2]
+
+Medium: __[123456]
+
+Long mathematical expression: ___[(1+2+3+4+5)^2]
+```</code></pre>
+</details>
 </section>
 <section id="collapsible-caption" class="level2">
 <h2 class="anchored" data-anchor-id="collapsible-caption">Collapsible caption</h2>
@@ -753,6 +777,14 @@ Long mathematical expression: <textarea id="math-exercise-2-f3" data-answer="(1+
 <div class="math-feedback-area"></div>
 </div>
 </div>
+<details class="math-example-source">
+  <summary>Show source</summary>
+  <pre><code class="language-markdown">```{math-exercise}
+#| label: basic-caption
+#| caption: Click this heading to open the exercise
+Compute $5^2$: _[25]
+```</code></pre>
+</details>
 </section>
 <section id="multiple-fields-and-meaningful-labels" class="level2">
 <h2 class="anchored" data-anchor-id="multiple-fields-and-meaningful-labels">Multiple fields and meaningful labels</h2>
@@ -771,6 +803,16 @@ difference <input type="text" id="math-exercise-4-f3" data-answer="4" data-vars=
 <div class="math-legend-panel" style="display:none;"></div>
 <div class="math-feedback-area"></div>
 </div>
+<details class="math-example-source">
+  <summary>Show source</summary>
+  <pre><code class="language-markdown">```{math-exercise}
+#| label: basic-labels
+#| field-labels: Sum, Product, Difference
+#| partial-credit: true
+For the numbers $7$ and $3$, enter their sum _[10], product _[21], and
+difference _[4].
+```</code></pre>
+</details>
 </section>
 <section id="representation-requirements" class="level2">
 <h2 class="anchored" data-anchor-id="representation-requirements">Representation requirements</h2>
@@ -792,6 +834,16 @@ difference <input type="text" id="math-exercise-4-f3" data-answer="4" data-vars=
 <div class="math-feedback-area"></div>
 </div>
 </div>
+<details class="math-example-source">
+  <summary>Show source</summary>
+  <pre><code class="language-markdown">```{math-exercise}
+#| label: basic-factored
+#| caption: Equivalent is not enough when a form is requested
+#| vars: x
+#| form: factored
+Factor $x^2+5x+6$: __[(x+2)*(x+3)]
+```</code></pre>
+</details>
 </section>
 <section id="case-insensitive-text" class="level2">
 <h2 class="anchored" data-anchor-id="case-insensitive-text">Case-insensitive text</h2>
@@ -809,6 +861,14 @@ difference <input type="text" id="math-exercise-4-f3" data-answer="4" data-vars=
 <div class="math-legend-panel" style="display:none;"></div>
 <div class="math-feedback-area"></div>
 </div>
+<details class="math-example-source">
+  <summary>Show source</summary>
+  <pre><code class="language-markdown">```{math-exercise}
+#| label: basic-text
+#| mode: string_ci
+Write the conventional name of the constant $\pi$: __[pi]
+```</code></pre>
+</details>
 </section>
 <section id="a-random-task-pool" class="level2">
 <h2 class="anchored" data-anchor-id="a-random-task-pool">A random task pool</h2>
@@ -832,6 +892,24 @@ difference <input type="text" id="math-exercise-4-f3" data-answer="4" data-vars=
 <div class="math-feedback-area"></div>
 </div>
 </div>
+<details class="math-example-source">
+  <summary>Show source</summary>
+  <pre><code class="language-markdown">```{math-exercise}
+#| label: basic-pool
+#| caption: Random arithmetic task
+#| pool: true
+
+$8+7=$ _[15]
+
+---
+
+$9\cdot6=$ _[54]
+
+---
+
+$2^8=$ _[256]
+```</code></pre>
+</details>
 </section>
 <section id="rejecting-an-unfinished-representation" class="level2">
 <h2 class="anchored" data-anchor-id="rejecting-an-unfinished-representation">Rejecting an unfinished representation</h2>
@@ -849,6 +927,15 @@ difference <input type="text" id="math-exercise-4-f3" data-answer="4" data-vars=
 <div class="math-legend-panel" style="display:none;"></div>
 <div class="math-feedback-area"></div>
 </div>
+<details class="math-example-source">
+  <summary>Show source</summary>
+  <pre><code class="language-markdown">```{math-exercise}
+#| label: basic-reject
+#| vars: x
+#| reject: (x+1)^2
+Expand $(x+1)^2$: __[x^2+2*x+1]
+```</code></pre>
+</details>
 
 
 </section>

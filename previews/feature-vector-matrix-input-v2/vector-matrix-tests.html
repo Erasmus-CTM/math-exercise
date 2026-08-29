@@ -598,6 +598,7 @@ select.math-modal-input {
 </style>
 
 
+<link rel="stylesheet" href="example-site.css">
 </head>
 
 <body class="nav-fixed quarto-light">
@@ -632,6 +633,10 @@ select.math-modal-input {
   <li class="nav-item">
     <a class="nav-link" href="./ai-feedback.html"> 
 <span class="menu-text">AI and context</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./custom-assessment.html"> 
+<span class="menu-text">Custom assessment</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link active" href="./vector-matrix-tests.html" aria-current="page"> 
@@ -730,6 +735,14 @@ select.math-modal-input {
 <div class="math-feedback-area"></div>
 </div>
 </div>
+<details class="math-example-source">
+  <summary>Vis kildekode</summary>
+  <pre><code class="language-markdown">```{math-exercise}
+#| label: nb-kolonnevektor
+#| caption: En kolonnevektor med tre komponenter
+Skriv inn vektoren $(2,-1,3)$: $v=$ vec[2,-1,3]
+```</code></pre>
+</details>
 </section>
 <section id="radvektor" class="level3">
 <h3 class="anchored" data-anchor-id="radvektor">Radvektor</h3>
@@ -751,6 +764,15 @@ select.math-modal-input {
 <div class="math-feedback-area"></div>
 </div>
 </div>
+<details class="math-example-source">
+  <summary>Vis kildekode</summary>
+  <pre><code class="language-markdown">```{math-exercise}
+#| label: nb-radvektor
+#| caption: Den samme vektoren som radvektor
+#| vecdir: row
+Skriv inn vektoren $(2,-1,3)$: $v=$ vec[2,-1,3]
+```</code></pre>
+</details>
 </section>
 <section id="symbolske-komponenter" class="level3">
 <h3 class="anchored" data-anchor-id="symbolske-komponenter">Symbolske komponenter</h3>
@@ -772,6 +794,15 @@ select.math-modal-input {
 <div class="math-feedback-area"></div>
 </div>
 </div>
+<details class="math-example-source">
+  <summary>Vis kildekode</summary>
+  <pre><code class="language-markdown">```{math-exercise}
+#| label: nb-symbolsk-vektor
+#| caption: Algebraisk ekvivalente komponenter
+#| vars: x,y
+Skriv gradienten til $f(x,y)=x^2+xy$: $\nabla f=$ vec[2*x+y,x]
+```</code></pre>
+</details>
 </section>
 <section id="komma-inne-i-en-funksjon" class="level3">
 <h3 class="anchored" data-anchor-id="komma-inne-i-en-funksjon">Komma inne i en funksjon</h3>
@@ -793,6 +824,15 @@ select.math-modal-input {
 <div class="math-feedback-area"></div>
 </div>
 </div>
+<details class="math-example-source">
+  <summary>Vis kildekode</summary>
+  <pre><code class="language-markdown">```{math-exercise}
+#| label: nb-nestet-komma
+#| caption: Parseren må bevare kommaet i atan2
+#| vars: x,y
+Fyll inn vektoren: vec[atan2(y,x),sqrt(x^2+y^2)]
+```</code></pre>
+</details>
 </section>
 </section>
 <section id="matriser-i-ulike-størrelser" class="level2">
@@ -817,6 +857,14 @@ select.math-modal-input {
 <div class="math-feedback-area"></div>
 </div>
 </div>
+<details class="math-example-source">
+  <summary>Vis kildekode</summary>
+  <pre><code class="language-markdown">```{math-exercise}
+#| label: nb-identitetsmatrise
+#| caption: En matrise på 2 × 2
+Skriv identitetsmatrisen: $I_2=$ mat[1,0;0,1]
+```</code></pre>
+</details>
 </section>
 <section id="rektangulær-matrise" class="level3">
 <h3 class="anchored" data-anchor-id="rektangulær-matrise">Rektangulær matrise</h3>
@@ -839,6 +887,15 @@ $A=$ <span class="math-mat" style="--cols:3"><input type="text" id="math-exercis
 <div class="math-feedback-area"></div>
 </div>
 </div>
+<details class="math-example-source">
+  <summary>Vis kildekode</summary>
+  <pre><code class="language-markdown">```{math-exercise}
+#| label: nb-rektangulaer
+#| caption: To rader og tre kolonner
+Skriv matrisen med radene $(1,2,3)$ og $(4,5,6)$:
+$A=$ mat[1,2,3;4,5,6]
+```</code></pre>
+</details>
 </section>
 <section id="større-matrise" class="level3">
 <h3 class="anchored" data-anchor-id="større-matrise">Større matrise</h3>
@@ -861,6 +918,15 @@ $D=$ <span class="math-mat" style="--cols:3"><input type="text" id="math-exercis
 <div class="math-feedback-area"></div>
 </div>
 </div>
+<details class="math-example-source">
+  <summary>Vis kildekode</summary>
+  <pre><code class="language-markdown">```{math-exercise}
+#| label: nb-tre-ganger-tre
+#| caption: En matrise på 3 × 3
+Skriv diagonalmatrisen med diagonal $(1,2,3)$:
+$D=$ mat[1,0,0;0,2,0;0,0,3]
+```</code></pre>
+</details>
 </section>
 <section id="symbolsk-matrise" class="level3">
 <h3 class="anchored" data-anchor-id="symbolsk-matrise">Symbolsk matrise</h3>
@@ -883,6 +949,16 @@ $D=$ <span class="math-mat" style="--cols:3"><input type="text" id="math-exercis
 <div class="math-feedback-area"></div>
 </div>
 </div>
+<details class="math-example-source">
+  <summary>Vis kildekode</summary>
+  <pre><code class="language-markdown">```{math-exercise}
+#| label: nb-symbolsk-matrise
+#| caption: Symbolske uttrykk og ekvivalenskontroll
+#| vars: x
+Skriv matrisen $\begin{bmatrix}(x+1)^2&amp;0\\0&amp;x^2-1\end{bmatrix}$:
+mat[(x+1)^2,0;0,(x-1)*(x+1)]
+```</code></pre>
+</details>
 </section>
 </section>
 <section id="kontrollmoduser-og-blandede-felt" class="level2">
@@ -908,6 +984,17 @@ $D=$ <span class="math-mat" style="--cols:3"><input type="text" id="math-exercis
 <div class="math-feedback-area"></div>
 </div>
 </div>
+<details class="math-example-source">
+  <summary>Vis kildekode</summary>
+  <pre><code class="language-markdown">```{math-exercise}
+#| label: nb-numerisk-matrise
+#| caption: Numeriske celler med absolutt toleranse
+#| mode: numeric
+#| tolerance: 0.01
+Oppgi rotasjonsmatrisen for $90^\circ$ med desimaltall:
+mat[0,-1;1,0]
+```</code></pre>
+</details>
 </section>
 <section id="skalar-vektor-og-matrise-i-samme-oppgave" class="level3">
 <h3 class="anchored" data-anchor-id="skalar-vektor-og-matrise-i-samme-oppgave">Skalar, vektor og matrise i samme oppgave</h3>
@@ -930,6 +1017,16 @@ $A=$ <span class="math-mat" style="--cols:2"><input type="text" id="math-exercis
 <div class="math-feedback-area"></div>
 </div>
 </div>
+<details class="math-example-source">
+  <summary>Vis kildekode</summary>
+  <pre><code class="language-markdown">```{math-exercise}
+#| label: nb-blandede-felt
+#| caption: Alle markørtypene nummereres i riktig rekkefølge
+#| partial-credit: true
+Fyll inn skalaren $s=$ _[2], vektoren $v=$ vec[1,2] og matrisen
+$A=$ mat[1,0;0,1].
+```</code></pre>
+</details>
 </section>
 <section id="egne-feltnavn-overstyrer-standardnavnene" class="level3">
 <h3 class="anchored" data-anchor-id="egne-feltnavn-overstyrer-standardnavnene">Egne feltnavn overstyrer standardnavnene</h3>
@@ -951,6 +1048,15 @@ $A=$ <span class="math-mat" style="--cols:2"><input type="text" id="math-exercis
 <div class="math-feedback-area"></div>
 </div>
 </div>
+<details class="math-example-source">
+  <summary>Vis kildekode</summary>
+  <pre><code class="language-markdown">```{math-exercise}
+#| label: nb-egne-feltnavn
+#| caption: field-labels har høyere prioritet enn komponentnavn
+#| field-labels: Første koordinat, Andre koordinat
+Skriv punktet $(4,5)$ som vektor: vec[4,5]
+```</code></pre>
+</details>
 </section>
 </section>
 <section id="oppgavepool" class="level2">
@@ -975,6 +1081,24 @@ $A=$ <span class="math-mat" style="--cols:2"><input type="text" id="math-exercis
 <div class="math-feedback-area"></div>
 </div>
 </div>
+<details class="math-example-source">
+  <summary>Vis kildekode</summary>
+  <pre><code class="language-markdown">```{math-exercise}
+#| label: nb-vektor-matrise-pool
+#| caption: Tilfeldig vektor- eller matriseoppgave
+#| pool: true
+
+Skriv vektoren $(1,2)$: vec[1,2]
+
+---
+
+Skriv nullmatrisen på $2\times2$: mat[0,0;0,0]
+
+---
+
+Skriv matrisen med radene $(1,0)$ og $(2,3)$: mat[1,0;2,3]
+```</code></pre>
+</details>
 </section>
 <section id="responsivitet" class="level2">
 <h2 class="anchored" data-anchor-id="responsivitet">Responsivitet</h2>
@@ -997,6 +1121,14 @@ $A=$ <span class="math-mat" style="--cols:2"><input type="text" id="math-exercis
 <div class="math-feedback-area"></div>
 </div>
 </div>
+<details class="math-example-source">
+  <summary>Vis kildekode</summary>
+  <pre><code class="language-markdown">```{math-exercise}
+#| label: nb-bred-matrise
+#| caption: Bred matrise for mobiltest
+Skriv radmatrisen: mat[1,2,3,4,5,6]
+```</code></pre>
+</details>
 
 
 </section>

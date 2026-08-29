@@ -627,6 +627,7 @@ window.Quarto = {
 };
 </script>
 
+<link rel="stylesheet" href="example-site.css">
 </head>
 
 <body class="nav-fixed quarto-light">
@@ -661,6 +662,10 @@ window.Quarto = {
   <li class="nav-item">
     <a class="nav-link active" href="./ai-feedback.html" aria-current="page"> 
 <span class="menu-text">AI and context</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./custom-assessment.html"> 
+<span class="menu-text">Custom assessment</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./vector-matrix-tests.html"> 
@@ -740,6 +745,15 @@ window.Quarto = {
 <div class="math-legend-panel" style="display:none;"></div>
 <div class="math-feedback-area"></div>
 </div>
+<details class="math-example-source">
+  <summary>Show source</summary>
+  <pre><code class="language-markdown">```{math-exercise}
+#| label: ai-auto-context
+#| vars: a,b,c
+#| field-labels: Discriminant
+For $2x^2+3x-2=0$, compute the discriminant: _[25]
+```</code></pre>
+</details>
 </section>
 <section id="reusable-explicit-context" class="level2">
 <h2 class="anchored" data-anchor-id="reusable-explicit-context">Reusable explicit context</h2>
@@ -761,6 +775,16 @@ window.Quarto = {
 <div class="math-legend-panel" style="display:none;"></div>
 <div class="math-feedback-area"></div>
 </div>
+<details class="math-example-source">
+  <summary>Show source</summary>
+  <pre><code class="language-markdown">```{math-exercise}
+#| label: ai-explicit-context
+#| context: newton-rule
+#| mode: numeric
+#| tolerance: 0.001
+For $f(x)=x^2-2$ and $x_0=1.5$, compute $x_1$: _[17/12]
+```</code></pre>
+</details>
 </section>
 <section id="several-exercises-sharing-one-context" class="level2">
 <h2 class="anchored" data-anchor-id="several-exercises-sharing-one-context">Several exercises sharing one context</h2>
@@ -779,6 +803,16 @@ window.Quarto = {
 <div class="math-legend-panel" style="display:none;"></div>
 <div class="math-feedback-area"></div>
 </div>
+<details class="math-example-source">
+  <summary>Show source</summary>
+  <pre><code class="language-markdown">```{math-exercise}
+#| label: ai-explicit-context-second
+#| context: newton-rule
+#| vars: x
+For $f(x)=x^3-1$, write the Newton update as a function of $x_k$:
+__[x-(x^3-1)/(3*x^2)]
+```</code></pre>
+</details>
 </section>
 <section id="opting-out-of-context" class="level2">
 <h2 class="anchored" data-anchor-id="opting-out-of-context">Opting out of context</h2>
@@ -797,6 +831,14 @@ window.Quarto = {
 <div class="math-legend-panel" style="display:none;"></div>
 <div class="math-feedback-area"></div>
 </div>
+<details class="math-example-source">
+  <summary>Show source</summary>
+  <pre><code class="language-markdown">```{math-exercise}
+#| label: ai-no-context
+#| context: none
+Compute $12/3$: _[4]
+```</code></pre>
+</details>
 </section>
 <section id="multi-field-feedback" class="level2">
 <h2 class="anchored" data-anchor-id="multi-field-feedback">Multi-field feedback</h2>
@@ -816,6 +858,16 @@ tangent at $x=2$: <input type="text" id="math-exercise-5-f3" data-answer="12" da
 <div class="math-legend-panel" style="display:none;"></div>
 <div class="math-feedback-area"></div>
 </div>
+<details class="math-example-source">
+  <summary>Show source</summary>
+  <pre><code class="language-markdown">```{math-exercise}
+#| label: ai-field-labels
+#| vars: x
+#| field-labels: Derivative, Value at x=2, Tangent slope
+For $f(x)=x^3$, enter $f'(x)=$ _[3*x^2], $f'(2)=$ _[12], and the slope of the
+tangent at $x=2$: _[12].
+```</code></pre>
+</details>
 </section>
 <section id="provider-compatibility" class="level2">
 <h2 class="anchored" data-anchor-id="provider-compatibility">Provider compatibility</h2>
