@@ -63,3 +63,9 @@ jobs:
           grep -Fq 'data-structural-field-labels=' _site/vector-matrix-tests.html
           grep -Fq 'Komponent ' _site/vector-matrix-tests.html
           grep -Fq 'Rad ' _site/vector-matrix-tests.html
+          grep -Fq 'Choose the number of basis vectors' _site/dynamic-matrix-tests.html
+          grep -Fq 'data-auto-cols="true"' _site/dynamic-matrix-tests.html
+          grep -Fq 'data-auto-rows="true"' _site/dynamic-matrix-tests.html
+          grep -Fq 'data-min-cols="0"' _site/dynamic-matrix-tests.html
+          grep -Fq 'A correct matrix with zero rows' _site/dynamic-matrix-tests.html
+          test "$(grep -Fc 'class="math-example-source"' _site/dynamic-matrix-tests.html)" -eq 5

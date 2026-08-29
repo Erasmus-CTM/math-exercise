@@ -78,3 +78,70 @@ test('structural labels are localized in every supported language', () => {
     assert.equal(api.localizeStructuralLabel('m1,2'), labels[1]);
   }
 });
+
+test('renders a named matrix with fixed rows and variable columns', () => {
+  const rendered = loadBundle().renderTaskText(
+    'mat{name=Z, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}',
+    'dynamic-cols',
+    '',
+    'col',
+    'custom',
+  );
+  assert.equal(rendered.fieldIds.length, 3);
+  assert.deepEqual(
+    Array.from(rendered.structuralLabels),
+    ['dm:Z:1,1', 'dm:Z:2,1', 'dm:Z:3,1'],
+  );
+  assert.match(rendered.html, /class="math-mat math-dynamic-mat"/);
+  assert.match(rendered.html, /data-auto-cols="true"/);
+  assert.match(rendered.html, /data-min-cols="0"/);
+  assert.match(rendered.html, /data-max-cols="3"/);
+});
+
+test('supports matrices that initially have zero rows or columns', () => {
+  const api = loadBundle();
+  const zeroColumns = api.renderTaskText(
+    'mat{name=Z, rows=3, cols=auto, initial-cols=0, min-cols=0, max-cols=3}',
+    'zero-cols', '', 'col', 'custom',
+  );
+  const zeroRows = api.renderTaskText(
+    'mat{name=A, rows=auto, cols=2, initial-rows=0, min-rows=0, max-rows=3}',
+    'zero-rows', '', 'col', 'custom',
+  );
+  assert.equal(zeroColumns.fieldIds.length, 0);
+  assert.equal(zeroRows.fieldIds.length, 0);
+  assert.match(zeroColumns.html, /data-rows="3" data-cols="0"/);
+  assert.match(zeroRows.html, /data-rows="0" data-cols="2"/);
+});
+
+test('validates dynamic matrix declarations and custom-only use', () => {
+  const api = loadBundle();
+  assert.throws(
+    () => api.renderTaskText('mat{name=A, rows=2, cols=auto}', 'mode', '', 'col'),
+    /requires mode: custom/,
+  );
+  assert.throws(
+    () => api.parseDynamicMatrixSpec('name=A, rows=auto, min-rows=3, max-rows=2, cols=2'),
+    /cannot exceed/,
+  );
+  assert.throws(
+    () => api.renderTaskText(
+      'mat{name=A, rows=2, cols=auto} mat{name=A, rows=2, cols=auto}',
+      'duplicate', '', 'col', 'custom',
+    ),
+    /duplicate dynamic matrix name/,
+  );
+});
+
+test('dynamic matrix labels and AI answer summaries include shape', () => {
+  const api = loadBundle('en');
+  assert.equal(api.localizeStructuralLabel('dm:Z:2,3'), 'Z, row 2, column 3');
+  const xml = api.expressionAnswersXml([], {
+    Z: { type: 'matrix', rows: 3, cols: 0, raw: [] },
+    A: { type: 'matrix', rows: 1, cols: 2, raw: ['x', '1'] },
+  });
+  assert.match(xml, /<matrix name="Z" rows="3" columns="0">/);
+  assert.match(xml, /<row index="3"><\/row>/);
+  assert.match(xml, /<matrix name="A" rows="1" columns="2">/);
+  assert.match(xml, /<entry column="1">x<\/entry>/);
+});

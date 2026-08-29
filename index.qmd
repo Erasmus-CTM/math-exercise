@@ -78,6 +78,13 @@ relationships between fields, iterative processes, and matrix constraints.
 :::
 
 ::: {.g-col-12 .g-col-md-6}
+### [Dynamic matrix input](dynamic-matrix-tests.qmd)
+
+Five custom-assessment examples with student-selected dimensions, including
+matrices with zero rows or zero columns.
+:::
+
+::: {.g-col-12 .g-col-md-6}
 ### [Graphical answers](graphics-examples.qmd)
 
 Click points, move graph handles, select one period, and draw or refine curves
