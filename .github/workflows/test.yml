@@ -19,8 +19,8 @@ jobs:
         run: |
           quarto render
           quarto render nb-render.qmd
-          grep -Fq '"lang":"nb"' _site/nb-render.html
-          grep -Fq 'Tilbakemelding' _site/nb-render.html
+          grep -Fq '"lang":"nb"' nb-render.html
+          grep -Fq 'Tilbakemelding' nb-render.html
           grep -Fq 'Basic features' _site/index.html
           grep -Fq 'General SymPy examples' _site/sympy-examples.html
           grep -Fq 'Automatic section context' _site/ai-feedback.html
