@@ -48,6 +48,7 @@ Question text with an input field: _[correct_answer]
 | `___[answer]` | wide, 2-row | `<textarea>` |
 | `vec[a,b,c]` | bracketed vector | one `<input>` per component |
 | `mat[a,b;c,d]` | bracketed matrix | one `<input>` per cell |
+| `mat{name=A, rows=2, cols=auto, ...}` | resizable matrix | student chooses an `auto` dimension |
 
 Multiple fields in one exercise are checked together when clicking **Check**.
 The answer inside `[...]` is a SymPy expression, e.g. `pi * 9`, `x**2 + 2*x + 1`.
@@ -59,6 +60,28 @@ Vectors are columns by default; add `#| vecdir: row` for a row vector. Each
 component or cell is checked independently, highlighted independently, and
 receives a localized label in feedback. Explicit `field-labels` override those
 generated labels.
+
+Dynamic matrices use `mat{...}` and currently require `mode: custom`. Each
+matrix needs a unique `name`; `rows` and `cols` are either a fixed non-negative
+integer or `auto`. For an automatic axis, configure `initial-rows` or
+`initial-cols` and optional `min-*`/`max-*` bounds. Zero rows and zero columns
+are supported when the corresponding minimum is zero.
+
+```{math-exercise}
+#| mode: custom
+#| checker: |
+#|   def check(response, symbols):
+#|       Z = response["inputs"]["Z"]["matrix"]
+#|       return Z.cols == 0
+
+Enter a matrix whose number of columns is part of the answer:
+mat{name=Z, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}
+```
+
+The checker receives a SymPy `Matrix` at
+`response["inputs"][name]["matrix"]`, plus `rows`, `cols`, `raw`, and parsed
+`expressions` in the same named input record. The legacy flattened
+`response["expressions"]` remains available for backward compatibility.
 
 ```{math-exercise}
 #| vars: x
@@ -280,6 +303,9 @@ The checker must define `check(response, symbols)`. For ordinary expression
 fields, `response` contains `kind`, `raw`, and an ordered `expressions` list of
 parsed SymPy values. `symbols` maps names from `vars` to SymPy symbols. Normal
 SymPy names such as `diff`, `minimum`, `Interval`, and `Matrix` are available.
+Named dynamic matrices additionally appear in `response["inputs"]`; their
+current shape is preserved even when one dimension is zero. AI feedback receives
+the matrix name, current dimensions, and entries as structured answer data.
 The function may return a boolean, a score from `0` to `1`, or a dictionary
 containing `score` (or `correct`) and optional plain-text `feedback`.
 

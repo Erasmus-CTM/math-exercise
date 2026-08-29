@@ -230,6 +230,57 @@ ul.task-list li input[type="checkbox"] {
   text-align: center;
 }
 
+.math-dynamic-matrix-wrap {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: middle;
+  max-width: 100%;
+}
+
+.math-dynamic-mat {
+  min-width: 2.6em;
+  min-height: 2.6em;
+  overflow-x: auto;
+}
+
+.math-dynamic-matrix-empty {
+  grid-column: 1;
+  align-self: center;
+  color: var(--bs-secondary-color, #6c757d);
+  font-size: .82em;
+  white-space: nowrap;
+}
+
+.math-dynamic-matrix-controls {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .25em;
+  margin-top: .15em;
+}
+
+.math-dynamic-matrix-controls button {
+  border: 1px solid var(--bs-border-color, #adb5bd);
+  border-radius: .3em;
+  background: var(--bs-tertiary-bg, #f8f9fa);
+  color: var(--bs-body-color, #212529);
+  padding: .12em .4em;
+  font-size: .72em;
+  line-height: 1.25;
+  cursor: pointer;
+}
+
+.math-dynamic-matrix-controls button:hover:not(:disabled),
+.math-dynamic-matrix-controls button:focus-visible {
+  border-color: var(--bs-primary, #0d6efd);
+}
+
+.math-dynamic-matrix-controls button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
 @media (max-width: 576px) {
   .math-exercise-question { overflow-x: auto; }
   .math-vec,
@@ -645,6 +696,10 @@ select.math-modal-input {
   <li class="nav-item">
     <a class="nav-link" href="./vector-matrix-tests.html"> 
 <span class="menu-text">Vektorer og matriser (NB)</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./dynamic-matrix-tests.html"> 
+<span class="menu-text">Dynamic matrices</span></a>
   </li>  
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
@@ -1614,6 +1669,12 @@ __[x^2+2*x+1]
       fieldPrefix:  function (n) { return 'Field&nbsp;' + n + ': '; },
       vecComponent: function (n) { return 'Component ' + n; },
       matCell: function (row, column) { return 'Row ' + row + ', column ' + column; },
+      dynamicMatCell: function (name, row, column) { return name + ', row ' + row + ', column ' + column; },
+      matrixAddRow: 'Add row',
+      matrixRemoveRow: 'Remove row',
+      matrixAddColumn: 'Add column',
+      matrixRemoveColumn: 'Remove column',
+      emptyMatrix: function (rows, columns) { return rows + ' × ' + columns + ' matrix'; },
       resEmpty:     'Please enter an answer.',
       resCorrect:   'Correct!',
       resPartial:   function (pct) { return 'Partially correct (' + pct + '%).'; },
@@ -1762,6 +1823,12 @@ __[x^2+2*x+1]
       fieldPrefix:  function (n) { return 'Feld&nbsp;' + n + ': '; },
       vecComponent: function (n) { return 'Komponente ' + n; },
       matCell: function (row, column) { return 'Zeile ' + row + ', Spalte ' + column; },
+      dynamicMatCell: function (name, row, column) { return name + ', Zeile ' + row + ', Spalte ' + column; },
+      matrixAddRow: 'Zeile hinzufügen',
+      matrixRemoveRow: 'Zeile entfernen',
+      matrixAddColumn: 'Spalte hinzufügen',
+      matrixRemoveColumn: 'Spalte entfernen',
+      emptyMatrix: function (rows, columns) { return rows + ' × ' + columns + '-Matrix'; },
       resEmpty:     'Bitte eine Antwort eingeben.',
       resCorrect:   'Richtig!',
       resPartial:   function (pct) { return 'Teilweise richtig (' + pct + '&nbsp;%).'; },
@@ -1910,6 +1977,12 @@ __[x^2+2*x+1]
     fieldPrefix: function (n) { return 'Felt&nbsp;' + n + ': '; },
     vecComponent: function (n) { return 'Komponent ' + n; },
     matCell: function (row, column) { return 'Rad ' + row + ', kolonne ' + column; },
+    dynamicMatCell: function (name, row, column) { return name + ', rad ' + row + ', kolonne ' + column; },
+    matrixAddRow: 'Legg til rad',
+    matrixRemoveRow: 'Fjern rad',
+    matrixAddColumn: 'Legg til kolonne',
+    matrixRemoveColumn: 'Fjern kolonne',
+    emptyMatrix: function (rows, columns) { return rows + ' × ' + columns + '-matrise'; },
     resEmpty: 'Skriv inn et svar.',
     resCorrect: 'Riktig!',
     resPartial: function (pct) { return 'Delvis riktig (' + pct + '%).'; },
@@ -2452,6 +2525,18 @@ __[x^2+2*x+1]
       '        if isinstance(response, dict) and response.get("kind") == "expressions":',
       '            raw_values = response.get("raw", [])',
       '            response["expressions"] = [parse_expr(v, local_dict=_local, transformations=_math_tf) for v in raw_values]',
+      '            for name, item in response.get("inputs", {}).items():',
+      '                if not isinstance(item, dict) or item.get("type") != "matrix":',
+      '                    continue',
+      '                rows, cols = int(item.get("rows", -1)), int(item.get("cols", -1))',
+      '                if rows < 0 or cols < 0:',
+      '                    raise ValueError(f"Invalid matrix dimensions for {name}")',
+      '                matrix_raw = item.get("raw", [])',
+      '                if len(matrix_raw) != rows * cols:',
+      '                    raise ValueError(f"Matrix {name} has inconsistent dimensions")',
+      '                matrix_expressions = [parse_expr(v, local_dict=_local, transformations=_math_tf) for v in matrix_raw]',
+      '                item["expressions"] = matrix_expressions',
+      '                item["matrix"] = Matrix(rows, cols, matrix_expressions)',
       '        checker_symbols = {k: v for k, v in _local.items() if isinstance(v, Symbol)}',
       '        namespace = dict(globals())',
       '        exec(_math_checker, namespace)',
@@ -2589,36 +2674,136 @@ __[x^2+2*x+1]
     };
   }
 
-  function matchBalancedBracket(text, position) {
-    if (text.charAt(position) !== '[') return null;
+  var MAX_DYNAMIC_DIMENSION = 12;
+
+  function parseDynamicMatrixSpec(content) {
+    var raw = {};
+    splitTop(content, ',').forEach(function (part) {
+      var match = /^\s*([\w-]+)\s*=\s*(.*?)\s*$/.exec(part);
+      if (!match || !match[2]) throw new Error('math-exercise: mat{...} entries must use key=value');
+      if (Object.prototype.hasOwnProperty.call(raw, match[1]))
+        throw new Error('math-exercise: duplicate mat{...} option ' + match[1]);
+      raw[match[1]] = match[2];
+    });
+    var allowed = {
+      name: true, rows: true, cols: true,
+      'initial-rows': true, 'initial-cols': true,
+      'min-rows': true, 'max-rows': true,
+      'min-cols': true, 'max-cols': true,
+    };
+    Object.keys(raw).forEach(function (key) {
+      if (!allowed[key]) throw new Error('math-exercise: unknown mat{...} option ' + key);
+    });
+    var name = raw.name || '';
+    if (!/^[A-Za-z][A-Za-z0-9_-]*$/.test(name))
+      throw new Error('math-exercise: mat{...} requires name beginning with a letter');
+
+    function integerOption(key, fallback) {
+      if (raw[key] === undefined) return fallback;
+      var value = Number(raw[key]);
+      if (!Number.isInteger(value) || value < 0 || value > MAX_DYNAMIC_DIMENSION)
+        throw new Error('math-exercise: ' + key + ' must be an integer from 0 to ' + MAX_DYNAMIC_DIMENSION);
+      return value;
+    }
+    function axis(axisName) {
+      if (raw[axisName] === undefined) throw new Error('math-exercise: mat{...} requires ' + axisName);
+      if (raw[axisName] !== 'auto') {
+        var fixed = integerOption(axisName, null);
+        return { auto: false, initial: fixed, min: fixed, max: fixed };
+      }
+      var min = integerOption('min-' + axisName, 0);
+      var max = integerOption('max-' + axisName, 8);
+      if (min > max) throw new Error('math-exercise: min-' + axisName + ' cannot exceed max-' + axisName);
+      var initial = integerOption('initial-' + axisName, Math.min(max, Math.max(1, min)));
+      if (initial < min || initial > max)
+        throw new Error('math-exercise: initial-' + axisName + ' must lie between min-' + axisName + ' and max-' + axisName);
+      return { auto: true, initial: initial, min: min, max: max };
+    }
+    return { name: name, rows: axis('rows'), cols: axis('cols') };
+  }
+
+  function dynamicMatrixCellHtml(exerciseId, spec, row, column, vars) {
+    var fid = exerciseId + '-dm-' + spec.name + '-' + row + '-' + column;
+    var label = 'dm:' + spec.name + ':' + row + ',' + column;
+    return {
+      id: fid,
+      label: label,
+      html: '<input type="text" id="' + fid + '" data-answer=""'
+          + ' data-vars="' + escHtml(vars) + '"'
+          + ' data-dynamic-matrix-name="' + escHtml(spec.name) + '"'
+          + ' data-matrix-row="' + row + '" data-matrix-column="' + column + '"'
+          + ' data-structural-label="' + escHtml(label) + '"'
+          + ' autocomplete="off" autocorrect="off" spellcheck="false"'
+          + ' class="math-input math-mat-cell">',
+    };
+  }
+
+  function buildDynamicMatrix(exerciseId, content, vars, mode) {
+    if (mode !== 'custom') throw new Error('math-exercise: mat{...} currently requires mode: custom');
+    var spec = parseDynamicMatrixSpec(content);
+    var rows = spec.rows.initial, cols = spec.cols.initial;
+    var ids = [], labels = [], cells = [];
+    for (var row = 1; row <= rows; row++) {
+      for (var column = 1; column <= cols; column++) {
+        var cell = dynamicMatrixCellHtml(exerciseId, spec, row, column, vars);
+        ids.push(cell.id); labels.push(cell.label); cells.push(cell.html);
+      }
+    }
+    var matrix = '<span class="math-mat math-dynamic-mat" style="--cols:' + Math.max(cols, 1) + '"'
+      + ' data-matrix-name="' + escHtml(spec.name) + '" data-rows="' + rows + '" data-cols="' + cols + '"'
+      + ' data-auto-rows="' + spec.rows.auto + '" data-auto-cols="' + spec.cols.auto + '"'
+      + ' data-min-rows="' + spec.rows.min + '" data-max-rows="' + spec.rows.max + '"'
+      + ' data-min-cols="' + spec.cols.min + '" data-max-cols="' + spec.cols.max + '">'
+      + cells.join('') + '</span>';
+    var controls = '<span class="math-dynamic-matrix-controls" aria-label="Matrix size controls">'
+      + '<button type="button" data-dynamic-action="remove-row">− row</button>'
+      + '<button type="button" data-dynamic-action="add-row">+ row</button>'
+      + '<button type="button" data-dynamic-action="remove-col">− column</button>'
+      + '<button type="button" data-dynamic-action="add-col">+ column</button>'
+      + '</span>';
+    return {
+      html: '<span class="math-dynamic-matrix-wrap" data-matrix-name="' + escHtml(spec.name) + '">' + matrix + controls + '</span>',
+      ids: ids,
+      labels: labels,
+      count: 0,
+    };
+  }
+
+  function matchBalanced(text, position, open, close) {
+    if (text.charAt(position) !== open) return null;
     var depth = 0;
     for (var i = position; i < text.length; i++) {
-      if (text.charAt(i) === '[') depth++;
-      else if (text.charAt(i) === ']' && --depth === 0) return text.slice(position, i + 1);
+      if (text.charAt(i) === open) depth++;
+      else if (text.charAt(i) === close && --depth === 0) return text.slice(position, i + 1);
     }
     return null;
   }
 
-  function renderTaskText(text, exerciseId, vars, vecdir) {
+  function renderTaskText(text, exerciseId, vars, vecdir, mode) {
+    mode = mode || 'equivalent';
     var count = 0, fieldIds = [], structuralLabels = [], output = [], position = 0;
+    var dynamicNames = {};
     while (position < text.length) {
       var scalar = /^_+\[/.exec(text.slice(position));
       var boundary = !scalar && (position === 0 || !/[\w]/.test(text.charAt(position - 1)));
       var vector = !scalar && boundary && text.slice(position, position + 4) === 'vec[';
       var matrix = !scalar && !vector && boundary && text.slice(position, position + 4) === 'mat[';
-      var headLength = scalar ? scalar[0].length : (vector || matrix ? 4 : 0);
-      var bracket = headLength ? matchBalancedBracket(text, position + headLength - 1) : null;
+      var dynamicMatrix = !scalar && !vector && !matrix && boundary && text.slice(position, position + 4) === 'mat{';
+      var headLength = scalar ? scalar[0].length : (vector || matrix || dynamicMatrix ? 4 : 0);
+      var bracket = headLength && !dynamicMatrix ? matchBalanced(text, position + headLength - 1, '[', ']') : null;
+      var brace = dynamicMatrix ? matchBalanced(text, position + headLength - 1, '{', '}') : null;
+      var balanced = bracket || brace;
 
-      if (!bracket) { output.push(text.charAt(position++)); continue; }
+      if (!balanced) { output.push(text.charAt(position++)); continue; }
 
-      var content = bracket.slice(1, -1), rendered;
+      var content = balanced.slice(1, -1), rendered;
       if (scalar) {
         count++;
         var fid = exerciseId + '-f' + count;
         output.push(scalarFieldHtml(fid, content, vars, scalar[0].length - 1));
         fieldIds.push(fid);
         structuralLabels.push('');
-      } else {
+      } else if (vector || matrix) {
         rendered = vector
           ? buildVector(exerciseId, count, content, vars, vecdir)
           : buildMatrix(exerciseId, count, content, vars);
@@ -2626,8 +2811,16 @@ __[x^2+2*x+1]
         fieldIds = fieldIds.concat(rendered.ids);
         structuralLabels = structuralLabels.concat(rendered.labels);
         count = rendered.count;
+      } else {
+        var spec = parseDynamicMatrixSpec(content);
+        if (dynamicNames[spec.name]) throw new Error('math-exercise: duplicate dynamic matrix name ' + spec.name);
+        dynamicNames[spec.name] = true;
+        rendered = buildDynamicMatrix(exerciseId, content, vars, mode);
+        output.push(rendered.html);
+        fieldIds = fieldIds.concat(rendered.ids);
+        structuralLabels = structuralLabels.concat(rendered.labels);
       }
-      position += headLength - 1 + bracket.length;
+      position += headLength - 1 + balanced.length;
     }
     return {
       html: output.join('').replace(/\n/g, '<br>\n'),
@@ -2639,8 +2832,119 @@ __[x^2+2*x+1]
   function localizeStructuralLabel(token) {
     if (!token) return '';
     if (/^v\d+$/.test(token)) return L.vecComponent(token.slice(1));
+    var dynamicMatrix = /^dm:([A-Za-z][A-Za-z0-9_-]*):(\d+),(\d+)$/.exec(token);
+    if (dynamicMatrix) return L.dynamicMatCell(dynamicMatrix[1], dynamicMatrix[2], dynamicMatrix[3]);
     var matrix = /^m(\d+),(\d+)$/.exec(token);
     return matrix ? L.matCell(matrix[1], matrix[2]) : '';
+  }
+
+  function dynamicSpecFromElement(matrix) {
+    return {
+      name: matrix.dataset.matrixName,
+      rows: {
+        auto: matrix.dataset.autoRows === 'true',
+        min: Number(matrix.dataset.minRows),
+        max: Number(matrix.dataset.maxRows),
+      },
+      cols: {
+        auto: matrix.dataset.autoCols === 'true',
+        min: Number(matrix.dataset.minCols),
+        max: Number(matrix.dataset.maxCols),
+      },
+    };
+  }
+
+  function renderDynamicMatrixElement(matrix, exerciseId, vars, rows, cols) {
+    var oldValues = {};
+    matrix.querySelectorAll('input[data-matrix-row][data-matrix-column]').forEach(function (input) {
+      oldValues[input.dataset.matrixRow + ',' + input.dataset.matrixColumn] = input.value;
+    });
+    var spec = dynamicSpecFromElement(matrix);
+    var cells = [];
+    for (var row = 1; row <= rows; row++) {
+      for (var column = 1; column <= cols; column++) {
+        var cell = dynamicMatrixCellHtml(exerciseId, spec, row, column, vars);
+        cells.push(cell.html);
+      }
+    }
+    matrix.dataset.rows = String(rows);
+    matrix.dataset.cols = String(cols);
+    matrix.style.setProperty('--cols', String(Math.max(cols, 1)));
+    matrix.innerHTML = cells.length
+      ? cells.join('')
+      : '<span class="math-dynamic-matrix-empty" aria-live="polite">' + escHtml(L.emptyMatrix(rows, cols)) + '</span>';
+    matrix.querySelectorAll('input[data-matrix-row][data-matrix-column]').forEach(function (input) {
+      var key = input.dataset.matrixRow + ',' + input.dataset.matrixColumn;
+      if (Object.prototype.hasOwnProperty.call(oldValues, key)) input.value = oldValues[key];
+    });
+  }
+
+  function collectDynamicMatrixInputs(root) {
+    var inputs = {};
+    root.querySelectorAll('.math-dynamic-mat').forEach(function (matrix) {
+      var name = matrix.dataset.matrixName;
+      var rows = Number(matrix.dataset.rows), cols = Number(matrix.dataset.cols);
+      var raw = [];
+      for (var row = 1; row <= rows; row++) {
+        for (var column = 1; column <= cols; column++) {
+          var selector = 'input[data-matrix-row="' + row + '"][data-matrix-column="' + column + '"]';
+          var input = matrix.querySelector(selector);
+          raw.push(input ? input.value.trim() : '');
+        }
+      }
+      inputs[name] = { type: 'matrix', rows: rows, cols: cols, raw: raw };
+    });
+    return inputs;
+  }
+
+  function initializeDynamicMatrices(root, exerciseId, vars, onChange) {
+    var names = {};
+    root.querySelectorAll('.math-dynamic-matrix-wrap').forEach(function (wrap) {
+      var matrix = wrap.querySelector('.math-dynamic-mat');
+      if (!matrix) return;
+      var spec = dynamicSpecFromElement(matrix);
+      if (names[spec.name]) throw new Error('math-exercise: duplicate dynamic matrix name ' + spec.name);
+      names[spec.name] = true;
+      var controls = wrap.querySelector('.math-dynamic-matrix-controls');
+      if (!controls) return;
+
+      var labels = {
+        'add-row': L.matrixAddRow,
+        'remove-row': L.matrixRemoveRow,
+        'add-col': L.matrixAddColumn,
+        'remove-col': L.matrixRemoveColumn,
+      };
+      function syncControls() {
+        var rows = Number(matrix.dataset.rows), cols = Number(matrix.dataset.cols);
+        controls.querySelectorAll('button[data-dynamic-action]').forEach(function (button) {
+          var action = button.dataset.dynamicAction;
+          var rowAction = action.indexOf('row') !== -1;
+          var axis = rowAction ? spec.rows : spec.cols;
+          button.style.display = axis.auto ? '' : 'none';
+          button.textContent = (action.indexOf('add') === 0 ? '+ ' : '− ') + labels[action];
+          button.setAttribute('aria-label', labels[action] + ' ' + spec.name);
+          var value = rowAction ? rows : cols;
+          button.disabled = action.indexOf('add') === 0 ? value >= axis.max : value <= axis.min;
+        });
+      }
+      function resize(action) {
+        var rows = Number(matrix.dataset.rows), cols = Number(matrix.dataset.cols);
+        if (action === 'add-row' && rows < spec.rows.max) rows++;
+        if (action === 'remove-row' && rows > spec.rows.min) rows--;
+        if (action === 'add-col' && cols < spec.cols.max) cols++;
+        if (action === 'remove-col' && cols > spec.cols.min) cols--;
+        renderDynamicMatrixElement(matrix, exerciseId, vars, rows, cols);
+        syncControls();
+        if (onChange) onChange();
+      }
+      controls.querySelectorAll('button[data-dynamic-action]').forEach(function (button) {
+        button.addEventListener('click', function () { resize(button.dataset.dynamicAction); });
+      });
+      if (Number(matrix.dataset.rows) === 0 || Number(matrix.dataset.cols) === 0) {
+        renderDynamicMatrixElement(matrix, exerciseId, vars, Number(matrix.dataset.rows), Number(matrix.dataset.cols));
+      }
+      syncControls();
+    });
   }
 
   // ---------------------------------------------------------------------------
@@ -2718,22 +3022,24 @@ __[x^2+2*x+1]
     });
   }
 
-  async function collectCustomResponse(fieldIds, opts, includeAI) {
+  async function collectCustomResponse(fieldIds, opts, includeAI, structuredInputs) {
     if (opts.responseSource) return requestExternalResponse(opts.responseSource, includeAI);
     var values = fieldIds.map(function (id) {
       var el = document.getElementById(id);
       return el ? el.value.trim() : '';
     });
-    if (!values.length || values.some(function (value) { return value === ''; })) {
-      return { empty: true, response: { kind: 'expressions', raw: values }, ai: null };
+    var hasStructuredInput = structuredInputs && Object.keys(structuredInputs).length > 0;
+    var response = { kind: 'expressions', raw: values, inputs: structuredInputs || {} };
+    if ((!values.length && !hasStructuredInput) || values.some(function (value) { return value === ''; })) {
+      return { empty: true, response: response, ai: null };
     }
-    return { response: { kind: 'expressions', raw: values }, ai: null };
+    return { response: response, ai: null };
   }
 
   // Shared by runCheck and doFeedback so the empty/score-0 fallback and the
   // collect-then-check sequence for mode: custom exist in exactly one place.
-  async function collectAndCheckCustom(fieldIds, opts, includeAI) {
-    var transport = await collectCustomResponse(fieldIds, opts, includeAI);
+  async function collectAndCheckCustom(fieldIds, opts, includeAI, structuredInputs) {
+    var transport = await collectCustomResponse(fieldIds, opts, includeAI, structuredInputs);
     var result = transport.empty
       ? { status: 'empty', score: 0 }
       : await checkCustom(transport.response, opts);
@@ -2744,6 +3050,29 @@ __[x^2+2*x+1]
     if (!ai || ai.summary === undefined || ai.summary === null) return '';
     var text = typeof ai.summary === 'string' ? ai.summary : JSON.stringify(ai.summary);
     return String(text || '').slice(0, 4000);
+  }
+
+  function expressionAnswersXml(responses, structuredInputs) {
+    var parts = responses.filter(function (field) {
+      return !(field.element && field.element.dataset.dynamicMatrixName);
+    }).map(function (field) {
+      return '<field label="' + promptXmlEsc(field.label) + '">' +
+        promptXmlEsc(field.value) + '</field>';
+    });
+    Object.keys(structuredInputs || {}).forEach(function (name) {
+      var matrix = structuredInputs[name];
+      var entries = [];
+      for (var row = 0; row < matrix.rows; row++) {
+        var values = matrix.raw.slice(row * matrix.cols, (row + 1) * matrix.cols);
+        entries.push('<row index="' + (row + 1) + '">' +
+          values.map(function (value, column) {
+            return '<entry column="' + (column + 1) + '">' + promptXmlEsc(value) + '</entry>';
+          }).join('') + '</row>');
+      }
+      parts.push('<matrix name="' + promptXmlEsc(name) + '" rows="' + matrix.rows +
+        '" columns="' + matrix.cols + '">' + entries.join('') + '</matrix>');
+    });
+    return parts.join('\n');
   }
 
   // ---------------------------------------------------------------------------
@@ -3573,7 +3902,7 @@ __[x^2+2*x+1]
         idx = Math.floor(Math.random() * poolTasks.length);
         try { sessionStorage.setItem(poolKey, String(idx)); } catch(e) {}
       }
-      var r = renderTaskText(poolTasks[idx], cell.id, vars, vecdir);
+      var r = renderTaskText(poolTasks[idx], cell.id, vars, vecdir, mode);
       var qDiv = cell.querySelector('.math-exercise-question');
       qDiv.innerHTML = r.html;
       cell.dataset.fields = JSON.stringify(r.fieldIds);
@@ -3607,6 +3936,46 @@ __[x^2+2*x+1]
     var legendPanel = cell.querySelector('.math-legend-panel');
     var fbDiv       = cell.querySelector('.math-feedback-area');
     var legendBuilt = false;
+    var questionDiv = cell.querySelector('.math-exercise-question');
+    var structuralLabelById = {};
+
+    function rememberCurrentLabels() {
+      fieldIds.forEach(function (id, index) {
+        structuralLabelById[id] = structuralFieldLabels[index] || '';
+      });
+    }
+
+    function refreshFields() {
+      var ids = [], labels = [];
+      questionDiv.querySelectorAll('input.math-input, textarea.math-input').forEach(function (input) {
+        ids.push(input.id);
+        labels.push(input.dataset.structuralLabel || structuralLabelById[input.id] || '');
+      });
+      fieldIds = ids;
+      structuralFieldLabels = labels;
+      rememberCurrentLabels();
+      cell.dataset.fields = JSON.stringify(fieldIds);
+      cell.dataset.structuralFieldLabels = JSON.stringify(structuralFieldLabels);
+    }
+
+    function clearAssessmentAfterResize() {
+      questionDiv.querySelectorAll('.math-input').forEach(function (input) {
+        input.classList.remove('math-input-ok', 'math-input-partial', 'math-input-wrong', 'math-input-err');
+      });
+      fbDiv.innerHTML = '';
+    }
+
+    function setupDynamicMatrices() {
+      initializeDynamicMatrices(questionDiv, cell.id, vars, function () {
+        refreshFields();
+        attachKeyListeners();
+        clearAssessmentAfterResize();
+      });
+      refreshFields();
+    }
+
+    rememberCurrentLabels();
+    setupDynamicMatrices();
 
     function fieldLabel(index) {
       var supplied = configuredFieldLabels[index];
@@ -3641,6 +4010,7 @@ __[x^2+2*x+1]
 
     // ---- Check ----
     async function runCheck() {
+      refreshFields();
       checkBtn.disabled = true;
       if (feedbackBtn) feedbackBtn.disabled = true;
       fbDiv.innerHTML = '<div class="math-fb-checking">' + L.checking + '</div>';
@@ -3649,7 +4019,9 @@ __[x^2+2*x+1]
         var parts = [];
         var fieldElements = fieldIds.map(function (id) { return document.getElementById(id); });
         if (mode === 'custom') {
-          var custom = (await collectAndCheckCustom(fieldIds, checkOpts, false)).result;
+          var custom = (await collectAndCheckCustom(
+            fieldIds, checkOpts, false, collectDynamicMatrixInputs(questionDiv)
+          )).result;
           fieldElements.forEach(function (el) {
             if (!el) return;
             el.classList.remove('math-input-ok', 'math-input-partial', 'math-input-wrong', 'math-input-err');
@@ -3706,8 +4078,10 @@ __[x^2+2*x+1]
     function attachKeyListeners() {
       fieldIds.forEach(function (id) {
         var el = document.getElementById(id);
-        if (el && el.tagName === 'INPUT')
+        if (el && el.tagName === 'INPUT' && el.dataset.mathEnterListener !== 'true') {
+          el.dataset.mathEnterListener = 'true';
           el.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); runCheck(); } });
+        }
       });
     }
 
@@ -3725,13 +4099,16 @@ __[x^2+2*x+1]
         }
         try { sessionStorage.setItem(poolKey, String(next)); } catch(e) {}
 
-        var r = renderTaskText(poolTasks[next], cell.id, vars, vecdir);
+        var r = renderTaskText(poolTasks[next], cell.id, vars, vecdir, mode);
         var qDivR = cell.querySelector('.math-exercise-question');
         qDivR.innerHTML = r.html;
         cell.dataset.fields = JSON.stringify(r.fieldIds);
         cell.dataset.structuralFieldLabels = JSON.stringify(r.structuralLabels);
         fieldIds = r.fieldIds;
         structuralFieldLabels = r.structuralLabels;
+        structuralLabelById = {};
+        rememberCurrentLabels();
+        setupDynamicMatrices();
         warnExtraFieldLabels();
         renderMathInQuestion(qDivR);
 
@@ -3743,21 +4120,34 @@ __[x^2+2*x+1]
     // ---- AI Feedback ----
     if (feedbackBtn) {
       feedbackBtn.addEventListener('click', function () {
+        refreshFields();
+        var structuredInputs = collectDynamicMatrixInputs(questionDiv);
         var responses = fieldIds.map(function (id, index) {
           var el = document.getElementById(id);
           return { index: index + 1, label: fieldLabel(index), value: el ? el.value.trim() : '', element: el };
         });
-        if (!checkOpts.responseSource && !responses.some(function (field) { return field.value !== ''; })) {
+        var zeroSizedMatrixSubmitted = Object.keys(structuredInputs).some(function (name) {
+          return structuredInputs[name].rows === 0 || structuredInputs[name].cols === 0;
+        });
+        if (!checkOpts.responseSource && !zeroSizedMatrixSubmitted &&
+            !responses.some(function (field) { return field.value !== ''; })) {
           fbDiv.innerHTML = '<div class="math-fb-empty">' + L.needAnswerFirst + '</div>';
           return;
         }
         var qDiv   = cell.querySelector('.math-exercise-question');
         var capEl  = cell.querySelector('.math-exercise-caption');
         var clone  = qDiv.cloneNode(true);
+        clone.querySelectorAll('.math-dynamic-matrix-wrap').forEach(function (wrap) {
+          var marker = document.createElement('span');
+          marker.textContent = '[Matrix ' + (wrap.dataset.matrixName || '') + ']';
+          wrap.parentNode.replaceChild(marker, wrap);
+        });
+        clone.querySelectorAll('.math-dynamic-matrix-controls').forEach(function (controls) { controls.remove(); });
         var clonedFields = clone.querySelectorAll('input, textarea');
-        clonedFields.forEach(function (el, index) {
+        clonedFields.forEach(function (el) {
           var s = document.createElement('span');
-          s.textContent = '[' + fieldLabel(index) + ']';
+          var originalIndex = fieldIds.indexOf(el.id);
+          s.textContent = '[' + fieldLabel(originalIndex >= 0 ? originalIndex : 0) + ']';
           el.parentNode.replaceChild(s, el);
         });
         var question = (capEl ? capEl.textContent + '\n' : '') + clone.textContent.replace(/\s+/g, ' ').trim();
@@ -3774,7 +4164,7 @@ __[x^2+2*x+1]
             var overallAssessment = '';
             var externalAI = null;
             if (mode === 'custom') {
-              var customOutcome = await collectAndCheckCustom(fieldIds, checkOpts, true);
+              var customOutcome = await collectAndCheckCustom(fieldIds, checkOpts, true, structuredInputs);
               externalAI = customOutcome.transport.ai;
               var customResult = customOutcome.result;
               responses.forEach(function (field) {
@@ -3809,10 +4199,7 @@ __[x^2+2*x+1]
             var summary = externalAISummary(externalAI);
             var answers = checkOpts.responseSource
               ? '<jsxgraph_response>' + promptXmlEsc(summary || 'Interactive graphical response submitted.') + '</jsxgraph_response>'
-              : responses.map(function (field) {
-                  return '<field label="' + promptXmlEsc(field.label) + '">' +
-                    promptXmlEsc(field.value) + '</field>';
-                }).join('\n');
+              : expressionAnswersXml(responses, structuredInputs);
             var assessment = responses.map(function (field) {
               var scoreAttr = typeof field.score === 'number' ? ' score="' + promptXmlEsc(field.score) + '"' : '';
               return '<field label="' + promptXmlEsc(field.label) + '"' + scoreAttr + '>' +
@@ -3876,8 +4263,10 @@ __[x^2+2*x+1]
       modelPolicy: modelPolicy,
       loadCapability: loadCapability,
       splitTop: splitTop,
+      parseDynamicMatrixSpec: parseDynamicMatrixSpec,
       renderTaskText: renderTaskText,
       localizeStructuralLabel: localizeStructuralLabel,
+      expressionAnswersXml: expressionAnswersXml,
     };
   }
 
