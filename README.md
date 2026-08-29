@@ -87,7 +87,8 @@ math-exercise:
 
 ## Interface language
 
-Currently supported: **German (`de`)** and **English (`en`)**.
+Currently supported: **English (`en`)**, **German (`de`)**, and
+**Norwegian Bokmål (`nb`; `no` is accepted as an alias)**.
 **Default is English** – without any setting, the interface appears in English.
 
 The extension resolves the language in this order:
@@ -112,8 +113,8 @@ Regional variants are shortened (`de-DE` → `de`). An unsupported language
 
 Translated: the buttons (**Check**, **Input help**, **Feedback**), the
 input-help table, all answer feedback messages, the settings dialog, and the
-instruction given to the AI: on an English page, the tutor responds in
-English.
+instruction given to the AI: on a Norwegian Bokmål page, the tutor responds
+in Norwegian Bokmål.
 
 **Not** translated: the exercise text itself – that lives in the code block
 and stays exactly as you write it.
@@ -527,13 +528,19 @@ request. The **system message** is assembled in this order:
 4. **Context rules** *(when context is present)* – use it to select the right
    method and notation, but do not copy worked examples or prematurely reveal
    formulas and values.
-5. **Current hint level** – the attempt-specific instruction is deliberately
-   placed last for stronger compliance. Levels 1–3 prohibit progressively less
-   information; only level 4 permits a complete solution.
+5. **Current hint level** – levels 1–3 prohibit progressively less information;
+   only level 4 permits a complete solution.
+6. **Final language guard** – the requested output language is repeated as the
+   last system instruction and is also included as an explicit
+   `<output_language>` element in the user message. Responses containing an
+   obviously unexpected writing system are retried once with a localized
+   correction. A second mismatch is shown as a localized error instead of
+   displaying feedback in the wrong script.
 
 The **user message** contains clearly separated blocks:
 
 ```xml
+<output_language code="nb">Norwegian Bokmål</output_language>
 <learning_context>...</learning_context>
 <task>...</task>
 <student_response>
