@@ -1,0 +1,10 @@
+---
+title: "General SymPy examples"
+lang: en
+engine: markdown
+filters:
+  - math-exercise
+---
+
+{{< include _includes/sympy-examples.qmd >}}
+

@@ -1,0 +1,91 @@
+This page covers the authoring features that are independent of a particular
+branch of mathematics. Enter a few deliberately wrong answers as well as the
+correct ones to inspect field highlighting and feedback labels.
+
+## A single answer field
+
+```{math-exercise}
+#| label: basic-single
+What is $7\cdot 6$? _[42]
+```
+
+The expression inside the brackets is the expected answer. It is not shown to
+the student in the rendered page.
+
+## Input widths
+
+```{math-exercise}
+#| label: basic-widths
+#| field-labels: Short answer, Medium answer, Long answer
+Short: _[2]
+
+Medium: __[123456]
+
+Long mathematical expression: ___[(1+2+3+4+5)^2]
+```
+
+## Collapsible caption
+
+```{math-exercise}
+#| label: basic-caption
+#| caption: Click this heading to open the exercise
+Compute $5^2$: _[25]
+```
+
+## Multiple fields and meaningful labels
+
+```{math-exercise}
+#| label: basic-labels
+#| field-labels: Sum, Product, Difference
+#| partial-credit: true
+For the numbers $7$ and $3$, enter their sum _[10], product _[21], and
+difference _[4].
+```
+
+## Representation requirements
+
+```{math-exercise}
+#| label: basic-factored
+#| caption: Equivalent is not enough when a form is requested
+#| vars: x
+#| form: factored
+Factor $x^2+5x+6$: __[(x+2)*(x+3)]
+```
+
+## Case-insensitive text
+
+```{math-exercise}
+#| label: basic-text
+#| mode: string_ci
+Write the conventional name of the constant $\pi$: __[pi]
+```
+
+## A random task pool
+
+The selected task is stable during a browser session. Use the reload button in
+the corner to request another variant.
+
+```{math-exercise}
+#| label: basic-pool
+#| caption: Random arithmetic task
+#| pool: true
+
+$8+7=$ _[15]
+
+---
+
+$9\cdot6=$ _[54]
+
+---
+
+$2^8=$ _[256]
+```
+
+## Rejecting an unfinished representation
+
+```{math-exercise}
+#| label: basic-reject
+#| vars: x
+#| reject: (x+1)^2
+Expand $(x+1)^2$: __[x^2+2*x+1]
+```

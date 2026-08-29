@@ -1,0 +1,139 @@
+These exercises exercise a broader range of SymPy parsing and equivalence
+checking. Unless a stricter mode or form is requested, any algebraically
+equivalent expression is accepted.
+
+## Polynomial algebra
+
+```{math-exercise}
+#| label: sympy-expand
+#| vars: x
+Expand $(2x-3)(x+4)$: __[2*x^2+5*x-12]
+```
+
+```{math-exercise}
+#| label: sympy-factor
+#| vars: x
+#| form: factored
+Factor $x^3-4x$: __[x*(x-2)*(x+2)]
+```
+
+## Rational expressions
+
+```{math-exercise}
+#| label: sympy-rational
+#| vars: x
+#| form: single_fraction
+Write $\frac{1}{x} + \frac{1}{x+1}$ as one fraction:
+__[(2*x+1)/(x*(x+1))]
+```
+
+```{math-exercise}
+#| label: sympy-lowest-terms
+#| form: lowest_terms
+Reduce $84/126$ fully: _[2/3]
+```
+
+## Powers, roots, and constants
+
+```{math-exercise}
+#| label: sympy-radicals
+Simplify $\sqrt{72}$: _[6*sqrt(2)]
+```
+
+```{math-exercise}
+#| label: sympy-logarithm
+#| vars: x
+Differentiate $\log(x^2)$ formally: __[2/x]
+```
+
+```{math-exercise}
+#| label: sympy-exponential
+#| vars: x
+Differentiate $e^{3x}$: __[3*exp(3*x)]
+```
+
+## Trigonometry
+
+```{math-exercise}
+#| label: sympy-trig-identity
+#| vars: x
+Simplify $\sin^2(x)+\cos^2(x)$: _[1]
+```
+
+```{math-exercise}
+#| label: sympy-trig-value
+Give the exact value of $\sin(\pi/6)$: _[1/2]
+```
+
+## Derivatives and integrals
+
+```{math-exercise}
+#| label: sympy-derivative
+#| vars: x
+Differentiate $x^2\sin(x)$:
+__[2*x*sin(x)+x^2*cos(x)]
+```
+
+```{math-exercise}
+#| label: sympy-antiderivative
+#| vars: x
+Give one antiderivative of $3x^2-4$: __[x^3-4*x]
+```
+
+## Complex numbers
+
+```{math-exercise}
+#| label: sympy-complex
+Compute $(1+2i)(3-i)$ using `I` for $i$: __[5+5*I]
+```
+
+## Solution sets
+
+Order does not matter in `set` mode, and repeated items are compared as a
+multiset.
+
+```{math-exercise}
+#| label: sympy-roots-set
+#| mode: set
+List all roots of $x^3-x=0$: __[-1,0,1]
+```
+
+## Numerical checking
+
+```{math-exercise}
+#| label: sympy-absolute-tolerance
+#| mode: numeric
+#| tolerance: 0.001
+Approximate $\sqrt{2}$: _[sqrt(2)]
+```
+
+```{math-exercise}
+#| label: sympy-relative-tolerance
+#| mode: numeric
+#| tolerance: 1%
+Approximate $e^5$: _[exp(5)]
+```
+
+```{math-exercise}
+#| label: sympy-decimal-places
+#| mode: numeric
+#| decplaces: 3
+Give $\pi$ to three decimal places: _[pi]
+```
+
+```{math-exercise}
+#| label: sympy-significant-figures
+#| mode: numeric
+#| sigfigs: 4
+Give $1/7$ to four significant figures: _[1/7]
+```
+
+## Exact representation
+
+```{math-exercise}
+#| label: sympy-exact
+#| mode: exact
+#| vars: x
+Enter the canonical expanded expression $x^2+2x+1$:
+__[x^2+2*x+1]
+```

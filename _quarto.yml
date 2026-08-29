@@ -1,0 +1,34 @@
+project:
+  type: website
+  output-dir: _site
+  render:
+    - index.qmd
+    - basic-features.qmd
+    - ai-feedback.qmd
+    - sympy-examples.qmd
+    - vector-matrix-tests.qmd
+    - examples.qmd
+
+website:
+  title: "math-exercise"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Overview
+      - href: basic-features.qmd
+        text: Basic features
+      - href: sympy-examples.qmd
+        text: SymPy examples
+      - href: ai-feedback.qmd
+        text: AI and context
+      - href: vector-matrix-tests.qmd
+        text: Vektorer og matriser (NB)
+    right:
+      - href: https://github.com/Erasmus-CTM/math-exercise
+        text: GitHub
+
+format:
+  html:
+    toc: true
+    theme: cosmo
+

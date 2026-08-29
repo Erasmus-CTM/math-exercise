@@ -1,0 +1,53 @@
+---
+title: "Interactive examples"
+subtitle: "A test and demonstration site for the math-exercise Quarto extension"
+lang: en
+toc: false
+---
+
+This site is built automatically from the repository's example sources. It is
+both documentation for authors and a browser-level regression suite for the
+extension.
+
+::: {.callout-note}
+All answer checking runs locally in the browser through SymPy and Pyodide.
+AI-generated progressive feedback is optional and works with OpenAI-compatible
+providers configured by the user.
+:::
+
+::: {.grid}
+::: {.g-col-12 .g-col-md-6}
+### [Basic features](basic-features.qmd)
+
+Input widths, captions, multiple fields, labels, partial credit, forms, and
+random task pools.
+:::
+
+::: {.g-col-12 .g-col-md-6}
+### [General SymPy examples](sympy-examples.qmd)
+
+Algebra, functions, trigonometry, exact forms, numerical tolerances, sets, and
+more involved symbolic answers.
+:::
+
+::: {.g-col-12 .g-col-md-6}
+### [AI feedback and context](ai-feedback.qmd)
+
+Automatic section context, reusable explicit context, context opt-out,
+meaningful field labels, and the model capability adapter.
+:::
+
+::: {.g-col-12 .g-col-md-6}
+### [Vektorer og matriser](vector-matrix-tests.qmd)
+
+En fullstendig norsk testside for rad- og kolonnevektorer, matriser, symbolske
+uttrykk, numerisk toleranse og oppgavepooler.
+:::
+:::
+
+## Extended regression page
+
+The original [all-in-one examples page](examples.qmd) remains available. It
+contains the large JSXGraph response examples and serves as compatibility
+coverage while the focused pages above provide the primary navigation.
+

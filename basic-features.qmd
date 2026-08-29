@@ -1,0 +1,10 @@
+---
+title: "Basic features"
+lang: en
+engine: markdown
+filters:
+  - math-exercise
+---
+
+{{< include _includes/basic-features.qmd >}}
+
