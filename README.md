@@ -313,6 +313,9 @@ can assess complete row or column vectors with, for example,
 `assessment: {"Z": {"columns": [True, False, True]}}` or
 `assessment: {"R": {"rows": [True, False]}}`; the corresponding vectors are
 marked as units, and the structured statuses are also available to AI feedback.
+For a basis exercise, mark a vector correct only when it belongs to the required
+subspace and adds a new independent direction. A valid but redundant vector
+should not be marked correct merely because it belongs to the subspace.
 
 ````markdown
 ```{math-exercise}

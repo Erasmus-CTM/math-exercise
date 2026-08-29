@@ -63,12 +63,12 @@ jobs:
           grep -Fq 'data-structural-field-labels=' _site/vector-matrix-tests.html
           grep -Fq 'Komponent ' _site/vector-matrix-tests.html
           grep -Fq 'Rad ' _site/vector-matrix-tests.html
-          grep -Fq 'Choose the number of basis vectors' _site/dynamic-matrix-tests.html
+          grep -Fq 'Bases with an unknown number of vectors' _site/dynamic-matrix-tests.html
           grep -Fq 'data-auto-cols="true"' _site/dynamic-matrix-tests.html
           grep -Fq 'data-auto-rows="true"' _site/dynamic-matrix-tests.html
           grep -Fq 'data-min-cols="0"' _site/dynamic-matrix-tests.html
-          grep -Fq 'Empty by removing rows' _site/dynamic-matrix-tests.html
-          grep -Fq 'A row-space basis' _site/dynamic-matrix-tests.html
-          grep -Fq 'Build a 3 × 3 Hessian' _site/dynamic-matrix-tests.html
-          grep -Fq 'Choose a path graph' _site/dynamic-matrix-tests.html
+          grep -Fq 'Row-space basis' _site/dynamic-matrix-tests.html
+          grep -Fq 'Hessian with three variables' _site/dynamic-matrix-tests.html
+          grep -Fq 'Adjacency matrix of a path' _site/dynamic-matrix-tests.html
+          grep -Fq 'Empty matrix edge cases' _site/dynamic-matrix-tests.html
           test "$(grep -Fc 'class="math-example-source"' _site/dynamic-matrix-tests.html)" -eq 9

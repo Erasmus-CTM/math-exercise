@@ -7,6 +7,10 @@ const source = await readFile(
   new URL('../_extensions/math-exercise/math-exercise.js', import.meta.url),
   'utf8',
 );
+const dynamicExamples = await readFile(
+  new URL('../dynamic-matrix-tests.qmd', import.meta.url),
+  'utf8',
+);
 
 function loadBundle(lang = 'en') {
   const context = {
@@ -189,4 +193,19 @@ test('normalizes task dollar math before raw HTML rendering', () => {
   );
   assert.equal(rendered.html, 'For \\(C=\\begin{bmatrix}1&2\\\\2&4\\end{bmatrix}\\), enter \\(Z\\).');
   assert.doesNotMatch(rendered.html, /\$/);
+});
+
+test('basis examples do not award vacuous credit and mark redundant vectors', () => {
+  assert.doesNotMatch(dynamicExamples, /contained\s*=\s*all\(/);
+  assert.equal((dynamicExamples.match(/coverage = min\(len\(accepted\), target_dim\) \/ target_dim/g) || []).length, 3);
+  assert.equal((dynamicExamples.match(/precision = len\(accepted\) \/ [ZBR]\.(?:cols|rows) if [ZBR]\.(?:cols|rows) else 0/g) || []).length, 3);
+  assert.equal((dynamicExamples.match(/adds_direction/g) || []).length, 9);
+});
+
+test('meaningful dynamic examples precede the empty-state edge cases', () => {
+  assert.equal((dynamicExamples.match(/```\{math-exercise\}/g) || []).length, 9);
+  const edgeCases = dynamicExamples.indexOf('## Empty matrix edge cases');
+  assert.ok(edgeCases > dynamicExamples.indexOf('### A non-square zero matrix'));
+  assert.ok(edgeCases < dynamicExamples.indexOf('#| label: dynamic-zero-columns'));
+  assert.ok(edgeCases < dynamicExamples.indexOf('#| label: dynamic-zero-rows'));
 });

@@ -10,263 +10,352 @@ filters:
   - math-exercise
 ---
 
-Dynamic matrices let the student choose one or both dimensions. Use
-`mat{...}` only with `mode: custom`; the checker receives each named input as a
-SymPy matrix at `response["inputs"][name]["matrix"]`.
+A dynamic matrix lets the student decide how many rows or columns the answer
+needs. This is useful when finding the size is part of the mathematics—for
+example, when the dimension of a subspace is not given in advance.
 
-::: {.callout-tip}
-The controls never infer a dimension from the answer. Authors set neutral
-initial dimensions and mathematical bounds. Removing the final row or column
-produces the single canonical empty matrix.
+{{< include _includes/input-guide-en.qmd >}}
+
+::: {.callout-tip title="Changing the matrix size"}
+Use the **−** and **+** buttons beside **Rows** or **Columns** before or while
+entering the matrix. Only dimensions that the exercise allows you to change are
+shown. Fill every visible cell, then select **Check**.
+
+In exercises that assess complete vectors, all cells in a row or column receive
+the same color. Green means that vector is valid *and adds a new independent
+direction*. A red vector may be outside the required space, zero, or redundant.
+The whole answer is correct only when the submitted vectors form a complete
+basis.
 :::
 
-::: {#dynamic-matrix-method .math-exercise-context}
+::: {.callout-note title="For exercise authors"}
+Write a resizable input as, for example,
+`mat{name=Z, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}`.
+Dynamic matrices use `mode: custom`. The checker receives the SymPy matrix at
+`response["inputs"][name]["matrix"]` and can return whole-vector assessment as
+`{"assessment": {"Z": {"columns": [...]}}}` or
+`{"assessment": {"R": {"rows": [...]}}}`.
+:::
 
-A nonempty matrix with $r$ rows and $c$ columns has shape $r\times c$. A
-matrix without entries is the empty matrix. For a matrix $A$ with $n$ columns,
-a null-space basis matrix $Z$ must satisfy $AZ=0$, have linearly
-independent columns, and have $n-\operatorname{rank}(A)$ columns. A set of
-points on $y=2x$ consists of distinct row pairs $(x,2x)$. A zero matrix has
-only zero entries, regardless of its rectangular shape.
+## Bases with an unknown number of vectors
+
+The number of basis vectors is the dimension of the subspace, so the student
+must determine both the entries and the number of vectors.
+
+::: {#dynamic-basis-method .math-exercise-context}
+
+To check a proposed basis:
+
+1. Verify that every vector belongs to the required subspace.
+2. Remove zero or redundant vectors; every remaining vector must add a new
+   independent direction.
+3. Verify that the independent vectors span the entire subspace.
 
 :::
 
-## 1. Choose the number of basis vectors
+### Null-space basis
 
 ```{math-exercise}
 #| label: dynamic-nullspace-basis
 #| caption: A basis without announcing nullity
 #| mode: custom
-#| context: dynamic-matrix-method
+#| context: dynamic-basis-method
 #| checker: |
 #|   def check(response, symbols):
 #|       Z = response["inputs"]["Z"]["matrix"]
 #|       C = Matrix([[1, 2, 3], [2, 4, 6]])
-#|       valid_columns = [
-#|           Z[:, j] != zeros(Z.rows, 1) and C * Z[:, j] == zeros(C.rows, 1)
-#|           for j in range(Z.cols)
-#|       ]
-#|       contained = all(valid_columns)
-#|       independent = Z.rank() == Z.cols
-#|       complete = Z.cols == C.cols - C.rank()
-#|       score = (int(contained) + int(independent) + int(complete)) / 3
+#|       target_dim = C.cols - C.rank()
+#|       accepted = []
+#|       column_status = []
+#|       for j in range(Z.cols):
+#|           vector = Z[:, j]
+#|           belongs = (
+#|               Z.rows == C.cols
+#|               and vector != zeros(Z.rows, 1)
+#|               and C * vector == zeros(C.rows, 1)
+#|           )
+#|           trial = accepted + [vector]
+#|           adds_direction = belongs and Matrix.hstack(*trial).rank() == len(trial)
+#|           column_status.append(adds_direction)
+#|           if adds_direction:
+#|               accepted.append(vector)
+#|       coverage = min(len(accepted), target_dim) / target_dim
+#|       precision = len(accepted) / Z.cols if Z.cols else 0
+#|       score = coverage * precision
+#|       feedback = "" if score == 1 else (
+#|           "This null space is not trivial; add basis vectors." if Z.cols == 0
+#|           else "A red column is zero, outside the null space, or redundant. Keep enough independent columns to span the null space."
+#|       )
 #|       return {
 #|           "score": score,
-#|           "feedback": "Check that every column is a nonzero null-space vector, that the columns are independent, and that the basis is complete.",
-#|           "assessment": {"Z": {"columns": valid_columns}}
+#|           "feedback": feedback,
+#|           "assessment": {"Z": {"columns": column_status}}
 #|       }
 
 Give a basis for the null space of
-$C=\begin{bmatrix}1&2&3\\2&4&6\end{bmatrix}$. Enter the basis vectors as
-columns of $Z$:
+$C=\begin{bmatrix}1&2&3\\2&4&6\end{bmatrix}$.
+Enter one basis vector per column of $Z$. Use the column controls to decide how
+many vectors are needed:
 
 $Z=$ mat{name=Z, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}
 ```
 
-## 2. Choose the number of rows
-
-```{math-exercise}
-#| label: dynamic-point-rows
-#| caption: A variable-length list of points
-#| mode: custom
-#| context: dynamic-matrix-method
-#| checker: |
-#|   def check(response, symbols):
-#|       P = response["inputs"]["P"]["matrix"]
-#|       on_line = all(simplify(P[i, 1] - 2*P[i, 0]) == 0 for i in range(P.rows))
-#|       distinct = len({tuple(P.row(i)) for i in range(P.rows)}) == P.rows
-#|       return {
-#|           "score": (int(on_line) + int(distinct)) / 2,
-#|           "feedback": "Each row must be a point on y=2x, and the submitted points must be distinct."
-#|       }
-
-Give between two and four distinct points on the line $y=2x$, one point per
-row:
-
-$P=$ mat{name=P, rows=auto, cols=2, initial-rows=2, min-rows=2, max-rows=4}
-```
-
-## 3. Choose both dimensions
-
-```{math-exercise}
-#| label: dynamic-both-dimensions
-#| caption: Any non-square zero matrix
-#| mode: custom
-#| context: dynamic-matrix-method
-#| checker: |
-#|   def check(response, symbols):
-#|       A = response["inputs"]["A"]["matrix"]
-#|       non_square = A.rows != A.cols
-#|       zero = A == zeros(A.rows, A.cols)
-#|       return {
-#|           "score": (int(non_square) + int(zero)) / 2,
-#|           "feedback": "The matrix must be rectangular rather than square, and every entry must be zero."
-#|       }
-
-Give any non-square zero matrix with at least one row and one column:
-
-$A=$ mat{name=A, rows=auto, cols=auto, initial-rows=2, initial-cols=1, min-rows=1, max-rows=4, min-cols=1, max-cols=4}
-```
-
-## 4. The empty basis
-
-```{math-exercise}
-#| label: dynamic-zero-columns
-#| caption: The null-space basis of an invertible matrix
-#| mode: custom
-#| context: dynamic-matrix-method
-#| checker: |
-#|   def check(response, symbols):
-#|       Z = response["inputs"]["Z0"]["matrix"]
-#|       return {
-#|           "correct": Z.rows == 0 and Z.cols == 0,
-#|           "feedback": "The null space is trivial, so its basis is empty."
-#|       }
-
-Give a basis for the null space of $I_2$. Enter basis vectors as columns:
-
-$Z_0=$ mat{name=Z0, rows=2, cols=auto, initial-cols=1, min-cols=0, max-cols=2}
-```
-
-## 5. Empty by removing rows
-
-```{math-exercise}
-#| label: dynamic-zero-rows
-#| caption: The canonical empty state
-#| mode: custom
-#| context: dynamic-matrix-method
-#| checker: |
-#|   def check(response, symbols):
-#|       T = response["inputs"]["T"]["matrix"]
-#|       return {
-#|           "correct": T.rows == 0 and T.cols == 0,
-#|           "feedback": "Remove every row to submit the empty matrix."
-#|       }
-
-Use the row control to submit the empty matrix:
-
-$T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
-```
-
-## 6. A column-space basis
+### Column-space basis
 
 ```{math-exercise}
 #| label: dynamic-column-space-basis
 #| caption: Compute a basis for a column space
 #| mode: custom
-#| context: dynamic-matrix-method
+#| context: dynamic-basis-method
 #| checker: |
 #|   def check(response, symbols):
 #|       B = response["inputs"]["B"]["matrix"]
 #|       A = Matrix([[1, 2, 0], [0, 1, 1], [1, 3, 1]])
-#|       right_height = B.rows == A.rows
-#|       valid_columns = [
-#|           B[:, j] != zeros(B.rows, 1) and A.row_join(B[:, j]).rank() == A.rank()
-#|           for j in range(B.cols)
-#|       ] if right_height else [False] * B.cols
-#|       contained = right_height and all(valid_columns)
-#|       independent = right_height and B.rank() == B.cols
-#|       complete = independent and B.cols == A.rank()
+#|       target_dim = A.rank()
+#|       accepted = []
+#|       column_status = []
+#|       for j in range(B.cols):
+#|           vector = B[:, j]
+#|           belongs = (
+#|               B.rows == A.rows
+#|               and vector != zeros(B.rows, 1)
+#|               and A.row_join(vector).rank() == A.rank()
+#|           )
+#|           trial = accepted + [vector]
+#|           adds_direction = belongs and Matrix.hstack(*trial).rank() == len(trial)
+#|           column_status.append(adds_direction)
+#|           if adds_direction:
+#|               accepted.append(vector)
+#|       coverage = min(len(accepted), target_dim) / target_dim
+#|       precision = len(accepted) / B.cols if B.cols else 0
+#|       score = coverage * precision
+#|       feedback = "" if score == 1 else (
+#|           "This column space is not trivial; add basis vectors." if B.cols == 0
+#|           else "A red column is zero, outside the column space, or redundant. Keep only enough independent columns to span the space."
+#|       )
 #|       return {
-#|           "score": (int(contained) + int(independent) + int(complete)) / 3,
-#|           "feedback": "Use nonzero vectors from the column space, keep them independent, and span the complete column space.",
-#|           "assessment": {"B": {"columns": valid_columns}}
+#|           "score": score,
+#|           "feedback": feedback,
+#|           "assessment": {"B": {"columns": column_status}}
 #|       }
 
 Compute a basis for the column space of
 $A=\begin{bmatrix}1&2&0\\0&1&1\\1&3&1\end{bmatrix}$.
-Enter your basis vectors as columns of $B$:
+Your basis may use columns of $A$ or any other vectors in its column space.
+Enter one basis vector per column of $B$:
 
 $B=$ mat{name=B, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}
 ```
 
-## 7. A row-space basis
+### Row-space basis
 
 ```{math-exercise}
 #| label: dynamic-row-space-basis
 #| caption: Compute a basis using row vectors
 #| mode: custom
-#| context: dynamic-matrix-method
+#| context: dynamic-basis-method
 #| checker: |
 #|   def check(response, symbols):
 #|       R = response["inputs"]["R"]["matrix"]
 #|       A = Matrix([[1, 0, 1, 2], [0, 1, 1, 1], [1, 1, 2, 3]])
-#|       right_width = R.cols == A.cols
-#|       valid_rows = [
-#|           R[i, :] != zeros(1, R.cols) and A.col_join(R[i, :]).rank() == A.rank()
-#|           for i in range(R.rows)
-#|       ] if right_width else [False] * R.rows
-#|       contained = right_width and all(valid_rows)
-#|       independent = right_width and R.rank() == R.rows
-#|       complete = independent and R.rows == A.rank()
+#|       target_dim = A.rank()
+#|       accepted = []
+#|       row_status = []
+#|       for i in range(R.rows):
+#|           vector = R[i, :]
+#|           belongs = (
+#|               R.cols == A.cols
+#|               and vector != zeros(1, R.cols)
+#|               and A.col_join(vector).rank() == A.rank()
+#|           )
+#|           trial = accepted + [vector]
+#|           adds_direction = belongs and Matrix.vstack(*trial).rank() == len(trial)
+#|           row_status.append(adds_direction)
+#|           if adds_direction:
+#|               accepted.append(vector)
+#|       coverage = min(len(accepted), target_dim) / target_dim
+#|       precision = len(accepted) / R.rows if R.rows else 0
+#|       score = coverage * precision
+#|       feedback = "" if score == 1 else (
+#|           "This row space is not trivial; add basis vectors." if R.rows == 0
+#|           else "A red row is zero, outside the row space, or redundant. Keep only enough independent rows to span the space."
+#|       )
 #|       return {
-#|           "score": (int(contained) + int(independent) + int(complete)) / 3,
-#|           "feedback": "Each row should be a nonzero row-space vector; the rows must be independent and complete.",
-#|           "assessment": {"R": {"rows": valid_rows}}
+#|           "score": score,
+#|           "feedback": feedback,
+#|           "assessment": {"R": {"rows": row_status}}
 #|       }
 
 Compute a basis for the row space of
 $A=\begin{bmatrix}1&0&1&2\\0&1&1&1\\1&1&2&3\end{bmatrix}$.
-Enter one basis vector per row of $R$:
+Enter one basis vector per row of $R$, and use the row controls to choose how
+many vectors are needed:
 
 $R=$ mat{name=R, rows=auto, cols=4, initial-rows=1, min-rows=0, max-rows=3}
 ```
 
-## 8. Build a 3 × 3 Hessian
+## Matrix size as part of the problem
+
+These exercises use adjustable dimensions for reasons other than choosing a
+basis. Read the task before changing the initial size.
+
+### Hessian with three variables
 
 ```{math-exercise}
 #| label: dynamic-hessian
-#| caption: Notice and repair the initial matrix size
+#| caption: Build a 3 × 3 Hessian from a 2 × 2 start
 #| mode: custom
-#| context: dynamic-matrix-method
 #| checker: |
 #|   def check(response, symbols):
 #|       H = response["inputs"]["H"]["matrix"]
 #|       target = Matrix([[2, 1, 0], [1, 4, 1], [0, 1, 6]])
 #|       shape_ok = H.shape == target.shape
-#|       valid_rows = [
+#|       row_status = [
 #|           shape_ok and all(simplify(H[i, j] - target[i, j]) == 0 for j in range(3))
 #|           for i in range(H.rows)
 #|       ]
-#|       row_credit = sum(valid_rows) / 3
+#|       score = sum(row_status) / 3
 #|       return {
-#|           "score": (int(shape_ok) + row_credit) / 2,
-#|           "feedback": "A Hessian has one row and column for every variable; then check each second derivative.",
-#|           "assessment": {"H": {"rows": valid_rows}}
+#|           "score": score,
+#|           "feedback": "" if score == 1 else "A Hessian has one row and one column for every variable. After fixing the size, check each second derivative.",
+#|           "assessment": {"H": {"rows": row_status}}
 #|       }
 
 Find the Hessian of
 $f(x,y,z)=x^2+xy+2y^2+yz+3z^2$.
-The input deliberately starts too small:
+There are three variables, but the input deliberately starts at $2\times2$.
+First correct its size, then enter the second derivatives:
 
 $H_f=$ mat{name=H, rows=auto, cols=auto, initial-rows=2, initial-cols=2, min-rows=1, max-rows=3, min-cols=1, max-cols=3}
 ```
 
-## 9. Choose a path graph
+### Adjacency matrix of a path
 
 ```{math-exercise}
 #| label: dynamic-path-adjacency
 #| caption: Let the matrix size choose the graph
 #| mode: custom
-#| context: dynamic-matrix-method
 #| checker: |
 #|   def check(response, symbols):
 #|       P = response["inputs"]["Pth"]["matrix"]
 #|       square = P.rows == P.cols
 #|       target = Matrix(P.rows, P.cols, lambda i, j: int(abs(i-j) == 1)) if square else None
-#|       valid_rows = [
+#|       row_status = [
 #|           square and all(simplify(P[i, j] - target[i, j]) == 0 for j in range(P.cols))
 #|           for i in range(P.rows)
 #|       ]
-#|       row_credit = sum(valid_rows) / P.rows if P.rows else 0
+#|       score = sum(row_status) / P.rows if P.rows else 0
 #|       return {
-#|           "score": (int(square) + row_credit) / 2,
-#|           "feedback": "A path adjacency matrix is square, has zeros on the diagonal, and joins only consecutive vertices.",
-#|           "assessment": {"Pth": {"rows": valid_rows}}
+#|           "score": score,
+#|           "feedback": "" if score == 1 else "The matrix must be square. Put 1 exactly where consecutive vertices meet and 0 everywhere else.",
+#|           "assessment": {"Pth": {"rows": row_status}}
 #|       }
 
-Choose between two and five ordered vertices and enter the adjacency matrix of
-the path $v_1-v_2-\cdots-v_n$. The size of your matrix chooses $n$:
+Choose between two and five ordered vertices. Enter the adjacency matrix of the
+path $v_1-v_2-\cdots-v_n$. The number of rows and columns chooses $n$.
+Consecutive vertices are joined; no other pair is joined:
 
 $P_n=$ mat{name=Pth, rows=auto, cols=auto, initial-rows=2, initial-cols=2, min-rows=2, max-rows=5, min-cols=2, max-cols=5}
+```
+
+### A variable-length list of points
+
+```{math-exercise}
+#| label: dynamic-point-rows
+#| caption: Choose how many points to submit
+#| mode: custom
+#| checker: |
+#|   def check(response, symbols):
+#|       P = response["inputs"]["P"]["matrix"]
+#|       seen = set()
+#|       row_status = []
+#|       for i in range(P.rows):
+#|           point = tuple(P.row(i))
+#|           valid = simplify(P[i, 1] - 2*P[i, 0]) == 0 and point not in seen
+#|           row_status.append(valid)
+#|           if valid:
+#|               seen.add(point)
+#|       score = sum(row_status) / P.rows
+#|       return {
+#|           "score": score,
+#|           "feedback": "" if score == 1 else "Each red row must be changed: it is either off the line or duplicates an earlier point.",
+#|           "assessment": {"P": {"rows": row_status}}
+#|       }
+
+Give between two and four distinct points on the line $y=2x$. Enter one point
+$(x,y)$ per row. Use the row controls to choose how many points to submit:
+
+$P=$ mat{name=P, rows=auto, cols=2, initial-rows=2, min-rows=2, max-rows=4}
+```
+
+### A non-square zero matrix
+
+```{math-exercise}
+#| label: dynamic-both-dimensions
+#| caption: Choose both dimensions
+#| mode: custom
+#| checker: |
+#|   def check(response, symbols):
+#|       A = response["inputs"]["A"]["matrix"]
+#|       non_square = A.rows != A.cols
+#|       zero = A == zeros(A.rows, A.cols)
+#|       score = (int(non_square) + int(zero)) / 2
+#|       return {
+#|           "score": score,
+#|           "feedback": "" if score == 1 else "The matrix must have different numbers of rows and columns, and every entry must be zero."
+#|       }
+
+Give any non-square zero matrix with at least one row and one column. Both its
+size and its entries are part of the answer:
+
+$A=$ mat{name=A, rows=auto, cols=auto, initial-rows=2, initial-cols=1, min-rows=1, max-rows=4, min-cols=1, max-cols=4}
+```
+
+## Empty matrix edge cases
+
+The final two exercises test the canonical empty state. A matrix with no entries
+is shown simply as **Empty matrix**, regardless of whether the last action
+removed its final row or its final column. Adding a row or column restores the
+other configured dimension.
+
+### Empty basis for a trivial null space
+
+```{math-exercise}
+#| label: dynamic-zero-columns
+#| caption: Remove the last basis-vector column
+#| mode: custom
+#| checker: |
+#|   def check(response, symbols):
+#|       Z = response["inputs"]["Z0"]["matrix"]
+#|       correct = Z.rows == 0 and Z.cols == 0
+#|       return {
+#|           "correct": correct,
+#|           "feedback": "" if correct else "The null space contains only the zero vector, so its basis contains no vectors. Remove the remaining column."
+#|       }
+
+Give a basis for the null space of $I_2$. Because this null space is trivial,
+its basis is empty. Remove the remaining column:
+
+$Z_0=$ mat{name=Z0, rows=2, cols=auto, initial-cols=1, min-cols=0, max-cols=2}
+```
+
+### Empty state reached by removing rows
+
+```{math-exercise}
+#| label: dynamic-zero-rows
+#| caption: Test restoration of a fixed column dimension
+#| mode: custom
+#| checker: |
+#|   def check(response, symbols):
+#|       T = response["inputs"]["T"]["matrix"]
+#|       correct = T.rows == 0 and T.cols == 0
+#|       return {
+#|           "correct": correct,
+#|           "feedback": "" if correct else "Remove every row to submit the empty matrix."
+#|       }
+
+Use the row control to remove the only row. After checking the empty state, add
+a row again: the two configured columns should reappear.
+
+$T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
 ```
