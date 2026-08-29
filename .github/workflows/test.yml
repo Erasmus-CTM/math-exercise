@@ -18,6 +18,6 @@ jobs:
       - name: Render example and Norwegian regression pages
         run: |
           quarto render examples.qmd
-          quarto render tests/nb-render.qmd
-          grep -Fq '"lang":"nb"' tests/nb-render.html
-          grep -Fq 'Tilbakemelding' tests/nb-render.html
+          quarto render nb-render.qmd
+          grep -Fq '"lang":"nb"' nb-render.html
+          grep -Fq 'Tilbakemelding' nb-render.html
