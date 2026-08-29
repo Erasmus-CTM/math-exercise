@@ -568,6 +568,10 @@ additional provider request.
 
 ### Provider and model portability
 
+See [Reliable AI feedback across OpenAI-compatible providers](docs/model-capability-adapter.md)
+for the problem statement, design decisions, compatibility guarantees, and
+test strategy behind the adapter.
+
 The normal request body deliberately uses only the portable OpenAI-compatible
 fields `model`, `messages`, and `max_tokens`. A small capability adapter adds
 optional low-reasoning controls only for model families with documented
@@ -591,7 +595,9 @@ non-reasoning model; timeouts are not automatically retried.
 
 Compatible with any **OpenAI-compatible API** (Cerebras, OpenRouter, OpenAI,
 Ollama, …). AI responses support a small safe Markdown subset and render
-LaTeX written with `\(...\)` or `\[...\]`.
+LaTeX written with `\(...\)` or `\[...\]`. The prompt asks models to prefer
+short paragraphs and lists; a strict, HTML-escaped fallback renders valid
+Markdown tables responsively when a model emits one anyway.
 
 ### AI feedback context
 
