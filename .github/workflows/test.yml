@@ -73,7 +73,9 @@ jobs:
           grep -Fq 'data-auto-rows="true"' _site/dynamic-matrix-tests.html
           grep -Fq 'data-min-cols="0"' _site/dynamic-matrix-tests.html
           grep -Fq 'Row-space basis' _site/dynamic-matrix-tests.html
+          grep -Fq 'Eigenspace basis' _site/dynamic-matrix-tests.html
+          grep -Fq 'Basis of a polynomial subspace' _site/dynamic-matrix-tests.html
           grep -Fq 'Hessian with three variables' _site/dynamic-matrix-tests.html
           grep -Fq 'Adjacency matrix of a path' _site/dynamic-matrix-tests.html
           grep -Fq 'Empty matrix edge cases' _site/dynamic-matrix-tests.html
-          test "$(grep -Fc 'class="math-example-source"' _site/dynamic-matrix-tests.html)" -eq 9
+          test "$(grep -Fc 'class="math-example-source"' _site/dynamic-matrix-tests.html)" -eq 11

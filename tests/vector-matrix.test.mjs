@@ -197,18 +197,20 @@ test('normalizes task dollar math before raw HTML rendering', () => {
 });
 
 test('basis examples delegate symmetric assessment to the shared helper', () => {
-  assert.equal((dynamicExamples.match(/return assess_basis\(/g) || []).length, 3);
-  assert.equal((dynamicExamples.match(/axis="columns"/g) || []).length, 2);
-  assert.equal((dynamicExamples.match(/axis="rows"/g) || []).length, 1);
+  assert.equal((dynamicExamples.match(/#\|       return assess_basis\(/g) || []).length, 5);
+  assert.equal((dynamicExamples.match(/#\|           axis="columns"/g) || []).length, 4);
+  assert.equal((dynamicExamples.match(/#\|           axis="rows"/g) || []).length, 1);
   assert.doesNotMatch(dynamicExamples, /accepted|adds_direction|redundant vector/);
   assert.match(source, /dependent = rank < valid_count/);
   assert.match(source, /\("dependent" if dependent else "correct"\) if valid else "incorrect"/);
   assert.match(source, /coverage \* validity \* independence/);
   assert.match(source, /\^\(correct\|dependent\|partial\|incorrect\|empty\|invalid\)\$/);
+  assert.match(source, /custom\.show_score === false \? L\.resPartialNoScore/);
+  assert.doesNotMatch(dynamicExamples, /missing independent direction|spans only \{rank\}/);
 });
 
 test('meaningful dynamic examples precede the empty-state edge cases', () => {
-  assert.equal((dynamicExamples.match(/```\{math-exercise\}/g) || []).length, 9);
+  assert.equal((dynamicExamples.match(/```\{math-exercise\}/g) || []).length, 11);
   const edgeCases = dynamicExamples.indexOf('## Empty matrix edge cases');
   assert.ok(edgeCases > dynamicExamples.indexOf('### A non-square zero matrix'));
   assert.ok(edgeCases < dynamicExamples.indexOf('#| label: dynamic-zero-columns'));

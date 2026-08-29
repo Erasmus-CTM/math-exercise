@@ -41,7 +41,25 @@ For basis problems, prefer the shared `assess_basis(...)` helper. The checker
 only supplies the submitted matrix, whether vectors are stored as rows or
 columns, the target dimension, and a test for membership in the target space.
 The helper calculates rank, permutation-invariant partial credit, colors, and
-standard feedback.
+standard feedback. Its internal score is available for assessment but hidden
+from the student, because displaying it could reveal the unknown dimension.
+
+```python
+return assess_basis(
+    matrix,
+    axis="columns",          # or "rows"
+    target_dimension=d,
+    belongs=lambda vector: ...,  # True exactly for vectors in the target space
+    name="B",                # the name used in mat{name=B, ...}
+    space_name="target space",
+)
+```
+
+The helper rejects zero vectors itself, so `belongs` only needs to test
+membership. It returns the exercise score, qualitative feedback, and complete
+row or column assessment. Green means valid and independent, yellow means valid
+but part of a dependent submitted family, and red means zero or outside the
+target space. See the README for the complete API contract and scoring formula.
 :::
 
 ## Bases with an unknown number of vectors
@@ -142,6 +160,64 @@ Enter one basis vector per row of $R$, and use the row controls to choose how
 many vectors are needed:
 
 $R=$ mat{name=R, rows=auto, cols=4, initial-rows=1, min-rows=0, max-rows=3}
+```
+
+### Eigenspace basis
+
+```{math-exercise}
+#| label: dynamic-eigenspace-basis
+#| caption: Find a basis for an eigenspace
+#| mode: custom
+#| context: dynamic-basis-method
+#| checker: |
+#|   def check(response, symbols):
+#|       E = response["inputs"]["E"]["matrix"]
+#|       A = Matrix([[2, 1, 1], [0, 2, 0], [0, 0, 2]])
+#|       constraint = A - 2*eye(3)
+#|       return assess_basis(
+#|           E,
+#|           axis="columns",
+#|           target_dimension=constraint.cols - constraint.rank(),
+#|           belongs=lambda vector: E.rows == A.rows and constraint * vector == zeros(A.rows, 1),
+#|           name="E",
+#|           space_name="eigenspace",
+#|       )
+
+Find a basis for the eigenspace of
+$A=\begin{bmatrix}2&1&1\\0&2&0\\0&0&2\end{bmatrix}$
+corresponding to the eigenvalue $2$. Enter one eigenvector per column of $E$;
+the number of columns is part of your answer:
+
+$E=$ mat{name=E, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}
+```
+
+### Basis of a polynomial subspace
+
+```{math-exercise}
+#| label: dynamic-polynomial-basis
+#| caption: Encode polynomials as coefficient vectors
+#| mode: custom
+#| context: dynamic-basis-method
+#| checker: |
+#|   def check(response, symbols):
+#|       P = response["inputs"]["Pcoef"]["matrix"]
+#|       constraints = Matrix([[1, 1, 1, 1], [0, 1, -2, 3]])
+#|       return assess_basis(
+#|           P,
+#|           axis="columns",
+#|           target_dimension=constraints.cols - constraints.rank(),
+#|           belongs=lambda vector: P.rows == constraints.cols and constraints * vector == zeros(constraints.rows, 1),
+#|           name="Pcoef",
+#|           space_name="polynomial subspace",
+#|       )
+
+Let $W$ be the subspace of polynomials
+$p(x)=a+bx+cx^2+dx^3$ satisfying $p(1)=0$ and $p'(-1)=0$.
+Represent each polynomial by its coefficient vector
+$\begin{bmatrix}a&b&c&d\end{bmatrix}^{\mathsf T}$ and enter one basis vector
+per column of $P$:
+
+$P=$ mat{name=Pcoef, rows=4, cols=auto, initial-cols=1, min-cols=0, max-cols=4}
 ```
 
 ## Matrix size as part of the problem
