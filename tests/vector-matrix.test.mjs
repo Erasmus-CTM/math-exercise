@@ -98,7 +98,7 @@ test('renders a named matrix with fixed rows and variable columns', () => {
   assert.match(rendered.html, /data-max-cols="3"/);
 });
 
-test('supports matrices that initially have zero rows or columns', () => {
+test('canonicalizes every matrix without entries to the empty matrix', () => {
   const api = loadBundle();
   const zeroColumns = api.renderTaskText(
     'mat{name=Z, rows=3, cols=auto, initial-cols=0, min-cols=0, max-cols=3}',
@@ -110,8 +110,10 @@ test('supports matrices that initially have zero rows or columns', () => {
   );
   assert.equal(zeroColumns.fieldIds.length, 0);
   assert.equal(zeroRows.fieldIds.length, 0);
-  assert.match(zeroColumns.html, /data-rows="3" data-cols="0"/);
-  assert.match(zeroRows.html, /data-rows="0" data-cols="2"/);
+  assert.match(zeroColumns.html, /data-rows="0" data-cols="0"/);
+  assert.match(zeroRows.html, /data-rows="0" data-cols="0"/);
+  assert.match(zeroColumns.html, /data-last-rows="3" data-last-cols="0"/);
+  assert.match(zeroRows.html, /data-last-rows="0" data-last-cols="2"/);
 });
 
 test('validates dynamic matrix declarations and custom-only use', () => {
@@ -137,11 +139,30 @@ test('dynamic matrix labels and AI answer summaries include shape', () => {
   const api = loadBundle('en');
   assert.equal(api.localizeStructuralLabel('dm:Z:2,3'), 'Z, row 2, column 3');
   const xml = api.expressionAnswersXml([], {
-    Z: { type: 'matrix', rows: 3, cols: 0, raw: [] },
+    Z: { type: 'matrix', rows: 0, cols: 0, raw: [] },
     A: { type: 'matrix', rows: 1, cols: 2, raw: ['x', '1'] },
   });
-  assert.match(xml, /<matrix name="Z" rows="3" columns="0">/);
-  assert.match(xml, /<row index="3"><\/row>/);
+  assert.match(xml, /<matrix name="Z" rows="0" columns="0">/);
   assert.match(xml, /<matrix name="A" rows="1" columns="2">/);
   assert.match(xml, /<entry column="1">x<\/entry>/);
+});
+
+test('custom matrix assessment records complete vector statuses for AI feedback', () => {
+  const xml = loadBundle().structuredAssessmentXml({
+    Z: { columns: [true, false, 0.5, 'empty'] },
+  });
+  assert.match(xml, /<matrix name="Z">/);
+  assert.match(xml, /<column index="1" status="correct"\/>/);
+  assert.match(xml, /<column index="2" status="incorrect"\/>/);
+  assert.match(xml, /<column index="3" status="partial"\/>/);
+  assert.match(xml, /<column index="4" status="empty"\/>/);
+});
+
+test('normalizes task dollar math before raw HTML rendering', () => {
+  const rendered = loadBundle().renderTaskText(
+    'For $C=\\begin{bmatrix}1&2\\\\2&4\\end{bmatrix}$, enter $Z$.',
+    'math-delimiters', '', 'col', 'custom',
+  );
+  assert.equal(rendered.html, 'For \\(C=\\begin{bmatrix}1&2\\\\2&4\\end{bmatrix}\\), enter \\(Z\\).');
+  assert.doesNotMatch(rendered.html, /\$/);
 });

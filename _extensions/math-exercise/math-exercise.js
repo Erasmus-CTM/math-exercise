@@ -57,7 +57,9 @@
       matrixRemoveRow: 'Remove row',
       matrixAddColumn: 'Add column',
       matrixRemoveColumn: 'Remove column',
-      emptyMatrix: function (rows, columns) { return rows + ' × ' + columns + ' matrix'; },
+      matrixRows: 'Rows',
+      matrixColumns: 'Columns',
+      emptyMatrix: 'Empty matrix',
       resEmpty:     'Please enter an answer.',
       resCorrect:   'Correct!',
       resPartial:   function (pct) { return 'Partially correct (' + pct + '%).'; },
@@ -211,7 +213,9 @@
       matrixRemoveRow: 'Zeile entfernen',
       matrixAddColumn: 'Spalte hinzufügen',
       matrixRemoveColumn: 'Spalte entfernen',
-      emptyMatrix: function (rows, columns) { return rows + ' × ' + columns + '-Matrix'; },
+      matrixRows: 'Zeilen',
+      matrixColumns: 'Spalten',
+      emptyMatrix: 'Leere Matrix',
       resEmpty:     'Bitte eine Antwort eingeben.',
       resCorrect:   'Richtig!',
       resPartial:   function (pct) { return 'Teilweise richtig (' + pct + '&nbsp;%).'; },
@@ -365,7 +369,9 @@
     matrixRemoveRow: 'Fjern rad',
     matrixAddColumn: 'Legg til kolonne',
     matrixRemoveColumn: 'Fjern kolonne',
-    emptyMatrix: function (rows, columns) { return rows + ' × ' + columns + '-matrise'; },
+    matrixRows: 'Rader',
+    matrixColumns: 'Kolonner',
+    emptyMatrix: 'Tom matrise',
     resEmpty: 'Skriv inn et svar.',
     resCorrect: 'Riktig!',
     resPartial: function (pct) { return 'Delvis riktig (' + pct + '%).'; },
@@ -880,12 +886,16 @@
       '',
       'def _normalize_custom_result(result):',
       '    feedback = ""',
+      '    assessment = {}',
       '    if isinstance(result, bool):',
       '        score = 1.0 if result else 0.0',
       '    elif isinstance(result, (int, float)):',
       '        score = float(result)',
       '    elif isinstance(result, dict):',
       '        feedback = str(result.get("feedback", ""))',
+      '        assessment = result.get("assessment", {})',
+      '        if not isinstance(assessment, dict):',
+      '            raise TypeError("Custom checker assessment must be a dictionary")',
       '        if "score" in result:',
       '            score = float(result["score"])',
       '        elif "correct" in result:',
@@ -897,7 +907,7 @@
       '    if not 0.0 <= score <= 1.0:',
       '        raise ValueError("Custom checker score must be between 0 and 1")',
       '    status = "correct" if score >= 1.0 - 1e-9 else ("wrong" if score <= 1e-9 else "partial")',
-      '    return {"status": status, "score": score, "feedback": feedback}',
+      '    return {"status": status, "score": score, "feedback": feedback, "assessment": assessment}',
       '',
       'def _math_check_custom():',
       '    try:',
@@ -1124,7 +1134,9 @@
   function buildDynamicMatrix(exerciseId, content, vars, mode) {
     if (mode !== 'custom') throw new Error('math-exercise: mat{...} currently requires mode: custom');
     var spec = parseDynamicMatrixSpec(content);
-    var rows = spec.rows.initial, cols = spec.cols.initial;
+    var configuredRows = spec.rows.initial, configuredCols = spec.cols.initial;
+    var rows = configuredRows, cols = configuredCols;
+    if (rows === 0 || cols === 0) { rows = 0; cols = 0; }
     var ids = [], labels = [], cells = [];
     for (var row = 1; row <= rows; row++) {
       for (var column = 1; column <= cols; column++) {
@@ -1136,13 +1148,16 @@
       + ' data-matrix-name="' + escHtml(spec.name) + '" data-rows="' + rows + '" data-cols="' + cols + '"'
       + ' data-auto-rows="' + spec.rows.auto + '" data-auto-cols="' + spec.cols.auto + '"'
       + ' data-min-rows="' + spec.rows.min + '" data-max-rows="' + spec.rows.max + '"'
-      + ' data-min-cols="' + spec.cols.min + '" data-max-cols="' + spec.cols.max + '">'
+      + ' data-min-cols="' + spec.cols.min + '" data-max-cols="' + spec.cols.max + '"'
+      + ' data-last-rows="' + configuredRows + '" data-last-cols="' + configuredCols + '">'
       + cells.join('') + '</span>';
     var controls = '<span class="math-dynamic-matrix-controls" aria-label="Matrix size controls">'
-      + '<button type="button" data-dynamic-action="remove-row">− row</button>'
-      + '<button type="button" data-dynamic-action="add-row">+ row</button>'
-      + '<button type="button" data-dynamic-action="remove-col">− column</button>'
-      + '<button type="button" data-dynamic-action="add-col">+ column</button>'
+      + '<span class="math-dynamic-axis" data-dynamic-axis="row"><span class="math-dynamic-axis-label"></span>'
+      + '<button type="button" data-dynamic-action="remove-row">−</button><output></output>'
+      + '<button type="button" data-dynamic-action="add-row">+</button></span>'
+      + '<span class="math-dynamic-axis" data-dynamic-axis="col"><span class="math-dynamic-axis-label"></span>'
+      + '<button type="button" data-dynamic-action="remove-col">−</button><output></output>'
+      + '<button type="button" data-dynamic-action="add-col">+</button></span>'
       + '</span>';
     return {
       html: '<span class="math-dynamic-matrix-wrap" data-matrix-name="' + escHtml(spec.name) + '">' + matrix + controls + '</span>',
@@ -1162,7 +1177,39 @@
     return null;
   }
 
+  // Raw exercise bodies bypass Pandoc's Markdown math handling. Normalize
+  // paired dollar delimiters before inserting HTML so a page-level MathJax
+  // pass cannot claim a bare \\begin{...} environment and strand the dollars.
+  function normalizeTaskMathDelimiters(text) {
+    var output = '', position = 0;
+    function unescapedAt(needle, start) {
+      var found = text.indexOf(needle, start);
+      while (found >= 0) {
+        var slashes = 0;
+        for (var i = found - 1; i >= 0 && text.charAt(i) === '\\'; i--) slashes++;
+        if (slashes % 2 === 0) return found;
+        found = text.indexOf(needle, found + needle.length);
+      }
+      return -1;
+    }
+    while (position < text.length) {
+      if (text.charAt(position) !== '$' || (position > 0 && text.charAt(position - 1) === '\\')) {
+        output += text.charAt(position++);
+        continue;
+      }
+      var display = text.slice(position, position + 2) === '$$';
+      var delimiter = display ? '$$' : '$';
+      var close = unescapedAt(delimiter, position + delimiter.length);
+      if (close < 0) { output += text.charAt(position++); continue; }
+      output += (display ? '\\[' : '\\(') + text.slice(position + delimiter.length, close) +
+        (display ? '\\]' : '\\)');
+      position = close + delimiter.length;
+    }
+    return output;
+  }
+
   function renderTaskText(text, exerciseId, vars, vecdir, mode) {
+    text = normalizeTaskMathDelimiters(text);
     mode = mode || 'equivalent';
     var count = 0, fieldIds = [], structuralLabels = [], output = [], position = 0;
     var dynamicNames = {};
@@ -1243,6 +1290,11 @@
       oldValues[input.dataset.matrixRow + ',' + input.dataset.matrixColumn] = input.value;
     });
     var spec = dynamicSpecFromElement(matrix);
+    if (rows === 0 || cols === 0) { rows = 0; cols = 0; }
+    else {
+      matrix.dataset.lastRows = String(rows);
+      matrix.dataset.lastCols = String(cols);
+    }
     var cells = [];
     for (var row = 1; row <= rows; row++) {
       for (var column = 1; column <= cols; column++) {
@@ -1255,7 +1307,7 @@
     matrix.style.setProperty('--cols', String(Math.max(cols, 1)));
     matrix.innerHTML = cells.length
       ? cells.join('')
-      : '<span class="math-dynamic-matrix-empty" aria-live="polite">' + escHtml(L.emptyMatrix(rows, cols)) + '</span>';
+      : '<span class="math-dynamic-matrix-empty" aria-live="polite">' + escHtml(L.emptyMatrix) + '</span>';
     matrix.querySelectorAll('input[data-matrix-row][data-matrix-column]').forEach(function (input) {
       var key = input.dataset.matrixRow + ',' + input.dataset.matrixColumn;
       if (Object.prototype.hasOwnProperty.call(oldValues, key)) input.value = oldValues[key];
@@ -1299,12 +1351,17 @@
       };
       function syncControls() {
         var rows = Number(matrix.dataset.rows), cols = Number(matrix.dataset.cols);
+        controls.querySelectorAll('.math-dynamic-axis').forEach(function (axisControl) {
+          var isRow = axisControl.dataset.dynamicAxis === 'row';
+          var axis = isRow ? spec.rows : spec.cols;
+          axisControl.style.display = axis.auto ? '' : 'none';
+          axisControl.querySelector('.math-dynamic-axis-label').textContent = isRow ? L.matrixRows : L.matrixColumns;
+          axisControl.querySelector('output').textContent = String(isRow ? rows : cols);
+        });
         controls.querySelectorAll('button[data-dynamic-action]').forEach(function (button) {
           var action = button.dataset.dynamicAction;
           var rowAction = action.indexOf('row') !== -1;
           var axis = rowAction ? spec.rows : spec.cols;
-          button.style.display = axis.auto ? '' : 'none';
-          button.textContent = (action.indexOf('add') === 0 ? '+ ' : '− ') + labels[action];
           button.setAttribute('aria-label', labels[action] + ' ' + spec.name);
           var value = rowAction ? rows : cols;
           button.disabled = action.indexOf('add') === 0 ? value >= axis.max : value <= axis.min;
@@ -1312,9 +1369,16 @@
       }
       function resize(action) {
         var rows = Number(matrix.dataset.rows), cols = Number(matrix.dataset.cols);
-        if (action === 'add-row' && rows < spec.rows.max) rows++;
+        var empty = rows === 0 || cols === 0;
+        if (empty && action === 'add-row') {
+          rows = Math.max(1, spec.rows.min);
+          cols = spec.cols.auto ? Math.max(1, Number(matrix.dataset.lastCols) || spec.cols.initial) : spec.cols.initial;
+        } else if (empty && action === 'add-col') {
+          cols = Math.max(1, spec.cols.min);
+          rows = spec.rows.auto ? Math.max(1, Number(matrix.dataset.lastRows) || spec.rows.initial) : spec.rows.initial;
+        } else if (action === 'add-row' && rows < spec.rows.max) rows++;
         if (action === 'remove-row' && rows > spec.rows.min) rows--;
-        if (action === 'add-col' && cols < spec.cols.max) cols++;
+        if (!empty && action === 'add-col' && cols < spec.cols.max) cols++;
         if (action === 'remove-col' && cols > spec.cols.min) cols--;
         renderDynamicMatrixElement(matrix, exerciseId, vars, rows, cols);
         syncControls();
@@ -1433,6 +1497,58 @@
     if (!ai || ai.summary === undefined || ai.summary === null) return '';
     var text = typeof ai.summary === 'string' ? ai.summary : JSON.stringify(ai.summary);
     return String(text || '').slice(0, 4000);
+  }
+
+  function normalizedAssessmentStatus(value) {
+    if (value === true) return 'correct';
+    if (value === false) return 'incorrect';
+    if (typeof value === 'number') return value >= 1 - 1e-9 ? 'correct' : (value <= 1e-9 ? 'incorrect' : 'partial');
+    var status = String(value || '').toLowerCase();
+    if (status === 'wrong') return 'incorrect';
+    return /^(correct|partial|incorrect|empty|invalid)$/.test(status) ? status : '';
+  }
+
+  function structuredGroupStatus(assessment, name, axis, index) {
+    var matrix = assessment && assessment[name];
+    var values = matrix && matrix[axis];
+    return Array.isArray(values) ? normalizedAssessmentStatus(values[index - 1]) : '';
+  }
+
+  function applyCustomAssessment(questionDiv, result) {
+    var assessment = result.assessment || {};
+    questionDiv.querySelectorAll('input.math-input').forEach(function (input) {
+      input.classList.remove('math-input-ok', 'math-input-partial', 'math-input-wrong', 'math-input-err');
+      var status = '';
+      if (input.dataset.dynamicMatrixName) {
+        status = structuredGroupStatus(
+          assessment, input.dataset.dynamicMatrixName, 'columns', Number(input.dataset.matrixColumn)
+        ) || structuredGroupStatus(
+          assessment, input.dataset.dynamicMatrixName, 'rows', Number(input.dataset.matrixRow)
+        );
+      }
+      status = status || result.status;
+      if (status === 'correct') input.classList.add('math-input-ok');
+      else if (status === 'partial') input.classList.add('math-input-partial');
+      else if (status === 'error' || status === 'invalid') input.classList.add('math-input-err');
+      else if (status !== 'empty') input.classList.add('math-input-wrong');
+    });
+  }
+
+  function structuredAssessmentXml(structuredAssessment) {
+    return Object.keys(structuredAssessment || {}).map(function (name) {
+      var assessment = structuredAssessment[name];
+      var groups = [];
+      ['rows', 'columns'].forEach(function (axis) {
+        var values = assessment && assessment[axis];
+        if (!Array.isArray(values)) return;
+        values.forEach(function (value, index) {
+          var status = normalizedAssessmentStatus(value);
+          if (status) groups.push('<' + axis.slice(0, -1) + ' index="' + (index + 1) +
+            '" status="' + status + '"/>');
+        });
+      });
+      return groups.length ? '<matrix name="' + promptXmlEsc(name) + '">' + groups.join('') + '</matrix>' : '';
+    }).filter(Boolean).join('\n');
   }
 
   function expressionAnswersXml(responses, structuredInputs) {
@@ -2405,14 +2521,7 @@
           var custom = (await collectAndCheckCustom(
             fieldIds, checkOpts, false, collectDynamicMatrixInputs(questionDiv)
           )).result;
-          fieldElements.forEach(function (el) {
-            if (!el) return;
-            el.classList.remove('math-input-ok', 'math-input-partial', 'math-input-wrong', 'math-input-err');
-            if (custom.status === 'correct') el.classList.add('math-input-ok');
-            else if (custom.status === 'partial') el.classList.add('math-input-partial');
-            else if (custom.status === 'error') el.classList.add('math-input-err');
-            else if (custom.status !== 'empty') el.classList.add('math-input-wrong');
-          });
+          applyCustomAssessment(questionDiv, custom);
           var customMessage = custom.feedback ? ' ' + escHtml(custom.feedback) : '';
           var customPct = Math.round((Number(custom.score) || 0) * 100);
           if (custom.status === 'correct')
@@ -2545,11 +2654,13 @@
           try {
             await ensureSympy();
             var overallAssessment = '';
+            var structuredAssessment = {};
             var externalAI = null;
             if (mode === 'custom') {
               var customOutcome = await collectAndCheckCustom(fieldIds, checkOpts, true, structuredInputs);
               externalAI = customOutcome.transport.ai;
               var customResult = customOutcome.result;
+              structuredAssessment = customResult.assessment || {};
               responses.forEach(function (field) {
                 field.status = field.value === '' ? 'empty' : 'submitted';
               });
@@ -2583,11 +2694,16 @@
             var answers = checkOpts.responseSource
               ? '<jsxgraph_response>' + promptXmlEsc(summary || 'Interactive graphical response submitted.') + '</jsxgraph_response>'
               : expressionAnswersXml(responses, structuredInputs);
-            var assessment = responses.map(function (field) {
+            var assessment = responses.filter(function (field) {
+              return !(field.element && field.element.dataset.dynamicMatrixName);
+            }).map(function (field) {
               var scoreAttr = typeof field.score === 'number' ? ' score="' + promptXmlEsc(field.score) + '"' : '';
               return '<field label="' + promptXmlEsc(field.label) + '"' + scoreAttr + '>' +
                 field.status + '</field>';
-            }).join('\n') + (overallAssessment ? '\n' + overallAssessment : '');
+            }).join('\n');
+            var matrixAssessment = structuredAssessmentXml(structuredAssessment);
+            if (matrixAssessment) assessment += (assessment ? '\n' : '') + matrixAssessment;
+            if (overallAssessment) assessment += (assessment ? '\n' : '') + overallAssessment;
             var reply = await callLLM(question, answers, assessment, contexts, n, cfg, externalAI);
             incCnt(label);
             fbDiv.innerHTML =
@@ -2648,8 +2764,10 @@
       splitTop: splitTop,
       parseDynamicMatrixSpec: parseDynamicMatrixSpec,
       renderTaskText: renderTaskText,
+      normalizeTaskMathDelimiters: normalizeTaskMathDelimiters,
       localizeStructuralLabel: localizeStructuralLabel,
       expressionAnswersXml: expressionAnswersXml,
+      structuredAssessmentXml: structuredAssessmentXml,
     };
   }
 

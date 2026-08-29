@@ -67,5 +67,5 @@ jobs:
           grep -Fq 'data-auto-cols="true"' _site/dynamic-matrix-tests.html
           grep -Fq 'data-auto-rows="true"' _site/dynamic-matrix-tests.html
           grep -Fq 'data-min-cols="0"' _site/dynamic-matrix-tests.html
-          grep -Fq 'A correct matrix with zero rows' _site/dynamic-matrix-tests.html
+          grep -Fq 'Empty by removing rows' _site/dynamic-matrix-tests.html
           test "$(grep -Fc 'class="math-example-source"' _site/dynamic-matrix-tests.html)" -eq 5

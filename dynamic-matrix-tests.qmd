@@ -16,16 +16,15 @@ SymPy matrix at `response["inputs"][name]["matrix"]`.
 
 ::: {.callout-tip}
 The controls never infer a dimension from the answer. Authors set neutral
-initial dimensions and mathematical bounds. A dimension may be zero when its
-minimum is zero.
+initial dimensions and mathematical bounds. Removing the final row or column
+produces the single canonical empty matrix.
 :::
 
 ::: {#dynamic-matrix-method .math-exercise-context}
 
-A matrix with $r$ rows and $c$ columns has shape $r\times c$. A $3\times0$
-matrix has three rows and no columns; a $0\times2$ matrix has no rows and two
-columns. These are legitimate matrix shapes. For a matrix $A$ with $n$
-columns, a null-space basis matrix $Z$ must satisfy $AZ=0$, have linearly
+A nonempty matrix with $r$ rows and $c$ columns has shape $r\times c$. A
+matrix without entries is the empty matrix. For a matrix $A$ with $n$ columns,
+a null-space basis matrix $Z$ must satisfy $AZ=0$, have linearly
 independent columns, and have $n-\operatorname{rank}(A)$ columns. A set of
 points on $y=2x$ consists of distinct row pairs $(x,2x)$. A zero matrix has
 only zero entries, regardless of its rectangular shape.
@@ -43,13 +42,18 @@ only zero entries, regardless of its rectangular shape.
 #|   def check(response, symbols):
 #|       Z = response["inputs"]["Z"]["matrix"]
 #|       C = Matrix([[1, 2, 3], [2, 4, 6]])
-#|       contained = C * Z == zeros(C.rows, Z.cols)
+#|       valid_columns = [
+#|           Z[:, j] != zeros(Z.rows, 1) and C * Z[:, j] == zeros(C.rows, 1)
+#|           for j in range(Z.cols)
+#|       ]
+#|       contained = all(valid_columns)
 #|       independent = Z.rank() == Z.cols
 #|       complete = Z.cols == C.cols - C.rank()
 #|       score = (int(contained) + int(independent) + int(complete)) / 3
 #|       return {
 #|           "score": score,
-#|           "feedback": "Check that every column is in the null space, that the columns are independent, and that the basis is complete."
+#|           "feedback": "Check that every column is a nonzero null-space vector, that the columns are independent, and that the basis is complete.",
+#|           "assessment": {"Z": {"columns": valid_columns}}
 #|       }
 
 Give a basis for the null space of
@@ -104,7 +108,7 @@ Give any non-square zero matrix with at least one row and one column:
 $A=$ mat{name=A, rows=auto, cols=auto, initial-rows=2, initial-cols=1, min-rows=1, max-rows=4, min-cols=1, max-cols=4}
 ```
 
-## 4. A correct matrix with zero columns
+## 4. The empty basis
 
 ```{math-exercise}
 #| label: dynamic-zero-columns
@@ -114,13 +118,9 @@ $A=$ mat{name=A, rows=auto, cols=auto, initial-rows=2, initial-cols=1, min-rows=
 #| checker: |
 #|   def check(response, symbols):
 #|       Z = response["inputs"]["Z0"]["matrix"]
-#|       I = eye(2)
-#|       contained = I * Z == zeros(2, Z.cols)
-#|       independent = Z.rank() == Z.cols
-#|       complete = Z.cols == 2 - I.rank()
 #|       return {
-#|           "score": (int(contained) + int(independent) + int(complete)) / 3,
-#|           "feedback": "A basis matrix may have no columns when the null space contains only the zero vector."
+#|           "correct": Z.rows == 0 and Z.cols == 0,
+#|           "feedback": "The null space is trivial, so its basis is empty."
 #|       }
 
 Give a basis for the null space of $I_2$. Enter basis vectors as columns:
@@ -128,22 +128,22 @@ Give a basis for the null space of $I_2$. Enter basis vectors as columns:
 $Z_0=$ mat{name=Z0, rows=2, cols=auto, initial-cols=1, min-cols=0, max-cols=2}
 ```
 
-## 5. A correct matrix with zero rows
+## 5. Empty by removing rows
 
 ```{math-exercise}
 #| label: dynamic-zero-rows
-#| caption: A map into the zero-dimensional space
+#| caption: The canonical empty state
 #| mode: custom
 #| context: dynamic-matrix-method
 #| checker: |
 #|   def check(response, symbols):
 #|       T = response["inputs"]["T"]["matrix"]
 #|       return {
-#|           "correct": T.rows == 0 and T.cols == 2,
-#|           "feedback": "The matrix of a map from R² has two columns; a zero-dimensional codomain contributes no rows."
+#|           "correct": T.rows == 0 and T.cols == 0,
+#|           "feedback": "Remove every row to submit the empty matrix."
 #|       }
 
-Give the matrix of the unique linear map $T:\mathbb R^2\to\mathbb R^0$:
+Use the row control to submit the empty matrix:
 
-$[T]=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
+$T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
 ```

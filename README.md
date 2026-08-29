@@ -64,15 +64,15 @@ generated labels.
 Dynamic matrices use `mat{...}` and currently require `mode: custom`. Each
 matrix needs a unique `name`; `rows` and `cols` are either a fixed non-negative
 integer or `auto`. For an automatic axis, configure `initial-rows` or
-`initial-cols` and optional `min-*`/`max-*` bounds. Zero rows and zero columns
-are supported when the corresponding minimum is zero.
+`initial-cols` and optional `min-*`/`max-*` bounds. A minimum of zero lets the
+student select the single canonical empty matrix.
 
 ```{math-exercise}
 #| mode: custom
 #| checker: |
 #|   def check(response, symbols):
 #|       Z = response["inputs"]["Z"]["matrix"]
-#|       return Z.cols == 0
+#|       return Z == Matrix(0, 0, [])
 
 Enter a matrix whose number of columns is part of the answer:
 mat{name=Z, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}
@@ -304,10 +304,15 @@ fields, `response` contains `kind`, `raw`, and an ordered `expressions` list of
 parsed SymPy values. `symbols` maps names from `vars` to SymPy symbols. Normal
 SymPy names such as `diff`, `minimum`, `Interval`, and `Matrix` are available.
 Named dynamic matrices additionally appear in `response["inputs"]`; their
-current shape is preserved even when one dimension is zero. AI feedback receives
-the matrix name, current dimensions, and entries as structured answer data.
+current shape and entries are preserved while they are nonempty. Removing the
+final row or column produces the canonical empty `Matrix(0, 0, [])`. AI feedback
+receives the matrix name, dimensions, and entries as structured answer data.
 The function may return a boolean, a score from `0` to `1`, or a dictionary
-containing `score` (or `correct`) and optional plain-text `feedback`.
+containing `score` (or `correct`) and optional plain-text `feedback`. A checker
+can assess complete row or column vectors with, for example,
+`assessment: {"Z": {"columns": [True, False, True]}}`; the corresponding
+vectors are marked as units, and the structured statuses are also available to
+AI feedback.
 
 ````markdown
 ```{math-exercise}

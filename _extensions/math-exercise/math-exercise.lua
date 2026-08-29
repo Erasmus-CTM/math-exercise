@@ -401,7 +401,9 @@ local function buildDynamicMatrix(exerciseId, content, vars, mode)
     error("math-exercise: mat{...} currently requires mode: custom")
   end
   local spec = parseDynamicMatrixSpec(content)
-  local rows, cols = spec.rows.initial, spec.cols.initial
+  local configuredRows, configuredCols = spec.rows.initial, spec.cols.initial
+  local rows, cols = configuredRows, configuredCols
+  if rows == 0 or cols == 0 then rows, cols = 0, 0 end
   local ids, labels, cells = {}, {}, {}
   for row = 1, rows do
     for column = 1, cols do
@@ -418,13 +420,16 @@ local function buildDynamicMatrix(exerciseId, content, vars, mode)
                .. ' data-auto-rows="' .. tostring(spec.rows.auto) .. '"'
                .. ' data-auto-cols="' .. tostring(spec.cols.auto) .. '"'
                .. ' data-min-rows="' .. spec.rows.min .. '" data-max-rows="' .. spec.rows.max .. '"'
-               .. ' data-min-cols="' .. spec.cols.min .. '" data-max-cols="' .. spec.cols.max .. '">'
+               .. ' data-min-cols="' .. spec.cols.min .. '" data-max-cols="' .. spec.cols.max .. '"'
+               .. ' data-last-rows="' .. configuredRows .. '" data-last-cols="' .. configuredCols .. '">'
                .. table.concat(cells) .. '</span>'
   local controls = '<span class="math-dynamic-matrix-controls" aria-label="Matrix size controls">'
-                 .. '<button type="button" data-dynamic-action="remove-row">− row</button>'
-                 .. '<button type="button" data-dynamic-action="add-row">+ row</button>'
-                 .. '<button type="button" data-dynamic-action="remove-col">− column</button>'
-                 .. '<button type="button" data-dynamic-action="add-col">+ column</button>'
+                 .. '<span class="math-dynamic-axis" data-dynamic-axis="row"><span class="math-dynamic-axis-label"></span>'
+                 .. '<button type="button" data-dynamic-action="remove-row">−</button><output></output>'
+                 .. '<button type="button" data-dynamic-action="add-row">+</button></span>'
+                 .. '<span class="math-dynamic-axis" data-dynamic-axis="col"><span class="math-dynamic-axis-label"></span>'
+                 .. '<button type="button" data-dynamic-action="remove-col">−</button><output></output>'
+                 .. '<button type="button" data-dynamic-action="add-col">+</button></span>'
                  .. '</span>'
   local html = '<span class="math-dynamic-matrix-wrap" data-matrix-name="' .. attrEsc(spec.name) .. '">'
              .. matrix .. controls .. '</span>'
@@ -480,12 +485,21 @@ local function atWordBoundary(text, position)
   return not text:sub(position - 1, position - 1):match("[%w_]")
 end
 
+-- Exercise bodies are inserted as raw HTML, outside Pandoc's Markdown math
+-- parser. Canonical delimiters keep page-level MathJax from consuming a bare
+-- \\begin{...} environment and leaving literal dollar signs behind.
+local function normalizeTaskMathDelimiters(text)
+  text = text:gsub("%$%$(.-)%$%$", "\\[%1\\]")
+  return text:gsub("%$(.-)%$", "\\(%1\\)")
+end
+
 -- Replace scalar, vector, and matrix markers with HTML input elements.
 -- The third return value contains structural label tokens used by the browser
 -- for localized component/cell feedback. Author-supplied field-labels still
 -- take precedence.
 ----
 local function processMarkers(text, exerciseId, vars, vecdir, mode)
+  text = normalizeTaskMathDelimiters(text)
   local count, fieldIds, structuralLabels = 0, {}, {}
   local dynamicNames = {}
   local output, position = {}, 1
