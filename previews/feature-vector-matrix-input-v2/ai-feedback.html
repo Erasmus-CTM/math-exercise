@@ -26,6 +26,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -746,9 +781,21 @@ window.Quarto = {
 <p>When feedback is requested, the model receives the task, the student’s current work, the checker result, the current hint level, and relevant explanatory text from the page. The examples below show how an author controls that context.</p>
 <section id="automatic-section-context" class="level2">
 <h2 class="anchored" data-anchor-id="automatic-section-context">Automatic section context</h2>
-<p>Normal prose since the most recent heading is collected automatically. In the exercise below, the explanation of the discriminant is therefore available to the feedback model without an extra author option.</p>
-<p>For <span class="math inline">\(ax^2+bx+c=0\)</span>, the discriminant is <span class="math inline">\(D=b^2-4ac\)</span>. The sign of <span class="math inline">\(D\)</span> determines the number of real roots.</p>
-<div class="math-exercise-cell" id="math-exercise-1" data-label="ai-auto-context" data-mode="equivalent" data-reject="" data-vars="a,b,c" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[&quot;Discriminant&quot;]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Automatic section context Normal prose since the most recent heading is collected automatically. In the exercise below, the explanation of the discriminant is therefore available to the feedback model without an extra author option. For ax^2+bx+c=0, the discriminant is D=b^2-4ac. The sign of D determines the number of real roots.&quot;" data-fields="[&quot;math-exercise-1-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<p>No author option is needed for automatic context. The nearest preceding heading starts a context section. Visible prose, lists, and callouts after that heading are collected until the exercise; code blocks and other exercises are excluded. A new heading starts a new section, and only the most recent 1,500 characters are retained. This keeps feedback grounded in the local explanation without sending the whole page.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Automatically collected context">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Automatically collected context
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>For <span class="math inline">\(ax^2+bx+c=0\)</span>, the discriminant is <span class="math inline">\(D=b^2-4ac\)</span>. The sign of <span class="math inline">\(D\)</span> determines the number of real roots. This visible callout is automatically available to the feedback model for the exercise immediately below it.</p>
+</div>
+</div>
+<div class="math-exercise-cell" id="math-exercise-1" data-label="ai-auto-context" data-mode="equivalent" data-reject="" data-vars="a,b,c" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[&quot;Discriminant&quot;]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Automatic section context No author option is needed for automatic context. The nearest preceding heading starts a context section. Visible prose, lists, and callouts after that heading are collected until the exercise; code blocks and other exercises are excluded. A new heading starts a new section, and only the most recent 1,500 characters are retained. This keeps feedback grounded in the local explanation without sending the whole page. Automatically collected context For ax^2+bx+c=0, the discriminant is D=b^2-4ac. The sign of D determines the number of real roots. This visible callout is automatically available to the feedback model for the exercise immediately below it.&quot;" data-fields="[&quot;math-exercise-1-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div class="math-exercise-question">For $2x^2+3x-2=0$, compute the discriminant: <input type="text" id="math-exercise-1-f1" data-answer="25" data-vars="a,b,c" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
@@ -774,11 +821,33 @@ For $2x^2+3x-2=0$, compute the discriminant: _[25]
 </section>
 <section id="reusable-explicit-context" class="level2">
 <h2 class="anchored" data-anchor-id="reusable-explicit-context">Reusable explicit context</h2>
-<p>An explicitly identified context block can be reused by exercises elsewhere on the page. The block remains visible to students.</p>
+<p>An explicitly identified context block can be reused by exercises elsewhere on the page. The block remains visible to students, and the exercise refers to it by id with <code>context: newton-rule</code>. Multiple ids may be listed when a task needs several sources. Explicit context is read from the rendered page when feedback is requested, so mathematical notation and text generated by other Quarto extensions are included.</p>
 <div id="newton-rule" class="math-exercise-context">
+<div class="callout callout-style-default callout-tip callout-titled" title="Explicit feedback context: Newton's method">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Explicit feedback context: Newton’s method
+</div>
+</div>
+<div class="callout-body-container callout-body">
 <p>Newton’s method uses <span class="math inline">\(x_{k+1}=x_k-f(x_k)/f'(x_k)\)</span>. Evaluate the function and derivative at the current iterate before forming the next iterate.</p>
 </div>
-<div class="math-exercise-cell" id="math-exercise-2" data-label="ai-explicit-context" data-mode="numeric" data-reject="" data-vars="" data-tolerance="0.001" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="explicit" data-context-refs="newton-rule" data-context="&quot;Reusable explicit context An explicitly identified context block can be reused by exercises elsewhere on the page. The block remains visible to students. Newton’s method uses x_{k+1}=x_k-f(x_k)/f'(x_k). Evaluate the function and derivative at the current iterate before forming the next iterate.&quot;" data-fields="[&quot;math-exercise-2-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+</div>
+</div>
+<details class="math-example-source">
+<summary>
+Show context-block source
+</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>::: {#newton-rule .math-exercise-context}</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>Newton's method uses</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>$x_{k+1}=x_k-f(x_k)/f'(x_k)$. Evaluate the function and derivative at the</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>current iterate before forming the next iterate.</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>:::</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="math-exercise-cell" id="math-exercise-2" data-label="ai-explicit-context" data-mode="numeric" data-reject="" data-vars="" data-tolerance="0.001" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="explicit" data-context-refs="newton-rule" data-context="&quot;Reusable explicit context An explicitly identified context block can be reused by exercises elsewhere on the page. The block remains visible to students, and the exercise refers to it by id with context: newton-rule. Multiple ids may be listed when a task needs several sources. Explicit context is read from the rendered page when feedback is requested, so mathematical notation and text generated by other Quarto extensions are included. Explicit feedback context: Newton’s methodNewton’s method uses x_{k+1}=x_k-f(x_k)/f'(x_k). Evaluate the function and derivative at the current iterate before forming the next iterate. Show context-block source&quot;" data-fields="[&quot;math-exercise-2-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div class="math-exercise-question">For $f(x)=x^2-2$ and $x_0=1.5$, compute $x_1$: <input type="text" id="math-exercise-2-f1" data-answer="17/12" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
@@ -833,8 +902,8 @@ __[x-(x^3-1)/(3*x^2)]
 </section>
 <section id="opting-out-of-context" class="level2">
 <h2 class="anchored" data-anchor-id="opting-out-of-context">Opting out of context</h2>
-<p>Use <code>context: none</code> when surrounding prose should not be sent with a feedback request.</p>
-<div class="math-exercise-cell" id="math-exercise-4" data-label="ai-no-context" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="none" data-context-refs="none" data-context="&quot;Opting out of context Use context: none when surrounding prose should not be sent with a feedback request.&quot;" data-fields="[&quot;math-exercise-4-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<p>Use <code>context: none</code> when surrounding prose should not be sent with a feedback request. This disables both automatic collection and accidental inheritance from the current section.</p>
+<div class="math-exercise-cell" id="math-exercise-4" data-label="ai-no-context" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="none" data-context-refs="none" data-context="&quot;Opting out of context Use context: none when surrounding prose should not be sent with a feedback request. This disables both automatic collection and accidental inheritance from the current section.&quot;" data-fields="[&quot;math-exercise-4-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div class="math-exercise-question">Compute $12/3$: <input type="text" id="math-exercise-4-f1" data-answer="4" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">

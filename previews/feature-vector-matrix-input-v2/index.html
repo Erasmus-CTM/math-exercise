@@ -164,6 +164,9 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<p><code>math-exercise</code> turns ordinary Quarto content into browser-based practice activities. Authors write the task, expected answer, and checking policy in a short <code>{math-exercise}</code> block. During rendering, the extension replaces answer markers with input fields and connects them to a checker. When a student selects <strong>Check</strong>, Pyodide and SymPy run locally in the browser; a grading server is not required.</p>
+<p>The extension supports symbolic equivalence, required algebraic forms, numerical tolerances, vectors and matrices, author-defined Python/SymPy checkers, and structured answers from JSXGraph. Optional AI feedback can use the task, the current answer, the checker result, and relevant page context to give a progressive hint without replacing deterministic answer checking.</p>
+<p>It is well suited to self-study notes, formative exercises, interactive textbooks, laboratory instructions, and visual mathematical exploration on a static Quarto website. It is not intended as a secure high-stakes examination system: expected answers and checker code are delivered to the student’s browser.</p>
 <p>Choose a page below to try common exercise types and see the corresponding Quarto source. Every source example is collapsed until you choose <strong>Show source</strong>.</p>
 <div class="callout callout-style-default callout-tip callout-titled" title="Trying the exercises">
 <div class="callout-header d-flex align-content-center">
