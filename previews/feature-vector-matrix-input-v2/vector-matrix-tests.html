@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Testside for vektor- og matriseinput – math-exercise</title>
+<title>Vektorer og matriser – math-exercise</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -628,19 +628,19 @@ select.math-modal-input {
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./sympy-examples.html"> 
-<span class="menu-text">SymPy examples</span></a>
+<span class="menu-text">Expressions and equivalence</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./ai-feedback.html"> 
-<span class="menu-text">AI and context</span></a>
+<span class="menu-text">AI feedback</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./custom-assessment.html"> 
-<span class="menu-text">Custom assessment</span></a>
+<span class="menu-text">Open-ended assessment</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./graphics-examples.html"> 
-<span class="menu-text">Graphics</span></a>
+<span class="menu-text">Graphical answers</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link active" href="./vector-matrix-tests.html" aria-current="page"> 
@@ -673,7 +673,7 @@ select.math-modal-input {
   <li><a href="#kolonnevektor" id="toc-kolonnevektor" class="nav-link" data-scroll-target="#kolonnevektor">Kolonnevektor</a></li>
   <li><a href="#radvektor" id="toc-radvektor" class="nav-link" data-scroll-target="#radvektor">Radvektor</a></li>
   <li><a href="#symbolske-komponenter" id="toc-symbolske-komponenter" class="nav-link" data-scroll-target="#symbolske-komponenter">Symbolske komponenter</a></li>
-  <li><a href="#komma-inne-i-en-funksjon" id="toc-komma-inne-i-en-funksjon" class="nav-link" data-scroll-target="#komma-inne-i-en-funksjon">Komma inne i en funksjon</a></li>
+  <li><a href="#funksjoner-med-flere-argumenter" id="toc-funksjoner-med-flere-argumenter" class="nav-link" data-scroll-target="#funksjoner-med-flere-argumenter">Funksjoner med flere argumenter</a></li>
   </ul></li>
   <li><a href="#matriser-i-ulike-størrelser" id="toc-matriser-i-ulike-størrelser" class="nav-link" data-scroll-target="#matriser-i-ulike-størrelser">Matriser i ulike størrelser</a>
   <ul class="collapse">
@@ -682,14 +682,14 @@ select.math-modal-input {
   <li><a href="#større-matrise" id="toc-større-matrise" class="nav-link" data-scroll-target="#større-matrise">Større matrise</a></li>
   <li><a href="#symbolsk-matrise" id="toc-symbolsk-matrise" class="nav-link" data-scroll-target="#symbolsk-matrise">Symbolsk matrise</a></li>
   </ul></li>
-  <li><a href="#kontrollmoduser-og-blandede-felt" id="toc-kontrollmoduser-og-blandede-felt" class="nav-link" data-scroll-target="#kontrollmoduser-og-blandede-felt">Kontrollmoduser og blandede felt</a>
+  <li><a href="#ulike-typer-svar" id="toc-ulike-typer-svar" class="nav-link" data-scroll-target="#ulike-typer-svar">Ulike typer svar</a>
   <ul class="collapse">
   <li><a href="#numerisk-toleranse" id="toc-numerisk-toleranse" class="nav-link" data-scroll-target="#numerisk-toleranse">Numerisk toleranse</a></li>
   <li><a href="#skalar-vektor-og-matrise-i-samme-oppgave" id="toc-skalar-vektor-og-matrise-i-samme-oppgave" class="nav-link" data-scroll-target="#skalar-vektor-og-matrise-i-samme-oppgave">Skalar, vektor og matrise i samme oppgave</a></li>
-  <li><a href="#egne-feltnavn-overstyrer-standardnavnene" id="toc-egne-feltnavn-overstyrer-standardnavnene" class="nav-link" data-scroll-target="#egne-feltnavn-overstyrer-standardnavnene">Egne feltnavn overstyrer standardnavnene</a></li>
+  <li><a href="#navngitte-koordinater" id="toc-navngitte-koordinater" class="nav-link" data-scroll-target="#navngitte-koordinater">Navngitte koordinater</a></li>
   </ul></li>
   <li><a href="#oppgavepool" id="toc-oppgavepool" class="nav-link" data-scroll-target="#oppgavepool">Oppgavepool</a></li>
-  <li><a href="#responsivitet" id="toc-responsivitet" class="nav-link" data-scroll-target="#responsivitet">Responsivitet</a></li>
+  <li><a href="#en-bred-radmatrise" id="toc-en-bred-radmatrise" class="nav-link" data-scroll-target="#en-bred-radmatrise">En bred radmatrise</a></li>
   </ul>
 </nav>
     </div>
@@ -699,7 +699,7 @@ select.math-modal-input {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Testside for vektor- og matriseinput</h1>
+<h1 class="title">Vektorer og matriser</h1>
 </div>
 
 
@@ -716,7 +716,20 @@ select.math-modal-input {
 </header>
 
 
-<p>Denne siden tester vektor- og matriseinput på norsk. Hver komponent er et eget svarfelt og kontrolleres med de samme reglene som vanlige svarfelt. Prøv både riktige og gale verdier, trykk <strong>Sjekk</strong>, og åpne <strong>Inntastingshjelp</strong> og <strong>Tilbakemelding</strong> for å kontrollere at hele grensesnittet er på bokmål.</p>
+<p>Her skriver du vektorer og matriser direkte i ferdig oppstilte svarfelt. Hver komponent eller matriseinngang har sitt eget felt. Fyll inn alle feltene og trykk <strong>Sjekk</strong>.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Slik skriver du svar">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tips</span>Slik skriver du svar
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Skriv bare innholdet i hver komponent eller matriseinngang; klammer og komma er allerede vist. Bruk <code>*</code> for multiplikasjon, <code>^</code> for potenser og parenteser for gruppering. Vanlige uttrykk er for eksempel <code>sqrt(2)</code>, <code>sin(x)</code>, <code>exp(x)</code> og <code>pi</code>. Algebraisk ekvivalente uttrykk godtas normalt. Åpne <strong>Inntastingshjelp</strong> for en fullstendig oversikt.</p>
+</div>
+</div>
 <section id="grunnleggende-vektorer" class="level2">
 <h2 class="anchored" data-anchor-id="grunnleggende-vektorer">Grunnleggende vektorer</h2>
 <section id="kolonnevektor" class="level3">
@@ -808,13 +821,14 @@ Skriv gradienten til $f(x,y)=x^2+xy$: $\nabla f=$ vec[2*x+y,x]
 ```</code></pre>
 </details>
 </section>
-<section id="komma-inne-i-en-funksjon" class="level3">
-<h3 class="anchored" data-anchor-id="komma-inne-i-en-funksjon">Komma inne i en funksjon</h3>
-<div class="math-exercise-cell" id="math-exercise-4" data-label="nb-nestet-komma" data-mode="equivalent" data-reject="" data-vars="x,y" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Komma inne i en funksjon&quot;" data-fields="[&quot;math-exercise-4-f1&quot;,&quot;math-exercise-4-f2&quot;]" data-structural-field-labels="[&quot;v1&quot;,&quot;v2&quot;]">
-<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Parseren må bevare kommaet i atan2</div>
+<section id="funksjoner-med-flere-argumenter" class="level3">
+<h3 class="anchored" data-anchor-id="funksjoner-med-flere-argumenter">Funksjoner med flere argumenter</h3>
+<div class="math-exercise-cell" id="math-exercise-4" data-label="nb-nestet-komma" data-mode="equivalent" data-reject="" data-vars="x,y" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Funksjoner med flere argumenter&quot;" data-fields="[&quot;math-exercise-4-f1&quot;,&quot;math-exercise-4-f2&quot;]" data-structural-field-labels="[&quot;v1&quot;,&quot;v2&quot;]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Polarkoordinater som vektorkomponenter</div>
 
 <div class="math-exercise-body" style="display:none;">
-<div class="math-exercise-question">Fyll inn vektoren: <span class="math-vec" style="--n:2"><input type="text" id="math-exercise-4-f1" data-answer="atan2(y,x)" data-vars="x,y" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-4-f2" data-answer="sqrt(x^2+y^2)" data-vars="x,y" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span></div>
+<div class="math-exercise-question">Skriv vektoren som består av vinkelen `atan2(y,x)` og lengden<br>
+$\sqrt{x^2+y^2}$: <span class="math-vec" style="--n:2"><input type="text" id="math-exercise-4-f1" data-answer="atan2(y,x)" data-vars="x,y" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-4-f2" data-answer="sqrt(x^2+y^2)" data-vars="x,y" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Sjekk</button>
@@ -832,9 +846,10 @@ Skriv gradienten til $f(x,y)=x^2+xy$: $\nabla f=$ vec[2*x+y,x]
   <summary>Vis kildekode</summary>
   <pre><code class="language-markdown">```{math-exercise}
 #| label: nb-nestet-komma
-#| caption: Parseren må bevare kommaet i atan2
+#| caption: Polarkoordinater som vektorkomponenter
 #| vars: x,y
-Fyll inn vektoren: vec[atan2(y,x),sqrt(x^2+y^2)]
+Skriv vektoren som består av vinkelen `atan2(y,x)` og lengden
+$\sqrt{x^2+y^2}$: vec[atan2(y,x),sqrt(x^2+y^2)]
 ```</code></pre>
 </details>
 </section>
@@ -965,8 +980,8 @@ mat[(x+1)^2,0;0,(x-1)*(x+1)]
 </details>
 </section>
 </section>
-<section id="kontrollmoduser-og-blandede-felt" class="level2">
-<h2 class="anchored" data-anchor-id="kontrollmoduser-og-blandede-felt">Kontrollmoduser og blandede felt</h2>
+<section id="ulike-typer-svar" class="level2">
+<h2 class="anchored" data-anchor-id="ulike-typer-svar">Ulike typer svar</h2>
 <section id="numerisk-toleranse" class="level3">
 <h3 class="anchored" data-anchor-id="numerisk-toleranse">Numerisk toleranse</h3>
 <div class="math-exercise-cell" id="math-exercise-9" data-label="nb-numerisk-matrise" data-mode="numeric" data-reject="" data-vars="" data-tolerance="0.01" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Numerisk toleranse&quot;" data-fields="[&quot;math-exercise-9-f1&quot;,&quot;math-exercise-9-f2&quot;,&quot;math-exercise-9-f3&quot;,&quot;math-exercise-9-f4&quot;]" data-structural-field-labels="[&quot;m1,1&quot;,&quot;m1,2&quot;,&quot;m2,1&quot;,&quot;m2,2&quot;]">
@@ -1032,10 +1047,10 @@ $A=$ mat[1,0;0,1].
 ```</code></pre>
 </details>
 </section>
-<section id="egne-feltnavn-overstyrer-standardnavnene" class="level3">
-<h3 class="anchored" data-anchor-id="egne-feltnavn-overstyrer-standardnavnene">Egne feltnavn overstyrer standardnavnene</h3>
-<div class="math-exercise-cell" id="math-exercise-11" data-label="nb-egne-feltnavn" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[&quot;Første koordinat&quot;,&quot;Andre koordinat&quot;]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Egne feltnavn overstyrer standardnavnene&quot;" data-fields="[&quot;math-exercise-11-f1&quot;,&quot;math-exercise-11-f2&quot;]" data-structural-field-labels="[&quot;v1&quot;,&quot;v2&quot;]">
-<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>field-labels har høyere prioritet enn komponentnavn</div>
+<section id="navngitte-koordinater" class="level3">
+<h3 class="anchored" data-anchor-id="navngitte-koordinater">Navngitte koordinater</h3>
+<div class="math-exercise-cell" id="math-exercise-11" data-label="nb-egne-feltnavn" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[&quot;Første koordinat&quot;,&quot;Andre koordinat&quot;]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Navngitte koordinater&quot;" data-fields="[&quot;math-exercise-11-f1&quot;,&quot;math-exercise-11-f2&quot;]" data-structural-field-labels="[&quot;v1&quot;,&quot;v2&quot;]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Et punkt med navngitte koordinater</div>
 
 <div class="math-exercise-body" style="display:none;">
 <div class="math-exercise-question">Skriv punktet $(4,5)$ som vektor: <span class="math-vec" style="--n:2"><input type="text" id="math-exercise-11-f1" data-answer="4" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-11-f2" data-answer="5" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span></div>
@@ -1056,7 +1071,7 @@ $A=$ mat[1,0;0,1].
   <summary>Vis kildekode</summary>
   <pre><code class="language-markdown">```{math-exercise}
 #| label: nb-egne-feltnavn
-#| caption: field-labels har høyere prioritet enn komponentnavn
+#| caption: Et punkt med navngitte koordinater
 #| field-labels: Første koordinat, Andre koordinat
 Skriv punktet $(4,5)$ som vektor: vec[4,5]
 ```</code></pre>
@@ -1065,8 +1080,8 @@ Skriv punktet $(4,5)$ som vektor: vec[4,5]
 </section>
 <section id="oppgavepool" class="level2">
 <h2 class="anchored" data-anchor-id="oppgavepool">Oppgavepool</h2>
-<p>Last inn en ny tilfeldig oppgave med omlastingsknappen. Dette tester at vektorene og matrisene også bygges riktig i nettleseren.</p>
-<div class="math-exercise-cell" id="math-exercise-12" data-label="nb-vektor-matrise-pool" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Oppgavepool Last inn en ny tilfeldig oppgave med omlastingsknappen. Dette tester at vektorene og matrisene også bygges riktig i nettleseren.&quot;" data-pool="[&quot;Skriv vektoren $(1,2)$: vec[1,2]&quot;,&quot;Skriv nullmatrisen på $2\\times2$: mat[0,0;0,0]&quot;,&quot;Skriv matrisen med radene $(1,0)$ og $(2,3)$: mat[1,0;2,3]&quot;]" data-fields="[]" data-structural-field-labels="[]">
+<p>Bruk omlastingsknappen i oppgaven for å få en annen variant.</p>
+<div class="math-exercise-cell" id="math-exercise-12" data-label="nb-vektor-matrise-pool" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Oppgavepool Bruk omlastingsknappen i oppgaven for å få en annen variant.&quot;" data-pool="[&quot;Skriv vektoren $(1,2)$: vec[1,2]&quot;,&quot;Skriv nullmatrisen på $2\\times2$: mat[0,0;0,0]&quot;,&quot;Skriv matrisen med radene $(1,0)$ og $(2,3)$: mat[1,0;2,3]&quot;]" data-fields="[]" data-structural-field-labels="[]">
 <div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Tilfeldig vektor- eller matriseoppgave</div>
 
 <div class="math-exercise-body" style="display:none;">
@@ -1104,11 +1119,11 @@ Skriv matrisen med radene $(1,0)$ og $(2,3)$: mat[1,0;2,3]
 ```</code></pre>
 </details>
 </section>
-<section id="responsivitet" class="level2">
-<h2 class="anchored" data-anchor-id="responsivitet">Responsivitet</h2>
-<p>Den brede matrisen nedenfor er med for å kontrollere små skjermer. Hele oppgaven skal fortsatt være tilgjengelig ved vannrett rulling uten at feltene eller klammene forsvinner.</p>
-<div class="math-exercise-cell" id="math-exercise-13" data-label="nb-bred-matrise" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Responsivitet Den brede matrisen nedenfor er med for å kontrollere små skjermer. Hele oppgaven skal fortsatt være tilgjengelig ved vannrett rulling uten at feltene eller klammene forsvinner.&quot;" data-fields="[&quot;math-exercise-13-f1&quot;,&quot;math-exercise-13-f2&quot;,&quot;math-exercise-13-f3&quot;,&quot;math-exercise-13-f4&quot;,&quot;math-exercise-13-f5&quot;,&quot;math-exercise-13-f6&quot;]" data-structural-field-labels="[&quot;m1,1&quot;,&quot;m1,2&quot;,&quot;m1,3&quot;,&quot;m1,4&quot;,&quot;m1,5&quot;,&quot;m1,6&quot;]">
-<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Bred matrise for mobiltest</div>
+<section id="en-bred-radmatrise" class="level2">
+<h2 class="anchored" data-anchor-id="en-bred-radmatrise">En bred radmatrise</h2>
+<p>På en smal skjerm kan du rulle vannrett for å nå alle feltene.</p>
+<div class="math-exercise-cell" id="math-exercise-13" data-label="nb-bred-matrise" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;En bred radmatrise På en smal skjerm kan du rulle vannrett for å nå alle feltene.&quot;" data-fields="[&quot;math-exercise-13-f1&quot;,&quot;math-exercise-13-f2&quot;,&quot;math-exercise-13-f3&quot;,&quot;math-exercise-13-f4&quot;,&quot;math-exercise-13-f5&quot;,&quot;math-exercise-13-f6&quot;]" data-structural-field-labels="[&quot;m1,1&quot;,&quot;m1,2&quot;,&quot;m1,3&quot;,&quot;m1,4&quot;,&quot;m1,5&quot;,&quot;m1,6&quot;]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Radmatrise med seks komponenter</div>
 
 <div class="math-exercise-body" style="display:none;">
 <div class="math-exercise-question">Skriv radmatrisen: <span class="math-mat" style="--cols:6"><input type="text" id="math-exercise-13-f1" data-answer="1" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-13-f2" data-answer="2" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-13-f3" data-answer="3" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-13-f4" data-answer="4" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-13-f5" data-answer="5" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-13-f6" data-answer="6" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span></div>
@@ -1129,7 +1144,7 @@ Skriv matrisen med radene $(1,0)$ og $(2,3)$: mat[1,0;2,3]
   <summary>Vis kildekode</summary>
   <pre><code class="language-markdown">```{math-exercise}
 #| label: nb-bred-matrise
-#| caption: Bred matrise for mobiltest
+#| caption: Radmatrise med seks komponenter
 Skriv radmatrisen: mat[1,2,3,4,5,6]
 ```</code></pre>
 </details>

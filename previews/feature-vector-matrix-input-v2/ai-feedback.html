@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>AI feedback and learning context – math-exercise</title>
+<title>AI feedback – math-exercise</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -657,19 +657,19 @@ window.Quarto = {
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./sympy-examples.html"> 
-<span class="menu-text">SymPy examples</span></a>
+<span class="menu-text">Expressions and equivalence</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link active" href="./ai-feedback.html" aria-current="page"> 
-<span class="menu-text">AI and context</span></a>
+<span class="menu-text">AI feedback</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./custom-assessment.html"> 
-<span class="menu-text">Custom assessment</span></a>
+<span class="menu-text">Open-ended assessment</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./graphics-examples.html"> 
-<span class="menu-text">Graphics</span></a>
+<span class="menu-text">Graphical answers</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./vector-matrix-tests.html"> 
@@ -702,7 +702,7 @@ window.Quarto = {
   <li><a href="#several-exercises-sharing-one-context" id="toc-several-exercises-sharing-one-context" class="nav-link" data-scroll-target="#several-exercises-sharing-one-context">Several exercises sharing one context</a></li>
   <li><a href="#opting-out-of-context" id="toc-opting-out-of-context" class="nav-link" data-scroll-target="#opting-out-of-context">Opting out of context</a></li>
   <li><a href="#multi-field-feedback" id="toc-multi-field-feedback" class="nav-link" data-scroll-target="#multi-field-feedback">Multi-field feedback</a></li>
-  <li><a href="#provider-compatibility" id="toc-provider-compatibility" class="nav-link" data-scroll-target="#provider-compatibility">Provider compatibility</a></li>
+  <li><a href="#working-with-different-ai-providers" id="toc-working-with-different-ai-providers" class="nav-link" data-scroll-target="#working-with-different-ai-providers">Working with different AI providers</a></li>
   </ul>
 </nav>
     </div>
@@ -712,7 +712,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">AI feedback and learning context</h1>
+<h1 class="title">AI feedback</h1>
 </div>
 
 
@@ -729,8 +729,21 @@ window.Quarto = {
 </header>
 
 
-<p>The <strong>Feedback</strong> button can request progressive hints from an OpenAI-compatible model. Credentials and model choice are stored only in the student’s browser. Ordinary answer checking does not require an AI service.</p>
-<p>The extension sends the exact task, the student’s current work, private checker results, the current hint level, and the relevant learning context. It asks the model to preserve the document language and to return concise student-facing feedback without exposing internal reasoning.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Entering answers">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Entering answers
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Type answers in the empty fields, then select <strong>Check</strong>. Use <code>*</code> for multiplication, <code>^</code> for powers, and parentheses to make grouping clear. Common forms include <code>sqrt(2)</code>, <code>sin(x)</code>, <code>exp(x)</code>, and <code>pi</code>. Enter an exact value unless the question asks for a decimal approximation. Algebraically equivalent expressions are normally accepted; when a particular form is required, the question says so. <strong>Input help</strong> shows the full notation reference.</p>
+</div>
+</div>
+<p>The <strong>Feedback</strong> button can request progressive hints from a configured AI model. <strong>Check</strong> still works without an AI service. API credentials and the chosen model remain in the student’s browser.</p>
+<p>When feedback is requested, the model receives the task, the student’s current work, the checker result, the current hint level, and relevant explanatory text from the page. The examples below show how an author controls that context.</p>
 <section id="automatic-section-context" class="level2">
 <h2 class="anchored" data-anchor-id="automatic-section-context">Automatic section context</h2>
 <p>Normal prose since the most recent heading is collected automatically. In the exercise below, the explanation of the discriminant is therefore available to the feedback model without an extra author option.</p>
@@ -873,8 +886,8 @@ tangent at $x=2$: _[12].
 ```</code></pre>
 </details>
 </section>
-<section id="provider-compatibility" class="level2">
-<h2 class="anchored" data-anchor-id="provider-compatibility">Provider compatibility</h2>
+<section id="working-with-different-ai-providers" class="level2">
+<h2 class="anchored" data-anchor-id="working-with-different-ai-providers">Working with different AI providers</h2>
 <p>The model capability adapter uses a portable request body for unknown OpenAI-compatible providers. It adds low-reasoning controls only for recognised model families and retries once with the portable baseline if a provider rejects optional parameters. See the <a href="docs/model-capability-adapter.md">adapter design notes</a> for the policy and known limitations.</p>
 
 
