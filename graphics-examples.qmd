@@ -10,4 +10,6 @@ filters:
 
 {{< include _includes/graphics-new-examples.qmd >}}
 
+{{< include _includes/graphics-coordinate-examples.qmd >}}
+
 {{< include _includes/graphics-original-examples.qmd >}}

@@ -22,6 +22,8 @@ jobs:
           grep -Fq '"lang":"nb"' nb-render.html
           grep -Fq 'Tilbakemelding' nb-render.html
           grep -Fq 'Basic exercise features' _site/index.html
+          grep -Fq 'browser-based practice activities' _site/index.html
+          grep -Fq 'not intended as a secure high-stakes examination system' _site/index.html
           grep -Fq 'Expressions and equivalence' _site/sympy-examples.html
           grep -Fq 'Entering answers' _site/basic-features.html
           grep -Fq 'Automatic section context' _site/ai-feedback.html
@@ -32,8 +34,14 @@ jobs:
           grep -Fq 'period-window-board' _site/graphics-examples.html
           grep -Fq 'Move the two orange dots' _site/graphics-examples.html
           grep -Fq 'Draw and refine an increasing curve' _site/graphics-examples.html
+          grep -Fq 'cube-transform-board' _site/graphics-examples.html
+          grep -Fq 'rotation-order-board' _site/graphics-examples.html
+          grep -Fq 'polar-sector-board' _site/graphics-examples.html
+          grep -Fq 'cylindrical-sector-board' _site/graphics-examples.html
           grep -Fq 'Show JSXGraph source' _site/graphics-examples.html
-          test "$(grep -Fc 'class="math-example-source"' _site/graphics-examples.html)" -eq 10
+          test "$(grep -Fc 'class="math-example-source"' _site/graphics-examples.html)" -eq 18
+          grep -Fq 'Automatically collected context' _site/ai-feedback.html
+          grep -Fq 'Explicit feedback context' _site/ai-feedback.html
           grep -Fq 'class="math-example-source"' _site/basic-features.html
           grep -Fq 'Show source' _site/sympy-examples.html
           grep -Fq 'Vis kildekode' _site/vector-matrix-tests.html
