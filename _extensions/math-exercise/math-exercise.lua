@@ -110,7 +110,14 @@ local lang = "en"
 -- Supported locales. Extend this set together with LOCALES in math-exercise.js.
 local supportedLangs = {
   ["en"] = true,
-  ["de"] = true
+  ["de"] = true,
+  ["nb"] = true
+}
+
+-- Quarto projects in Norway commonly use either `nb` or the older/general
+-- `no` code.  The student-facing wording is Bokmål in both cases.
+local langAliases = {
+  ["no"] = "nb"
 }
 
 -- Button labels rendered by this filter. Everything else lives in the
@@ -129,6 +136,13 @@ local uiText = {
     feedback   = "Feedback",
     reconfig   = "KI-Konfiguration ändern",
     poolReload = "Neue Zufallsaufgabe laden"
+  },
+  nb = {
+    check      = "Sjekk",
+    legend     = "Inntastingshjelp",
+    feedback   = "Tilbakemelding",
+    reconfig   = "Endre KI-oppsett",
+    poolReload = "Last inn en ny tilfeldig oppgave"
   }
 }
 
@@ -461,6 +475,7 @@ local function resolveLang(meta)
   end
 
   local base = raw:lower():match("^(%a+)")
+  base = langAliases[base] or base
   if base and supportedLangs[base] then
     return base
   end
