@@ -273,6 +273,32 @@
 .math-fb-llm-body .math-fb-display {
   margin: .5em 0 .65em;
 }
+
+.math-fb-table-wrap {
+  max-width: 100%;
+  margin: .45em 0 .7em;
+  overflow-x: auto;
+}
+
+.math-fb-table {
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+  font-size: .95em;
+}
+
+.math-fb-table th,
+.math-fb-table td {
+  padding: .3em .45em;
+  border: 1px solid var(--bs-border-color, #b8c5d1);
+  text-align: left;
+  vertical-align: top;
+}
+
+.math-fb-table th {
+  background: rgba(255, 255, 255, .45);
+  font-weight: 600;
+}
 .math-fb-llm-body .katex-display {
   margin: 0;
 }
@@ -412,6 +438,13 @@ select.math-modal-input {
 .math-modal-modellist-info {
   color: var(--bs-secondary-color, #495057);
   margin-bottom: .35em;
+}
+
+.math-modal-model-selection-info {
+  min-height: 1.25em;
+  margin-top: .3em;
+  color: var(--bs-secondary-color, #495057);
+  font-size: .92em;
 }
 
 .math-modal-modellist label {
