@@ -16,7 +16,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install checker test dependencies
-        run: python -m pip install sympy==1.14.0
+        run: python -m pip install sympy==1.14.0 networkx==3.4.2
       - name: Test feedback and provider compatibility
         run: node --test tests/*.test.mjs
       - uses: quarto-dev/quarto-actions/setup@v2
@@ -38,6 +38,8 @@ jobs:
           ! grep -Fq '&amp;nbsp;' _site/custom-assessment.html
           grep -Fq 'mode: custom' _site/custom-assessment.html
           grep -Fq 'Click every local maximum' _site/graphics-examples.html
+          grep -Fq 'bipartite-graph-board' _site/graphics-examples.html
+          grep -Fq 'data-packages="[&quot;networkx&quot;]"' _site/graphics-examples.html
           grep -Fq 'pooled-maxima-board' _site/graphics-examples.html
           grep -Fq 'period-window-board' _site/graphics-examples.html
           grep -Fq 'Move the two orange dots' _site/graphics-examples.html
@@ -53,7 +55,7 @@ jobs:
           grep -Fq 'cylindrical-sector-board' _site/graphics-examples.html
           grep -Fq 'Show JSXGraph source' _site/graphics-examples.html
           ! grep -Fq 'rotation-order-board' _site/graphics-examples.html
-          test "$(grep -Fc 'class="math-example-source"' _site/graphics-examples.html)" -eq 16
+          test "$(grep -Fc 'class="math-example-source"' _site/graphics-examples.html)" -eq 18
           original_line="$(grep -n 'Draw and refine a non-decreasing curve' _site/graphics-examples.html | head -1 | cut -d: -f1)"
           imported_line="$(grep -n 'Coordinate transformations' _site/graphics-examples.html | head -1 | cut -d: -f1)"
           test "$original_line" -lt "$imported_line"

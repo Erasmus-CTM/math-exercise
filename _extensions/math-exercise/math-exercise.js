@@ -734,6 +734,37 @@
   // ---------------------------------------------------------------------------
 
   var sympyReady = false;
+  var packageLoads = Object.create(null);
+
+  function parsePackageList(value) {
+    var packages = Array.isArray(value) ? value : [];
+    var seen = Object.create(null);
+    return packages.map(function (name) { return String(name || '').trim(); })
+      .filter(function (name) {
+        if (!name || !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(name)) {
+          if (name) throw new Error('Invalid Pyodide package name: ' + name);
+          return false;
+        }
+        var key = name.toLowerCase();
+        if (seen[key]) return false;
+        seen[key] = true;
+        return true;
+      });
+  }
+
+  async function ensurePackages(packages) {
+    var requested = parsePackageList(packages);
+    await Promise.all(requested.map(function (name) {
+      var key = name.toLowerCase();
+      if (!packageLoads[key]) {
+        packageLoads[key] = mainPyodide.loadPackage(name).catch(function (error) {
+          delete packageLoads[key];
+          throw error;
+        });
+      }
+      return packageLoads[key];
+    }));
+  }
 
   async function ensureSympy() {
     if (sympyReady) return;
@@ -2460,6 +2491,8 @@
     try { structuralFieldLabels = JSON.parse(cell.dataset.structuralFieldLabels || '[]'); } catch (e) {}
     var checker = '';
     try { checker = JSON.parse(cell.dataset.checker || '""'); } catch (e) {}
+    var packages = [];
+    try { packages = JSON.parse(cell.dataset.packages || '[]'); } catch (e) {}
     var formCredit = Number(cell.dataset.formCredit || '0.5');
     if (!Number.isFinite(formCredit) || formCredit < 0 || formCredit > 1) formCredit = 0.5;
     var checkOpts = {
@@ -2470,6 +2503,7 @@
       form:      cell.dataset.form      || '',
       vars:       vars,
       checker:    checker,
+      packages:   packages,
       responseSource: cell.dataset.response || '',
       partialCredit: cell.dataset.partialCredit === 'true',
       formCredit: formCredit
@@ -2612,6 +2646,7 @@
       fbDiv.innerHTML = '<div class="math-fb-checking">' + L.checking + '</div>';
       try {
         await ensureSympy();
+        await ensurePackages(checkOpts.packages);
         var parts = [];
         var fieldElements = fieldIds.map(function (id) { return document.getElementById(id); });
         if (mode === 'custom') {
@@ -2751,6 +2786,7 @@
           fbDiv.innerHTML = '<div class="math-fb-checking">' + L.fetchingFeedback + '</div>';
           try {
             await ensureSympy();
+            await ensurePackages(checkOpts.packages);
             var overallAssessment = '';
             var structuredAssessment = {};
             var externalAI = null;
@@ -2869,6 +2905,8 @@
       expressionAnswersXml: expressionAnswersXml,
       structuredAssessmentXml: structuredAssessmentXml,
       structuredGroupStatus: structuredGroupStatus,
+      parsePackageList: parsePackageList,
+      ensurePackages: ensurePackages,
     };
   }
 

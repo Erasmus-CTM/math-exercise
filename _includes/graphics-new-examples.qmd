@@ -3,6 +3,252 @@ moving handles, or drawing a curve, open the exercise heading below the plot
 and select **Check**. The collapsed source panels show authors how each
 JSXGraph plot and its answer checker are defined.
 
+## Construct a bipartite graph
+
+Click an empty part of the board to place a vertex. Click two vertices in
+succession to add an edge; click the same pair again to remove that edge. Drag
+vertices to arrange the drawing. To remove a vertex, select it and use **Delete
+selected**. Construct a connected bipartite graph with at least four vertices
+and at least four edges.
+
+```{.jsxgraph assessment_id="bipartite-graph-board" width="800" height="520" style="border:1px solid #ddd; border-radius:8px; max-width:100%;"}
+var board = JXG.JSXGraph.initBoard(BOARDID, {
+  boundingbox: [-5, 4, 5, -4],
+  axis: false,
+  pan: { enabled: false },
+  zoom: { enabled: false },
+  showNavigation: false,
+  showCopyright: false
+});
+
+var vertices = [];
+var edges = [];
+var selectedVertex = null;
+var pointerStart = null;
+var nextVertexId = 1;
+var clickToleranceSquared = 36;
+
+function vertexStyle(selected) {
+  return {
+    fillColor: selected ? '#f59e0b' : '#2563eb',
+    strokeColor: selected ? '#92400e' : '#1d4ed8'
+  };
+}
+
+function setSelected(vertex) {
+  if (selectedVertex) selectedVertex.point.setAttribute(vertexStyle(false));
+  selectedVertex = vertex;
+  if (selectedVertex) selectedVertex.point.setAttribute(vertexStyle(true));
+  board.update();
+}
+
+function addVertex(x, y) {
+  var vertex = { id: nextVertexId++ };
+  vertex.point = board.create('point', [x, y], Object.assign({
+    name: String(vertex.id),
+    size: 6,
+    fixed: false,
+    showInfobox: false,
+    highlight: false
+  }, vertexStyle(false)));
+  vertices.push(vertex);
+  setSelected(null);
+}
+
+function edgeKey(a, b) {
+  return a.id < b.id ? a.id + ':' + b.id : b.id + ':' + a.id;
+}
+
+function toggleEdge(a, b) {
+  var key = edgeKey(a, b);
+  var index = edges.findIndex(function (edge) { return edge.key === key; });
+  if (index >= 0) {
+    board.removeObject(edges[index].segment);
+    edges.splice(index, 1);
+  } else {
+    edges.push({
+      key: key,
+      source: a,
+      target: b,
+      segment: board.create('segment', [a.point, b.point], {
+        strokeColor: '#475569',
+        strokeWidth: 3,
+        fixed: true,
+        highlight: false
+      })
+    });
+  }
+  setSelected(null);
+}
+
+function handleVertexClick(vertex) {
+  if (!selectedVertex) {
+    setSelected(vertex);
+  } else if (selectedVertex === vertex) {
+    setSelected(null);
+  } else {
+    toggleEdge(selectedVertex, vertex);
+  }
+}
+
+function deleteSelected() {
+  if (!selectedVertex) return;
+  var doomed = selectedVertex;
+  edges.slice().forEach(function (edge) {
+    if (edge.source === doomed || edge.target === doomed) {
+      board.removeObject(edge.segment);
+      edges.splice(edges.indexOf(edge), 1);
+    }
+  });
+  board.removeObject(doomed.point);
+  vertices.splice(vertices.indexOf(doomed), 1);
+  selectedVertex = null;
+  board.update();
+}
+
+function clearGraph() {
+  setSelected(null);
+  edges.forEach(function (edge) { board.removeObject(edge.segment); });
+  vertices.forEach(function (vertex) { board.removeObject(vertex.point); });
+  edges = [];
+  vertices = [];
+  nextVertexId = 1;
+  board.update();
+}
+
+function isControlEvent(event) {
+  return !!(event.target && event.target.closest && event.target.closest('button'));
+}
+
+function vertexAt(screen) {
+  for (var i = vertices.length - 1; i >= 0; i--) {
+    if (vertices[i].point.hasPoint(screen[0], screen[1])) return vertices[i];
+  }
+  return null;
+}
+
+board.create('button', [-4.7, -3.55, 'Delete selected', deleteSelected], { fixed: true });
+board.create('button', [-1.8, -3.55, 'Clear graph', clearGraph], { fixed: true });
+
+board.on('down', function (event) {
+  pointerStart = null;
+  if (isControlEvent(event)) return;
+  var screen = board.getMousePosition(event);
+  pointerStart = {
+    screen: screen,
+    vertex: vertexAt(screen)
+  };
+});
+
+board.on('up', function (event) {
+  if (!pointerStart || isControlEvent(event)) {
+    pointerStart = null;
+    return;
+  }
+  var screen = board.getMousePosition(event);
+  var dx = screen[0] - pointerStart.screen[0];
+  var dy = screen[1] - pointerStart.screen[1];
+  if (dx * dx + dy * dy <= clickToleranceSquared) {
+    if (pointerStart.vertex) {
+      handleVertexClick(pointerStart.vertex);
+    } else if (!vertexAt(screen)) {
+      var coords = new JXG.Coords(JXG.COORDS_BY_SCREEN, screen, board);
+      var x = coords.usrCoords[1];
+      var y = coords.usrCoords[2];
+      if (y > -3.1) addVertex(x, y);
+    }
+  }
+  pointerStart = null;
+});
+
+function graphResponse() {
+  return {
+    representation: 'undirected-graph',
+    nodes: vertices.map(function (vertex) {
+      return {
+        id: vertex.id,
+        x: Number(vertex.point.X().toFixed(4)),
+        y: Number(vertex.point.Y().toFixed(4))
+      };
+    }),
+    edges: edges.map(function (edge) { return [edge.source.id, edge.target.id]; })
+  };
+}
+
+JXG.QuartoAssessment.register({
+  board: board,
+  response: graphResponse,
+  ai: {
+    render: true,
+    summary: function (data) {
+      return {
+        representation: data.representation,
+        vertexCount: data.nodes.length,
+        edgeCount: data.edges.length,
+        feedbackPolicy: 'Discuss bipartitions and odd cycles without proposing a finished graph.'
+      };
+    }
+  }
+});
+```
+
+```{math-exercise}
+#| label: jsxgraph-bipartite-construction
+#| caption: Give an example of a bipartite graph
+#| mode: custom
+#| packages: networkx
+#| response: jsxgraph:bipartite-graph-board
+#| embed-response: true
+#| checker: |
+#|   def check(response, symbols):
+#|       import networkx as nx
+#|
+#|       if response.get("representation") != "undirected-graph":
+#|           return {"score": 0, "feedback": "The board returned an invalid graph."}
+#|       nodes = response.get("nodes", [])
+#|       edges = response.get("edges", [])
+#|       if not isinstance(nodes, list) or not isinstance(edges, list):
+#|           return {"score": 0, "feedback": "The board returned invalid graph data."}
+#|
+#|       try:
+#|           node_ids = [node["id"] for node in nodes]
+#|           valid_ids = all(isinstance(node_id, int) and not isinstance(node_id, bool) for node_id in node_ids)
+#|           if not valid_ids or len(set(node_ids)) != len(node_ids):
+#|               raise ValueError("invalid vertices")
+#|           pairs = []
+#|           seen_edges = set()
+#|           known = set(node_ids)
+#|           for edge in edges:
+#|               if not isinstance(edge, list) or len(edge) != 2:
+#|                   raise ValueError("invalid edge")
+#|               source, target = edge
+#|               if source not in known or target not in known or source == target:
+#|                   raise ValueError("invalid edge endpoints")
+#|               key = tuple(sorted((source, target)))
+#|               if key in seen_edges:
+#|                   raise ValueError("duplicate edge")
+#|               seen_edges.add(key)
+#|               pairs.append((source, target))
+#|       except (KeyError, TypeError, ValueError):
+#|           return {"score": 0, "feedback": "The board returned a malformed graph."}
+#|
+#|       graph = nx.Graph()
+#|       graph.add_nodes_from(node_ids)
+#|       graph.add_edges_from(pairs)
+#|       if graph.number_of_nodes() < 4:
+#|           return {"score": 0, "feedback": "Use at least four vertices."}
+#|       if graph.number_of_edges() < 4:
+#|           return {"score": 0, "feedback": "Add at least four edges."}
+#|       if not nx.is_connected(graph):
+#|           return {"score": 0, "feedback": "Make the graph connected."}
+#|       if not nx.is_bipartite(graph):
+#|           return {"score": 0, "feedback": "This graph has an odd cycle, so it is not bipartite."}
+#|       return {"score": 1, "feedback": "This is a connected bipartite graph."}
+
+Construct a connected bipartite graph with at least four vertices and at least
+four edges.
+```
+
 ## Click every local maximum
 
 A local maximum is a point whose function value is at least as large as the

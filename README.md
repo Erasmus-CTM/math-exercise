@@ -105,6 +105,7 @@ Enter a matrix: mat[1,0;0,x]
 | `sigfigs` | integer | — | only for `mode: numeric`: round both sides to N significant figures before comparing |
 | `form` | `factored` / `expanded` / `single_fraction` / `lowest_terms` | — | representation additionally required for correctness — only for `mode: equivalent`/`exact` |
 | `checker` | multiline Python | — | trusted author checker for `mode: custom`; define `check(response, symbols)` |
+| `packages` | comma-separated package names | — | Pyodide packages to load lazily before checking, e.g. `networkx`; intended for `mode: custom` |
 | `response` | `jsxgraph:iframe-id` | — | obtain arbitrary JSON from a JSXGraph assessment iframe instead of expression fields |
 | `embed-response` | `true` / `false` | `false` | move the referenced JSXGraph iframe into the exercise card, between the question and controls |
 | `partial-credit` | `true` / `false` | `false` | average multiple fields, partially score sets, and award `form-credit` for equivalent answers in the wrong form |
@@ -423,6 +424,15 @@ Functions, cyclic structures, DOM nodes, and live JSXGraph objects are not JSON
 and must be converted by the response provider. The transport validates the
 iframe window and request id, times out after five seconds, and has a 1 MB
 accidental-overload limit.
+
+Custom checkers that need another package included with Pyodide may list it in
+the exercise options. Packages are downloaded only before the first check that
+needs them and are shared by later exercises on the page:
+
+```yaml
+#| mode: custom
+#| packages: networkx
+```
 
 The optional `ai` configuration is independent of local assessment:
 
