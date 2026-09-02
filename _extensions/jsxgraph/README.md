@@ -5,6 +5,11 @@ This directory is a focused fork of
 retaining its MIT license. It adds a generic `postMessage` assessment bridge
 for sandboxed interactive HTML iframes.
 
+The same bridge carries layout notifications when a collapsed
+`math-exercise` is opened. Every JSXGraph board in the iframe is resized and
+fully updated after the parent layout settles. This behavior is shared by the
+graph editor and by custom graphical-answer boards.
+
 ## Added API
 
 Give a block a stable `assessment_id` and register a JSON response provider:

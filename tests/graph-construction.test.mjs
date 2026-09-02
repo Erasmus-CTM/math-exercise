@@ -68,6 +68,23 @@ test('package lists are validated, deduplicated, and loaded only once', async ()
   assert.deepEqual(loaded, ['networkx']);
 });
 
+test('parent layout notification targets the sandboxed JSXGraph iframe', () => {
+  const api = loadBundle(async () => {});
+  const messages = [];
+  const iframe = {
+    id: 'collapsed-board',
+    tagName: 'IFRAME',
+    contentWindow: { postMessage: (message, origin) => messages.push([message, origin]) },
+  };
+  assert.equal(api.notifyExternalLayout(iframe), true);
+  assert.deepEqual(JSON.parse(JSON.stringify(messages)), [[{
+    protocol: 'jsxgraph-quarto-assessment',
+    version: 1,
+    type: 'layout',
+    assessmentId: 'collapsed-board',
+  }, '*']]);
+});
+
 test('graph editor creates vertices, toggles edges, serializes, and registers', () => {
   const container = {
     id: 'board', style: {}, children: [], listeners: {}, attributes: {},
@@ -195,9 +212,19 @@ test('graph theory is the final examples tab and exercises use the requested ord
   const nonplanar = examples.indexOf('## Make a non-planar graph');
   const bipartite = examples.indexOf('## Give an example of a bipartite graph');
   assert.ok(tree >= 0 && tree < euler && euler < nonplanar && nonplanar < bipartite);
-  assert.equal((examples.match(/#\| caption:/g) || []).length, 0);
+  assert.equal((examples.match(/#\| caption:/g) || []).length, 4);
   assert.doesNotMatch(graphics, /bipartite-graph-board/);
   assert.match(quarto, /- href: dynamic-matrix-tests\.qmd\n\s+text: Dynamic matrices\n\s+- href: graph-theory\.qmd\n\s+text: Graph theory\n\s+right:/);
+});
+
+test('collapsed JSXGraph assessments request a shared board refresh when opened', () => {
+  assert.match(source, /type: 'layout'/);
+  assert.match(source, /if \(open && responseFrame\) scheduleExternalLayout\(responseFrame\)/);
+  assert.match(lua, /aria-expanded="false"/);
+  assert.match(jsxLua, /if \(message\.type === 'layout'\)/);
+  assert.match(jsxLua, /Object\.values\(JXG\.boards \|\| \{\}\)\.forEach/);
+  assert.match(jsxLua, /board\.resizeContainer\(width, height\)/);
+  assert.match(jsxLua, /board\.fullUpdate\(\)/);
 });
 
 test('shared response conversion and all four NetworkX checkers work', () => {

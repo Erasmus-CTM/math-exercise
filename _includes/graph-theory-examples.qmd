@@ -26,6 +26,7 @@ editor.register({
 ```
 
 ```{math-exercise}
+#| caption: Construct a tree
 #| label: jsxgraph-tree-construction
 #| mode: custom
 #| packages: networkx
@@ -72,6 +73,7 @@ editor.register({
 ```
 
 ```{math-exercise}
+#| caption: Give a graph with an Euler circuit
 #| label: jsxgraph-euler-construction
 #| mode: custom
 #| packages: networkx
@@ -122,6 +124,7 @@ editor.register({
 ```
 
 ```{math-exercise}
+#| caption: Make a non-planar graph
 #| label: jsxgraph-nonplanar-construction
 #| mode: custom
 #| packages: networkx
@@ -169,6 +172,7 @@ editor.register({
 ```
 
 ```{math-exercise}
+#| caption: Give an example of a bipartite graph
 #| label: jsxgraph-bipartite-construction
 #| mode: custom
 #| packages: networkx

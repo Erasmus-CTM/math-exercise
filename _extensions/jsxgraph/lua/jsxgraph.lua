@@ -592,6 +592,33 @@ board%s.reload = function() { window.location.reload(); };
     return boards.length ? boards[0] : null;
   }
 
+  function refreshBoards() {
+    Object.values(JXG.boards || {}).forEach((board) => {
+      const container = board.containerObj;
+      if (!container) return;
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      if (!(width > 0 && height > 0)) return;
+      if (typeof board.resizeContainer === 'function' &&
+          (Math.abs((board.canvasWidth || 0) - width) > 1 ||
+           Math.abs((board.canvasHeight || 0) - height) > 1)) {
+        board.resizeContainer(width, height);
+      }
+      if (typeof board.fullUpdate === 'function') board.fullUpdate();
+      else if (typeof board.update === 'function') board.update();
+    });
+  }
+
+  function scheduleBoardRefresh() {
+    refreshBoards();
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(() => {
+        refreshBoards();
+        requestAnimationFrame(refreshBoards);
+      });
+    }
+  }
+
   JXG.QuartoAssessment = {
     register(spec) {
       registration = typeof spec === 'function' ? { response: spec } : spec;
@@ -604,8 +631,12 @@ board%s.reload = function() { window.location.reload(); };
   window.addEventListener('message', async (event) => {
     const message = event.data;
     if (event.source !== window.parent || !message || message.protocol !== protocol ||
-        message.version !== version || message.type !== 'request' ||
-        message.assessmentId !== assessmentId) return;
+        message.version !== version || message.assessmentId !== assessmentId) return;
+    if (message.type === 'layout') {
+      scheduleBoardRefresh();
+      return;
+    }
+    if (message.type !== 'request') return;
 
     const reply = {
       protocol,
@@ -638,6 +669,7 @@ board%s.reload = function() { window.location.reload(); };
     }
     window.parent.postMessage(reply, '*');
   });
+  window.addEventListener('resize', scheduleBoardRefresh);
 })();
 ]], assessment_id)
 

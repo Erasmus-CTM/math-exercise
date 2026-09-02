@@ -632,7 +632,7 @@ local function buildExercise(el, state)
 
   local captionHtml = ""
   if caption then
-    captionHtml = '<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0">'
+    captionHtml = '<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0" aria-expanded="false">'
                .. '<span class="math-chevron" aria-hidden="true"></span>'
                .. caption .. '</div>\n'
   end
