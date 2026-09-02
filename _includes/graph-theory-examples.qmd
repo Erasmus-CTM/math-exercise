@@ -27,7 +27,6 @@ editor.register({
 
 ```{math-exercise}
 #| label: jsxgraph-tree-construction
-#| caption: Construct a tree
 #| mode: custom
 #| packages: networkx
 #| response: jsxgraph:tree-construction-board

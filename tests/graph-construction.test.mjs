@@ -143,7 +143,8 @@ test('graph editor creates vertices, toggles edges, serializes, and registers', 
   assert.equal(container.children[0].style.display, 'block');
   assert.equal(container.attributes['data-graph-editor-ready'], 'true');
   assert.equal(container.children[1].children[2].textContent, 'Hide controls');
-  assert.equal(typeof container.listeners.click, 'function');
+  assert.equal(typeof container.listeners.mousedown, 'function');
+  assert.equal(typeof container.listeners.mouseup, 'function');
   editor.register();
   assert.equal(registrations.length, 1);
   assert.deepEqual(JSON.parse(JSON.stringify(registrations[0].response())), expected);
@@ -154,7 +155,7 @@ test('graph editor creates vertices, toggles edges, serializes, and registers', 
   assert.equal(editor.resize(), true);
   assert.deepEqual(resizeCalls, [[800, 520]]);
   const blankTarget = { closest: () => null };
-  container.listeners.click({ clientX: 400, clientY: 260, target: blankTarget });
+  container.listeners.mousedown({ button: 0, clientX: 400, clientY: 260, target: blankTarget });
   assert.deepEqual(JSON.parse(JSON.stringify(editor.response().nodes)), [{ id: 1, x: 0, y: 0 }]);
 });
 

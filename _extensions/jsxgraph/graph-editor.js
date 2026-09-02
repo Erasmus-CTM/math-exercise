@@ -239,22 +239,38 @@
       return [event.clientX - rect.left, event.clientY - rect.top];
     }
 
-    function canvasClick(event) {
+    var pressStart = null;
+
+    function canvasMouseDown(event) {
       if (isControlEvent(event)) return;
+      if (event.button !== undefined && event.button !== 0) return;
       var screen = clickScreen(event);
       var vertex = vertexAt(screen);
       if (vertex) {
-        handleVertexClick(vertex);
+        pressStart = { screen: screen, vertex: vertex };
       } else {
         var position = userPosition(screen);
         if (position[1] > editableBottom) addVertex(position[0], position[1]);
       }
     }
 
-    // Native click events are also used by the in-canvas controls and survive
-    // sandboxing and exercise reparenting. Capture before JSXGraph handles the
-    // event, then use JSXGraph only to draw and drag the resulting objects.
-    board.containerObj.addEventListener('click', canvasClick, true);
+    function canvasMouseUp(event) {
+      if (!pressStart || isControlEvent(event)) {
+        pressStart = null;
+        return;
+      }
+      var screen = clickScreen(event);
+      var dx = screen[0] - pressStart.screen[0];
+      var dy = screen[1] - pressStart.screen[1];
+      if (dx * dx + dy * dy <= 64) handleVertexClick(pressStart.vertex);
+      pressStart = null;
+    }
+
+    // Create a blank-space vertex on mouse-down, before JSXGraph can suppress
+    // the later SVG click. Delay vertex selection until mouse-up so dragging a
+    // point does not also create or remove an edge.
+    board.containerObj.addEventListener('mousedown', canvasMouseDown, true);
+    board.containerObj.addEventListener('mouseup', canvasMouseUp, true);
 
     board.containerObj.setAttribute('data-graph-editor-ready', 'true');
 
