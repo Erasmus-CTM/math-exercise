@@ -38,14 +38,11 @@
     }, options.edgeAttributes);
     var normalStyle = merge({ fillColor: '#2563eb', strokeColor: '#1d4ed8' }, options.normalStyle);
     var selectedStyle = merge({ fillColor: '#f59e0b', strokeColor: '#92400e' }, options.selectedStyle);
-    var clickTolerance = Number(options.clickTolerance || 8);
-    var clickToleranceSquared = clickTolerance * clickTolerance;
     var bounds = board.getBoundingBox();
     var editableBottom = options.editableBottom === undefined ? bounds[3] + 0.9 : Number(options.editableBottom);
     var vertices = [];
     var edges = [];
     var selectedVertex = null;
-    var pointerStart = null;
     var nextVertexId = 1;
     var controlsVisible = false;
 
@@ -155,6 +152,7 @@
     var panel = document.createElement('div');
     panel.setAttribute('role', 'note');
     panel.setAttribute('aria-label', 'Graph editor controls');
+    panel.setAttribute('data-graph-editor-control', 'true');
     panel.style.cssText = [
       'position:absolute', 'top:48px', 'right:12px', 'z-index:20',
       'display:none', 'width:min(270px,calc(100% - 24px))',
@@ -236,38 +234,27 @@
       return [coords.usrCoords[1], coords.usrCoords[2]];
     }
 
-    function pointerDown(event) {
-      pointerStart = null;
+    function clickScreen(event) {
+      var rect = board.containerObj.getBoundingClientRect();
+      return [event.clientX - rect.left, event.clientY - rect.top];
+    }
+
+    function canvasClick(event) {
       if (isControlEvent(event)) return;
-      var screen = board.getMousePosition(event);
-      pointerStart = { screen: screen, vertex: vertexAt(screen) };
+      var screen = clickScreen(event);
+      var vertex = vertexAt(screen);
+      if (vertex) {
+        handleVertexClick(vertex);
+      } else {
+        var position = userPosition(screen);
+        if (position[1] > editableBottom) addVertex(position[0], position[1]);
+      }
     }
 
-    function pointerUp(event) {
-      if (!pointerStart || isControlEvent(event)) {
-        pointerStart = null;
-        return;
-      }
-      var screen = board.getMousePosition(event);
-      var dx = screen[0] - pointerStart.screen[0];
-      var dy = screen[1] - pointerStart.screen[1];
-      if (dx * dx + dy * dy <= clickToleranceSquared) {
-        if (pointerStart.vertex) {
-          handleVertexClick(pointerStart.vertex);
-        } else if (!vertexAt(screen)) {
-          var position = userPosition(screen);
-          var x = position[0];
-          var y = position[1];
-          if (y > editableBottom) addVertex(x, y);
-        }
-      }
-      pointerStart = null;
-    }
-
-    // Use JSXGraph's normalized board events. This is the same path used by
-    // the original inline graph exercise and works across mouse and touch.
-    board.on('down', pointerDown);
-    board.on('up', pointerUp);
+    // Native click events are also used by the in-canvas controls and survive
+    // sandboxing and exercise reparenting. Capture before JSXGraph handles the
+    // event, then use JSXGraph only to draw and drag the resulting objects.
+    board.containerObj.addEventListener('click', canvasClick, true);
 
     board.containerObj.setAttribute('data-graph-editor-ready', 'true');
 

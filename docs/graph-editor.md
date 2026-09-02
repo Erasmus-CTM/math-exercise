@@ -62,7 +62,6 @@ For a board that already exists, call
 | `controlsInitiallyVisible` | `false` | Show the instruction panel when the board opens. |
 | `instructions` | Four standard interaction steps | Array of strings displayed in the instruction panel. |
 | `labels` | English control labels | Overrides `deleteSelected`, `clearGraph`, `showControls`, or `hideControls`. |
-| `clickTolerance` | `8` | Maximum pointer movement in pixels that still counts as a click rather than a drag. |
 | `editableBottom` | bottom of board plus `0.9` | Lowest y-coordinate where a blank click may add a vertex; reserves space for controls. |
 | `pointAttributes` | standard draggable blue point | Additional JSXGraph point attributes. |
 | `edgeAttributes` | standard fixed grey segment | Additional JSXGraph segment attributes. |
