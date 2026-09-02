@@ -259,9 +259,11 @@
     }
 
     if (board.containerObj.addEventListener) {
-      board.containerObj.addEventListener('pointerdown', pointerDown);
-      board.containerObj.addEventListener('pointerup', pointerUp);
-      board.containerObj.addEventListener('pointercancel', function () { pointerStart = null; });
+      // JSXGraph may stop pointer events while managing its own drag state.
+      // Capture them first so blank-canvas clicks always reach the editor.
+      board.containerObj.addEventListener('pointerdown', pointerDown, true);
+      board.containerObj.addEventListener('pointerup', pointerUp, true);
+      board.containerObj.addEventListener('pointercancel', function () { pointerStart = null; }, true);
     } else {
       board.on('down', pointerDown);
       board.on('up', pointerUp);
