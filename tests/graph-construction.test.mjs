@@ -79,8 +79,11 @@ test('graph editor creates vertices, toggles edges, serializes, and registers', 
   };
   const events = {};
   const registrations = [];
+  const resizeCalls = [];
   const board = {
     containerObj: container,
+    canvasWidth: 0,
+    canvasHeight: 0,
     getBoundingBox: () => [-5, 4, 5, -4],
     getMousePosition: (event) => [event.x, event.y],
     create(type, args, attributes) {
@@ -96,6 +99,12 @@ test('graph editor creates vertices, toggles edges, serializes, and registers', 
       return { type, args, attributes };
     },
     on(name, callback) { events[name] = callback; },
+    resizeContainer(width, height) {
+      this.canvasWidth = width;
+      this.canvasHeight = height;
+      resizeCalls.push([width, height]);
+    },
+    fullUpdate() {},
     update() {},
     removeObject() {},
   };
@@ -140,10 +149,14 @@ test('graph editor creates vertices, toggles edges, serializes, and registers', 
   assert.deepEqual(JSON.parse(JSON.stringify(registrations[0].response())), expected);
 
   editor.clear();
+  container.clientWidth = 800;
+  container.clientHeight = 520;
+  assert.equal(editor.resize(), true);
+  assert.deepEqual(resizeCalls, [[800, 520]]);
   const blankTarget = { closest: () => null };
-  events.down({ x: 20, y: 10, target: blankTarget });
-  events.up({ x: 20, y: 10, target: blankTarget });
-  assert.deepEqual(JSON.parse(JSON.stringify(editor.response().nodes)), [{ id: 1, x: 2, y: 1 }]);
+  events.down({ x: 400, y: 260, target: blankTarget });
+  events.up({ x: 400, y: 260, target: blankTarget });
+  assert.deepEqual(JSON.parse(JSON.stringify(editor.response().nodes)), [{ id: 1, x: 0, y: 0 }]);
 });
 
 test('Lua injects the common editor and exercise packages reach the runtime', () => {

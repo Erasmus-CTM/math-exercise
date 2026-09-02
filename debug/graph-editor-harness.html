@@ -5,12 +5,15 @@
   <title>Graph editor harness</title>
   <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css">
-  <style>html,body{margin:0;height:100%}#board{width:900px;height:600px;max-width:100%;position:relative}</style>
+  <style>html,body{margin:0;height:100%}#wrap{display:none}#board{width:900px;height:600px;max-width:100%;position:relative}</style>
 </head>
 <body>
-  <div id="board" class="jxgbox"></div>
+  <div id="wrap"><div id="board" class="jxgbox"></div></div>
   <script>JXG.QuartoAssessment={register:function(){}};</script>
   <script src="../_extensions/jsxgraph/graph-editor.js"></script>
-  <script>window.editor=JXG.QuartoGraphEditor.createBoard({container:document.getElementById('board')});</script>
+  <script>
+    window.editor=JXG.QuartoGraphEditor.createBoard({container:document.getElementById('board')});
+    setTimeout(function(){document.getElementById('wrap').style.display='block';},500);
+  </script>
 </body>
 </html>
