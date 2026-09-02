@@ -330,6 +330,14 @@ checker. See the **[complete `assess_basis` API reference](docs/assess-basis.md)
 for its parameters, callback contract, scoring rule, statuses, edge cases, and
 row/column examples.
 
+#### Graph construction assessment
+
+For graph-theory construction problems, use the shared free-placement
+`JXG.QuartoGraphEditor` API and convert its response with the browser-side
+`graph_from_response(...)` helper. See the **[complete graph-editor API
+reference](docs/graph-editor.md)** for interactions, configuration, response
+schema, NetworkX validation, and a complete Quarto example.
+
 #### General custom-checker example
 
 The following example demonstrates a custom checker that assesses a property
@@ -814,8 +822,9 @@ The examples from `main` are published as a small navigable
 [math-exercise examples site](https://erasmus-ctm.github.io/math-exercise/),
 with focused pages for basic exercise features, expressions and equivalence,
 AI feedback and context, open-ended assessment, graphical JSXGraph responses,
-and Norwegian vector/matrix input. Every rendered exercise and graph has a
-collapsed panel containing its complete source. The graphics page includes
+graph-theory constructions, and Norwegian vector/matrix input. Every rendered
+exercise and graph has a collapsed panel containing its complete source. The
+graphics page includes
 pooled point selection, a draggable one-period window, movable piecewise-linear
 graphs, and freehand-curve assessment. The original all-in-one regression page remains
 available from the site. The complete Quarto project is rebuilt automatically
