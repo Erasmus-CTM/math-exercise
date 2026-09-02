@@ -70,11 +70,10 @@ test('package lists are validated, deduplicated, and loaded only once', async ()
 
 test('graph editor creates vertices, toggles edges, serializes, and registers', () => {
   const container = {
-    id: 'board', style: {}, children: [], listeners: {}, listenerOptions: {}, attributes: {},
+    id: 'board', style: {}, children: [], listeners: {}, attributes: {},
     appendChild(child) { this.children.push(child); },
-    addEventListener(name, callback, options) {
+    addEventListener(name, callback) {
       this.listeners[name] = callback;
-      this.listenerOptions[name] = options;
     },
     setAttribute(name, value) { this.attributes[name] = value; },
   };
@@ -134,16 +133,16 @@ test('graph editor creates vertices, toggles edges, serializes, and registers', 
   assert.equal(container.children[0].style.display, 'block');
   assert.equal(container.attributes['data-graph-editor-ready'], 'true');
   assert.equal(container.children[1].children[2].textContent, 'Hide controls');
-  assert.equal(container.listenerOptions.pointerdown, true);
-  assert.equal(container.listenerOptions.pointerup, true);
+  assert.equal(typeof events.down, 'function');
+  assert.equal(typeof events.up, 'function');
   editor.register();
   assert.equal(registrations.length, 1);
   assert.deepEqual(JSON.parse(JSON.stringify(registrations[0].response())), expected);
 
   editor.clear();
   const blankTarget = { closest: () => null };
-  container.listeners.pointerdown({ x: 20, y: 10, target: blankTarget });
-  container.listeners.pointerup({ x: 20, y: 10, target: blankTarget });
+  events.down({ x: 20, y: 10, target: blankTarget });
+  events.up({ x: 20, y: 10, target: blankTarget });
   assert.deepEqual(JSON.parse(JSON.stringify(editor.response().nodes)), [{ id: 1, x: 2, y: 1 }]);
 });
 

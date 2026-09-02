@@ -228,9 +228,6 @@
       if (isControlEvent(event)) return;
       var screen = board.getMousePosition(event);
       pointerStart = { screen: screen, vertex: vertexAt(screen) };
-      if (event.pointerId !== undefined && board.containerObj.setPointerCapture) {
-        try { board.containerObj.setPointerCapture(event.pointerId); } catch (_) {}
-      }
     }
 
     function pointerUp(event) {
@@ -252,22 +249,12 @@
         }
       }
       pointerStart = null;
-      if (event.pointerId !== undefined && board.containerObj.hasPointerCapture &&
-          board.containerObj.hasPointerCapture(event.pointerId)) {
-        board.containerObj.releasePointerCapture(event.pointerId);
-      }
     }
 
-    if (board.containerObj.addEventListener) {
-      // JSXGraph may stop pointer events while managing its own drag state.
-      // Capture them first so blank-canvas clicks always reach the editor.
-      board.containerObj.addEventListener('pointerdown', pointerDown, true);
-      board.containerObj.addEventListener('pointerup', pointerUp, true);
-      board.containerObj.addEventListener('pointercancel', function () { pointerStart = null; }, true);
-    } else {
-      board.on('down', pointerDown);
-      board.on('up', pointerUp);
-    }
+    // Use JSXGraph's normalized board events. This is the same path used by
+    // the original inline graph exercise and works across mouse and touch.
+    board.on('down', pointerDown);
+    board.on('up', pointerUp);
 
     board.containerObj.setAttribute('data-graph-editor-ready', 'true');
 
