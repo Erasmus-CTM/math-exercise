@@ -10,7 +10,7 @@ const [source, lua, jsxLua, editorSource, examples, docs, quarto, graphics] = aw
   readFile(new URL('../_extensions/jsxgraph/lua/jsxgraph.lua', import.meta.url), 'utf8'),
   readFile(new URL('../_extensions/jsxgraph/graph-editor.js', import.meta.url), 'utf8'),
   readFile(new URL('../_includes/graph-theory-examples.qmd', import.meta.url), 'utf8'),
-  readFile(new URL('../docs/graph-editor.md', import.meta.url), 'utf8'),
+  readFile(new URL('../docs/graph-editor.qmd', import.meta.url), 'utf8'),
   readFile(new URL('../_quarto.yml', import.meta.url), 'utf8'),
   readFile(new URL('../_includes/graphics-new-examples.qmd', import.meta.url), 'utf8'),
 ]);

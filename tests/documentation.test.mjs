@@ -22,7 +22,7 @@ test('README links graph construction to its dedicated API reference', () => {
   const general = readme.indexOf('#### General custom-checker example');
   assert.ok(graph >= 0);
   assert.ok(general > graph);
-  assert.match(readme, /\[complete graph-editor API\s+reference\]\(docs\/graph-editor\.md\)/);
+  assert.match(readme, /\[complete graph-editor API\s+reference\]\(docs\/graph-editor\.qmd\)/);
 });
 
 test('basis API uses GitHub-compatible math and balanced nested fences', () => {

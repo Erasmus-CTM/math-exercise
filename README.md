@@ -335,7 +335,7 @@ row/column examples.
 For graph-theory construction problems, use the shared free-placement
 `JXG.QuartoGraphEditor` API and convert its response with the browser-side
 `graph_from_response(...)` helper. See the **[complete graph-editor API
-reference](docs/graph-editor.md)** for interactions, configuration, response
+reference](docs/graph-editor.qmd)** for interactions, configuration, response
 schema, NetworkX validation, and a complete Quarto example.
 
 #### General custom-checker example
