@@ -70,14 +70,17 @@ test('package lists are validated, deduplicated, and loaded only once', async ()
 
 test('graph editor creates vertices, toggles edges, serializes, and registers', () => {
   const container = {
-    id: 'board', style: {}, children: [],
+    id: 'board', style: {}, children: [], listeners: {}, attributes: {},
     appendChild(child) { this.children.push(child); },
+    addEventListener(name, callback) { this.listeners[name] = callback; },
+    setAttribute(name, value) { this.attributes[name] = value; },
   };
   const events = {};
   const registrations = [];
   const board = {
     containerObj: container,
     getBoundingBox: () => [-5, 4, 5, -4],
+    getMousePosition: (event) => [event.x, event.y],
     create(type, args, attributes) {
       if (type === 'point') {
         return {
@@ -95,16 +98,17 @@ test('graph editor creates vertices, toggles edges, serializes, and registers', 
     removeObject() {},
   };
   const element = () => ({
-    style: {}, children: [], textContent: '',
+    style: {}, children: [], textContent: '', listeners: {},
     setAttribute() {},
     appendChild(child) { this.children.push(child); },
+    addEventListener(name, callback) { this.listeners[name] = callback; },
   });
   const context = {
     document: { createElement: element, querySelector: () => container },
     JXG: {
       JSXGraph: { initBoard: () => board },
       QuartoAssessment: { register: (spec) => registrations.push(spec) },
-      Coords: function () {},
+      Coords: function (_mode, screen) { this.usrCoords = [1, screen[0] / 10, screen[1] / 10]; },
       COORDS_BY_SCREEN: 0,
     },
   };
@@ -125,9 +129,17 @@ test('graph editor creates vertices, toggles edges, serializes, and registers', 
   assert.deepEqual(JSON.parse(JSON.stringify(editor.response())), expected);
   assert.equal(editor.showControls(true), true);
   assert.equal(container.children[0].style.display, 'block');
+  assert.equal(container.attributes['data-graph-editor-ready'], 'true');
+  assert.equal(container.children[1].children[2].textContent, 'Hide controls');
   editor.register();
   assert.equal(registrations.length, 1);
   assert.deepEqual(JSON.parse(JSON.stringify(registrations[0].response())), expected);
+
+  editor.clear();
+  const blankTarget = { closest: () => null };
+  container.listeners.pointerdown({ x: 20, y: 10, target: blankTarget });
+  container.listeners.pointerup({ x: 20, y: 10, target: blankTarget });
+  assert.deepEqual(JSON.parse(JSON.stringify(editor.response().nodes)), [{ id: 1, x: 2, y: 1 }]);
 });
 
 test('Lua injects the common editor and exercise packages reach the runtime', () => {

@@ -42,12 +42,6 @@
     var clickToleranceSquared = clickTolerance * clickTolerance;
     var bounds = board.getBoundingBox();
     var editableBottom = options.editableBottom === undefined ? bounds[3] + 0.9 : Number(options.editableBottom);
-    var buttonPositions = merge({
-      deleteSelected: [bounds[0] + 0.3, bounds[3] + 0.45],
-      clearGraph: [bounds[0] + 3.2, bounds[3] + 0.45],
-      toggleControls: [bounds[2] - 2.4, bounds[1] - 0.45]
-    }, options.buttonPositions);
-
     var vertices = [];
     var edges = [];
     var selectedVertex = null;
@@ -179,25 +173,47 @@
     board.containerObj.style.position = board.containerObj.style.position || 'relative';
     board.containerObj.appendChild(panel);
 
+    var controlBar = document.createElement('div');
+    controlBar.setAttribute('data-graph-editor-control', 'true');
+    controlBar.style.cssText = [
+      'position:absolute', 'left:12px', 'bottom:10px', 'z-index:20',
+      'display:flex', 'gap:8px', 'flex-wrap:wrap', 'font:14px/1.2 sans-serif'
+    ].join(';');
+    board.containerObj.appendChild(controlBar);
+
+    function createControl(label, handler) {
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = label;
+      button.style.cssText = [
+        'padding:6px 10px', 'border:1px solid #94a3b8', 'border-radius:5px',
+        'background:#fff', 'color:#1e293b', 'cursor:pointer'
+      ].join(';');
+      button.addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        handler();
+      });
+      controlBar.appendChild(button);
+      return button;
+    }
+
     var toggleButton;
     function showControls(show) {
       controlsVisible = show === undefined ? !controlsVisible : !!show;
       panel.style.display = controlsVisible ? 'block' : 'none';
-      if (toggleButton && typeof toggleButton.setText === 'function') {
-        toggleButton.setText(controlsVisible ? labels.hideControls : labels.showControls);
-      }
+      if (toggleButton) toggleButton.textContent = controlsVisible ? labels.hideControls : labels.showControls;
       board.update();
       return controlsVisible;
     }
 
-    board.create('button', buttonPositions.deleteSelected.concat([labels.deleteSelected, deleteSelected]), { fixed: true });
-    board.create('button', buttonPositions.clearGraph.concat([labels.clearGraph, clear]), { fixed: true });
-    toggleButton = board.create('button', buttonPositions.toggleControls.concat([labels.showControls, function () {
-      showControls();
-    }]), { fixed: true });
+    createControl(labels.deleteSelected, deleteSelected);
+    createControl(labels.clearGraph, clear);
+    toggleButton = createControl(labels.showControls, function () { showControls(); });
 
     function isControlEvent(event) {
-      return !!(event.target && event.target.closest && event.target.closest('button, input'));
+      return !!(event.target && event.target.closest &&
+        event.target.closest('button, input, [data-graph-editor-control]'));
     }
 
     function vertexAt(screen) {
@@ -207,14 +223,17 @@
       return null;
     }
 
-    board.on('down', function (event) {
+    function pointerDown(event) {
       pointerStart = null;
       if (isControlEvent(event)) return;
       var screen = board.getMousePosition(event);
       pointerStart = { screen: screen, vertex: vertexAt(screen) };
-    });
+      if (event.pointerId !== undefined && board.containerObj.setPointerCapture) {
+        try { board.containerObj.setPointerCapture(event.pointerId); } catch (_) {}
+      }
+    }
 
-    board.on('up', function (event) {
+    function pointerUp(event) {
       if (!pointerStart || isControlEvent(event)) {
         pointerStart = null;
         return;
@@ -233,7 +252,22 @@
         }
       }
       pointerStart = null;
-    });
+      if (event.pointerId !== undefined && board.containerObj.hasPointerCapture &&
+          board.containerObj.hasPointerCapture(event.pointerId)) {
+        board.containerObj.releasePointerCapture(event.pointerId);
+      }
+    }
+
+    if (board.containerObj.addEventListener) {
+      board.containerObj.addEventListener('pointerdown', pointerDown);
+      board.containerObj.addEventListener('pointerup', pointerUp);
+      board.containerObj.addEventListener('pointercancel', function () { pointerStart = null; });
+    } else {
+      board.on('down', pointerDown);
+      board.on('up', pointerUp);
+    }
+
+    board.containerObj.setAttribute('data-graph-editor-ready', 'true');
 
     if (options.controlsInitiallyVisible) showControls(true);
 
