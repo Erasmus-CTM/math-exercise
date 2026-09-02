@@ -152,21 +152,19 @@ requested only when the student selects **Feedback**.
 
 Graph exercises use custom checkers, so partial credit is determined by the
 checker return value rather than by geometry or the `partial-credit` option.
-Return a score strictly between `0` and `1` for meaningful progress and `1`
-only when every requirement is satisfied:
+The examples use a deliberately simple three-level rule: zero until all
+required vertex and edge counts are met, one half when those counts are met but
+the defining property is not, and one only for a complete construction:
 
 ```python
 def check(response, symbols):
     import networkx as nx
     graph = graph_from_response(response)
-    enough_vertices = graph.number_of_nodes() >= 5
-    connected = graph.number_of_nodes() > 0 and nx.is_connected(graph)
-    acyclic = graph.number_of_edges() > 0 and nx.is_forest(graph)
-    if enough_vertices and connected and acyclic:
+    if graph.number_of_nodes() < 5:
+        return {"score": 0, "feedback": "Use at least five vertices."}
+    if nx.is_tree(graph):
         return {"score": 1, "feedback": "This graph is a tree."}
-    score = 0.25 * min(graph.number_of_nodes() / 5, 1)
-    score += 0.35 * connected + 0.40 * acyclic
-    return {"score": score, "feedback": "Continue with the unmet requirement."}
+    return {"score": 0.5, "feedback": "Make the graph connected and acyclic."}
 ```
 
 `#| partial-credit: true` is recommended in the exercise declaration to make
