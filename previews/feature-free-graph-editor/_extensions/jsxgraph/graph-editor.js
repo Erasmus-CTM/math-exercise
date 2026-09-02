@@ -223,6 +223,19 @@
       return null;
     }
 
+    function userPosition(screen) {
+      var width = board.containerObj.clientWidth || board.canvasWidth;
+      var height = board.containerObj.clientHeight || board.canvasHeight;
+      if (Number.isFinite(width) && width > 0 && Number.isFinite(height) && height > 0) {
+        return [
+          bounds[0] + screen[0] / width * (bounds[2] - bounds[0]),
+          bounds[1] - screen[1] / height * (bounds[1] - bounds[3])
+        ];
+      }
+      var coords = new JXG.Coords(JXG.COORDS_BY_SCREEN, screen, board);
+      return [coords.usrCoords[1], coords.usrCoords[2]];
+    }
+
     function pointerDown(event) {
       pointerStart = null;
       if (isControlEvent(event)) return;
@@ -242,9 +255,9 @@
         if (pointerStart.vertex) {
           handleVertexClick(pointerStart.vertex);
         } else if (!vertexAt(screen)) {
-          var coords = new JXG.Coords(JXG.COORDS_BY_SCREEN, screen, board);
-          var x = coords.usrCoords[1];
-          var y = coords.usrCoords[2];
+          var position = userPosition(screen);
+          var x = position[0];
+          var y = position[1];
           if (y > editableBottom) addVertex(x, y);
         }
       }
@@ -291,7 +304,34 @@
       showNavigation: false,
       showCopyright: false
     }, options.boardAttributes));
-    return createGraphEditor(merge(options, { board: board }));
+    var editor = createGraphEditor(merge(options, { board: board }));
+
+    function resizeToVisibleContainer() {
+      var width = container.clientWidth;
+      var height = container.clientHeight;
+      if (!(width > 0 && height > 0) || typeof board.resizeContainer !== 'function') return false;
+      if (Math.abs((board.canvasWidth || 0) - width) > 1 ||
+          Math.abs((board.canvasHeight || 0) - height) > 1) {
+        board.resizeContainer(width, height);
+        if (typeof board.fullUpdate === 'function') board.fullUpdate();
+      }
+      return true;
+    }
+
+    editor.resize = resizeToVisibleContainer;
+    if (typeof ResizeObserver !== 'undefined') {
+      var observer = new ResizeObserver(resizeToVisibleContainer);
+      observer.observe(container);
+      editor.resizeObserver = observer;
+    }
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(function () {
+        resizeToVisibleContainer();
+        requestAnimationFrame(resizeToVisibleContainer);
+      });
+    }
+    resizeToVisibleContainer();
+    return editor;
   }
 
   JXG.QuartoGraphEditor = {

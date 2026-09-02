@@ -78,6 +78,7 @@ For a board that already exists, call
 | `deleteSelected()` | Deletes the selected vertex and returns whether anything was deleted. |
 | `clear()` | Restores the empty editor and resets the next identifier to 1. |
 | `showControls(show)` | Shows or hides the instruction panel. With no argument, toggles it. |
+| `resize()` | Synchronizes JSXGraph with the visible canvas size; this also happens automatically after a collapsed exercise opens. |
 | `response()` | Returns the current JSON-serializable graph response. |
 | `register(spec)` | Registers the response with `JXG.QuartoAssessment`; optional `ai` configuration may be supplied in `spec`. |
 
