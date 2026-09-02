@@ -3,6 +3,8 @@ project:
   output-dir: _site
   resources:
     - docs/graph-editor.md
+    - _extensions/jsxgraph/graph-editor.js
+    - debug/graph-editor-harness.html
   render:
     - index.qmd
     - basic-features.qmd
