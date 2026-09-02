@@ -2585,7 +2585,7 @@
       if (responseFrame && responseFrame.tagName === 'IFRAME' && responseSlot) {
         responseSlot.appendChild(responseFrame);
         responseFrame.addEventListener('load', function () {
-          if (!bodyEl || bodyEl.style.display !== 'none') scheduleExternalLayout(responseFrame);
+          scheduleExternalLayout(responseFrame);
         });
       } else {
         console.warn('math-exercise: could not embed JSXGraph response "' + assessmentId + '".');
@@ -2621,8 +2621,8 @@
     if (toggleEl && bodyEl) {
       function toggleOpen() {
         var open = cell.classList.toggle('math-exercise-open');
-        bodyEl.style.display = open ? '' : 'none';
         toggleEl.setAttribute('aria-expanded', String(open));
+        bodyEl.setAttribute('aria-hidden', String(!open));
         if (open && responseFrame) scheduleExternalLayout(responseFrame);
       }
       toggleEl.addEventListener('click', toggleOpen);

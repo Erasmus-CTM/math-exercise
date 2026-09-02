@@ -4,9 +4,10 @@ import { spawnSync } from 'node:child_process';
 import test from 'node:test';
 import vm from 'node:vm';
 
-const [source, lua, jsxLua, editorSource, examples, docs, quarto, graphics] = await Promise.all([
+const [source, lua, css, jsxLua, editorSource, examples, docs, quarto, graphics] = await Promise.all([
   readFile(new URL('../_extensions/math-exercise/math-exercise.js', import.meta.url), 'utf8'),
   readFile(new URL('../_extensions/math-exercise/math-exercise.lua', import.meta.url), 'utf8'),
+  readFile(new URL('../_extensions/math-exercise/math-exercise.css', import.meta.url), 'utf8'),
   readFile(new URL('../_extensions/jsxgraph/lua/jsxgraph.lua', import.meta.url), 'utf8'),
   readFile(new URL('../_extensions/jsxgraph/graph-editor.js', import.meta.url), 'utf8'),
   readFile(new URL('../_includes/graph-theory-examples.qmd', import.meta.url), 'utf8'),
@@ -225,6 +226,11 @@ test('collapsed JSXGraph assessments request a shared board refresh when opened'
   assert.match(jsxLua, /Object\.values\(JXG\.boards \|\| \{\}\)\.forEach/);
   assert.match(jsxLua, /board\.resizeContainer\(width, height\)/);
   assert.match(jsxLua, /board\.fullUpdate\(\)/);
+  assert.doesNotMatch(lua, /math-exercise-body" style="display:none/);
+  assert.match(lua, /math-exercise-body" aria-hidden="true"/);
+  assert.doesNotMatch(source, /bodyEl\.style\.display/);
+  assert.match(source, /bodyEl\.setAttribute\('aria-hidden', String\(!open\)\)/);
+  assert.match(css, /math-exercise-cell:not\(\.math-exercise-open\) > \.math-exercise-body[\s\S]*?height: 0;[\s\S]*?visibility: hidden;/);
 });
 
 test('shared response conversion and all four NetworkX checkers work', () => {

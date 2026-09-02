@@ -689,7 +689,7 @@ local function buildExercise(el, state)
     html = table.concat({
       '<div class="math-exercise-cell" ' .. attrs .. '>',
       captionHtml,
-      '<div class="math-exercise-body" style="display:none;">',
+      '<div class="math-exercise-body" aria-hidden="true">',
       bodyHtml,
       '</div>',
       '</div>',
