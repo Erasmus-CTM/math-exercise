@@ -5,6 +5,66 @@
     return Object.assign({}, base, extra || {});
   }
 
+  function summarizeGraph(data, options) {
+    data = data || {};
+    options = options || {};
+    var nodes = Array.isArray(data.nodes) ? data.nodes : [];
+    var rawEdges = Array.isArray(data.edges) ? data.edges : [];
+    var vertexIds = nodes.map(function (node) { return node.id; }).sort(function (a, b) { return a - b; });
+    var adjacency = {};
+    vertexIds.forEach(function (id) { adjacency[id] = []; });
+    var edges = rawEdges.map(function (edge) {
+      var source = edge[0];
+      var target = edge[1];
+      if (adjacency[source]) adjacency[source].push(target);
+      if (adjacency[target]) adjacency[target].push(source);
+      return source < target ? [source, target] : [target, source];
+    }).sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; });
+    vertexIds.forEach(function (id) { adjacency[id].sort(function (a, b) { return a - b; }); });
+
+    var visited = {};
+    var components = [];
+    vertexIds.forEach(function (start) {
+      if (visited[start]) return;
+      var component = [];
+      var queue = [start];
+      visited[start] = true;
+      while (queue.length) {
+        var id = queue.shift();
+        component.push(id);
+        adjacency[id].forEach(function (neighbor) {
+          if (!visited[neighbor]) {
+            visited[neighbor] = true;
+            queue.push(neighbor);
+          }
+        });
+      }
+      component.sort(function (a, b) { return a - b; });
+      components.push(component);
+    });
+
+    var summary = {
+      representation: data.representation || 'undirected-graph',
+      vertexCount: vertexIds.length,
+      edgeCount: edges.length,
+      vertexIds: vertexIds,
+      edges: edges,
+      degrees: vertexIds.map(function (id) { return { vertex: id, degree: adjacency[id].length }; }),
+      connected: components.length === 1,
+      componentCount: components.length,
+      components: components,
+      isolatedVertices: vertexIds.filter(function (id) { return adjacency[id].length === 0; }),
+      cycleRank: edges.length - vertexIds.length + components.length
+    };
+    if (options.feedbackPolicy !== undefined) {
+      summary.feedbackPolicy = String(options.feedbackPolicy);
+    }
+    if (options.extra && typeof options.extra === 'object') {
+      summary.extra = options.extra;
+    }
+    return summary;
+  }
+
   function createGraphEditor(options) {
     options = options || {};
     var board = options.board;
@@ -276,6 +336,7 @@
       deleteSelected: deleteSelected,
       clear: clear,
       response: response,
+      summarize: function (summaryOptions) { return summarizeGraph(response(), summaryOptions); },
       showControls: showControls,
       register: function (spec) {
         if (!JXG.QuartoAssessment || typeof JXG.QuartoAssessment.register !== 'function') {
@@ -332,6 +393,7 @@
 
   JXG.QuartoGraphEditor = {
     create: createGraphEditor,
-    createBoard: createBoard
+    createBoard: createBoard,
+    summarize: summarizeGraph
   };
 })();

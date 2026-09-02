@@ -168,6 +168,20 @@ test('graph editor creates vertices, toggles edges, serializes, and registers', 
     edges: [[1, 2]],
   };
   assert.deepEqual(JSON.parse(JSON.stringify(editor.response())), expected);
+  assert.deepEqual(JSON.parse(JSON.stringify(editor.summarize({ feedbackPolicy: 'Focus on structure.' }))), {
+    representation: 'undirected-graph',
+    vertexCount: 2,
+    edgeCount: 1,
+    vertexIds: [1, 2],
+    edges: [[1, 2]],
+    degrees: [{ vertex: 1, degree: 1 }, { vertex: 2, degree: 1 }],
+    connected: true,
+    componentCount: 1,
+    components: [[1, 2]],
+    isolatedVertices: [],
+    cycleRank: 0,
+    feedbackPolicy: 'Focus on structure.',
+  });
   assert.equal(editor.showControls(true), true);
   assert.equal(container.children[0].style.display, 'block');
   assert.equal(container.attributes['data-graph-editor-ready'], 'true');
@@ -204,7 +218,23 @@ test('Lua injects the common editor and exercise packages reach the runtime', ()
   assert.match(lua, /data-packages=.*jsonArrAttr\(packages\)/);
   assert.match(source, /def graph_from_response\(response, \*, directed=False\):/);
   assert.equal((examples.match(/#\| packages: networkx/g) || []).length, 4);
+  assert.equal((examples.match(/#\| partial-credit: true/g) || []).length, 4);
+  assert.equal((examples.match(/JXG\.QuartoGraphEditor\.summarize\(data/g) || []).length, 4);
   assert.match(docs, /## `graph_from_response\(response, \*, directed=False\)`/);
+});
+
+test('graphical AI context keeps topology, assessment, and learning context separate', () => {
+  const api = loadBundle(async () => {});
+  const topology = JSON.stringify({ edges: [[1, 2]], degrees: [{ vertex: 1, degree: 1 }] });
+  const prompt = api.buildUserPrompt(
+    'Construct a tree.',
+    `<jsxgraph_response>${topology}</jsxgraph_response>`,
+    '<exercise status="partial" score="0.6">The graph contains a cycle.</exercise>',
+    [{ id: 'tree-notes', content: 'A tree is connected and acyclic.' }],
+  );
+  assert.match(prompt, /<learning_context id="tree-notes">/);
+  assert.match(prompt, /<student_response>\n<jsxgraph_response>/);
+  assert.match(prompt, /<private_field_assessment never_quote="true">\n<exercise status="partial" score="0\.6">/);
 });
 
 test('graph theory is the final examples tab and exercises use the requested order', () => {
@@ -255,16 +285,16 @@ test('shared response conversion and all four NetworkX checkers work', () => {
     `fixtures = ${JSON.stringify(fixtures)}`,
     `exec(${JSON.stringify(checker('jsxgraph-tree-construction'))})`,
     'assert check(fixtures["tree"], {})["score"] == 1',
-    'assert check(fixtures["treeCycle"], {})["score"] == 0',
+    'assert 0 < check(fixtures["treeCycle"], {})["score"] < 1',
     `exec(${JSON.stringify(checker('jsxgraph-euler-construction'))})`,
     'assert check(fixtures["euler"], {})["score"] == 1',
-    'assert check(fixtures["nonEuler"], {})["score"] == 0',
+    'assert 0 < check(fixtures["nonEuler"], {})["score"] < 1',
     `exec(${JSON.stringify(checker('jsxgraph-nonplanar-construction'))})`,
     'assert check(fixtures["nonplanar"], {})["score"] == 1',
-    'assert check(fixtures["planar"], {})["score"] == 0',
+    'assert 0 < check(fixtures["planar"], {})["score"] < 1',
     `exec(${JSON.stringify(checker('jsxgraph-bipartite-construction'))})`,
     'assert check(fixtures["bipartite"], {})["score"] == 1',
-    'assert check(fixtures["oddCycle"], {})["score"] == 0',
+    'assert 0 < check(fixtures["oddCycle"], {})["score"] < 1',
     'converted = graph_from_response(fixtures["bipartite"])',
     'assert converted.nodes[1]["x"] == 1.0 and converted.nodes[1]["y"] == -1.0',
     'malformed = fixtures["bipartite"].copy()',

@@ -30,7 +30,9 @@ is needed only for `ai.render`. `ai.summary` and `ai.render` are optional.
 
 For simple undirected graph-construction exercises, the injected
 `JXG.QuartoGraphEditor` API provides a standard free-placement editor and
-registers its node/edge response with this bridge. See the
+registers its node/edge response with this bridge. Its shared `summarize`
+helper supplies adjacency, degrees, components, isolated vertices, and cycle
+rank for AI feedback without sending drawing coordinates. See the
 [graph-editor API reference](../../docs/graph-editor.md).
 
 The fork uses the official jsDelivr JSXGraph assets for interactive HTML so it

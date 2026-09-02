@@ -14,12 +14,9 @@ editor.register({
   ai: {
     render: true,
     summary: function (data) {
-      return {
-        representation: data.representation,
-        vertexCount: data.nodes.length,
-        edgeCount: data.edges.length,
+      return JXG.QuartoGraphEditor.summarize(data, {
         feedbackPolicy: 'Discuss connectedness and cycles without proposing a finished graph.'
-      };
+      });
     }
   }
 });
@@ -32,6 +29,7 @@ editor.register({
 #| packages: networkx
 #| response: jsxgraph:tree-construction-board
 #| embed-response: true
+#| partial-credit: true
 #| checker: |
 #|   def check(response, symbols):
 #|       import networkx as nx
@@ -39,13 +37,21 @@ editor.register({
 #|           graph = graph_from_response(response)
 #|       except ValueError:
 #|           return {"score": 0, "feedback": "The board returned a malformed graph."}
-#|       if graph.number_of_nodes() < 5:
-#|           return {"score": 0, "feedback": "Use at least five vertices."}
-#|       if not nx.is_connected(graph):
-#|           return {"score": 0, "feedback": "A tree must be connected."}
-#|       if not nx.is_tree(graph):
-#|           return {"score": 0, "feedback": "The graph is connected but contains a cycle."}
-#|       return {"score": 1, "feedback": "This graph is a tree."}
+#|       n = graph.number_of_nodes()
+#|       m = graph.number_of_edges()
+#|       enough_vertices = n >= 5
+#|       connected = n > 0 and nx.is_connected(graph)
+#|       acyclic = m > 0 and nx.is_forest(graph)
+#|       if enough_vertices and connected and acyclic:
+#|           return {"score": 1, "feedback": "This graph is a tree."}
+#|       score = 0.25 * min(n / 5, 1) + 0.35 * connected + 0.40 * acyclic
+#|       if not enough_vertices:
+#|           feedback = "Use at least five vertices."
+#|       elif not connected:
+#|           feedback = "A tree must be connected."
+#|       else:
+#|           feedback = "The graph contains a cycle."
+#|       return {"score": score, "feedback": feedback}
 
 Construct a tree with at least five vertices.
 ```
@@ -61,12 +67,9 @@ editor.register({
   ai: {
     render: true,
     summary: function (data) {
-      return {
-        representation: data.representation,
-        vertexCount: data.nodes.length,
-        edgeCount: data.edges.length,
+      return JXG.QuartoGraphEditor.summarize(data, {
         feedbackPolicy: 'Discuss connectedness and vertex degrees without proposing a finished graph.'
-      };
+      });
     }
   }
 });
@@ -79,6 +82,7 @@ editor.register({
 #| packages: networkx
 #| response: jsxgraph:euler-construction-board
 #| embed-response: true
+#| partial-credit: true
 #| checker: |
 #|   def check(response, symbols):
 #|       import networkx as nx
@@ -86,15 +90,25 @@ editor.register({
 #|           graph = graph_from_response(response)
 #|       except ValueError:
 #|           return {"score": 0, "feedback": "The board returned a malformed graph."}
-#|       if graph.number_of_nodes() < 4:
-#|           return {"score": 0, "feedback": "Use at least four vertices."}
-#|       if graph.number_of_edges() < 4:
-#|           return {"score": 0, "feedback": "Use at least four edges."}
-#|       if not nx.is_connected(graph):
-#|           return {"score": 0, "feedback": "Join all vertices into one connected graph."}
-#|       if not nx.is_eulerian(graph):
-#|           return {"score": 0, "feedback": "An Euler circuit requires every vertex to have even degree."}
-#|       return {"score": 1, "feedback": "This graph has an Euler circuit."}
+#|       n = graph.number_of_nodes()
+#|       m = graph.number_of_edges()
+#|       enough_vertices = n >= 4
+#|       enough_edges = m >= 4
+#|       connected = n > 0 and nx.is_connected(graph)
+#|       even_fraction = (sum(degree % 2 == 0 for _, degree in graph.degree()) / n) if n and m else 0
+#|       if enough_vertices and enough_edges and nx.is_eulerian(graph):
+#|           return {"score": 1, "feedback": "This graph has an Euler circuit."}
+#|       score = (0.20 * min(n / 4, 1) + 0.20 * min(m / 4, 1) +
+#|                0.25 * connected + 0.35 * even_fraction)
+#|       if not enough_vertices:
+#|           feedback = "Use at least four vertices."
+#|       elif not enough_edges:
+#|           feedback = "Use at least four edges."
+#|       elif not connected:
+#|           feedback = "Join all vertices into one connected graph."
+#|       else:
+#|           feedback = "An Euler circuit requires every vertex to have even degree."
+#|       return {"score": score, "feedback": feedback}
 
 Construct a graph with at least four vertices and four edges that has an Euler
 circuit.
@@ -112,12 +126,9 @@ editor.register({
   ai: {
     render: true,
     summary: function (data) {
-      return {
-        representation: data.representation,
-        vertexCount: data.nodes.length,
-        edgeCount: data.edges.length,
+      return JXG.QuartoGraphEditor.summarize(data, {
         feedbackPolicy: 'Discuss graph structure and planarity without proposing a finished graph.'
-      };
+      });
     }
   }
 });
@@ -130,6 +141,7 @@ editor.register({
 #| packages: networkx
 #| response: jsxgraph:nonplanar-construction-board
 #| embed-response: true
+#| partial-credit: true
 #| checker: |
 #|   def check(response, symbols):
 #|       import networkx as nx
@@ -137,14 +149,21 @@ editor.register({
 #|           graph = graph_from_response(response)
 #|       except ValueError:
 #|           return {"score": 0, "feedback": "The board returned a malformed graph."}
-#|       if graph.number_of_nodes() < 5:
-#|           return {"score": 0, "feedback": "A simple non-planar graph needs at least five vertices."}
-#|       if graph.number_of_edges() < 9:
-#|           return {"score": 0, "feedback": "This graph does not yet have enough edges to be non-planar."}
+#|       n = graph.number_of_nodes()
+#|       m = graph.number_of_edges()
+#|       enough_vertices = n >= 5
+#|       enough_edges = m >= 9
 #|       planar, _ = nx.check_planarity(graph)
-#|       if planar:
-#|           return {"score": 0, "feedback": "This graph is planar; edge crossings in the current drawing do not change that."}
-#|       return {"score": 1, "feedback": "This graph is non-planar."}
+#|       if enough_vertices and enough_edges and not planar:
+#|           return {"score": 1, "feedback": "This graph is non-planar."}
+#|       score = 0.20 * min(n / 5, 1) + 0.25 * min(m / 9, 1) + 0.55 * (not planar)
+#|       if not enough_vertices:
+#|           feedback = "A simple non-planar graph needs at least five vertices."
+#|       elif not enough_edges:
+#|           feedback = "This graph does not yet have enough edges to be non-planar."
+#|       else:
+#|           feedback = "This graph is planar; crossings in the drawing do not change that."
+#|       return {"score": score, "feedback": feedback}
 
 Construct a non-planar graph.
 ```
@@ -160,12 +179,9 @@ editor.register({
   ai: {
     render: true,
     summary: function (data) {
-      return {
-        representation: data.representation,
-        vertexCount: data.nodes.length,
-        edgeCount: data.edges.length,
+      return JXG.QuartoGraphEditor.summarize(data, {
         feedbackPolicy: 'Discuss bipartitions and odd cycles without proposing a finished graph.'
-      };
+      });
     }
   }
 });
@@ -178,6 +194,7 @@ editor.register({
 #| packages: networkx
 #| response: jsxgraph:bipartite-graph-board
 #| embed-response: true
+#| partial-credit: true
 #| checker: |
 #|   def check(response, symbols):
 #|       import networkx as nx
@@ -185,15 +202,25 @@ editor.register({
 #|           graph = graph_from_response(response)
 #|       except ValueError:
 #|           return {"score": 0, "feedback": "The board returned a malformed graph."}
-#|       if graph.number_of_nodes() < 4:
-#|           return {"score": 0, "feedback": "Use at least four vertices."}
-#|       if graph.number_of_edges() < 4:
-#|           return {"score": 0, "feedback": "Add at least four edges."}
-#|       if not nx.is_connected(graph):
-#|           return {"score": 0, "feedback": "Make the graph connected."}
-#|       if not nx.is_bipartite(graph):
-#|           return {"score": 0, "feedback": "This graph has an odd cycle, so it is not bipartite."}
-#|       return {"score": 1, "feedback": "This is a connected bipartite graph."}
+#|       n = graph.number_of_nodes()
+#|       m = graph.number_of_edges()
+#|       enough_vertices = n >= 4
+#|       enough_edges = m >= 4
+#|       connected = n > 0 and nx.is_connected(graph)
+#|       bipartite = m > 0 and nx.is_bipartite(graph)
+#|       if enough_vertices and enough_edges and connected and bipartite:
+#|           return {"score": 1, "feedback": "This is a connected bipartite graph."}
+#|       score = (0.20 * min(n / 4, 1) + 0.20 * min(m / 4, 1) +
+#|                0.25 * connected + 0.35 * bipartite)
+#|       if not enough_vertices:
+#|           feedback = "Use at least four vertices."
+#|       elif not enough_edges:
+#|           feedback = "Add at least four edges."
+#|       elif not connected:
+#|           feedback = "Make the graph connected."
+#|       else:
+#|           feedback = "This graph has an odd cycle, so it is not bipartite."
+#|       return {"score": score, "feedback": feedback}
 
 Construct a connected bipartite graph with at least four vertices and at least
 four edges.
