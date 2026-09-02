@@ -79,6 +79,7 @@ For a board that already exists, call
 | `showControls(show)` | Shows or hides the instruction panel. With no argument, toggles it. |
 | `resize()` | Synchronizes JSXGraph with the visible canvas size; this also happens automatically after a collapsed exercise opens. |
 | `response()` | Returns the current JSON-serializable graph response. |
+| `summarize(options)` | Returns the current topology summary used for AI feedback. |
 | `register(spec)` | Registers the response with `JXG.QuartoAssessment`; optional `ai` configuration may be supplied in `spec`. |
 
 ## Response schema
@@ -96,6 +97,81 @@ For a board that already exists, call
 
 Coordinates describe only the drawing. Graph properties are determined from
 the node identifiers and edges.
+
+## AI-feedback context
+
+Use `JXG.QuartoGraphEditor.summarize(data, options)` to turn a graph response
+into a compact, deterministic topology description. The instance method
+`editor.summarize(options)` summarizes the editor's current response. The
+summary contains:
+
+- vertex and edge counts;
+- sorted vertex identifiers and edges;
+- every vertex degree;
+- connected components and isolated vertices;
+- whether the graph is connected; and
+- the undirected cycle rank $|E|-|V|+c$, where $c$ is the number of connected
+  components.
+
+Coordinates are deliberately omitted: adjacency describes the mathematical
+graph, while an optional rendered image shows its current drawing. Add an
+author-controlled feedback policy with `options.feedbackPolicy`, and optional
+JSON metadata under `options.extra`.
+
+```javascript
+var editor = JXG.QuartoGraphEditor.createBoard();
+editor.register({
+  ai: {
+    render: true,
+    summary: function (data) {
+      return JXG.QuartoGraphEditor.summarize(data, {
+        feedbackPolicy: 'Discuss degrees and connectedness without proposing a finished graph.'
+      });
+    }
+  }
+});
+```
+
+When the student requests AI feedback, context is assembled in separate
+channels:
+
+| Prompt part | Contents |
+|---|---|
+| Task | Exercise caption and question text. |
+| Learning context | Automatic section context or explicitly referenced `.math-exercise-context` blocks. |
+| Student response | The escaped JSON topology summary inside `<jsxgraph_response>`. |
+| Private assessment | The custom checker's status, numeric score, and feedback. The model is instructed not to quote assessment metadata. |
+| Image | A PNG of the current board when `ai.render: true`; providers that reject images are retried with text only. |
+
+The full graph response is used locally by the custom checker but is not sent
+to the AI. The textual summary is limited to 4,000 characters. Summary values
+are XML-escaped before prompt assembly, and the iframe's image and summary are
+requested only when the student selects **Feedback**.
+
+## Partial-credit checkers
+
+Graph exercises use custom checkers, so partial credit is determined by the
+checker return value rather than by geometry or the `partial-credit` option.
+Return a score strictly between `0` and `1` for meaningful progress and `1`
+only when every requirement is satisfied:
+
+```python
+def check(response, symbols):
+    import networkx as nx
+    graph = graph_from_response(response)
+    enough_vertices = graph.number_of_nodes() >= 5
+    connected = graph.number_of_nodes() > 0 and nx.is_connected(graph)
+    acyclic = graph.number_of_edges() > 0 and nx.is_forest(graph)
+    if enough_vertices and connected and acyclic:
+        return {"score": 1, "feedback": "This graph is a tree."}
+    score = 0.25 * min(graph.number_of_nodes() / 5, 1)
+    score += 0.35 * connected + 0.40 * acyclic
+    return {"score": score, "feedback": "Continue with the unmet requirement."}
+```
+
+`#| partial-credit: true` is recommended in the exercise declaration to make
+the grading intent explicit, although custom checker scores are honored
+regardless of that option.
 
 ## `graph_from_response(response, *, directed=False)`
 
