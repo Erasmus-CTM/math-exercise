@@ -45,7 +45,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-e3adbaa939bcd423dddc8c8a834270b4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-3e9b1289f5f353c49b617ce48ad2bc38.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -130,6 +130,16 @@ ul.task-list li input[type="checkbox"] {
 }
 .math-exercise-toggle:hover { color: var(--bs-primary, #0d6efd); border-bottom-color: var(--bs-primary, #0d6efd); }
 .math-exercise-open .math-exercise-toggle { margin-bottom: .75em; }
+
+/* Keep collapsed interactive content in layout so iframe-based tools such as
+   JSXGraph initialize with real dimensions. Clipping and visibility preserve
+   the compact, non-interactive collapsed state without display:none. */
+.math-exercise-cell:not(.math-exercise-open) > .math-exercise-body {
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
 
 .math-chevron {
   display: inline-flex;
@@ -726,6 +736,10 @@ select.math-modal-input {
     <a class="nav-link" href="./dynamic-matrix-tests.html"> 
 <span class="menu-text">Dynamic matrices</span></a>
   </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./graph-theory.html"> 
+<span class="menu-text">Graph theory</span></a>
+  </li>  
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
@@ -814,10 +828,10 @@ select.math-modal-input {
 <h2 class="anchored" data-anchor-id="grunnleggende-vektorer">Grunnleggende vektorer</h2>
 <section id="kolonnevektor" class="level3">
 <h3 class="anchored" data-anchor-id="kolonnevektor">Kolonnevektor</h3>
-<div class="math-exercise-cell" id="math-exercise-1" data-label="nb-kolonnevektor" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Kolonnevektor&quot;" data-fields="[&quot;math-exercise-1-f1&quot;,&quot;math-exercise-1-f2&quot;,&quot;math-exercise-1-f3&quot;]" data-structural-field-labels="[&quot;v1&quot;,&quot;v2&quot;,&quot;v3&quot;]">
-<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>En kolonnevektor med tre komponenter</div>
+<div class="math-exercise-cell" id="math-exercise-1" data-label="nb-kolonnevektor" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Kolonnevektor&quot;" data-fields="[&quot;math-exercise-1-f1&quot;,&quot;math-exercise-1-f2&quot;,&quot;math-exercise-1-f3&quot;]" data-structural-field-labels="[&quot;v1&quot;,&quot;v2&quot;,&quot;v3&quot;]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>En kolonnevektor med tre komponenter</div>
 
-<div class="math-exercise-body" style="display:none;">
+<div class="math-exercise-body" aria-hidden="true">
 <div class="math-exercise-question">Skriv inn vektoren \((2,-1,3)\): \(v=\) <span class="math-vec" style="--n:3"><input type="text" id="math-exercise-1-f1" data-answer="2" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-1-f2" data-answer="-1" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-1-f3" data-answer="3" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span></div>
 
 <div class="math-exercise-controls">
@@ -843,10 +857,10 @@ Skriv inn vektoren $(2,-1,3)$: $v=$ vec[2,-1,3]
 </section>
 <section id="radvektor" class="level3">
 <h3 class="anchored" data-anchor-id="radvektor">Radvektor</h3>
-<div class="math-exercise-cell" id="math-exercise-2" data-label="nb-radvektor" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="row" data-context-mode="auto" data-context-refs="" data-context="&quot;Radvektor&quot;" data-fields="[&quot;math-exercise-2-f1&quot;,&quot;math-exercise-2-f2&quot;,&quot;math-exercise-2-f3&quot;]" data-structural-field-labels="[&quot;v1&quot;,&quot;v2&quot;,&quot;v3&quot;]">
-<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Den samme vektoren som radvektor</div>
+<div class="math-exercise-cell" id="math-exercise-2" data-label="nb-radvektor" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="row" data-context-mode="auto" data-context-refs="" data-context="&quot;Radvektor&quot;" data-fields="[&quot;math-exercise-2-f1&quot;,&quot;math-exercise-2-f2&quot;,&quot;math-exercise-2-f3&quot;]" data-structural-field-labels="[&quot;v1&quot;,&quot;v2&quot;,&quot;v3&quot;]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>Den samme vektoren som radvektor</div>
 
-<div class="math-exercise-body" style="display:none;">
+<div class="math-exercise-body" aria-hidden="true">
 <div class="math-exercise-question">Skriv inn vektoren \((2,-1,3)\): \(v=\) <span class="math-vec math-vec-row" style="--n:3"><input type="text" id="math-exercise-2-f1" data-answer="2" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-2-f2" data-answer="-1" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-2-f3" data-answer="3" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span></div>
 
 <div class="math-exercise-controls">
@@ -873,10 +887,10 @@ Skriv inn vektoren $(2,-1,3)$: $v=$ vec[2,-1,3]
 </section>
 <section id="symbolske-komponenter" class="level3">
 <h3 class="anchored" data-anchor-id="symbolske-komponenter">Symbolske komponenter</h3>
-<div class="math-exercise-cell" id="math-exercise-3" data-label="nb-symbolsk-vektor" data-mode="equivalent" data-reject="" data-vars="x,y" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Symbolske komponenter&quot;" data-fields="[&quot;math-exercise-3-f1&quot;,&quot;math-exercise-3-f2&quot;]" data-structural-field-labels="[&quot;v1&quot;,&quot;v2&quot;]">
-<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Algebraisk ekvivalente komponenter</div>
+<div class="math-exercise-cell" id="math-exercise-3" data-label="nb-symbolsk-vektor" data-mode="equivalent" data-reject="" data-vars="x,y" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Symbolske komponenter&quot;" data-fields="[&quot;math-exercise-3-f1&quot;,&quot;math-exercise-3-f2&quot;]" data-structural-field-labels="[&quot;v1&quot;,&quot;v2&quot;]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>Algebraisk ekvivalente komponenter</div>
 
-<div class="math-exercise-body" style="display:none;">
+<div class="math-exercise-body" aria-hidden="true">
 <div class="math-exercise-question">Skriv gradienten til \(f(x,y)=x^2+xy\): \(\nabla f=\) <span class="math-vec" style="--n:2"><input type="text" id="math-exercise-3-f1" data-answer="2*x+y" data-vars="x,y" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-3-f2" data-answer="x" data-vars="x,y" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span></div>
 
 <div class="math-exercise-controls">
@@ -903,10 +917,10 @@ Skriv gradienten til $f(x,y)=x^2+xy$: $\nabla f=$ vec[2*x+y,x]
 </section>
 <section id="funksjoner-med-flere-argumenter" class="level3">
 <h3 class="anchored" data-anchor-id="funksjoner-med-flere-argumenter">Funksjoner med flere argumenter</h3>
-<div class="math-exercise-cell" id="math-exercise-4" data-label="nb-nestet-komma" data-mode="equivalent" data-reject="" data-vars="x,y" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Funksjoner med flere argumenter&quot;" data-fields="[&quot;math-exercise-4-f1&quot;,&quot;math-exercise-4-f2&quot;]" data-structural-field-labels="[&quot;v1&quot;,&quot;v2&quot;]">
-<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Polarkoordinater som vektorkomponenter</div>
+<div class="math-exercise-cell" id="math-exercise-4" data-label="nb-nestet-komma" data-mode="equivalent" data-reject="" data-vars="x,y" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Funksjoner med flere argumenter&quot;" data-fields="[&quot;math-exercise-4-f1&quot;,&quot;math-exercise-4-f2&quot;]" data-structural-field-labels="[&quot;v1&quot;,&quot;v2&quot;]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>Polarkoordinater som vektorkomponenter</div>
 
-<div class="math-exercise-body" style="display:none;">
+<div class="math-exercise-body" aria-hidden="true">
 <div class="math-exercise-question">Skriv vektoren som består av vinkelen \(\operatorname{atan2}(y,x)\) og lengden<br>
 \(\sqrt{x^2+y^2}\). Bruk inntastingsformen atan2(y,x) for vinkelen:<br>
 <span class="math-vec" style="--n:2"><input type="text" id="math-exercise-4-f1" data-answer="atan2(y,x)" data-vars="x,y" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-4-f2" data-answer="sqrt(x^2+y^2)" data-vars="x,y" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span></div>
@@ -940,10 +954,10 @@ vec[atan2(y,x),sqrt(x^2+y^2)]
 <h2 class="anchored" data-anchor-id="matriser-i-ulike-størrelser">Matriser i ulike størrelser</h2>
 <section id="identitetsmatrise" class="level3">
 <h3 class="anchored" data-anchor-id="identitetsmatrise">Identitetsmatrise</h3>
-<div class="math-exercise-cell" id="math-exercise-5" data-label="nb-identitetsmatrise" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Identitetsmatrise&quot;" data-fields="[&quot;math-exercise-5-f1&quot;,&quot;math-exercise-5-f2&quot;,&quot;math-exercise-5-f3&quot;,&quot;math-exercise-5-f4&quot;]" data-structural-field-labels="[&quot;m1,1&quot;,&quot;m1,2&quot;,&quot;m2,1&quot;,&quot;m2,2&quot;]">
-<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>En matrise på 2 × 2</div>
+<div class="math-exercise-cell" id="math-exercise-5" data-label="nb-identitetsmatrise" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Identitetsmatrise&quot;" data-fields="[&quot;math-exercise-5-f1&quot;,&quot;math-exercise-5-f2&quot;,&quot;math-exercise-5-f3&quot;,&quot;math-exercise-5-f4&quot;]" data-structural-field-labels="[&quot;m1,1&quot;,&quot;m1,2&quot;,&quot;m2,1&quot;,&quot;m2,2&quot;]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>En matrise på 2 × 2</div>
 
-<div class="math-exercise-body" style="display:none;">
+<div class="math-exercise-body" aria-hidden="true">
 <div class="math-exercise-question">Skriv identitetsmatrisen: \(I_2=\) <span class="math-mat" style="--cols:2"><input type="text" id="math-exercise-5-f1" data-answer="1" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-5-f2" data-answer="0" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-5-f3" data-answer="0" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-5-f4" data-answer="1" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span></div>
 
 <div class="math-exercise-controls">
@@ -969,10 +983,10 @@ Skriv identitetsmatrisen: $I_2=$ mat[1,0;0,1]
 </section>
 <section id="rektangulær-matrise" class="level3">
 <h3 class="anchored" data-anchor-id="rektangulær-matrise">Rektangulær matrise</h3>
-<div class="math-exercise-cell" id="math-exercise-6" data-label="nb-rektangulaer" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Rektangulær matrise&quot;" data-fields="[&quot;math-exercise-6-f1&quot;,&quot;math-exercise-6-f2&quot;,&quot;math-exercise-6-f3&quot;,&quot;math-exercise-6-f4&quot;,&quot;math-exercise-6-f5&quot;,&quot;math-exercise-6-f6&quot;]" data-structural-field-labels="[&quot;m1,1&quot;,&quot;m1,2&quot;,&quot;m1,3&quot;,&quot;m2,1&quot;,&quot;m2,2&quot;,&quot;m2,3&quot;]">
-<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>To rader og tre kolonner</div>
+<div class="math-exercise-cell" id="math-exercise-6" data-label="nb-rektangulaer" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Rektangulær matrise&quot;" data-fields="[&quot;math-exercise-6-f1&quot;,&quot;math-exercise-6-f2&quot;,&quot;math-exercise-6-f3&quot;,&quot;math-exercise-6-f4&quot;,&quot;math-exercise-6-f5&quot;,&quot;math-exercise-6-f6&quot;]" data-structural-field-labels="[&quot;m1,1&quot;,&quot;m1,2&quot;,&quot;m1,3&quot;,&quot;m2,1&quot;,&quot;m2,2&quot;,&quot;m2,3&quot;]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>To rader og tre kolonner</div>
 
-<div class="math-exercise-body" style="display:none;">
+<div class="math-exercise-body" aria-hidden="true">
 <div class="math-exercise-question">Skriv matrisen med radene \((1,2,3)\) og \((4,5,6)\):<br>
 \(A=\) <span class="math-mat" style="--cols:3"><input type="text" id="math-exercise-6-f1" data-answer="1" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-6-f2" data-answer="2" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-6-f3" data-answer="3" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-6-f4" data-answer="4" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-6-f5" data-answer="5" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-6-f6" data-answer="6" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span></div>
 
@@ -1000,10 +1014,10 @@ $A=$ mat[1,2,3;4,5,6]
 </section>
 <section id="større-matrise" class="level3">
 <h3 class="anchored" data-anchor-id="større-matrise">Større matrise</h3>
-<div class="math-exercise-cell" id="math-exercise-7" data-label="nb-tre-ganger-tre" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Større matrise&quot;" data-fields="[&quot;math-exercise-7-f1&quot;,&quot;math-exercise-7-f2&quot;,&quot;math-exercise-7-f3&quot;,&quot;math-exercise-7-f4&quot;,&quot;math-exercise-7-f5&quot;,&quot;math-exercise-7-f6&quot;,&quot;math-exercise-7-f7&quot;,&quot;math-exercise-7-f8&quot;,&quot;math-exercise-7-f9&quot;]" data-structural-field-labels="[&quot;m1,1&quot;,&quot;m1,2&quot;,&quot;m1,3&quot;,&quot;m2,1&quot;,&quot;m2,2&quot;,&quot;m2,3&quot;,&quot;m3,1&quot;,&quot;m3,2&quot;,&quot;m3,3&quot;]">
-<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>En matrise på 3 × 3</div>
+<div class="math-exercise-cell" id="math-exercise-7" data-label="nb-tre-ganger-tre" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Større matrise&quot;" data-fields="[&quot;math-exercise-7-f1&quot;,&quot;math-exercise-7-f2&quot;,&quot;math-exercise-7-f3&quot;,&quot;math-exercise-7-f4&quot;,&quot;math-exercise-7-f5&quot;,&quot;math-exercise-7-f6&quot;,&quot;math-exercise-7-f7&quot;,&quot;math-exercise-7-f8&quot;,&quot;math-exercise-7-f9&quot;]" data-structural-field-labels="[&quot;m1,1&quot;,&quot;m1,2&quot;,&quot;m1,3&quot;,&quot;m2,1&quot;,&quot;m2,2&quot;,&quot;m2,3&quot;,&quot;m3,1&quot;,&quot;m3,2&quot;,&quot;m3,3&quot;]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>En matrise på 3 × 3</div>
 
-<div class="math-exercise-body" style="display:none;">
+<div class="math-exercise-body" aria-hidden="true">
 <div class="math-exercise-question">Skriv diagonalmatrisen med diagonal \((1,2,3)\):<br>
 \(D=\) <span class="math-mat" style="--cols:3"><input type="text" id="math-exercise-7-f1" data-answer="1" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-7-f2" data-answer="0" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-7-f3" data-answer="0" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-7-f4" data-answer="0" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-7-f5" data-answer="2" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-7-f6" data-answer="0" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-7-f7" data-answer="0" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-7-f8" data-answer="0" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-7-f9" data-answer="3" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span></div>
 
@@ -1031,10 +1045,10 @@ $D=$ mat[1,0,0;0,2,0;0,0,3]
 </section>
 <section id="symbolsk-matrise" class="level3">
 <h3 class="anchored" data-anchor-id="symbolsk-matrise">Symbolsk matrise</h3>
-<div class="math-exercise-cell" id="math-exercise-8" data-label="nb-symbolsk-matrise" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Symbolsk matrise&quot;" data-fields="[&quot;math-exercise-8-f1&quot;,&quot;math-exercise-8-f2&quot;,&quot;math-exercise-8-f3&quot;,&quot;math-exercise-8-f4&quot;]" data-structural-field-labels="[&quot;m1,1&quot;,&quot;m1,2&quot;,&quot;m2,1&quot;,&quot;m2,2&quot;]">
-<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Symbolske uttrykk og ekvivalenskontroll</div>
+<div class="math-exercise-cell" id="math-exercise-8" data-label="nb-symbolsk-matrise" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Symbolsk matrise&quot;" data-fields="[&quot;math-exercise-8-f1&quot;,&quot;math-exercise-8-f2&quot;,&quot;math-exercise-8-f3&quot;,&quot;math-exercise-8-f4&quot;]" data-structural-field-labels="[&quot;m1,1&quot;,&quot;m1,2&quot;,&quot;m2,1&quot;,&quot;m2,2&quot;]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>Symbolske uttrykk og ekvivalenskontroll</div>
 
-<div class="math-exercise-body" style="display:none;">
+<div class="math-exercise-body" aria-hidden="true">
 <div class="math-exercise-question">Skriv matrisen \(\begin{bmatrix}(x+1)^2&amp;0\\0&amp;x^2-1\end{bmatrix}\):<br>
 <span class="math-mat" style="--cols:2"><input type="text" id="math-exercise-8-f1" data-answer="(x+1)^2" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-8-f2" data-answer="0" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-8-f3" data-answer="0" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-8-f4" data-answer="(x-1)*(x+1)" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span></div>
 
@@ -1066,10 +1080,10 @@ mat[(x+1)^2,0;0,(x-1)*(x+1)]
 <h2 class="anchored" data-anchor-id="ulike-typer-svar">Ulike typer svar</h2>
 <section id="numerisk-toleranse" class="level3">
 <h3 class="anchored" data-anchor-id="numerisk-toleranse">Numerisk toleranse</h3>
-<div class="math-exercise-cell" id="math-exercise-9" data-label="nb-numerisk-matrise" data-mode="numeric" data-reject="" data-vars="" data-tolerance="0.01" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Numerisk toleranse&quot;" data-fields="[&quot;math-exercise-9-f1&quot;,&quot;math-exercise-9-f2&quot;,&quot;math-exercise-9-f3&quot;,&quot;math-exercise-9-f4&quot;]" data-structural-field-labels="[&quot;m1,1&quot;,&quot;m1,2&quot;,&quot;m2,1&quot;,&quot;m2,2&quot;]">
-<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Numeriske celler med absolutt toleranse</div>
+<div class="math-exercise-cell" id="math-exercise-9" data-label="nb-numerisk-matrise" data-mode="numeric" data-reject="" data-vars="" data-tolerance="0.01" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Numerisk toleranse&quot;" data-fields="[&quot;math-exercise-9-f1&quot;,&quot;math-exercise-9-f2&quot;,&quot;math-exercise-9-f3&quot;,&quot;math-exercise-9-f4&quot;]" data-structural-field-labels="[&quot;m1,1&quot;,&quot;m1,2&quot;,&quot;m2,1&quot;,&quot;m2,2&quot;]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>Numeriske celler med absolutt toleranse</div>
 
-<div class="math-exercise-body" style="display:none;">
+<div class="math-exercise-body" aria-hidden="true">
 <div class="math-exercise-question">Oppgi rotasjonsmatrisen for \(90^\circ\) med desimaltall:<br>
 <span class="math-mat" style="--cols:2"><input type="text" id="math-exercise-9-f1" data-answer="0" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-9-f2" data-answer="-1" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-9-f3" data-answer="1" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-9-f4" data-answer="0" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span></div>
 
@@ -1099,10 +1113,10 @@ mat[0,-1;1,0]
 </section>
 <section id="skalar-vektor-og-matrise-i-samme-oppgave" class="level3">
 <h3 class="anchored" data-anchor-id="skalar-vektor-og-matrise-i-samme-oppgave">Skalar, vektor og matrise i samme oppgave</h3>
-<div class="math-exercise-cell" id="math-exercise-10" data-label="nb-blandede-felt" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="true" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Skalar, vektor og matrise i samme oppgave&quot;" data-fields="[&quot;math-exercise-10-f1&quot;,&quot;math-exercise-10-f2&quot;,&quot;math-exercise-10-f3&quot;,&quot;math-exercise-10-f4&quot;,&quot;math-exercise-10-f5&quot;,&quot;math-exercise-10-f6&quot;,&quot;math-exercise-10-f7&quot;]" data-structural-field-labels="[&quot;&quot;,&quot;v1&quot;,&quot;v2&quot;,&quot;m1,1&quot;,&quot;m1,2&quot;,&quot;m2,1&quot;,&quot;m2,2&quot;]">
-<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Alle markørtypene nummereres i riktig rekkefølge</div>
+<div class="math-exercise-cell" id="math-exercise-10" data-label="nb-blandede-felt" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="true" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Skalar, vektor og matrise i samme oppgave&quot;" data-fields="[&quot;math-exercise-10-f1&quot;,&quot;math-exercise-10-f2&quot;,&quot;math-exercise-10-f3&quot;,&quot;math-exercise-10-f4&quot;,&quot;math-exercise-10-f5&quot;,&quot;math-exercise-10-f6&quot;,&quot;math-exercise-10-f7&quot;]" data-structural-field-labels="[&quot;&quot;,&quot;v1&quot;,&quot;v2&quot;,&quot;m1,1&quot;,&quot;m1,2&quot;,&quot;m2,1&quot;,&quot;m2,2&quot;]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>Alle markørtypene nummereres i riktig rekkefølge</div>
 
-<div class="math-exercise-body" style="display:none;">
+<div class="math-exercise-body" aria-hidden="true">
 <div class="math-exercise-question">Fyll inn skalaren \(s=\) <input type="text" id="math-exercise-10-f1" data-answer="2" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">, vektoren \(v=\) <span class="math-vec" style="--n:2"><input type="text" id="math-exercise-10-f2" data-answer="1" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-10-f3" data-answer="2" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span> og matrisen<br>
 \(A=\) <span class="math-mat" style="--cols:2"><input type="text" id="math-exercise-10-f4" data-answer="1" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-10-f5" data-answer="0" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-10-f6" data-answer="0" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-10-f7" data-answer="1" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span>.</div>
 
@@ -1131,10 +1145,10 @@ $A=$ mat[1,0;0,1].
 </section>
 <section id="navngitte-koordinater" class="level3">
 <h3 class="anchored" data-anchor-id="navngitte-koordinater">Navngitte koordinater</h3>
-<div class="math-exercise-cell" id="math-exercise-11" data-label="nb-egne-feltnavn" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[&quot;Første koordinat&quot;,&quot;Andre koordinat&quot;]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Navngitte koordinater&quot;" data-fields="[&quot;math-exercise-11-f1&quot;,&quot;math-exercise-11-f2&quot;]" data-structural-field-labels="[&quot;v1&quot;,&quot;v2&quot;]">
-<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Et punkt med navngitte koordinater</div>
+<div class="math-exercise-cell" id="math-exercise-11" data-label="nb-egne-feltnavn" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[&quot;Første koordinat&quot;,&quot;Andre koordinat&quot;]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Navngitte koordinater&quot;" data-fields="[&quot;math-exercise-11-f1&quot;,&quot;math-exercise-11-f2&quot;]" data-structural-field-labels="[&quot;v1&quot;,&quot;v2&quot;]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>Et punkt med navngitte koordinater</div>
 
-<div class="math-exercise-body" style="display:none;">
+<div class="math-exercise-body" aria-hidden="true">
 <div class="math-exercise-question">Skriv punktet \((4,5)\) som vektor: <span class="math-vec" style="--n:2"><input type="text" id="math-exercise-11-f1" data-answer="4" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-11-f2" data-answer="5" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span></div>
 
 <div class="math-exercise-controls">
@@ -1163,10 +1177,10 @@ Skriv punktet $(4,5)$ som vektor: vec[4,5]
 <section id="oppgavepool" class="level2">
 <h2 class="anchored" data-anchor-id="oppgavepool">Oppgavepool</h2>
 <p>Bruk omlastingsknappen i oppgaven for å få en annen variant.</p>
-<div class="math-exercise-cell" id="math-exercise-12" data-label="nb-vektor-matrise-pool" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Oppgavepool Bruk omlastingsknappen i oppgaven for å få en annen variant.&quot;" data-pool="[&quot;Skriv vektoren $(1,2)$: vec[1,2]&quot;,&quot;Skriv nullmatrisen på $2\\times2$: mat[0,0;0,0]&quot;,&quot;Skriv matrisen med radene $(1,0)$ og $(2,3)$: mat[1,0;2,3]&quot;]" data-fields="[]" data-structural-field-labels="[]">
-<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Tilfeldig vektor- eller matriseoppgave</div>
+<div class="math-exercise-cell" id="math-exercise-12" data-label="nb-vektor-matrise-pool" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Oppgavepool Bruk omlastingsknappen i oppgaven for å få en annen variant.&quot;" data-pool="[&quot;Skriv vektoren $(1,2)$: vec[1,2]&quot;,&quot;Skriv nullmatrisen på $2\\times2$: mat[0,0;0,0]&quot;,&quot;Skriv matrisen med radene $(1,0)$ og $(2,3)$: mat[1,0;2,3]&quot;]" data-fields="[]" data-structural-field-labels="[]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>Tilfeldig vektor- eller matriseoppgave</div>
 
-<div class="math-exercise-body" style="display:none;">
+<div class="math-exercise-body" aria-hidden="true">
 <button type="button" class="math-pool-reload" title="Last inn en ny tilfeldig oppgave">↻</button>
 <div class="math-exercise-question"></div>
 
@@ -1204,10 +1218,10 @@ Skriv matrisen med radene $(1,0)$ og $(2,3)$: mat[1,0;2,3]
 <section id="en-bred-radmatrise" class="level2">
 <h2 class="anchored" data-anchor-id="en-bred-radmatrise">En bred radmatrise</h2>
 <p>På en smal skjerm kan du rulle vannrett for å nå alle feltene.</p>
-<div class="math-exercise-cell" id="math-exercise-13" data-label="nb-bred-matrise" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;En bred radmatrise På en smal skjerm kan du rulle vannrett for å nå alle feltene.&quot;" data-fields="[&quot;math-exercise-13-f1&quot;,&quot;math-exercise-13-f2&quot;,&quot;math-exercise-13-f3&quot;,&quot;math-exercise-13-f4&quot;,&quot;math-exercise-13-f5&quot;,&quot;math-exercise-13-f6&quot;]" data-structural-field-labels="[&quot;m1,1&quot;,&quot;m1,2&quot;,&quot;m1,3&quot;,&quot;m1,4&quot;,&quot;m1,5&quot;,&quot;m1,6&quot;]">
-<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Radmatrise med seks komponenter</div>
+<div class="math-exercise-cell" id="math-exercise-13" data-label="nb-bred-matrise" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;En bred radmatrise På en smal skjerm kan du rulle vannrett for å nå alle feltene.&quot;" data-fields="[&quot;math-exercise-13-f1&quot;,&quot;math-exercise-13-f2&quot;,&quot;math-exercise-13-f3&quot;,&quot;math-exercise-13-f4&quot;,&quot;math-exercise-13-f5&quot;,&quot;math-exercise-13-f6&quot;]" data-structural-field-labels="[&quot;m1,1&quot;,&quot;m1,2&quot;,&quot;m1,3&quot;,&quot;m1,4&quot;,&quot;m1,5&quot;,&quot;m1,6&quot;]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>Radmatrise med seks komponenter</div>
 
-<div class="math-exercise-body" style="display:none;">
+<div class="math-exercise-body" aria-hidden="true">
 <div class="math-exercise-question">Skriv radmatrisen \((1,2,3,4,5,6)\): <span class="math-mat" style="--cols:6"><input type="text" id="math-exercise-13-f1" data-answer="1" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-13-f2" data-answer="2" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-13-f3" data-answer="3" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-13-f4" data-answer="4" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-13-f5" data-answer="5" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-13-f6" data-answer="6" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span></div>
 
 <div class="math-exercise-controls">
@@ -2373,6 +2387,37 @@ Skriv radmatrisen $(1,2,3,4,5,6)$: mat[1,2,3,4,5,6]
   // ---------------------------------------------------------------------------
 
   var sympyReady = false;
+  var packageLoads = Object.create(null);
+
+  function parsePackageList(value) {
+    var packages = Array.isArray(value) ? value : [];
+    var seen = Object.create(null);
+    return packages.map(function (name) { return String(name || '').trim(); })
+      .filter(function (name) {
+        if (!name || !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(name)) {
+          if (name) throw new Error('Invalid Pyodide package name: ' + name);
+          return false;
+        }
+        var key = name.toLowerCase();
+        if (seen[key]) return false;
+        seen[key] = true;
+        return true;
+      });
+  }
+
+  async function ensurePackages(packages) {
+    var requested = parsePackageList(packages);
+    await Promise.all(requested.map(function (name) {
+      var key = name.toLowerCase();
+      if (!packageLoads[key]) {
+        packageLoads[key] = mainPyodide.loadPackage(name).catch(function (error) {
+          delete packageLoads[key];
+          throw error;
+        });
+      }
+      return packageLoads[key];
+    }));
+  }
 
   async function ensureSympy() {
     if (sympyReady) return;
@@ -2455,6 +2500,52 @@ Skriv radmatrisen $(1,2,3,4,5,6)$: mat[1,2,3,4,5,6]
       '            if _v: _local[_v] = symbols(_v)',
       '    _local.setdefault("inf", oo)',
       '    return _local',
+      '',
+      'def graph_from_response(response, *, directed=False):',
+      '    """Validate graph-editor JSON and return a NetworkX graph."""',
+      '    import math as _graph_math',
+      '    import networkx as nx',
+      '',
+      '    if not isinstance(response, dict):',
+      '        raise ValueError("Graph response must be an object")',
+      '    expected = "directed-graph" if directed else "undirected-graph"',
+      '    if response.get("representation") != expected:',
+      '        raise ValueError(f"Expected {expected} response")',
+      '    nodes = response.get("nodes")',
+      '    edges = response.get("edges")',
+      '    if not isinstance(nodes, list) or not isinstance(edges, list):',
+      '        raise ValueError("Graph response needs node and edge lists")',
+      '',
+      '    graph = nx.DiGraph() if directed else nx.Graph()',
+      '    known = set()',
+      '    for node in nodes:',
+      '        if not isinstance(node, dict):',
+      '            raise ValueError("Every graph node must be an object")',
+      '        node_id = node.get("id")',
+      '        if type(node_id) is not int or node_id in known:',
+      '            raise ValueError("Graph node identifiers must be unique integers")',
+      '        try:',
+      '            x, y = float(node["x"]), float(node["y"])',
+      '        except (KeyError, TypeError, ValueError):',
+      '            raise ValueError("Every graph node needs numeric x and y coordinates")',
+      '        if not _graph_math.isfinite(x) or not _graph_math.isfinite(y):',
+      '            raise ValueError("Graph node coordinates must be finite")',
+      '        known.add(node_id)',
+      '        graph.add_node(node_id, x=x, y=y)',
+      '',
+      '    seen = set()',
+      '    for edge in edges:',
+      '        if not isinstance(edge, list) or len(edge) != 2:',
+      '            raise ValueError("Every graph edge must contain two endpoints")',
+      '        source, target = edge',
+      '        if source not in known or target not in known or source == target:',
+      '            raise ValueError("Graph edges need two distinct known endpoints")',
+      '        key = (source, target) if directed else tuple(sorted((source, target)))',
+      '        if key in seen:',
+      '            raise ValueError("Graph response contains a duplicate edge")',
+      '        seen.add(key)',
+      '        graph.add_edge(source, target)',
+      '    return graph',
       '',
       'def assess_basis(matrix, *, axis, target_dimension, belongs, name, space_name="space"):',
       '    """Assess a row- or column-basis submission without privileging vector order.',
@@ -3142,6 +3233,29 @@ Skriv radmatrisen $(1,2,3,4,5,6)$: mat[1,2,3,4,5,6]
   var ASSESSMENT_VERSION = 1;
   var MAX_ASSESSMENT_JSON_BYTES = 1024 * 1024;
   var assessmentSequence = 0;
+
+  function notifyExternalLayout(iframe) {
+    if (!iframe || iframe.tagName !== 'IFRAME' || !iframe.contentWindow) return false;
+    iframe.contentWindow.postMessage({
+      protocol: ASSESSMENT_PROTOCOL,
+      version: ASSESSMENT_VERSION,
+      type: 'layout',
+      assessmentId: iframe.id
+    }, '*');
+    return true;
+  }
+
+  function scheduleExternalLayout(iframe) {
+    notifyExternalLayout(iframe);
+    if (typeof window.requestAnimationFrame === 'function') {
+      window.requestAnimationFrame(function () {
+        notifyExternalLayout(iframe);
+        window.requestAnimationFrame(function () { notifyExternalLayout(iframe); });
+      });
+    } else {
+      window.setTimeout(function () { notifyExternalLayout(iframe); }, 0);
+    }
+  }
 
   function requestExternalResponse(sourceSpec, includeAI) {
     var match = /^jsxgraph:(.+)$/.exec(sourceSpec || '');
@@ -4099,6 +4213,8 @@ Skriv radmatrisen $(1,2,3,4,5,6)$: mat[1,2,3,4,5,6]
     try { structuralFieldLabels = JSON.parse(cell.dataset.structuralFieldLabels || '[]'); } catch (e) {}
     var checker = '';
     try { checker = JSON.parse(cell.dataset.checker || '""'); } catch (e) {}
+    var packages = [];
+    try { packages = JSON.parse(cell.dataset.packages || '[]'); } catch (e) {}
     var formCredit = Number(cell.dataset.formCredit || '0.5');
     if (!Number.isFinite(formCredit) || formCredit < 0 || formCredit > 1) formCredit = 0.5;
     var checkOpts = {
@@ -4109,6 +4225,7 @@ Skriv radmatrisen $(1,2,3,4,5,6)$: mat[1,2,3,4,5,6]
       form:      cell.dataset.form      || '',
       vars:       vars,
       checker:    checker,
+      packages:   packages,
       responseSource: cell.dataset.response || '',
       partialCredit: cell.dataset.partialCredit === 'true',
       formCredit: formCredit
@@ -4120,6 +4237,9 @@ Skriv radmatrisen $(1,2,3,4,5,6)$: mat[1,2,3,4,5,6]
       var responseSlot = cell.querySelector('.math-exercise-response-slot');
       if (responseFrame && responseFrame.tagName === 'IFRAME' && responseSlot) {
         responseSlot.appendChild(responseFrame);
+        responseFrame.addEventListener('load', function () {
+          scheduleExternalLayout(responseFrame);
+        });
       } else {
         console.warn('math-exercise: could not embed JSXGraph response "' + assessmentId + '".');
       }
@@ -4154,7 +4274,9 @@ Skriv radmatrisen $(1,2,3,4,5,6)$: mat[1,2,3,4,5,6]
     if (toggleEl && bodyEl) {
       function toggleOpen() {
         var open = cell.classList.toggle('math-exercise-open');
-        bodyEl.style.display = open ? '' : 'none';
+        toggleEl.setAttribute('aria-expanded', String(open));
+        bodyEl.setAttribute('aria-hidden', String(!open));
+        if (open && responseFrame) scheduleExternalLayout(responseFrame);
       }
       toggleEl.addEventListener('click', toggleOpen);
       toggleEl.addEventListener('keydown', function (e) {
@@ -4251,6 +4373,7 @@ Skriv radmatrisen $(1,2,3,4,5,6)$: mat[1,2,3,4,5,6]
       fbDiv.innerHTML = '<div class="math-fb-checking">' + L.checking + '</div>';
       try {
         await ensureSympy();
+        await ensurePackages(checkOpts.packages);
         var parts = [];
         var fieldElements = fieldIds.map(function (id) { return document.getElementById(id); });
         if (mode === 'custom') {
@@ -4390,6 +4513,7 @@ Skriv radmatrisen $(1,2,3,4,5,6)$: mat[1,2,3,4,5,6]
           fbDiv.innerHTML = '<div class="math-fb-checking">' + L.fetchingFeedback + '</div>';
           try {
             await ensureSympy();
+            await ensurePackages(checkOpts.packages);
             var overallAssessment = '';
             var structuredAssessment = {};
             var externalAI = null;
@@ -4508,6 +4632,10 @@ Skriv radmatrisen $(1,2,3,4,5,6)$: mat[1,2,3,4,5,6]
       expressionAnswersXml: expressionAnswersXml,
       structuredAssessmentXml: structuredAssessmentXml,
       structuredGroupStatus: structuredGroupStatus,
+      parsePackageList: parsePackageList,
+      ensurePackages: ensurePackages,
+      notifyExternalLayout: notifyExternalLayout,
+      scheduleExternalLayout: scheduleExternalLayout,
     };
   }
 

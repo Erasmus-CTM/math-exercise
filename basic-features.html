@@ -45,7 +45,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-e3adbaa939bcd423dddc8c8a834270b4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-3e9b1289f5f353c49b617ce48ad2bc38.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -130,6 +130,16 @@ ul.task-list li input[type="checkbox"] {
 }
 .math-exercise-toggle:hover { color: var(--bs-primary, #0d6efd); border-bottom-color: var(--bs-primary, #0d6efd); }
 .math-exercise-open .math-exercise-toggle { margin-bottom: .75em; }
+
+/* Keep collapsed interactive content in layout so iframe-based tools such as
+   JSXGraph initialize with real dimensions. Clipping and visibility preserve
+   the compact, non-interactive collapsed state without display:none. */
+.math-exercise-cell:not(.math-exercise-open) > .math-exercise-body {
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
 
 .math-chevron {
   display: inline-flex;
@@ -726,6 +736,10 @@ select.math-modal-input {
     <a class="nav-link" href="./dynamic-matrix-tests.html"> 
 <span class="menu-text">Dynamic matrices</span></a>
   </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./graph-theory.html"> 
+<span class="menu-text">Graph theory</span></a>
+  </li>  
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
@@ -798,7 +812,7 @@ select.math-modal-input {
 <p>These examples introduce the main exercise controls: one or several answer fields, required answer forms, text answers, partial credit, collapsible tasks, and pools of alternative questions.</p>
 <section id="a-single-answer-field" class="level2">
 <h2 class="anchored" data-anchor-id="a-single-answer-field">A single answer field</h2>
-<div class="math-exercise-cell" id="math-exercise-1" data-label="basic-single" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;A single answer field&quot;" data-fields="[&quot;math-exercise-1-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" id="math-exercise-1" data-label="basic-single" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;A single answer field&quot;" data-fields="[&quot;math-exercise-1-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div class="math-exercise-question">What is \(7\cdot 6\)? <input type="text" id="math-exercise-1-f1" data-answer="42" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
@@ -823,7 +837,7 @@ What is $7\cdot 6$? _[42]
 </section>
 <section id="answer-fields-of-different-widths" class="level2">
 <h2 class="anchored" data-anchor-id="answer-fields-of-different-widths">Answer fields of different widths</h2>
-<div class="math-exercise-cell" id="math-exercise-2" data-label="basic-widths" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[&quot;Short answer&quot;,&quot;Medium answer&quot;,&quot;Long answer&quot;]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Answer fields of different widths&quot;" data-fields="[&quot;math-exercise-2-f1&quot;,&quot;math-exercise-2-f2&quot;,&quot;math-exercise-2-f3&quot;]" data-structural-field-labels="[&quot;&quot;,&quot;&quot;,&quot;&quot;]">
+<div class="math-exercise-cell" id="math-exercise-2" data-label="basic-widths" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[&quot;Short answer&quot;,&quot;Medium answer&quot;,&quot;Long answer&quot;]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Answer fields of different widths&quot;" data-fields="[&quot;math-exercise-2-f1&quot;,&quot;math-exercise-2-f2&quot;,&quot;math-exercise-2-f3&quot;]" data-structural-field-labels="[&quot;&quot;,&quot;&quot;,&quot;&quot;]">
 <div class="math-exercise-question">Enter \(2\): <input type="text" id="math-exercise-2-f1" data-answer="2" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"><br>
 <br>
 Enter the six-digit number \(123456\): <input type="text" id="math-exercise-2-f2" data-answer="123456" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"><br>
@@ -856,10 +870,10 @@ Enter the expression $(1+2+3+4+5)^2$: ___[(1+2+3+4+5)^2]
 </section>
 <section id="a-collapsible-exercise" class="level2">
 <h2 class="anchored" data-anchor-id="a-collapsible-exercise">A collapsible exercise</h2>
-<div class="math-exercise-cell" id="math-exercise-3" data-label="basic-caption" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;A collapsible exercise&quot;" data-fields="[&quot;math-exercise-3-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
-<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Click this heading to open the exercise</div>
+<div class="math-exercise-cell" id="math-exercise-3" data-label="basic-caption" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;A collapsible exercise&quot;" data-fields="[&quot;math-exercise-3-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>Click this heading to open the exercise</div>
 
-<div class="math-exercise-body" style="display:none;">
+<div class="math-exercise-body" aria-hidden="true">
 <div class="math-exercise-question">Compute \(5^2\): <input type="text" id="math-exercise-3-f1" data-answer="25" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
@@ -885,7 +899,7 @@ Compute $5^2$: _[25]
 </section>
 <section id="multiple-fields-and-meaningful-labels" class="level2">
 <h2 class="anchored" data-anchor-id="multiple-fields-and-meaningful-labels">Multiple fields and meaningful labels</h2>
-<div class="math-exercise-cell" id="math-exercise-4" data-label="basic-labels" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="true" data-form-credit="0.5" data-field-labels="[&quot;Sum&quot;,&quot;Product&quot;,&quot;Difference&quot;]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Multiple fields and meaningful labels&quot;" data-fields="[&quot;math-exercise-4-f1&quot;,&quot;math-exercise-4-f2&quot;,&quot;math-exercise-4-f3&quot;]" data-structural-field-labels="[&quot;&quot;,&quot;&quot;,&quot;&quot;]">
+<div class="math-exercise-cell" id="math-exercise-4" data-label="basic-labels" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="true" data-form-credit="0.5" data-field-labels="[&quot;Sum&quot;,&quot;Product&quot;,&quot;Difference&quot;]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Multiple fields and meaningful labels&quot;" data-fields="[&quot;math-exercise-4-f1&quot;,&quot;math-exercise-4-f2&quot;,&quot;math-exercise-4-f3&quot;]" data-structural-field-labels="[&quot;&quot;,&quot;&quot;,&quot;&quot;]">
 <div class="math-exercise-question">For the numbers \(7\) and \(3\), enter their sum <input type="text" id="math-exercise-4-f1" data-answer="10" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">, product <input type="text" id="math-exercise-4-f2" data-answer="21" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">, and<br>
 difference <input type="text" id="math-exercise-4-f3" data-answer="4" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">.</div>
 
@@ -913,10 +927,10 @@ difference _[4].
 </section>
 <section id="requiring-a-particular-form" class="level2">
 <h2 class="anchored" data-anchor-id="requiring-a-particular-form">Requiring a particular form</h2>
-<div class="math-exercise-cell" id="math-exercise-5" data-label="basic-factored" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="factored" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Requiring a particular form&quot;" data-fields="[&quot;math-exercise-5-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
-<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Equivalent is not enough when a form is requested</div>
+<div class="math-exercise-cell" id="math-exercise-5" data-label="basic-factored" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="factored" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Requiring a particular form&quot;" data-fields="[&quot;math-exercise-5-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>Equivalent is not enough when a form is requested</div>
 
-<div class="math-exercise-body" style="display:none;">
+<div class="math-exercise-body" aria-hidden="true">
 <div class="math-exercise-question">Factor \(x^2+5x+6\): <input type="text" id="math-exercise-5-f1" data-answer="(x+2)*(x+3)" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
 
 <div class="math-exercise-controls">
@@ -944,7 +958,7 @@ Factor $x^2+5x+6$: __[(x+2)*(x+3)]
 </section>
 <section id="case-insensitive-text" class="level2">
 <h2 class="anchored" data-anchor-id="case-insensitive-text">Case-insensitive text</h2>
-<div class="math-exercise-cell" id="math-exercise-6" data-label="basic-text" data-mode="string_ci" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Case-insensitive text&quot;" data-fields="[&quot;math-exercise-6-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" id="math-exercise-6" data-label="basic-text" data-mode="string_ci" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Case-insensitive text&quot;" data-fields="[&quot;math-exercise-6-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div class="math-exercise-question">Write the conventional name of the constant \(\pi\): <input type="text" id="math-exercise-6-f1" data-answer="pi" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
 
 <div class="math-exercise-controls">
@@ -970,10 +984,10 @@ Write the conventional name of the constant $\pi$: __[pi]
 <section id="a-random-task-pool" class="level2">
 <h2 class="anchored" data-anchor-id="a-random-task-pool">A random task pool</h2>
 <p>The selected task is stable during a browser session. Use the reload button in the corner to request another variant.</p>
-<div class="math-exercise-cell" id="math-exercise-7" data-label="basic-pool" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;A random task pool The selected task is stable during a browser session. Use the reload button in the corner to request another variant.&quot;" data-pool="[&quot;$8+7=$ _[15]&quot;,&quot;$9\\cdot6=$ _[54]&quot;,&quot;$2^8=$ _[256]&quot;]" data-fields="[]" data-structural-field-labels="[]">
-<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Random arithmetic task</div>
+<div class="math-exercise-cell" id="math-exercise-7" data-label="basic-pool" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;A random task pool The selected task is stable during a browser session. Use the reload button in the corner to request another variant.&quot;" data-pool="[&quot;$8+7=$ _[15]&quot;,&quot;$9\\cdot6=$ _[54]&quot;,&quot;$2^8=$ _[256]&quot;]" data-fields="[]" data-structural-field-labels="[]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>Random arithmetic task</div>
 
-<div class="math-exercise-body" style="display:none;">
+<div class="math-exercise-body" aria-hidden="true">
 <button type="button" class="math-pool-reload" title="Load a new random task">↻</button>
 <div class="math-exercise-question"></div>
 
@@ -1010,7 +1024,7 @@ $2^8=$ _[256]
 </section>
 <section id="rejecting-a-specific-unfinished-form" class="level2">
 <h2 class="anchored" data-anchor-id="rejecting-a-specific-unfinished-form">Rejecting a specific unfinished form</h2>
-<div class="math-exercise-cell" id="math-exercise-8" data-label="basic-reject" data-mode="equivalent" data-reject="(x+1)^2" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Rejecting a specific unfinished form&quot;" data-fields="[&quot;math-exercise-8-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" id="math-exercise-8" data-label="basic-reject" data-mode="equivalent" data-reject="(x+1)^2" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Rejecting a specific unfinished form&quot;" data-fields="[&quot;math-exercise-8-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div class="math-exercise-question">Expand \((x+1)^2\): <input type="text" id="math-exercise-8-f1" data-answer="x^2+2*x+1" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
 
 <div class="math-exercise-controls">
@@ -2176,6 +2190,37 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
   // ---------------------------------------------------------------------------
 
   var sympyReady = false;
+  var packageLoads = Object.create(null);
+
+  function parsePackageList(value) {
+    var packages = Array.isArray(value) ? value : [];
+    var seen = Object.create(null);
+    return packages.map(function (name) { return String(name || '').trim(); })
+      .filter(function (name) {
+        if (!name || !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(name)) {
+          if (name) throw new Error('Invalid Pyodide package name: ' + name);
+          return false;
+        }
+        var key = name.toLowerCase();
+        if (seen[key]) return false;
+        seen[key] = true;
+        return true;
+      });
+  }
+
+  async function ensurePackages(packages) {
+    var requested = parsePackageList(packages);
+    await Promise.all(requested.map(function (name) {
+      var key = name.toLowerCase();
+      if (!packageLoads[key]) {
+        packageLoads[key] = mainPyodide.loadPackage(name).catch(function (error) {
+          delete packageLoads[key];
+          throw error;
+        });
+      }
+      return packageLoads[key];
+    }));
+  }
 
   async function ensureSympy() {
     if (sympyReady) return;
@@ -2258,6 +2303,52 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
       '            if _v: _local[_v] = symbols(_v)',
       '    _local.setdefault("inf", oo)',
       '    return _local',
+      '',
+      'def graph_from_response(response, *, directed=False):',
+      '    """Validate graph-editor JSON and return a NetworkX graph."""',
+      '    import math as _graph_math',
+      '    import networkx as nx',
+      '',
+      '    if not isinstance(response, dict):',
+      '        raise ValueError("Graph response must be an object")',
+      '    expected = "directed-graph" if directed else "undirected-graph"',
+      '    if response.get("representation") != expected:',
+      '        raise ValueError(f"Expected {expected} response")',
+      '    nodes = response.get("nodes")',
+      '    edges = response.get("edges")',
+      '    if not isinstance(nodes, list) or not isinstance(edges, list):',
+      '        raise ValueError("Graph response needs node and edge lists")',
+      '',
+      '    graph = nx.DiGraph() if directed else nx.Graph()',
+      '    known = set()',
+      '    for node in nodes:',
+      '        if not isinstance(node, dict):',
+      '            raise ValueError("Every graph node must be an object")',
+      '        node_id = node.get("id")',
+      '        if type(node_id) is not int or node_id in known:',
+      '            raise ValueError("Graph node identifiers must be unique integers")',
+      '        try:',
+      '            x, y = float(node["x"]), float(node["y"])',
+      '        except (KeyError, TypeError, ValueError):',
+      '            raise ValueError("Every graph node needs numeric x and y coordinates")',
+      '        if not _graph_math.isfinite(x) or not _graph_math.isfinite(y):',
+      '            raise ValueError("Graph node coordinates must be finite")',
+      '        known.add(node_id)',
+      '        graph.add_node(node_id, x=x, y=y)',
+      '',
+      '    seen = set()',
+      '    for edge in edges:',
+      '        if not isinstance(edge, list) or len(edge) != 2:',
+      '            raise ValueError("Every graph edge must contain two endpoints")',
+      '        source, target = edge',
+      '        if source not in known or target not in known or source == target:',
+      '            raise ValueError("Graph edges need two distinct known endpoints")',
+      '        key = (source, target) if directed else tuple(sorted((source, target)))',
+      '        if key in seen:',
+      '            raise ValueError("Graph response contains a duplicate edge")',
+      '        seen.add(key)',
+      '        graph.add_edge(source, target)',
+      '    return graph',
       '',
       'def assess_basis(matrix, *, axis, target_dimension, belongs, name, space_name="space"):',
       '    """Assess a row- or column-basis submission without privileging vector order.',
@@ -2945,6 +3036,29 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
   var ASSESSMENT_VERSION = 1;
   var MAX_ASSESSMENT_JSON_BYTES = 1024 * 1024;
   var assessmentSequence = 0;
+
+  function notifyExternalLayout(iframe) {
+    if (!iframe || iframe.tagName !== 'IFRAME' || !iframe.contentWindow) return false;
+    iframe.contentWindow.postMessage({
+      protocol: ASSESSMENT_PROTOCOL,
+      version: ASSESSMENT_VERSION,
+      type: 'layout',
+      assessmentId: iframe.id
+    }, '*');
+    return true;
+  }
+
+  function scheduleExternalLayout(iframe) {
+    notifyExternalLayout(iframe);
+    if (typeof window.requestAnimationFrame === 'function') {
+      window.requestAnimationFrame(function () {
+        notifyExternalLayout(iframe);
+        window.requestAnimationFrame(function () { notifyExternalLayout(iframe); });
+      });
+    } else {
+      window.setTimeout(function () { notifyExternalLayout(iframe); }, 0);
+    }
+  }
 
   function requestExternalResponse(sourceSpec, includeAI) {
     var match = /^jsxgraph:(.+)$/.exec(sourceSpec || '');
@@ -3902,6 +4016,8 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
     try { structuralFieldLabels = JSON.parse(cell.dataset.structuralFieldLabels || '[]'); } catch (e) {}
     var checker = '';
     try { checker = JSON.parse(cell.dataset.checker || '""'); } catch (e) {}
+    var packages = [];
+    try { packages = JSON.parse(cell.dataset.packages || '[]'); } catch (e) {}
     var formCredit = Number(cell.dataset.formCredit || '0.5');
     if (!Number.isFinite(formCredit) || formCredit < 0 || formCredit > 1) formCredit = 0.5;
     var checkOpts = {
@@ -3912,6 +4028,7 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
       form:      cell.dataset.form      || '',
       vars:       vars,
       checker:    checker,
+      packages:   packages,
       responseSource: cell.dataset.response || '',
       partialCredit: cell.dataset.partialCredit === 'true',
       formCredit: formCredit
@@ -3923,6 +4040,9 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
       var responseSlot = cell.querySelector('.math-exercise-response-slot');
       if (responseFrame && responseFrame.tagName === 'IFRAME' && responseSlot) {
         responseSlot.appendChild(responseFrame);
+        responseFrame.addEventListener('load', function () {
+          scheduleExternalLayout(responseFrame);
+        });
       } else {
         console.warn('math-exercise: could not embed JSXGraph response "' + assessmentId + '".');
       }
@@ -3957,7 +4077,9 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
     if (toggleEl && bodyEl) {
       function toggleOpen() {
         var open = cell.classList.toggle('math-exercise-open');
-        bodyEl.style.display = open ? '' : 'none';
+        toggleEl.setAttribute('aria-expanded', String(open));
+        bodyEl.setAttribute('aria-hidden', String(!open));
+        if (open && responseFrame) scheduleExternalLayout(responseFrame);
       }
       toggleEl.addEventListener('click', toggleOpen);
       toggleEl.addEventListener('keydown', function (e) {
@@ -4054,6 +4176,7 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
       fbDiv.innerHTML = '<div class="math-fb-checking">' + L.checking + '</div>';
       try {
         await ensureSympy();
+        await ensurePackages(checkOpts.packages);
         var parts = [];
         var fieldElements = fieldIds.map(function (id) { return document.getElementById(id); });
         if (mode === 'custom') {
@@ -4193,6 +4316,7 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
           fbDiv.innerHTML = '<div class="math-fb-checking">' + L.fetchingFeedback + '</div>';
           try {
             await ensureSympy();
+            await ensurePackages(checkOpts.packages);
             var overallAssessment = '';
             var structuredAssessment = {};
             var externalAI = null;
@@ -4311,6 +4435,10 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
       expressionAnswersXml: expressionAnswersXml,
       structuredAssessmentXml: structuredAssessmentXml,
       structuredGroupStatus: structuredGroupStatus,
+      parsePackageList: parsePackageList,
+      ensurePackages: ensurePackages,
+      notifyExternalLayout: notifyExternalLayout,
+      scheduleExternalLayout: scheduleExternalLayout,
     };
   }
 

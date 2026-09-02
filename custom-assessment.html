@@ -45,7 +45,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-e3adbaa939bcd423dddc8c8a834270b4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-3e9b1289f5f353c49b617ce48ad2bc38.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -130,6 +130,16 @@ ul.task-list li input[type="checkbox"] {
 }
 .math-exercise-toggle:hover { color: var(--bs-primary, #0d6efd); border-bottom-color: var(--bs-primary, #0d6efd); }
 .math-exercise-open .math-exercise-toggle { margin-bottom: .75em; }
+
+/* Keep collapsed interactive content in layout so iframe-based tools such as
+   JSXGraph initialize with real dimensions. Clipping and visibility preserve
+   the compact, non-interactive collapsed state without display:none. */
+.math-exercise-cell:not(.math-exercise-open) > .math-exercise-body {
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
 
 .math-chevron {
   display: inline-flex;
@@ -755,6 +765,10 @@ window.Quarto = {
     <a class="nav-link" href="./dynamic-matrix-tests.html"> 
 <span class="menu-text">Dynamic matrices</span></a>
   </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./graph-theory.html"> 
+<span class="menu-text">Graph theory</span></a>
+  </li>  
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
@@ -839,10 +853,10 @@ Warning
 <section id="assess-a-mathematical-property" class="level2">
 <h2 class="anchored" data-anchor-id="assess-a-mathematical-property">1. Assess a mathematical property</h2>
 <p>A function is non-decreasing on <span class="math inline">\([0,1]\)</span> when <span class="math inline">\(f(x_2)\ge f(x_1)\)</span> whenever <span class="math inline">\(0\le x_1&lt;x_2\le1\)</span>. This exercise accepts any such function whose value at 1 is strictly greater than its value at 0; there is no single canonical answer. Examples include <code>x</code>, <code>x^2</code>, and <code>x^3+x</code>.</p>
-<div class="math-exercise-cell" id="math-exercise-1" data-label="custom-monotone" data-mode="custom" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    f = response[\&quot;expressions\&quot;][0]\n    x = symbols[\&quot;x\&quot;]\n    derivative_min = minimum(diff(f, x), x, Interval(0, 1))\n    rise = simplify(f.subs(x, 1) - f.subs(x, 0))\n    valid = (\n        derivative_min.is_nonnegative is True\n        and rise.is_positive is True\n    )\n    return {\n        \&quot;correct\&quot;: valid,\n        \&quot;feedback\&quot;: \&quot;The derivative must stay non-negative and the endpoint value must increase.\&quot;\n    }&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;1. Assess a mathematical property A function is non-decreasing on [0,1] when f(x_2)\\ge f(x_1) whenever 0\\le x_1<x_2\\le1. This exercise accepts any such function whose value at 1 is strictly greater than its value at 0; there is no single canonical answer. Examples include x, x^2, and x^3+x.&quot;" data-fields="[&quot;math-exercise-1-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
-<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Any non-decreasing function that rises overall</div>
+<div class="math-exercise-cell" id="math-exercise-1" data-label="custom-monotone" data-mode="custom" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    f = response[\&quot;expressions\&quot;][0]\n    x = symbols[\&quot;x\&quot;]\n    derivative_min = minimum(diff(f, x), x, Interval(0, 1))\n    rise = simplify(f.subs(x, 1) - f.subs(x, 0))\n    valid = (\n        derivative_min.is_nonnegative is True\n        and rise.is_positive is True\n    )\n    return {\n        \&quot;correct\&quot;: valid,\n        \&quot;feedback\&quot;: \&quot;The derivative must stay non-negative and the endpoint value must increase.\&quot;\n    }&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;1. Assess a mathematical property A function is non-decreasing on [0,1] when f(x_2)\\ge f(x_1) whenever 0\\le x_1<x_2\\le1. This exercise accepts any such function whose value at 1 is strictly greater than its value at 0; there is no single canonical answer. Examples include x, x^2, and x^3+x.&quot;" data-fields="[&quot;math-exercise-1-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>Any non-decreasing function that rises overall</div>
 
-<div class="math-exercise-body" style="display:none;">
+<div class="math-exercise-body" aria-hidden="true">
 <div class="math-exercise-question">Give a function that is non-decreasing on \([0,1]\) and satisfies \(f(1)&gt;f(0)\):<br>
 \(f(x)=\) <textarea id="math-exercise-1-f1" data-answer="" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-large" rows="2"></textarea></div>
 
@@ -888,10 +902,10 @@ $f(x)=$ ___[]
 <section id="assess-several-fields-together" class="level2">
 <h2 class="anchored" data-anchor-id="assess-several-fields-together">2. Assess several fields together</h2>
 <p>A Pythagorean triple consists of positive integers <span class="math inline">\((a,b,c)\)</span> satisfying <span class="math inline">\(a^2+b^2=c^2\)</span>. Any such triple is accepted, not only <span class="math inline">\((3,4,5)\)</span>, provided the entries are ordered as <span class="math inline">\(a&lt;b&lt;c\)</span>.</p>
-<div class="math-exercise-cell" id="math-exercise-2" data-label="custom-pythagorean" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    a, b, c = response[\&quot;expressions\&quot;]\n    integers = all(v.is_integer is True and v.is_positive is True for v in (a, b, c))\n    ordered = (a < b) is S.true and (b < c) is S.true\n    equation = simplify(a**2 + b**2 - c**2) == 0\n    score = (int(integers) + int(ordered) + int(equation)) / 3\n    return {\n        \&quot;score\&quot;: score,\n        \&quot;feedback\&quot;: \&quot;Check positivity, a < b < c, and the equation a²+b²=c².\&quot;\n    }&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[&quot;a&quot;,&quot;b&quot;,&quot;c&quot;]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;2. Assess several fields together A Pythagorean triple consists of positive integers (a,b,c) satisfying a^2+b^2=c^2. Any such triple is accepted, not only (3,4,5), provided the entries are ordered as a<b<c.&quot;" data-fields="[&quot;math-exercise-2-f1&quot;,&quot;math-exercise-2-f2&quot;,&quot;math-exercise-2-f3&quot;]" data-structural-field-labels="[&quot;&quot;,&quot;&quot;,&quot;&quot;]">
-<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>A positive integer Pythagorean triple</div>
+<div class="math-exercise-cell" id="math-exercise-2" data-label="custom-pythagorean" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    a, b, c = response[\&quot;expressions\&quot;]\n    integers = all(v.is_integer is True and v.is_positive is True for v in (a, b, c))\n    ordered = (a < b) is S.true and (b < c) is S.true\n    equation = simplify(a**2 + b**2 - c**2) == 0\n    score = (int(integers) + int(ordered) + int(equation)) / 3\n    return {\n        \&quot;score\&quot;: score,\n        \&quot;feedback\&quot;: \&quot;Check positivity, a < b < c, and the equation a²+b²=c².\&quot;\n    }&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[&quot;a&quot;,&quot;b&quot;,&quot;c&quot;]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;2. Assess several fields together A Pythagorean triple consists of positive integers (a,b,c) satisfying a^2+b^2=c^2. Any such triple is accepted, not only (3,4,5), provided the entries are ordered as a<b<c.&quot;" data-fields="[&quot;math-exercise-2-f1&quot;,&quot;math-exercise-2-f2&quot;,&quot;math-exercise-2-f3&quot;]" data-structural-field-labels="[&quot;&quot;,&quot;&quot;,&quot;&quot;]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>A positive integer Pythagorean triple</div>
 
-<div class="math-exercise-body" style="display:none;">
+<div class="math-exercise-body" aria-hidden="true">
 <div class="math-exercise-question">Enter positive integers \(a<b<c\) satisfying="" \(a^2+b^2="c^2\):<br">
 \(a=\) <input type="text" id="math-exercise-2-f1" data-answer="" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">, \(b=\) <input type="text" id="math-exercise-2-f2" data-answer="" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">, \(c=\) <input type="text" id="math-exercise-2-f3" data-answer="" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></b<c\)></div>
 
@@ -934,10 +948,10 @@ $a=$ _[], $b=$ _[], $c=$ _[]
 <section id="check-relationships-between-symbolic-answers" class="level2">
 <h2 class="anchored" data-anchor-id="check-relationships-between-symbolic-answers">3. Check relationships between symbolic answers</h2>
 <p>The polynomial and its proposed roots are assessed as one response. A monic quadratic has leading coefficient 1, so every valid answer has the form <span class="math inline">\(p(x)=(x-r_1)(x-r_2)\)</span> with <span class="math inline">\(r_1\ne r_2\)</span>.</p>
-<div class="math-exercise-cell" id="math-exercise-3" data-label="custom-polynomial-roots" data-mode="custom" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    p, r1, r2 = response[\&quot;expressions\&quot;]\n    x = symbols[\&quot;x\&quot;]\n    try:\n        polynomial = Poly(p, x)\n        monic_quadratic = polynomial.degree() == 2 and polynomial.LC() == 1\n    except Exception:\n        monic_quadratic = False\n    distinct = simplify(r1 - r2) != 0\n    consistent = simplify(p - (x-r1)*(x-r2)) == 0\n    score = (int(monic_quadratic) + int(distinct) + int(consistent)) / 3\n    return {\n        \&quot;score\&quot;: score,\n        \&quot;feedback\&quot;: \&quot;The polynomial must be monic, quadratic, and equal to (x-r₁)(x-r₂).\&quot;\n    }&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[&quot;Polynomial&quot;,&quot;First root&quot;,&quot;Second root&quot;]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;3. Check relationships between symbolic answers The polynomial and its proposed roots are assessed as one response. A monic quadratic has leading coefficient 1, so every valid answer has the form p(x)=(x-r_1)(x-r_2) with r_1\\ne r_2.&quot;" data-fields="[&quot;math-exercise-3-f1&quot;,&quot;math-exercise-3-f2&quot;,&quot;math-exercise-3-f3&quot;]" data-structural-field-labels="[&quot;&quot;,&quot;&quot;,&quot;&quot;]">
-<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>A polynomial consistent with two proposed roots</div>
+<div class="math-exercise-cell" id="math-exercise-3" data-label="custom-polynomial-roots" data-mode="custom" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    p, r1, r2 = response[\&quot;expressions\&quot;]\n    x = symbols[\&quot;x\&quot;]\n    try:\n        polynomial = Poly(p, x)\n        monic_quadratic = polynomial.degree() == 2 and polynomial.LC() == 1\n    except Exception:\n        monic_quadratic = False\n    distinct = simplify(r1 - r2) != 0\n    consistent = simplify(p - (x-r1)*(x-r2)) == 0\n    score = (int(monic_quadratic) + int(distinct) + int(consistent)) / 3\n    return {\n        \&quot;score\&quot;: score,\n        \&quot;feedback\&quot;: \&quot;The polynomial must be monic, quadratic, and equal to (x-r₁)(x-r₂).\&quot;\n    }&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[&quot;Polynomial&quot;,&quot;First root&quot;,&quot;Second root&quot;]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;3. Check relationships between symbolic answers The polynomial and its proposed roots are assessed as one response. A monic quadratic has leading coefficient 1, so every valid answer has the form p(x)=(x-r_1)(x-r_2) with r_1\\ne r_2.&quot;" data-fields="[&quot;math-exercise-3-f1&quot;,&quot;math-exercise-3-f2&quot;,&quot;math-exercise-3-f3&quot;]" data-structural-field-labels="[&quot;&quot;,&quot;&quot;,&quot;&quot;]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>A polynomial consistent with two proposed roots</div>
 
-<div class="math-exercise-body" style="display:none;">
+<div class="math-exercise-body" aria-hidden="true">
 <div class="math-exercise-question">Give a monic quadratic \(p(x)\) and two distinct roots:<br>
 \(p(x)=\) <input type="text" id="math-exercise-3-f1" data-answer="" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium">, \(r_1=\) <input type="text" id="math-exercise-3-f2" data-answer="" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">, \(r_2=\) <input type="text" id="math-exercise-3-f3" data-answer="" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
@@ -989,10 +1003,10 @@ $p(x)=$ __[], $r_1=$ _[], $r_2=$ _[]
 x_{n+1}=x_n-\frac{x_n^2-2}{2x_n}
        =\frac12\left(x_n+\frac{2}{x_n}\right).
 \]</span> This square-root iteration is also known as the Babylonian method. Choose any positive starting value other than the exact root, then apply the displayed formula twice. For example, you may begin with <span class="math inline">\(x_0=1\)</span>.</p>
-<div class="math-exercise-cell" id="math-exercise-4" data-label="custom-newton-sequence" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    x0, x1, x2 = response[\&quot;expressions\&quot;]\n    step = lambda value: (value + 2/value) / 2\n    start_ok = x0.is_positive is True and simplify(x0**2 - 2) != 0\n    first_ok = simplify(x1 - step(x0)) == 0\n    second_ok = simplify(x2 - step(x1)) == 0\n    score = (int(start_ok) + int(first_ok) + int(second_ok)) / 3\n    return {\n        \&quot;score\&quot;: score,\n        \&quot;feedback\&quot;: \&quot;Each new value must equal (x + 2/x)/2 for the preceding value.\&quot;\n    }&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[&quot;x₀&quot;,&quot;x₁&quot;,&quot;x₂&quot;]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;4. Validate a numerical process To approximate \\sqrt2, apply Newton’s method to f(x)=x^2-2. Its update formula simplifies to x_{n+1}=x_n-\\frac{x_n^2-2}{2x_n} =\\frac12\\left(x_n+\\frac{2}{x_n}\\right). This square-root iteration is also known as the Babylonian method. Choose any positive starting value other than the exact root, then apply the displayed formula twice. For example, you may begin with x_0=1.&quot;" data-fields="[&quot;math-exercise-4-f1&quot;,&quot;math-exercise-4-f2&quot;,&quot;math-exercise-4-f3&quot;]" data-structural-field-labels="[&quot;&quot;,&quot;&quot;,&quot;&quot;]">
-<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>Two consistent iterations toward sqrt(2)</div>
+<div class="math-exercise-cell" id="math-exercise-4" data-label="custom-newton-sequence" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    x0, x1, x2 = response[\&quot;expressions\&quot;]\n    step = lambda value: (value + 2/value) / 2\n    start_ok = x0.is_positive is True and simplify(x0**2 - 2) != 0\n    first_ok = simplify(x1 - step(x0)) == 0\n    second_ok = simplify(x2 - step(x1)) == 0\n    score = (int(start_ok) + int(first_ok) + int(second_ok)) / 3\n    return {\n        \&quot;score\&quot;: score,\n        \&quot;feedback\&quot;: \&quot;Each new value must equal (x + 2/x)/2 for the preceding value.\&quot;\n    }&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[&quot;x₀&quot;,&quot;x₁&quot;,&quot;x₂&quot;]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;4. Validate a numerical process To approximate \\sqrt2, apply Newton’s method to f(x)=x^2-2. Its update formula simplifies to x_{n+1}=x_n-\\frac{x_n^2-2}{2x_n} =\\frac12\\left(x_n+\\frac{2}{x_n}\\right). This square-root iteration is also known as the Babylonian method. Choose any positive starting value other than the exact root, then apply the displayed formula twice. For example, you may begin with x_0=1.&quot;" data-fields="[&quot;math-exercise-4-f1&quot;,&quot;math-exercise-4-f2&quot;,&quot;math-exercise-4-f3&quot;]" data-structural-field-labels="[&quot;&quot;,&quot;&quot;,&quot;&quot;]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>Two consistent iterations toward sqrt(2)</div>
 
-<div class="math-exercise-body" style="display:none;">
+<div class="math-exercise-body" aria-hidden="true">
 <div class="math-exercise-question">Choose a positive \(x_0\ne\sqrt2\) and apply<br>
 \(x_{n+1}=(x_n+2/x_n)/2\) twice:<br>
 \(x_0=\) <input type="text" id="math-exercise-4-f1" data-answer="" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">, \(x_1=\) <input type="text" id="math-exercise-4-f2" data-answer="" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">, \(x_2=\) <input type="text" id="math-exercise-4-f3" data-answer="" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
@@ -1038,10 +1052,10 @@ $x_0=$ _[], $x_1=$ _[], $x_2=$ _[]
 <section id="assess-a-matrix-constraint" class="level2">
 <h2 class="anchored" data-anchor-id="assess-a-matrix-constraint">5. Assess a matrix constraint</h2>
 <p>Every cell is parsed separately, then reconstructed inside the checker. Any integer <span class="math inline">\(2\times2\)</span> matrix with determinant 1 is accepted except the identity matrix <span class="math inline">\(I_2=\begin{pmatrix}1&amp;0\\0&amp;1\end{pmatrix}\)</span>.</p>
-<div class="math-exercise-cell" id="math-exercise-5" data-label="custom-special-linear-matrix" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    values = response[\&quot;expressions\&quot;]\n    A = Matrix(2, 2, values)\n    integer_entries = all(value.is_integer is True for value in values)\n    determinant_one = simplify(A.det() - 1) == 0\n    nonidentity = A != eye(2)\n    score = (int(integer_entries) + int(determinant_one) + int(nonidentity)) / 3\n    return {\n        \&quot;score\&quot;: score,\n        \&quot;feedback\&quot;: \&quot;Require integer entries, determinant 1, and a matrix different from I₂.\&quot;\n    }&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;5. Assess a matrix constraint Every cell is parsed separately, then reconstructed inside the checker. Any integer 2\\times2 matrix with determinant 1 is accepted except the identity matrix I_2=\\begin{pmatrix}1&amp;0\\\\0&amp;1\\end{pmatrix}.&quot;" data-fields="[&quot;math-exercise-5-f1&quot;,&quot;math-exercise-5-f2&quot;,&quot;math-exercise-5-f3&quot;,&quot;math-exercise-5-f4&quot;]" data-structural-field-labels="[&quot;m1,1&quot;,&quot;m1,2&quot;,&quot;m2,1&quot;,&quot;m2,2&quot;]">
-<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0"><span class="math-chevron" aria-hidden="true"></span>A non-identity integer matrix with determinant 1</div>
+<div class="math-exercise-cell" id="math-exercise-5" data-label="custom-special-linear-matrix" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    values = response[\&quot;expressions\&quot;]\n    A = Matrix(2, 2, values)\n    integer_entries = all(value.is_integer is True for value in values)\n    determinant_one = simplify(A.det() - 1) == 0\n    nonidentity = A != eye(2)\n    score = (int(integer_entries) + int(determinant_one) + int(nonidentity)) / 3\n    return {\n        \&quot;score\&quot;: score,\n        \&quot;feedback\&quot;: \&quot;Require integer entries, determinant 1, and a matrix different from I₂.\&quot;\n    }&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;5. Assess a matrix constraint Every cell is parsed separately, then reconstructed inside the checker. Any integer 2\\times2 matrix with determinant 1 is accepted except the identity matrix I_2=\\begin{pmatrix}1&amp;0\\\\0&amp;1\\end{pmatrix}.&quot;" data-fields="[&quot;math-exercise-5-f1&quot;,&quot;math-exercise-5-f2&quot;,&quot;math-exercise-5-f3&quot;,&quot;math-exercise-5-f4&quot;]" data-structural-field-labels="[&quot;m1,1&quot;,&quot;m1,2&quot;,&quot;m2,1&quot;,&quot;m2,2&quot;]">
+<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>A non-identity integer matrix with determinant 1</div>
 
-<div class="math-exercise-body" style="display:none;">
+<div class="math-exercise-body" aria-hidden="true">
 <div class="math-exercise-question">Enter an integer matrix \(A\ne I_2\) with \(\det(A)=1\):<br>
 \(A=\) <span class="math-mat" style="--cols:2"><input type="text" id="math-exercise-5-f1" data-answer="" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-5-f2" data-answer="" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-5-f3" data-answer="" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-5-f4" data-answer="" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span></div>
 
@@ -2223,6 +2237,37 @@ $A=$ mat[,;,]
   // ---------------------------------------------------------------------------
 
   var sympyReady = false;
+  var packageLoads = Object.create(null);
+
+  function parsePackageList(value) {
+    var packages = Array.isArray(value) ? value : [];
+    var seen = Object.create(null);
+    return packages.map(function (name) { return String(name || '').trim(); })
+      .filter(function (name) {
+        if (!name || !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(name)) {
+          if (name) throw new Error('Invalid Pyodide package name: ' + name);
+          return false;
+        }
+        var key = name.toLowerCase();
+        if (seen[key]) return false;
+        seen[key] = true;
+        return true;
+      });
+  }
+
+  async function ensurePackages(packages) {
+    var requested = parsePackageList(packages);
+    await Promise.all(requested.map(function (name) {
+      var key = name.toLowerCase();
+      if (!packageLoads[key]) {
+        packageLoads[key] = mainPyodide.loadPackage(name).catch(function (error) {
+          delete packageLoads[key];
+          throw error;
+        });
+      }
+      return packageLoads[key];
+    }));
+  }
 
   async function ensureSympy() {
     if (sympyReady) return;
@@ -2305,6 +2350,52 @@ $A=$ mat[,;,]
       '            if _v: _local[_v] = symbols(_v)',
       '    _local.setdefault("inf", oo)',
       '    return _local',
+      '',
+      'def graph_from_response(response, *, directed=False):',
+      '    """Validate graph-editor JSON and return a NetworkX graph."""',
+      '    import math as _graph_math',
+      '    import networkx as nx',
+      '',
+      '    if not isinstance(response, dict):',
+      '        raise ValueError("Graph response must be an object")',
+      '    expected = "directed-graph" if directed else "undirected-graph"',
+      '    if response.get("representation") != expected:',
+      '        raise ValueError(f"Expected {expected} response")',
+      '    nodes = response.get("nodes")',
+      '    edges = response.get("edges")',
+      '    if not isinstance(nodes, list) or not isinstance(edges, list):',
+      '        raise ValueError("Graph response needs node and edge lists")',
+      '',
+      '    graph = nx.DiGraph() if directed else nx.Graph()',
+      '    known = set()',
+      '    for node in nodes:',
+      '        if not isinstance(node, dict):',
+      '            raise ValueError("Every graph node must be an object")',
+      '        node_id = node.get("id")',
+      '        if type(node_id) is not int or node_id in known:',
+      '            raise ValueError("Graph node identifiers must be unique integers")',
+      '        try:',
+      '            x, y = float(node["x"]), float(node["y"])',
+      '        except (KeyError, TypeError, ValueError):',
+      '            raise ValueError("Every graph node needs numeric x and y coordinates")',
+      '        if not _graph_math.isfinite(x) or not _graph_math.isfinite(y):',
+      '            raise ValueError("Graph node coordinates must be finite")',
+      '        known.add(node_id)',
+      '        graph.add_node(node_id, x=x, y=y)',
+      '',
+      '    seen = set()',
+      '    for edge in edges:',
+      '        if not isinstance(edge, list) or len(edge) != 2:',
+      '            raise ValueError("Every graph edge must contain two endpoints")',
+      '        source, target = edge',
+      '        if source not in known or target not in known or source == target:',
+      '            raise ValueError("Graph edges need two distinct known endpoints")',
+      '        key = (source, target) if directed else tuple(sorted((source, target)))',
+      '        if key in seen:',
+      '            raise ValueError("Graph response contains a duplicate edge")',
+      '        seen.add(key)',
+      '        graph.add_edge(source, target)',
+      '    return graph',
       '',
       'def assess_basis(matrix, *, axis, target_dimension, belongs, name, space_name="space"):',
       '    """Assess a row- or column-basis submission without privileging vector order.',
@@ -2992,6 +3083,29 @@ $A=$ mat[,;,]
   var ASSESSMENT_VERSION = 1;
   var MAX_ASSESSMENT_JSON_BYTES = 1024 * 1024;
   var assessmentSequence = 0;
+
+  function notifyExternalLayout(iframe) {
+    if (!iframe || iframe.tagName !== 'IFRAME' || !iframe.contentWindow) return false;
+    iframe.contentWindow.postMessage({
+      protocol: ASSESSMENT_PROTOCOL,
+      version: ASSESSMENT_VERSION,
+      type: 'layout',
+      assessmentId: iframe.id
+    }, '*');
+    return true;
+  }
+
+  function scheduleExternalLayout(iframe) {
+    notifyExternalLayout(iframe);
+    if (typeof window.requestAnimationFrame === 'function') {
+      window.requestAnimationFrame(function () {
+        notifyExternalLayout(iframe);
+        window.requestAnimationFrame(function () { notifyExternalLayout(iframe); });
+      });
+    } else {
+      window.setTimeout(function () { notifyExternalLayout(iframe); }, 0);
+    }
+  }
 
   function requestExternalResponse(sourceSpec, includeAI) {
     var match = /^jsxgraph:(.+)$/.exec(sourceSpec || '');
@@ -3949,6 +4063,8 @@ $A=$ mat[,;,]
     try { structuralFieldLabels = JSON.parse(cell.dataset.structuralFieldLabels || '[]'); } catch (e) {}
     var checker = '';
     try { checker = JSON.parse(cell.dataset.checker || '""'); } catch (e) {}
+    var packages = [];
+    try { packages = JSON.parse(cell.dataset.packages || '[]'); } catch (e) {}
     var formCredit = Number(cell.dataset.formCredit || '0.5');
     if (!Number.isFinite(formCredit) || formCredit < 0 || formCredit > 1) formCredit = 0.5;
     var checkOpts = {
@@ -3959,6 +4075,7 @@ $A=$ mat[,;,]
       form:      cell.dataset.form      || '',
       vars:       vars,
       checker:    checker,
+      packages:   packages,
       responseSource: cell.dataset.response || '',
       partialCredit: cell.dataset.partialCredit === 'true',
       formCredit: formCredit
@@ -3970,6 +4087,9 @@ $A=$ mat[,;,]
       var responseSlot = cell.querySelector('.math-exercise-response-slot');
       if (responseFrame && responseFrame.tagName === 'IFRAME' && responseSlot) {
         responseSlot.appendChild(responseFrame);
+        responseFrame.addEventListener('load', function () {
+          scheduleExternalLayout(responseFrame);
+        });
       } else {
         console.warn('math-exercise: could not embed JSXGraph response "' + assessmentId + '".');
       }
@@ -4004,7 +4124,9 @@ $A=$ mat[,;,]
     if (toggleEl && bodyEl) {
       function toggleOpen() {
         var open = cell.classList.toggle('math-exercise-open');
-        bodyEl.style.display = open ? '' : 'none';
+        toggleEl.setAttribute('aria-expanded', String(open));
+        bodyEl.setAttribute('aria-hidden', String(!open));
+        if (open && responseFrame) scheduleExternalLayout(responseFrame);
       }
       toggleEl.addEventListener('click', toggleOpen);
       toggleEl.addEventListener('keydown', function (e) {
@@ -4101,6 +4223,7 @@ $A=$ mat[,;,]
       fbDiv.innerHTML = '<div class="math-fb-checking">' + L.checking + '</div>';
       try {
         await ensureSympy();
+        await ensurePackages(checkOpts.packages);
         var parts = [];
         var fieldElements = fieldIds.map(function (id) { return document.getElementById(id); });
         if (mode === 'custom') {
@@ -4240,6 +4363,7 @@ $A=$ mat[,;,]
           fbDiv.innerHTML = '<div class="math-fb-checking">' + L.fetchingFeedback + '</div>';
           try {
             await ensureSympy();
+            await ensurePackages(checkOpts.packages);
             var overallAssessment = '';
             var structuredAssessment = {};
             var externalAI = null;
@@ -4358,6 +4482,10 @@ $A=$ mat[,;,]
       expressionAnswersXml: expressionAnswersXml,
       structuredAssessmentXml: structuredAssessmentXml,
       structuredGroupStatus: structuredGroupStatus,
+      parsePackageList: parsePackageList,
+      ensurePackages: ensurePackages,
+      notifyExternalLayout: notifyExternalLayout,
+      scheduleExternalLayout: scheduleExternalLayout,
     };
   }
 

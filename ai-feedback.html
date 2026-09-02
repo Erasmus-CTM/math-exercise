@@ -80,7 +80,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-e3adbaa939bcd423dddc8c8a834270b4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-3e9b1289f5f353c49b617ce48ad2bc38.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -165,6 +165,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 }
 .math-exercise-toggle:hover { color: var(--bs-primary, #0d6efd); border-bottom-color: var(--bs-primary, #0d6efd); }
 .math-exercise-open .math-exercise-toggle { margin-bottom: .75em; }
+
+/* Keep collapsed interactive content in layout so iframe-based tools such as
+   JSXGraph initialize with real dimensions. Clipping and visibility preserve
+   the compact, non-interactive collapsed state without display:none. */
+.math-exercise-cell:not(.math-exercise-open) > .math-exercise-body {
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
 
 .math-chevron {
   display: inline-flex;
@@ -790,6 +800,10 @@ window.Quarto = {
     <a class="nav-link" href="./dynamic-matrix-tests.html"> 
 <span class="menu-text">Dynamic matrices</span></a>
   </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./graph-theory.html"> 
+<span class="menu-text">Graph theory</span></a>
+  </li>  
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
@@ -875,7 +889,7 @@ window.Quarto = {
 <p>For <span class="math inline">\(ax^2+bx+c=0\)</span>, the discriminant is <span class="math inline">\(D=b^2-4ac\)</span>. The sign of <span class="math inline">\(D\)</span> determines the number of real roots. This visible callout is automatically available to the feedback model for the exercise immediately below it.</p>
 </div>
 </div>
-<div class="math-exercise-cell" id="math-exercise-1" data-label="ai-auto-context" data-mode="equivalent" data-reject="" data-vars="a,b,c" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[&quot;Discriminant&quot;]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Automatic section context No author option is needed for automatic context. The nearest preceding heading starts a context section. Visible prose, lists, and callouts after that heading are collected until the exercise; code blocks and other exercises are excluded. A new heading starts a new section, and only the most recent 1,500 characters are retained. This keeps feedback grounded in the local explanation without sending the whole page. Automatically collected context For ax^2+bx+c=0, the discriminant is D=b^2-4ac. The sign of D determines the number of real roots. This visible callout is automatically available to the feedback model for the exercise immediately below it.&quot;" data-fields="[&quot;math-exercise-1-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" id="math-exercise-1" data-label="ai-auto-context" data-mode="equivalent" data-reject="" data-vars="a,b,c" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[&quot;Discriminant&quot;]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Automatic section context No author option is needed for automatic context. The nearest preceding heading starts a context section. Visible prose, lists, and callouts after that heading are collected until the exercise; code blocks and other exercises are excluded. A new heading starts a new section, and only the most recent 1,500 characters are retained. This keeps feedback grounded in the local explanation without sending the whole page. Automatically collected context For ax^2+bx+c=0, the discriminant is D=b^2-4ac. The sign of D determines the number of real roots. This visible callout is automatically available to the feedback model for the exercise immediately below it.&quot;" data-fields="[&quot;math-exercise-1-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div class="math-exercise-question">For \(2x^2+3x-2=0\), compute the discriminant: <input type="text" id="math-exercise-1-f1" data-answer="25" data-vars="a,b,c" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
@@ -927,7 +941,7 @@ Show context-block source
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>current iterate before forming the next iterate.</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>:::</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div class="math-exercise-cell" id="math-exercise-2" data-label="ai-explicit-context" data-mode="numeric" data-reject="" data-vars="" data-tolerance="0.001" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="explicit" data-context-refs="newton-rule" data-context="&quot;Reusable explicit context An explicitly identified context block can be reused by exercises elsewhere on the page. The block remains visible to students, and the exercise refers to it by id with context: newton-rule. Multiple ids may be listed when a task needs several sources. Explicit context is read from the rendered page when feedback is requested, so mathematical notation and text generated by other Quarto extensions are included. Explicit feedback context: Newton’s methodNewton’s method uses x_{k+1}=x_k-f(x_k)/f'(x_k). Evaluate the function and derivative at the current iterate before forming the next iterate. Show context-block source&quot;" data-fields="[&quot;math-exercise-2-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" id="math-exercise-2" data-label="ai-explicit-context" data-mode="numeric" data-reject="" data-vars="" data-tolerance="0.001" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="explicit" data-context-refs="newton-rule" data-context="&quot;Reusable explicit context An explicitly identified context block can be reused by exercises elsewhere on the page. The block remains visible to students, and the exercise refers to it by id with context: newton-rule. Multiple ids may be listed when a task needs several sources. Explicit context is read from the rendered page when feedback is requested, so mathematical notation and text generated by other Quarto extensions are included. Explicit feedback context: Newton’s methodNewton’s method uses x_{k+1}=x_k-f(x_k)/f'(x_k). Evaluate the function and derivative at the current iterate before forming the next iterate. Show context-block source&quot;" data-fields="[&quot;math-exercise-2-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div class="math-exercise-question">For \(f(x)=x^2-2\) and \(x_0=1.5\), compute \(x_1\): <input type="text" id="math-exercise-2-f1" data-answer="17/12" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
@@ -954,7 +968,7 @@ For $f(x)=x^2-2$ and $x_0=1.5$, compute $x_1$: _[17/12]
 </section>
 <section id="several-exercises-sharing-one-context" class="level2">
 <h2 class="anchored" data-anchor-id="several-exercises-sharing-one-context">Several exercises sharing one context</h2>
-<div class="math-exercise-cell" id="math-exercise-3" data-label="ai-explicit-context-second" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="explicit" data-context-refs="newton-rule" data-context="&quot;Several exercises sharing one context&quot;" data-fields="[&quot;math-exercise-3-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" id="math-exercise-3" data-label="ai-explicit-context-second" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="explicit" data-context-refs="newton-rule" data-context="&quot;Several exercises sharing one context&quot;" data-fields="[&quot;math-exercise-3-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div class="math-exercise-question">For \(f(x)=x^3-1\), write the Newton update as a function of \(x_k\):<br>
 <input type="text" id="math-exercise-3-f1" data-answer="x-(x^3-1)/(3*x^2)" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
 
@@ -983,7 +997,7 @@ __[x-(x^3-1)/(3*x^2)]
 <section id="opting-out-of-context" class="level2">
 <h2 class="anchored" data-anchor-id="opting-out-of-context">Opting out of context</h2>
 <p>Use <code>context: none</code> when surrounding prose should not be sent with a feedback request. This disables both automatic collection and accidental inheritance from the current section.</p>
-<div class="math-exercise-cell" id="math-exercise-4" data-label="ai-no-context" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="none" data-context-refs="none" data-context="&quot;Opting out of context Use context: none when surrounding prose should not be sent with a feedback request. This disables both automatic collection and accidental inheritance from the current section.&quot;" data-fields="[&quot;math-exercise-4-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" id="math-exercise-4" data-label="ai-no-context" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="none" data-context-refs="none" data-context="&quot;Opting out of context Use context: none when surrounding prose should not be sent with a feedback request. This disables both automatic collection and accidental inheritance from the current section.&quot;" data-fields="[&quot;math-exercise-4-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div class="math-exercise-question">Compute \(12/3\): <input type="text" id="math-exercise-4-f1" data-answer="4" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
@@ -1009,7 +1023,7 @@ Compute $12/3$: _[4]
 <section id="multi-field-feedback" class="level2">
 <h2 class="anchored" data-anchor-id="multi-field-feedback">Multi-field feedback</h2>
 <p>Meaningful labels make hints clearer and prevent generic references such as “field 2”.</p>
-<div class="math-exercise-cell" id="math-exercise-5" data-label="ai-field-labels" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[&quot;Derivative&quot;,&quot;Value at x=2&quot;,&quot;Tangent slope&quot;]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Multi-field feedback Meaningful labels make hints clearer and prevent generic references such as “field 2”.&quot;" data-fields="[&quot;math-exercise-5-f1&quot;,&quot;math-exercise-5-f2&quot;,&quot;math-exercise-5-f3&quot;]" data-structural-field-labels="[&quot;&quot;,&quot;&quot;,&quot;&quot;]">
+<div class="math-exercise-cell" id="math-exercise-5" data-label="ai-field-labels" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[&quot;Derivative&quot;,&quot;Value at x=2&quot;,&quot;Tangent slope&quot;]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Multi-field feedback Meaningful labels make hints clearer and prevent generic references such as “field 2”.&quot;" data-fields="[&quot;math-exercise-5-f1&quot;,&quot;math-exercise-5-f2&quot;,&quot;math-exercise-5-f3&quot;]" data-structural-field-labels="[&quot;&quot;,&quot;&quot;,&quot;&quot;]">
 <div class="math-exercise-question">For \(f(x)=x^3\), enter \(f'(x)=\) <input type="text" id="math-exercise-5-f1" data-answer="3*x^2" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">, \(f'(2)=\) <input type="text" id="math-exercise-5-f2" data-answer="12" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">, and the slope of the<br>
 tangent at \(x=2\): <input type="text" id="math-exercise-5-f3" data-answer="12" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">.</div>
 
@@ -2181,6 +2195,37 @@ tangent at $x=2$: _[12].
   // ---------------------------------------------------------------------------
 
   var sympyReady = false;
+  var packageLoads = Object.create(null);
+
+  function parsePackageList(value) {
+    var packages = Array.isArray(value) ? value : [];
+    var seen = Object.create(null);
+    return packages.map(function (name) { return String(name || '').trim(); })
+      .filter(function (name) {
+        if (!name || !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(name)) {
+          if (name) throw new Error('Invalid Pyodide package name: ' + name);
+          return false;
+        }
+        var key = name.toLowerCase();
+        if (seen[key]) return false;
+        seen[key] = true;
+        return true;
+      });
+  }
+
+  async function ensurePackages(packages) {
+    var requested = parsePackageList(packages);
+    await Promise.all(requested.map(function (name) {
+      var key = name.toLowerCase();
+      if (!packageLoads[key]) {
+        packageLoads[key] = mainPyodide.loadPackage(name).catch(function (error) {
+          delete packageLoads[key];
+          throw error;
+        });
+      }
+      return packageLoads[key];
+    }));
+  }
 
   async function ensureSympy() {
     if (sympyReady) return;
@@ -2263,6 +2308,52 @@ tangent at $x=2$: _[12].
       '            if _v: _local[_v] = symbols(_v)',
       '    _local.setdefault("inf", oo)',
       '    return _local',
+      '',
+      'def graph_from_response(response, *, directed=False):',
+      '    """Validate graph-editor JSON and return a NetworkX graph."""',
+      '    import math as _graph_math',
+      '    import networkx as nx',
+      '',
+      '    if not isinstance(response, dict):',
+      '        raise ValueError("Graph response must be an object")',
+      '    expected = "directed-graph" if directed else "undirected-graph"',
+      '    if response.get("representation") != expected:',
+      '        raise ValueError(f"Expected {expected} response")',
+      '    nodes = response.get("nodes")',
+      '    edges = response.get("edges")',
+      '    if not isinstance(nodes, list) or not isinstance(edges, list):',
+      '        raise ValueError("Graph response needs node and edge lists")',
+      '',
+      '    graph = nx.DiGraph() if directed else nx.Graph()',
+      '    known = set()',
+      '    for node in nodes:',
+      '        if not isinstance(node, dict):',
+      '            raise ValueError("Every graph node must be an object")',
+      '        node_id = node.get("id")',
+      '        if type(node_id) is not int or node_id in known:',
+      '            raise ValueError("Graph node identifiers must be unique integers")',
+      '        try:',
+      '            x, y = float(node["x"]), float(node["y"])',
+      '        except (KeyError, TypeError, ValueError):',
+      '            raise ValueError("Every graph node needs numeric x and y coordinates")',
+      '        if not _graph_math.isfinite(x) or not _graph_math.isfinite(y):',
+      '            raise ValueError("Graph node coordinates must be finite")',
+      '        known.add(node_id)',
+      '        graph.add_node(node_id, x=x, y=y)',
+      '',
+      '    seen = set()',
+      '    for edge in edges:',
+      '        if not isinstance(edge, list) or len(edge) != 2:',
+      '            raise ValueError("Every graph edge must contain two endpoints")',
+      '        source, target = edge',
+      '        if source not in known or target not in known or source == target:',
+      '            raise ValueError("Graph edges need two distinct known endpoints")',
+      '        key = (source, target) if directed else tuple(sorted((source, target)))',
+      '        if key in seen:',
+      '            raise ValueError("Graph response contains a duplicate edge")',
+      '        seen.add(key)',
+      '        graph.add_edge(source, target)',
+      '    return graph',
       '',
       'def assess_basis(matrix, *, axis, target_dimension, belongs, name, space_name="space"):',
       '    """Assess a row- or column-basis submission without privileging vector order.',
@@ -2950,6 +3041,29 @@ tangent at $x=2$: _[12].
   var ASSESSMENT_VERSION = 1;
   var MAX_ASSESSMENT_JSON_BYTES = 1024 * 1024;
   var assessmentSequence = 0;
+
+  function notifyExternalLayout(iframe) {
+    if (!iframe || iframe.tagName !== 'IFRAME' || !iframe.contentWindow) return false;
+    iframe.contentWindow.postMessage({
+      protocol: ASSESSMENT_PROTOCOL,
+      version: ASSESSMENT_VERSION,
+      type: 'layout',
+      assessmentId: iframe.id
+    }, '*');
+    return true;
+  }
+
+  function scheduleExternalLayout(iframe) {
+    notifyExternalLayout(iframe);
+    if (typeof window.requestAnimationFrame === 'function') {
+      window.requestAnimationFrame(function () {
+        notifyExternalLayout(iframe);
+        window.requestAnimationFrame(function () { notifyExternalLayout(iframe); });
+      });
+    } else {
+      window.setTimeout(function () { notifyExternalLayout(iframe); }, 0);
+    }
+  }
 
   function requestExternalResponse(sourceSpec, includeAI) {
     var match = /^jsxgraph:(.+)$/.exec(sourceSpec || '');
@@ -3907,6 +4021,8 @@ tangent at $x=2$: _[12].
     try { structuralFieldLabels = JSON.parse(cell.dataset.structuralFieldLabels || '[]'); } catch (e) {}
     var checker = '';
     try { checker = JSON.parse(cell.dataset.checker || '""'); } catch (e) {}
+    var packages = [];
+    try { packages = JSON.parse(cell.dataset.packages || '[]'); } catch (e) {}
     var formCredit = Number(cell.dataset.formCredit || '0.5');
     if (!Number.isFinite(formCredit) || formCredit < 0 || formCredit > 1) formCredit = 0.5;
     var checkOpts = {
@@ -3917,6 +4033,7 @@ tangent at $x=2$: _[12].
       form:      cell.dataset.form      || '',
       vars:       vars,
       checker:    checker,
+      packages:   packages,
       responseSource: cell.dataset.response || '',
       partialCredit: cell.dataset.partialCredit === 'true',
       formCredit: formCredit
@@ -3928,6 +4045,9 @@ tangent at $x=2$: _[12].
       var responseSlot = cell.querySelector('.math-exercise-response-slot');
       if (responseFrame && responseFrame.tagName === 'IFRAME' && responseSlot) {
         responseSlot.appendChild(responseFrame);
+        responseFrame.addEventListener('load', function () {
+          scheduleExternalLayout(responseFrame);
+        });
       } else {
         console.warn('math-exercise: could not embed JSXGraph response "' + assessmentId + '".');
       }
@@ -3962,7 +4082,9 @@ tangent at $x=2$: _[12].
     if (toggleEl && bodyEl) {
       function toggleOpen() {
         var open = cell.classList.toggle('math-exercise-open');
-        bodyEl.style.display = open ? '' : 'none';
+        toggleEl.setAttribute('aria-expanded', String(open));
+        bodyEl.setAttribute('aria-hidden', String(!open));
+        if (open && responseFrame) scheduleExternalLayout(responseFrame);
       }
       toggleEl.addEventListener('click', toggleOpen);
       toggleEl.addEventListener('keydown', function (e) {
@@ -4059,6 +4181,7 @@ tangent at $x=2$: _[12].
       fbDiv.innerHTML = '<div class="math-fb-checking">' + L.checking + '</div>';
       try {
         await ensureSympy();
+        await ensurePackages(checkOpts.packages);
         var parts = [];
         var fieldElements = fieldIds.map(function (id) { return document.getElementById(id); });
         if (mode === 'custom') {
@@ -4198,6 +4321,7 @@ tangent at $x=2$: _[12].
           fbDiv.innerHTML = '<div class="math-fb-checking">' + L.fetchingFeedback + '</div>';
           try {
             await ensureSympy();
+            await ensurePackages(checkOpts.packages);
             var overallAssessment = '';
             var structuredAssessment = {};
             var externalAI = null;
@@ -4316,6 +4440,10 @@ tangent at $x=2$: _[12].
       expressionAnswersXml: expressionAnswersXml,
       structuredAssessmentXml: structuredAssessmentXml,
       structuredGroupStatus: structuredGroupStatus,
+      parsePackageList: parsePackageList,
+      ensurePackages: ensurePackages,
+      notifyExternalLayout: notifyExternalLayout,
+      scheduleExternalLayout: scheduleExternalLayout,
     };
   }
 
