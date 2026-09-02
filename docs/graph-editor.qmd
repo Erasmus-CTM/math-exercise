@@ -119,7 +119,7 @@ Declare NetworkX as an exercise package before using the helper:
 Invalid input raises `ValueError`. A checker should catch it and return a
 student-facing result:
 
-```python
+```{.python}
 def check(response, symbols):
     import networkx as nx
     try:
