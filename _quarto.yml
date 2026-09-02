@@ -10,6 +10,7 @@ project:
     - sympy-examples.qmd
     - vector-matrix-tests.qmd
     - dynamic-matrix-tests.qmd
+    - graph-theory.qmd
     - examples.qmd
 
 website:
@@ -32,6 +33,8 @@ website:
         text: Vektorer og matriser (NB)
       - href: dynamic-matrix-tests.qmd
         text: Dynamic matrices
+      - href: graph-theory.qmd
+        text: Graph theory
     right:
       - href: https://github.com/Erasmus-CTM/math-exercise
         text: GitHub

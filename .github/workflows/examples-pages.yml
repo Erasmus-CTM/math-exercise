@@ -34,6 +34,7 @@ jobs:
           test -f _site/graphics-examples.html
           test -f _site/vector-matrix-tests.html
           test -f _site/dynamic-matrix-tests.html
+          test -f _site/graph-theory.html
 
       - name: Select deployment directory
         id: destination

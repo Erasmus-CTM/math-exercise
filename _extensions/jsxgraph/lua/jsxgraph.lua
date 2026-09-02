@@ -139,6 +139,7 @@ end
 -- Cache Base64 for speed
 local JSXGRAPH_BASE64
 local CSS_BASE64
+local GRAPH_EDITOR_JS
 local function loadBase64Files()
     if not JSXGRAPH_BASE64 then JSXGRAPH_BASE64 = 'data:text/javascript;base64,' .. quarto.base64.encode(ioRead(joinPath(extension_dir,"resources","js","jsxgraphcore.js"))) end
     if not CSS_BASE64 then CSS_BASE64 = 'data:text/css;base64,' .. quarto.base64.encode(ioRead(joinPath(extension_dir,"resources","css","jsxgraph.css"))) end
@@ -555,6 +556,9 @@ board%s.reload = function() { window.location.reload(); };
             if options.src_css ~= '' and not options.src_css:match("^http") then options.src_css = CSS_BASE64 end
 
             local assessment_id = options.assessment_id or options.iframe_id or id
+            if not GRAPH_EDITOR_JS then
+                GRAPH_EDITOR_JS = ioRead(joinPath(extension_dir, "graph-editor.js"))
+            end
             local assessment_bridge = string.format([[
 (function () {
   'use strict';
@@ -651,8 +655,9 @@ board%s.reload = function() { window.location.reload(); };
 <div id="%s" class="jxgbox" style="width:100%%;height:100%%;display:block;object-fit:fill;box-sizing:border-box;"></div>
 <script>%s</script>
 <script>%s</script>
+<script>%s</script>
 </body>
-</html>]], options.src_mjx, options.src_jxg, options.src_css, id, assessment_bridge, jsxgraph)
+</html>]], options.src_mjx, options.src_jxg, options.src_css, id, assessment_bridge, GRAPH_EDITOR_JS, jsxgraph)
 
             local jsx_b64 = 'data:text/html;base64,' .. quarto.base64.encode(icontent)
             local iframe = '<iframe src="'..jsx_b64..'" class="'..options.class..'" name="iframe'..id..'"'

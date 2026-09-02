@@ -38,8 +38,7 @@ jobs:
           ! grep -Fq '&amp;nbsp;' _site/custom-assessment.html
           grep -Fq 'mode: custom' _site/custom-assessment.html
           grep -Fq 'Click every local maximum' _site/graphics-examples.html
-          grep -Fq 'bipartite-graph-board' _site/graphics-examples.html
-          grep -Fq 'data-packages="[&quot;networkx&quot;]"' _site/graphics-examples.html
+          ! grep -Fq 'bipartite-graph-board' _site/graphics-examples.html
           grep -Fq 'pooled-maxima-board' _site/graphics-examples.html
           grep -Fq 'period-window-board' _site/graphics-examples.html
           grep -Fq 'Move the two orange dots' _site/graphics-examples.html
@@ -55,7 +54,7 @@ jobs:
           grep -Fq 'cylindrical-sector-board' _site/graphics-examples.html
           grep -Fq 'Show JSXGraph source' _site/graphics-examples.html
           ! grep -Fq 'rotation-order-board' _site/graphics-examples.html
-          test "$(grep -Fc 'class="math-example-source"' _site/graphics-examples.html)" -eq 18
+          test "$(grep -Fc 'class="math-example-source"' _site/graphics-examples.html)" -eq 16
           original_line="$(grep -n 'Draw and refine a non-decreasing curve' _site/graphics-examples.html | head -1 | cut -d: -f1)"
           imported_line="$(grep -n 'Coordinate transformations' _site/graphics-examples.html | head -1 | cut -d: -f1)"
           test "$original_line" -lt "$imported_line"
@@ -81,3 +80,11 @@ jobs:
           grep -Fq 'Adjacency matrix of a path' _site/dynamic-matrix-tests.html
           grep -Fq 'Empty matrix edge cases' _site/dynamic-matrix-tests.html
           test "$(grep -Fc 'class="math-example-source"' _site/dynamic-matrix-tests.html)" -eq 11
+          grep -Fq 'Graph theory constructions' _site/graph-theory.html
+          grep -Fq 'tree-construction-board' _site/graph-theory.html
+          grep -Fq 'euler-construction-board' _site/graph-theory.html
+          grep -Fq 'nonplanar-construction-board' _site/graph-theory.html
+          grep -Fq 'bipartite-graph-board' _site/graph-theory.html
+          grep -Fq 'Show controls' _site/graph-theory.html
+          grep -Fq 'data-packages="[&quot;networkx&quot;]"' _site/graph-theory.html
+          test "$(grep -Fc 'class="math-example-source"' _site/graph-theory.html)" -eq 8
