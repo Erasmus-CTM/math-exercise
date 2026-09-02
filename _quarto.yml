@@ -1,6 +1,8 @@
 project:
   type: website
   output-dir: _site
+  resources:
+    - docs/graph-editor.md
   render:
     - index.qmd
     - basic-features.qmd
@@ -11,7 +13,6 @@ project:
     - vector-matrix-tests.qmd
     - dynamic-matrix-tests.qmd
     - graph-theory.qmd
-    - docs/graph-editor.qmd
     - examples.qmd
 
 website:

@@ -2,7 +2,7 @@ These exercises use the shared `JXG.QuartoGraphEditor` API. Click **Show
 controls** on any canvas for a reminder of the interactions. Every graph is
 converted from the editor's JSON response into a validated NetworkX graph by
 the shared `graph_from_response(...)` checker helper. See the
-[graph-editor API reference](docs/graph-editor.html) for authoring details.
+[graph-editor API reference](docs/graph-editor.md) for authoring details.
 
 ## Construct a tree
 
