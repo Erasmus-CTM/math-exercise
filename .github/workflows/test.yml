@@ -16,7 +16,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install checker test dependencies
-        run: python -m pip install sympy==1.14.0
+        run: python -m pip install sympy==1.14.0 networkx==3.4.2
       - name: Test feedback and provider compatibility
         run: node --test tests/*.test.mjs
       - uses: quarto-dev/quarto-actions/setup@v2
@@ -38,6 +38,7 @@ jobs:
           ! grep -Fq '&amp;nbsp;' _site/custom-assessment.html
           grep -Fq 'mode: custom' _site/custom-assessment.html
           grep -Fq 'Click every local maximum' _site/graphics-examples.html
+          ! grep -Fq 'bipartite-graph-board' _site/graphics-examples.html
           grep -Fq 'pooled-maxima-board' _site/graphics-examples.html
           grep -Fq 'period-window-board' _site/graphics-examples.html
           grep -Fq 'Move the two orange dots' _site/graphics-examples.html
@@ -79,3 +80,13 @@ jobs:
           grep -Fq 'Adjacency matrix of a path' _site/dynamic-matrix-tests.html
           grep -Fq 'Empty matrix edge cases' _site/dynamic-matrix-tests.html
           test "$(grep -Fc 'class="math-example-source"' _site/dynamic-matrix-tests.html)" -eq 11
+          grep -Fq 'Graph theory constructions' _site/graph-theory.html
+          grep -Fq 'tree-construction-board' _site/graph-theory.html
+          grep -Fq 'euler-construction-board' _site/graph-theory.html
+          grep -Fq 'nonplanar-construction-board' _site/graph-theory.html
+          grep -Fq 'bipartite-graph-board' _site/graph-theory.html
+          grep -Fq 'Show controls' _site/graph-theory.html
+          grep -Fq 'data-packages="[&quot;networkx&quot;]"' _site/graph-theory.html
+          test "$(grep -Fc 'class="math-example-source"' _site/graph-theory.html)" -eq 8
+          test -f _site/docs/graph-editor.md
+          grep -Fq 'Graph editor API reference' _site/docs/graph-editor.md

@@ -1,0 +1,11 @@
+---
+title: "Graph theory constructions"
+lang: en
+engine: markdown
+filters:
+  - _filters/example-source.lua
+  - jsxgraph
+  - math-exercise
+---
+
+{{< include _includes/graph-theory-examples.qmd >}}

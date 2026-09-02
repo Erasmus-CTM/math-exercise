@@ -105,6 +105,7 @@ Enter a matrix: mat[1,0;0,x]
 | `sigfigs` | integer | — | only for `mode: numeric`: round both sides to N significant figures before comparing |
 | `form` | `factored` / `expanded` / `single_fraction` / `lowest_terms` | — | representation additionally required for correctness — only for `mode: equivalent`/`exact` |
 | `checker` | multiline Python | — | trusted author checker for `mode: custom`; define `check(response, symbols)` |
+| `packages` | comma-separated package names | — | Pyodide packages to load lazily before checking, e.g. `networkx`; intended for `mode: custom` |
 | `response` | `jsxgraph:iframe-id` | — | obtain arbitrary JSON from a JSXGraph assessment iframe instead of expression fields |
 | `embed-response` | `true` / `false` | `false` | move the referenced JSXGraph iframe into the exercise card, between the question and controls |
 | `partial-credit` | `true` / `false` | `false` | average multiple fields, partially score sets, and award `form-credit` for equivalent answers in the wrong form |
@@ -329,6 +330,14 @@ checker. See the **[complete `assess_basis` API reference](docs/assess-basis.md)
 for its parameters, callback contract, scoring rule, statuses, edge cases, and
 row/column examples.
 
+#### Graph construction assessment
+
+For graph-theory construction problems, use the shared free-placement
+`JXG.QuartoGraphEditor` API and convert its response with the browser-side
+`graph_from_response(...)` helper. See the **[complete graph-editor API
+reference](docs/graph-editor.md)** for interactions, configuration, response
+schema, NetworkX validation, and a complete Quarto example.
+
 #### General custom-checker example
 
 The following example demonstrates a custom checker that assesses a property
@@ -423,6 +432,15 @@ Functions, cyclic structures, DOM nodes, and live JSXGraph objects are not JSON
 and must be converted by the response provider. The transport validates the
 iframe window and request id, times out after five seconds, and has a 1 MB
 accidental-overload limit.
+
+Custom checkers that need another package included with Pyodide may list it in
+the exercise options. Packages are downloaded only before the first check that
+needs them and are shared by later exercises on the page:
+
+```yaml
+#| mode: custom
+#| packages: networkx
+```
 
 The optional `ai` configuration is independent of local assessment:
 
@@ -804,8 +822,9 @@ The examples from `main` are published as a small navigable
 [math-exercise examples site](https://erasmus-ctm.github.io/math-exercise/),
 with focused pages for basic exercise features, expressions and equivalence,
 AI feedback and context, open-ended assessment, graphical JSXGraph responses,
-and Norwegian vector/matrix input. Every rendered exercise and graph has a
-collapsed panel containing its complete source. The graphics page includes
+graph-theory constructions, and Norwegian vector/matrix input. Every rendered
+exercise and graph has a collapsed panel containing its complete source. The
+graphics page includes
 pooled point selection, a draggable one-period window, movable piecewise-linear
 graphs, and freehand-curve assessment. The original all-in-one regression page remains
 available from the site. The complete Quarto project is rebuilt automatically

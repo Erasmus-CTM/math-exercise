@@ -43,6 +43,7 @@
 --
 -- Custom checker (trusted author code; student input is parsed separately):
 --   #| mode: custom
+--   #| packages: networkx                   -- optional Pyodide packages
 --   #| response: jsxgraph:board-iframe-id   -- optional external JSON source
 --   #| checker: |
 --   #|   def check(response, symbols):
@@ -620,6 +621,7 @@ local function buildExercise(el, state)
   local sigfigs   = opts["sigfigs"]   or ""
   local form      = opts["form"]      or ""
   local checker   = opts["checker"]   or ""
+  local packages  = splitCsv(opts["packages"] or "")
   local response  = opts["response"]  or ""
   local embedResponse = (opts["embed-response"] == "true")
   local partialCredit = (opts["partial-credit"] == "true")
@@ -630,7 +632,7 @@ local function buildExercise(el, state)
 
   local captionHtml = ""
   if caption then
-    captionHtml = '<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0">'
+    captionHtml = '<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0" aria-expanded="false">'
                .. '<span class="math-chevron" aria-hidden="true"></span>'
                .. caption .. '</div>\n'
   end
@@ -646,6 +648,7 @@ local function buildExercise(el, state)
              .. ' data-sigfigs="'   .. attrEsc(sigfigs)   .. '"'
              .. ' data-form="'      .. attrEsc(form)      .. '"'
              .. ' data-checker="'   .. jsonStrAttr(checker) .. '"'
+             .. ' data-packages="'  .. jsonArrAttr(packages) .. '"'
              .. ' data-response="'  .. attrEsc(response) .. '"'
              .. ' data-embed-response="' .. tostring(embedResponse) .. '"'
              .. ' data-partial-credit="' .. tostring(partialCredit) .. '"'
@@ -686,7 +689,7 @@ local function buildExercise(el, state)
     html = table.concat({
       '<div class="math-exercise-cell" ' .. attrs .. '>',
       captionHtml,
-      '<div class="math-exercise-body" style="display:none;">',
+      '<div class="math-exercise-body" aria-hidden="true">',
       bodyHtml,
       '</div>',
       '</div>',

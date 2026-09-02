@@ -90,4 +90,11 @@ the canonical empty matrix and whole-vector assessment.
 Click points, move graph handles, select one period, and draw or refine curves
 directly in JSXGraph.
 :::
+
+::: {.g-col-12 .g-col-md-6}
+### [Graph theory](graph-theory.qmd)
+
+Construct freely placed graphs and check trees, Euler circuits, planarity, and
+bipartiteness with NetworkX.
+:::
 :::
