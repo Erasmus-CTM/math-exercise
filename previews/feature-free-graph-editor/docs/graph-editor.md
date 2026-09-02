@@ -64,7 +64,6 @@ For a board that already exists, call
 | `labels` | English control labels | Overrides `deleteSelected`, `clearGraph`, `showControls`, or `hideControls`. |
 | `clickTolerance` | `8` | Maximum pointer movement in pixels that still counts as a click rather than a drag. |
 | `editableBottom` | bottom of board plus `0.9` | Lowest y-coordinate where a blank click may add a vertex; reserves space for controls. |
-| `buttonPositions` | positions derived from the board bounds | Overrides the `[x, y]` positions named `deleteSelected`, `clearGraph`, and `toggleControls`. |
 | `pointAttributes` | standard draggable blue point | Additional JSXGraph point attributes. |
 | `edgeAttributes` | standard fixed grey segment | Additional JSXGraph segment attributes. |
 | `normalStyle` | blue fill and border | Normal vertex colors. |
