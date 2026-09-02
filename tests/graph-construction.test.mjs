@@ -220,6 +220,8 @@ test('Lua injects the common editor and exercise packages reach the runtime', ()
   assert.equal((examples.match(/#\| packages: networkx/g) || []).length, 4);
   assert.equal((examples.match(/#\| partial-credit: true/g) || []).length, 4);
   assert.equal((examples.match(/JXG\.QuartoGraphEditor\.summarize\(data/g) || []).length, 4);
+  assert.equal((examples.match(/return \{"score": 0\.5/g) || []).length, 4);
+  assert.doesNotMatch(examples, /min\(n \/|min\(m \//);
   assert.match(docs, /## `graph_from_response\(response, \*, directed=False\)`/);
 });
 
@@ -279,22 +281,27 @@ test('shared response conversion and all four NetworkX checkers work', () => {
     ]),
     bipartite: graph([1, 2, 3, 4], [[1, 2], [2, 3], [3, 4], [4, 1]]),
     oddCycle: graph([1, 2, 3, 4], [[1, 2], [2, 3], [3, 1], [3, 4]]),
+    tooSmall: graph([1, 2], [[1, 2]]),
   };
   const script = [
     sympyBootstrap(),
     `fixtures = ${JSON.stringify(fixtures)}`,
     `exec(${JSON.stringify(checker('jsxgraph-tree-construction'))})`,
     'assert check(fixtures["tree"], {})["score"] == 1',
-    'assert 0 < check(fixtures["treeCycle"], {})["score"] < 1',
+    'assert check(fixtures["treeCycle"], {})["score"] == 0.5',
+    'assert check(fixtures["tooSmall"], {})["score"] == 0',
     `exec(${JSON.stringify(checker('jsxgraph-euler-construction'))})`,
     'assert check(fixtures["euler"], {})["score"] == 1',
-    'assert 0 < check(fixtures["nonEuler"], {})["score"] < 1',
+    'assert check(fixtures["nonEuler"], {})["score"] == 0.5',
+    'assert check(fixtures["tooSmall"], {})["score"] == 0',
     `exec(${JSON.stringify(checker('jsxgraph-nonplanar-construction'))})`,
     'assert check(fixtures["nonplanar"], {})["score"] == 1',
-    'assert 0 < check(fixtures["planar"], {})["score"] < 1',
+    'assert check(fixtures["planar"], {})["score"] == 0.5',
+    'assert check(fixtures["tooSmall"], {})["score"] == 0',
     `exec(${JSON.stringify(checker('jsxgraph-bipartite-construction'))})`,
     'assert check(fixtures["bipartite"], {})["score"] == 1',
-    'assert 0 < check(fixtures["oddCycle"], {})["score"] < 1',
+    'assert check(fixtures["oddCycle"], {})["score"] == 0.5',
+    'assert check(fixtures["tooSmall"], {})["score"] == 0',
     'converted = graph_from_response(fixtures["bipartite"])',
     'assert converted.nodes[1]["x"] == 1.0 and converted.nodes[1]["y"] == -1.0',
     'malformed = fixtures["bipartite"].copy()',
