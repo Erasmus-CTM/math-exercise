@@ -90,15 +90,8 @@ test('graph editor creates vertices, toggles edges, serializes, and registers', 
     getMousePosition: (event) => [event.clientX ?? event.x, event.clientY ?? event.y],
     create(type, args, attributes) {
       if (type === 'point') {
-        const rendererAttributes = {};
         const point = {
           x: args[0], y: args[1], attributes,
-          rendNode: {
-            parentNode: container,
-            closest: () => null,
-            setAttribute(name, value) { rendererAttributes[name] = value; },
-            getAttribute(name) { return rendererAttributes[name] ?? null; },
-          },
           X() { return this.x; }, Y() { return this.y; },
           setAttribute(next) { Object.assign(this.attributes, next); },
           hasPoint(screenX, screenY) {
@@ -161,7 +154,8 @@ test('graph editor creates vertices, toggles edges, serializes, and registers', 
   assert.equal(container.children[0].style.display, 'block');
   assert.equal(container.attributes['data-graph-editor-ready'], 'true');
   assert.equal(container.children[1].children[2].textContent, 'Hide controls');
-  assert.equal(typeof container.listeners.mousedown, 'function');
+  assert.equal(typeof events.down, 'function');
+  assert.equal(typeof events.up, 'function');
   editor.register();
   assert.equal(registrations.length, 1);
   assert.deepEqual(JSON.parse(JSON.stringify(registrations[0].response())), expected);
@@ -172,15 +166,17 @@ test('graph editor creates vertices, toggles edges, serializes, and registers', 
   assert.equal(editor.resize(), true);
   assert.deepEqual(resizeCalls, [[800, 520]]);
   const blankTarget = { closest: () => null };
-  container.listeners.mousedown({ button: 0, clientX: 400, clientY: 260, target: blankTarget });
+  events.down({ clientX: 400, clientY: 260, target: blankTarget });
+  events.up({ clientX: 400, clientY: 260, target: blankTarget });
   assert.deepEqual(JSON.parse(JSON.stringify(editor.response().nodes)), [{ id: 1, x: 0, y: 0 }]);
-  container.listeners.mousedown({ button: 0, clientX: 560, clientY: 260, target: blankTarget });
-  const [firstClicked, secondClicked] = createdPoints.slice(-2);
-  assert.equal(firstClicked.rendNode.getAttribute('data-graph-vertex-id'), '1');
-  assert.equal(secondClicked.rendNode.getAttribute('data-graph-vertex-id'), '2');
-  container.listeners.mousedown({ button: 0, clientX: 10, clientY: 10, target: firstClicked.rendNode });
+  events.down({ clientX: 560, clientY: 260, target: blankTarget });
+  events.up({ clientX: 560, clientY: 260, target: blankTarget });
+  const [firstClicked] = createdPoints.slice(-2);
+  events.down({ clientX: 400, clientY: 260, target: blankTarget });
+  events.up({ clientX: 400, clientY: 260, target: blankTarget });
   assert.equal(firstClicked.attributes.fillColor, '#f59e0b');
-  container.listeners.mousedown({ button: 0, clientX: 10, clientY: 10, target: secondClicked.rendNode });
+  events.down({ clientX: 560, clientY: 260, target: blankTarget });
+  events.up({ clientX: 560, clientY: 260, target: blankTarget });
   assert.deepEqual(JSON.parse(JSON.stringify(editor.response().edges)), [[1, 2]]);
 });
 

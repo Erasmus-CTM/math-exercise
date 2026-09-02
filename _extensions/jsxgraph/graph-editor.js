@@ -43,8 +43,10 @@
     var vertices = [];
     var edges = [];
     var selectedVertex = null;
+    var pointerStart = null;
     var nextVertexId = 1;
     var controlsVisible = false;
+    var clickToleranceSquared = 36;
 
     function setSelected(vertex) {
       if (selectedVertex) selectedVertex.point.setAttribute(normalStyle);
@@ -63,12 +65,6 @@
       vertex.point = board.create('point', [x, y], merge(pointAttributes, merge(normalStyle, {
         name: String(vertex.id)
       })));
-      [vertex.point.rendNode, vertex.point.rendNodeLabel,
-        vertex.point.label && vertex.point.label.rendNode].forEach(function (node) {
-        if (node && typeof node.setAttribute === 'function') {
-          node.setAttribute('data-graph-vertex-id', String(vertex.id));
-        }
-      });
       vertices.push(vertex);
       setSelected(null);
       return vertex.id;
@@ -227,19 +223,6 @@
       return null;
     }
 
-    function vertexFromEvent(event) {
-      var node = event.target;
-      while (node && node !== board.containerObj) {
-        if (typeof node.getAttribute === 'function') {
-          var rawId = node.getAttribute('data-graph-vertex-id');
-          var id = Number(rawId);
-          if (rawId !== null && Number.isInteger(id)) return findVertex(id);
-        }
-        node = node.parentNode;
-      }
-      return null;
-    }
-
     function userPosition(screen) {
       var width = board.containerObj.clientWidth || board.canvasWidth;
       var height = board.containerObj.clientHeight || board.canvasHeight;
@@ -253,23 +236,34 @@
       return [coords.usrCoords[1], coords.usrCoords[2]];
     }
 
-    function canvasMouseDown(event) {
+    board.on('down', function (event) {
+      pointerStart = null;
       if (isControlEvent(event)) return;
-      if (event.button !== undefined && event.button !== 0) return;
       var screen = board.getMousePosition(event);
-      var vertex = vertexFromEvent(event) || vertexAt(screen);
-      if (vertex) {
-        handleVertexClick(vertex);
-      } else {
+      pointerStart = {
+        screen: screen,
+        vertex: vertexAt(screen)
+      };
+    });
+
+    board.on('up', function (event) {
+      if (!pointerStart || isControlEvent(event)) {
+        pointerStart = null;
+        return;
+      }
+      var screen = board.getMousePosition(event);
+      var dx = screen[0] - pointerStart.screen[0];
+      var dy = screen[1] - pointerStart.screen[1];
+      if (dx * dx + dy * dy <= clickToleranceSquared) {
+        if (pointerStart.vertex) {
+          handleVertexClick(pointerStart.vertex);
+        } else if (!vertexAt(screen)) {
         var position = userPosition(screen);
         if (position[1] > editableBottom) addVertex(position[0], position[1]);
+        }
       }
-    }
-
-    // Create vertices and select their tagged SVG nodes on mouse-down, before
-    // JSXGraph can suppress later mouse/click events. Edges remain attached to
-    // the points when a selected endpoint is subsequently dragged.
-    board.containerObj.addEventListener('mousedown', canvasMouseDown, true);
+      pointerStart = null;
+    });
 
     board.containerObj.setAttribute('data-graph-editor-ready', 'true');
 
