@@ -88,3 +88,5 @@ jobs:
           grep -Fq 'Show controls' _site/graph-theory.html
           grep -Fq 'data-packages="[&quot;networkx&quot;]"' _site/graph-theory.html
           test "$(grep -Fc 'class="math-example-source"' _site/graph-theory.html)" -eq 8
+          test -f _site/docs/graph-editor.html
+          grep -Fq 'Graph editor API reference' _site/docs/graph-editor.html

@@ -11,6 +11,7 @@ project:
     - vector-matrix-tests.qmd
     - dynamic-matrix-tests.qmd
     - graph-theory.qmd
+    - docs/graph-editor.md
     - examples.qmd
 
 website:
