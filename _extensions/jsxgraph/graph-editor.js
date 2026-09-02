@@ -234,17 +234,12 @@
       return [coords.usrCoords[1], coords.usrCoords[2]];
     }
 
-    function clickScreen(event) {
-      var rect = board.containerObj.getBoundingClientRect();
-      return [event.clientX - rect.left, event.clientY - rect.top];
-    }
-
     var pressStart = null;
 
     function canvasMouseDown(event) {
       if (isControlEvent(event)) return;
       if (event.button !== undefined && event.button !== 0) return;
-      var screen = clickScreen(event);
+      var screen = board.getMousePosition(event);
       var vertex = vertexAt(screen);
       if (vertex) {
         pressStart = { screen: screen, vertex: vertex };
@@ -259,7 +254,7 @@
         pressStart = null;
         return;
       }
-      var screen = clickScreen(event);
+      var screen = board.getMousePosition(event);
       var dx = screen[0] - pressStart.screen[0];
       var dy = screen[1] - pressStart.screen[1];
       if (dx * dx + dy * dy <= 64) handleVertexClick(pressStart.vertex);
@@ -270,7 +265,7 @@
     // the later SVG click. Delay vertex selection until mouse-up so dragging a
     // point does not also create or remove an edge.
     board.containerObj.addEventListener('mousedown', canvasMouseDown, true);
-    board.containerObj.addEventListener('mouseup', canvasMouseUp, true);
+    document.addEventListener('mouseup', canvasMouseUp, true);
 
     board.containerObj.setAttribute('data-graph-editor-ready', 'true');
 

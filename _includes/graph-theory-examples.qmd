@@ -73,7 +73,6 @@ editor.register({
 
 ```{math-exercise}
 #| label: jsxgraph-euler-construction
-#| caption: Give a graph with an Euler circuit
 #| mode: custom
 #| packages: networkx
 #| response: jsxgraph:euler-construction-board
@@ -124,7 +123,6 @@ editor.register({
 
 ```{math-exercise}
 #| label: jsxgraph-nonplanar-construction
-#| caption: Make a non-planar graph
 #| mode: custom
 #| packages: networkx
 #| response: jsxgraph:nonplanar-construction-board
@@ -172,7 +170,6 @@ editor.register({
 
 ```{math-exercise}
 #| label: jsxgraph-bipartite-construction
-#| caption: Give an example of a bipartite graph
 #| mode: custom
 #| packages: networkx
 #| response: jsxgraph:bipartite-graph-board

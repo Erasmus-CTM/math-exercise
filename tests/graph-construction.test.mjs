@@ -79,6 +79,7 @@ test('graph editor creates vertices, toggles edges, serializes, and registers', 
     setAttribute(name, value) { this.attributes[name] = value; },
   };
   const events = {};
+  const documentEvents = {};
   const registrations = [];
   const resizeCalls = [];
   const board = {
@@ -86,14 +87,19 @@ test('graph editor creates vertices, toggles edges, serializes, and registers', 
     canvasWidth: 0,
     canvasHeight: 0,
     getBoundingBox: () => [-5, 4, 5, -4],
-    getMousePosition: (event) => [event.x, event.y],
+    getMousePosition: (event) => [event.clientX ?? event.x, event.clientY ?? event.y],
     create(type, args, attributes) {
       if (type === 'point') {
         return {
           x: args[0], y: args[1], attributes,
           X() { return this.x; }, Y() { return this.y; },
           setAttribute(next) { Object.assign(this.attributes, next); },
-          hasPoint() { return false; },
+          hasPoint(screenX, screenY) {
+            if (!(container.clientWidth > 0 && container.clientHeight > 0)) return false;
+            const ownX = (this.x + 5) / 10 * container.clientWidth;
+            const ownY = (4 - this.y) / 8 * container.clientHeight;
+            return (screenX - ownX) ** 2 + (screenY - ownY) ** 2 <= 100;
+          },
         };
       }
       if (type === 'button') return { text: args[2], setText(text) { this.text = text; } };
@@ -116,7 +122,11 @@ test('graph editor creates vertices, toggles edges, serializes, and registers', 
     addEventListener(name, callback) { this.listeners[name] = callback; },
   });
   const context = {
-    document: { createElement: element, querySelector: () => container },
+    document: {
+      createElement: element,
+      querySelector: () => container,
+      addEventListener(name, callback) { documentEvents[name] = callback; },
+    },
     JXG: {
       JSXGraph: { initBoard: () => board },
       QuartoAssessment: { register: (spec) => registrations.push(spec) },
@@ -144,7 +154,7 @@ test('graph editor creates vertices, toggles edges, serializes, and registers', 
   assert.equal(container.attributes['data-graph-editor-ready'], 'true');
   assert.equal(container.children[1].children[2].textContent, 'Hide controls');
   assert.equal(typeof container.listeners.mousedown, 'function');
-  assert.equal(typeof container.listeners.mouseup, 'function');
+  assert.equal(typeof documentEvents.mouseup, 'function');
   editor.register();
   assert.equal(registrations.length, 1);
   assert.deepEqual(JSON.parse(JSON.stringify(registrations[0].response())), expected);
@@ -157,6 +167,12 @@ test('graph editor creates vertices, toggles edges, serializes, and registers', 
   const blankTarget = { closest: () => null };
   container.listeners.mousedown({ button: 0, clientX: 400, clientY: 260, target: blankTarget });
   assert.deepEqual(JSON.parse(JSON.stringify(editor.response().nodes)), [{ id: 1, x: 0, y: 0 }]);
+  container.listeners.mousedown({ button: 0, clientX: 560, clientY: 260, target: blankTarget });
+  container.listeners.mousedown({ button: 0, clientX: 400, clientY: 260, target: blankTarget });
+  documentEvents.mouseup({ clientX: 400, clientY: 260, target: blankTarget });
+  container.listeners.mousedown({ button: 0, clientX: 560, clientY: 260, target: blankTarget });
+  documentEvents.mouseup({ clientX: 560, clientY: 260, target: blankTarget });
+  assert.deepEqual(JSON.parse(JSON.stringify(editor.response().edges)), [[1, 2]]);
 });
 
 test('Lua injects the common editor and exercise packages reach the runtime', () => {
@@ -174,6 +190,7 @@ test('graph theory is the final examples tab and exercises use the requested ord
   const nonplanar = examples.indexOf('## Make a non-planar graph');
   const bipartite = examples.indexOf('## Give an example of a bipartite graph');
   assert.ok(tree >= 0 && tree < euler && euler < nonplanar && nonplanar < bipartite);
+  assert.equal((examples.match(/#\| caption:/g) || []).length, 0);
   assert.doesNotMatch(graphics, /bipartite-graph-board/);
   assert.match(quarto, /- href: dynamic-matrix-tests\.qmd\n\s+text: Dynamic matrices\n\s+- href: graph-theory\.qmd\n\s+text: Graph theory\n\s+right:/);
 });
