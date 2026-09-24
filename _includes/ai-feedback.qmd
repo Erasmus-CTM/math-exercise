@@ -11,8 +11,9 @@ from the page. The examples below show how an author controls that context.
 No author option is needed for automatic context. The nearest preceding
 heading starts a context section. Visible prose, lists, and callouts after that
 heading are collected until the exercise; code blocks and other exercises are
-excluded. A new heading starts a new section, and only the most recent 1,500
-characters are retained. This keeps feedback grounded in the local explanation
+excluded. A new heading starts a new section. The most recent whole blocks are
+retained up to 1,500 characters, without cutting a formula. Use explicit context
+for explanations that exceed this limit. This keeps feedback grounded in the local explanation
 without sending the whole page.
 
 ::: {.callout-note title="Automatically collected context"}
@@ -100,6 +101,39 @@ Meaningful labels make hints clearer and prevent generic references such as
 For $f(x)=x^3$, enter $f'(x)=$ _[3*x^2], $f'(2)=$ _[12], and the slope of the
 tangent at $x=2$: _[12].
 ```
+
+## Mathematics in AI context
+
+Mathematics is sent as LaTeX source, including fractions, powers, subscripts,
+matrices and aligned equations. The source is preserved before typesetting, so
+MathJax and KaTeX produce the same mathematical context. The question and its
+caption are preserved too; loading another pool question refreshes its source.
+
+::: {#solenoid-notation .math-exercise-context}
+A long solenoid has $N$ turns over a length $l$. Its turn density is
+$n=\frac{N}{l}$, measured in $\mathrm{m}^{-1}$. In vacuum,
+$\mu_0\approx 4\pi\times10^{-7}\,\mathrm{H/m}$.
+For radius $2a$, the ideal long-solenoid approximation gives
+
+$$
+L=\frac{4\pi\mu_0N^2a^2}{l}.
+$$
+:::
+
+```{math-exercise}
+#| label: ai-solenoid-source
+#| caption: Turn density
+#| context: solenoid-notation
+#| vars: N,l
+#| field-labels: Turn density
+Write the turn density in terms of $N$ and $l$: _[N/l]
+```
+
+For this example, the outgoing context retains `\frac{N}{l}` and `10^{-7}`.
+To inspect it, open your browser's Network panel, request feedback, and inspect
+`messages[1].content` in the chat-completions request. The `<task>` block uses
+`[Turn density]` for the input; the answer stored by the checker is not copied
+into that block.
 
 ## Working with different AI providers
 

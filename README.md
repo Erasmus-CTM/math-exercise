@@ -721,8 +721,11 @@ Decode 0x3C00 as a half-precision float: _[1]
 The block renders as normal, visible content on the page (styled as a light
 callout) – students see the same explanation the AI gets. Unlike the
 automatic case, this part is resolved lazily, client-side, when Feedback is
-clicked, directly from the rendered page – so it also picks up KaTeX-rendered
-math cleanly (as its original `$...$` source).
+clicked, using the current prose and preserved LaTeX source. The Quarto filter
+attaches source metadata to formulas in explicit context blocks. Dynamically
+generated mathematics can also be recovered from MathJax 3/4 (HTML or SVG) and
+KaTeX. Inline and display mathematics retain their delimiters; rendered glyphs
+are never flattened into a substitute formula.
 
 Context rules for explicit references:
 
@@ -735,9 +738,38 @@ Context rules for explicit references:
 - Combined budget: 6,000 characters across all of an exercise's explicit
   context blocks; a block that would exceed it is omitted whole (never cut
   mid-block). The automatic case has its own, separate 1,500-character cap
-  (keeping the most recent part, since that's closest to the exercise).
+  (keeping the most recent whole blocks, since those are closest to the
+  exercise). Collection stops before a block that would exceed the cap; a
+  single oversized final block therefore leaves automatic context empty.
+  Use explicit references for longer explanations. Neither path cuts through
+  a formula to meet its budget.
 
 To opt an exercise out of context entirely, use `#| context: none`.
+
+**Question and caption mathematics.** The filter also preserves the question
+and caption before typesetting. Pool questions refresh that source on every
+draw. Correct-answer attributes are removed from the saved question source;
+inputs become their current field labels in the request, and dynamic matrices
+remain named placeholders. Student work is sent separately. When reading page
+content, the serializer excludes hidden elements, controls and previous feedback.
+
+If rendered mathematics has neither saved source nor a supported renderer's
+source, the request contains `[Mathematical source unavailable]` and the browser
+console reports it. This avoids silently turning, for example, `\frac{N}{l}`
+into `Nl`. Re-rendering a document with the updated extension adds the source
+metadata; existing published HTML is not changed by updating the extension alone.
+
+The [AI feedback examples](https://erasmus-ctm.github.io/math-exercise/ai-feedback.html)
+include a solenoid example. To inspect a request, open the browser's Network
+panel, request feedback, and examine the chat-completions request's
+`messages[1].content`, especially `<learning_context>` and `<task>`.
+
+For local regression tests, install Node dependencies with `npm ci` and run
+`npm test`. The existing checker tests also require Python with SymPy and
+NetworkX. Install Quarto (or set `QUARTO_BIN`) to run the two rendered-document
+tests; they are skipped when Quarto is unavailable. CI requires and runs them.
+The tests use local renderers and a mocked AI endpoint; no model or credentials
+are needed.
 
 The AI request contains the selected context, the task, and the student's
 current response as individually labelled fields. A separate private assessment

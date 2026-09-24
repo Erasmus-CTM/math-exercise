@@ -1,0 +1,100 @@
+---
+title: AI context regression fixture
+engine: markdown
+format:
+  html:
+    html-math-method: mathjax
+filters:
+  - math-exercise
+---
+
+## Automatic $10^{-7}$
+
+The turn density is $\frac{N}{l}$ and $\dot I_1=-4\dot I_2$.
+
+```python
+DO_NOT_SEND_CODE
+```
+
+```{math-exercise}
+#| label: auto
+#| caption: Density $\frac{N}{l}$
+#| field-labels: Density
+Compute $\frac{N}{l}$: _[SECRET_AUTO]
+```
+
+## Explicit context and nested tabs
+
+:::: {.panel-tabset}
+
+### Problem
+
+```{math-exercise}
+#| label: explicit
+#| context: coil-context
+#| field-labels: Inductance
+Find $\frac{4\pi\mu_0N^2a^2}{l}$: _[SECRET_EXPLICIT]
+```
+
+### Background
+
+::: {.panel-tabset}
+
+#### Notation
+
+::: {#coil-context .math-exercise-context}
+
+Use $\frac{N}{l}$ and $10^{-7}$. The sign convention is $\dot I_1=-4\dot I_2$.
+
+$$
+\begin{aligned}
+M &= \frac{\mu_0N^2\pi a^2}{l} \\
+L_2 &= 4M
+\end{aligned}
+$$
+
+The matrix $\begin{pmatrix}1&2\\3&4\end{pmatrix}$ has four entries.
+
+<span hidden>DO_NOT_SEND_HIDDEN</span>
+
+:::
+
+#### Another tab
+
+Unrelated material.
+
+:::
+
+::::
+
+## Context disabled
+
+DO_NOT_SEND_SURROUNDING
+
+```{math-exercise}
+#| label: none
+#| context: none
+Compute $10^{-7}$: _[SECRET_NONE]
+```
+
+## Pool
+
+```{math-exercise}
+#| label: pool
+#| pool: true
+#| context: coil-context
+Compute $\frac{N}{l}$: _[SECRET_POOL_A]
+---
+Compute $\frac{4\pi\mu_0N^2a^2}{l}$: _[SECRET_POOL_B]
+```
+
+## Automatic context budget
+
+REPLACE_WITH_OVERSIZED_MATH_PARAGRAPH
+
+Recent whole paragraph: $\frac{N}{l}$, strøm, blåbær.
+
+```{math-exercise}
+#| label: budget
+Compute $\frac{N}{l}$: _[SECRET_BUDGET]
+```
