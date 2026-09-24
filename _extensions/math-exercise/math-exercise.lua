@@ -284,21 +284,47 @@ end
 ----
 -- AI-feedback auto-context helpers
 --
--- collapseWs: flattens a stringified block to a single line of normalized
--- whitespace, so accumulated context reads as compact prose rather than
--- preserving the source markdown's line breaks/indentation.
---
--- truncate: keeps the *tail* of long context (the part closest to the
--- exercise it precedes) instead of the head, since that is the most likely
--- to be relevant, and bounds prompt size/cost.
+-- Keep whole recent blocks: slicing a string can split a formula or UTF-8
+-- character. Math is serialized from the AST before any renderer touches it.
 ----
-local function collapseWs(s)
-  return (s:gsub("%s+", " "):match("^%s*(.-)%s*$"))
+local function contextBlockText(block)
+  local source = block:walk({
+    Math = function(math)
+      local display = math.mathtype == "DisplayMath"
+      return pandoc.Str((display and "\\[" or "\\(") .. math.text ..
+        (display and "\\]" or "\\)"))
+    end,
+    CodeBlock = function() return {} end,
+  })
+  return pandoc.utils.stringify(source):match("^%s*(.-)%s*$")
 end
 
-local function truncate(text, n)
-  if #text <= n then return text end
-  return "…" .. text:sub(#text - n + 1)
+local function appendContext(state, block)
+  local text = contextBlockText(block)
+  if text ~= "" then table.insert(state.sectionCtx, text) end
+end
+
+local function boundedContext(blocks)
+  local kept, length = {}, 0
+  for i = #blocks, 1, -1 do
+    local size = utf8.len(blocks[i])
+    local separator = #kept > 0 and 1 or 0
+    if length + separator + size > MAX_CONTEXT_CHARS then break end
+    table.insert(kept, 1, blocks[i])
+    length = length + separator + size
+  end
+  return table.concat(kept, "\n")
+end
+
+local function preserveContextMath(block)
+  return block:walk({
+    Math = function(math)
+      return pandoc.Span({ math }, pandoc.Attr("", {}, {
+        ["data-math-exercise-tex"] = math.text,
+        ["data-math-exercise-display"] = math.mathtype == "DisplayMath" and "true" or "false",
+      }))
+    end,
+  })
 end
 
 ----
@@ -632,7 +658,8 @@ local function buildExercise(el, state)
 
   local captionHtml = ""
   if caption then
-    captionHtml = '<div class="math-exercise-caption math-exercise-toggle" role="button" tabindex="0" aria-expanded="false">'
+    captionHtml = '<div class="math-exercise-caption math-exercise-toggle" data-math-exercise-source="'
+               .. attrEsc(caption) .. '" role="button" tabindex="0" aria-expanded="false">'
                .. '<span class="math-chevron" aria-hidden="true"></span>'
                .. caption .. '</div>\n'
   end
@@ -657,7 +684,7 @@ local function buildExercise(el, state)
              .. ' data-vecdir="' .. vecdir .. '"'
              .. ' data-context-mode="' .. contextMode(opts) .. '"'
              .. ' data-context-refs="' .. attrEsc(opts["context"] or "") .. '"'
-             .. ' data-context="'      .. jsonStrAttr(truncate(state.sectionCtx, MAX_CONTEXT_CHARS)) .. '"'
+             .. ' data-context="'      .. attrEsc('"' .. jsonEsc(boundedContext(state.sectionCtx)) .. '"') .. '"'
 
   local questionHtml
 
@@ -673,7 +700,11 @@ local function buildExercise(el, state)
     body         = body:gsub("\n", "<br>\n")
     attrs        = attrs .. ' data-fields="' .. jsonArrAttr(fieldIds) .. '"'
                          .. ' data-structural-field-labels="' .. jsonArrAttr(structuralLabels) .. '"'
-    questionHtml = '<div class="math-exercise-question">' .. body .. '</div>'
+    -- Retain the pre-typesetting HTML, but never copy answer keys into the
+    -- AI source. Inputs keep their ids so JS can insert current field labels.
+    local source = body:gsub(' data%-answer="[^"]*"', '')
+    questionHtml = '<div class="math-exercise-question" data-math-exercise-source="'
+      .. attrEsc(source) .. '">' .. body .. '</div>'
   end
 
   local bodyHtml = table.concat({
@@ -766,14 +797,15 @@ end
 -- referenced from `#| context:`, but resolution happens client-side (JS),
 -- not here – this walk only folds their text into sectionCtx (so they also
 -- count as ambient auto-context for neighboring exercises) and otherwise
--- leaves them untouched, still visible on the page.
+-- adds source metadata to their math, still visible on the page.
 ----
 local function walkBlocks(blocks, state)
   local out = pandoc.Blocks({})
   for _, b in ipairs(blocks) do
     if b.t == "Header" then
       -- Seed the new section's context with its own heading text.
-      state.sectionCtx = collapseWs(pandoc.utils.stringify(b))
+      state.sectionCtx = {}
+      appendContext(state, b)
       out:insert(b)
 
     elseif b.t == "CodeBlock" and b.attr.classes:includes("{math-exercise}") then
@@ -783,9 +815,8 @@ local function walkBlocks(blocks, state)
       out:insert(b) -- code isn't useful prose context; don't accumulate
 
     elseif b.t == "Div" and b.attr.classes:includes("math-exercise-context") then
-      local text = collapseWs(pandoc.utils.stringify(b))
-      state.sectionCtx = (state.sectionCtx == "" and text) or (state.sectionCtx .. " " .. text)
-      out:insert(b) -- still rendered normally; students should see it too
+      appendContext(state, b)
+      out:insert(preserveContextMath(b)) -- still rendered normally
 
     elseif b.t == "Div" or b.t == "BlockQuote" then
       b.content = walkBlocks(b.content, state)
@@ -794,10 +825,7 @@ local function walkBlocks(blocks, state)
     else
       -- Para, Plain, BulletList, OrderedList, DefinitionList, Table, … :
       -- flatten to plain text and fold into the running section context.
-      local text = collapseWs(pandoc.utils.stringify(b))
-      if text ~= "" then
-        state.sectionCtx = (state.sectionCtx == "" and text) or (state.sectionCtx .. " " .. text)
-      end
+      appendContext(state, b)
       out:insert(b)
     end
   end
@@ -808,7 +836,7 @@ local function Pandoc(doc)
   doc.meta = Meta(doc.meta)
 
   if quarto.doc.is_format("html") then
-    local state = { sectionCtx = "" }
+    local state = { sectionCtx = {} }
     doc.blocks = walkBlocks(doc.blocks, state)
   end
 

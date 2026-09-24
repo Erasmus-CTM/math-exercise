@@ -1,0 +1,11 @@
+node_modules/
+_site/
+.quarto/
+/*.html
+/site_libs/
+/*_files/
+tests/fixtures/*.html
+tests/fixtures/*_files/
+
+/.quarto/
+**/*.quarto_ipynb

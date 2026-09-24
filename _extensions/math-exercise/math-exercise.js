@@ -1425,6 +1425,13 @@
     };
   }
 
+  // Pool questions are replaced on every draw. Save this draw's source before
+  // typesetting, without answer keys; input ids remain for current field labels.
+  function setQuestionContent(el, rendered) {
+    el.dataset.mathExerciseSource = rendered.html.replace(/ data-answer="[^"]*"/g, '');
+    el.innerHTML = rendered.html;
+  }
+
   function localizeStructuralLabel(token) {
     if (!token) return '';
     if (/^v\d+$/.test(token)) return L.vecComponent(token.slice(1));
@@ -2254,20 +2261,26 @@
   //                referenced by id via #| context: id1, id2. Resolved here,
   //                lazily, from the live rendered DOM: elements may appear
   //                anywhere on the page and in any order, and this also
-  //                captures KaTeX-rendered math cleanly (as LaTeX source)
-  //                instead of a build-time plain-text stringify.
+  //                preserves source math saved by the filter and recovers
+  //                MathJax/KaTeX source for dynamically generated content.
   //   "none"     – #| context: none; no context is sent.
   // ---------------------------------------------------------------------------
 
   var MAX_FEEDBACK_CONTEXT_CHARS = 6000;
 
-  // Extracts a clean text/LaTeX rendering of a context element's *current*
-  // visible content: skips hidden/UI-chrome nodes, turns KaTeX spans back
-  // into their original $...$ source (rather than KaTeX's generated markup),
-  // and normalizes block-level tags to newlines so paragraphs/list items
-  // don't run together.
-  function contextText(root) {
+  // One serializer for context, captions and questions. Never infer mathematics
+  // from rendered glyphs: fraction bars, powers and SVG text are not plain text.
+  // fieldLabels is supplied only for the question, not for surrounding context.
+  function contextText(root, fieldLabels) {
+    if (!root) return '';
     var parts = [];
+    var mathItems = new Map();
+    var mathDocument = window.MathJax && window.MathJax.startup && window.MathJax.startup.document;
+    if (mathDocument && typeof mathDocument.getMathItemsWithin === 'function') {
+      mathDocument.getMathItemsWithin([root]).forEach(function (item) {
+        if (item.typesetRoot) mathItems.set(item.typesetRoot, item);
+      });
+    }
     var blockTags = {
       ADDRESS: true, ARTICLE: true, ASIDE: true, BLOCKQUOTE: true,
       DIV: true, FIGCAPTION: true, FIGURE: true, FOOTER: true,
@@ -2280,26 +2293,70 @@
       if (parts.length && parts[parts.length - 1] !== '\n') parts.push('\n');
     }
 
+    function math(tex, display) {
+      parts.push({ math: (display ? '\\[' : '\\(') + tex + (display ? '\\]' : '\\)') });
+    }
+
+    function missingMath() {
+      console.warn('math-exercise: mathematical source unavailable; rendered glyphs were not sent to AI.');
+      parts.push('[Mathematical source unavailable]');
+    }
+
     function walk(node) {
       if (node.nodeType === Node.TEXT_NODE) {
         parts.push(node.nodeValue || '');
+        return;
+      }
+      if (node.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
+        Array.prototype.forEach.call(node.childNodes, walk);
         return;
       }
       if (node.nodeType !== Node.ELEMENT_NODE) return;
 
       var el = node;
       if (el.matches(
-        'script, style, noscript, template, button, input, textarea, select, ' +
+        'script, style, noscript, template, button, select, ' +
         '.math-exercise-cell, .math-exercise-controls, .math-feedback-area, ' +
-        '.math-legend-panel, [hidden], [aria-hidden="true"]'
+        '.math-legend-panel, .math-dynamic-matrix-controls, [hidden], [aria-hidden="true"]'
       )) return;
 
       var style = window.getComputedStyle(el);
       if (style.display === 'none' || style.visibility === 'hidden') return;
 
-      if (el.classList.contains('katex')) {
+      if (el.matches('input, textarea')) {
+        if (fieldLabels && Object.prototype.hasOwnProperty.call(fieldLabels, el.id)) {
+          parts.push('[' + fieldLabels[el.id] + ']');
+        }
+        return;
+      }
+      if (fieldLabels && el.classList.contains('math-dynamic-matrix-wrap')) {
+        parts.push('[Matrix ' + (el.dataset.matrixName || '') + ']');
+        return;
+      }
+
+      // Authored context math survives either renderer and asynchronous loading.
+      if (el.hasAttribute('data-math-exercise-tex')) {
+        math(el.dataset.mathExerciseTex, el.dataset.mathExerciseDisplay === 'true');
+        return;
+      }
+
+      if (el.matches('.katex, .katex-display')) {
         var annotation = el.querySelector('annotation[encoding="application/x-tex"]');
-        parts.push(annotation ? '$' + annotation.textContent.trim() + '$' : el.textContent);
+        if (annotation) math(annotation.textContent, el.classList.contains('katex-display'));
+        else missingMath();
+        return;
+      }
+
+      if (el.matches('mjx-container') || mathItems.has(el)) {
+        var item = mathItems.get(el);
+        var latex = el.querySelector('mjx-math[data-latex], [data-mml-node="math"][data-latex]');
+        var texAnnotation = el.querySelector('annotation[encoding="application/x-tex"]');
+        if (item && typeof item.math === 'string') math(item.math, item.display);
+        // MathJax 4 exposes source on the root math node. Use the outermost
+        // expression only; never concatenate the source of individual glyphs.
+        else if (latex) math(latex.getAttribute('data-latex'), el.getAttribute('display') === 'true');
+        else if (texAnnotation) math(texAnnotation.textContent, el.getAttribute('display') === 'true');
+        else missingMath();
         return;
       }
 
@@ -2311,6 +2368,7 @@
       var isBlock = !!blockTags[el.tagName];
       if (isBlock) newline();
       if (el.tagName === 'LI') parts.push('- ');
+      if (el.tagName === 'TD' || el.tagName === 'TH') parts.push(' | ');
 
       Array.prototype.forEach.call(el.childNodes, walk);
 
@@ -2318,12 +2376,35 @@
     }
 
     walk(root);
-    return parts.join('')
-      .replace(/\u00a0/g, ' ')
-      .replace(/[ \t]+/g, ' ')
-      .replace(/ *\n */g, '\n')
-      .replace(/\n{3,}/g, '\n\n')
-      .trim();
+    var text = '', prose = '';
+    function flush() {
+      text += prose.replace(/\u00a0/g, ' ').replace(/[ \t]+/g, ' ')
+        .replace(/ *\n */g, '\n').replace(/\n{3,}/g, '\n\n');
+      prose = '';
+    }
+    parts.forEach(function (part) {
+      if (typeof part === 'string') prose += part;
+      else { flush(); text += part.math; }
+    });
+    flush();
+    return text.trim();
+  }
+
+  function sourceText(el, fieldLabels) {
+    if (!el) return '';
+    if (!el.hasAttribute('data-math-exercise-source')) return contextText(el, fieldLabels);
+    // Inert HTML: no scripts, image requests or custom element constructors.
+    var template = document.createElement('template');
+    template.innerHTML = el.dataset.mathExerciseSource;
+    return contextText(template.content, fieldLabels);
+  }
+
+  function questionText(cell, fieldIds, fieldLabel) {
+    var labels = Object.create(null);
+    fieldIds.forEach(function (id, index) { labels[id] = fieldLabel(index); });
+    var caption = sourceText(cell.querySelector('.math-exercise-caption'));
+    var question = sourceText(cell.querySelector('.math-exercise-question'), labels);
+    return (caption ? caption + '\n' : '') + question;
   }
 
   // Resolves #| context: id1, id2, ... against the live DOM. Duplicate,
@@ -2606,7 +2687,7 @@
       }
       var r = renderTaskText(poolTasks[idx], cell.id, vars, vecdir, mode);
       var qDiv = cell.querySelector('.math-exercise-question');
-      qDiv.innerHTML = r.html;
+      setQuestionContent(qDiv, r);
       cell.dataset.fields = JSON.stringify(r.fieldIds);
       cell.dataset.structuralFieldLabels = JSON.stringify(r.structuralLabels);
       structuralFieldLabels = r.structuralLabels;
@@ -2800,7 +2881,7 @@
 
         var r = renderTaskText(poolTasks[next], cell.id, vars, vecdir, mode);
         var qDivR = cell.querySelector('.math-exercise-question');
-        qDivR.innerHTML = r.html;
+        setQuestionContent(qDivR, r);
         cell.dataset.fields = JSON.stringify(r.fieldIds);
         cell.dataset.structuralFieldLabels = JSON.stringify(r.structuralLabels);
         fieldIds = r.fieldIds;
@@ -2833,23 +2914,7 @@
           fbDiv.innerHTML = '<div class="math-fb-empty">' + L.needAnswerFirst + '</div>';
           return;
         }
-        var qDiv   = cell.querySelector('.math-exercise-question');
-        var capEl  = cell.querySelector('.math-exercise-caption');
-        var clone  = qDiv.cloneNode(true);
-        clone.querySelectorAll('.math-dynamic-matrix-wrap').forEach(function (wrap) {
-          var marker = document.createElement('span');
-          marker.textContent = '[Matrix ' + (wrap.dataset.matrixName || '') + ']';
-          wrap.parentNode.replaceChild(marker, wrap);
-        });
-        clone.querySelectorAll('.math-dynamic-matrix-controls').forEach(function (controls) { controls.remove(); });
-        var clonedFields = clone.querySelectorAll('input, textarea');
-        clonedFields.forEach(function (el) {
-          var s = document.createElement('span');
-          var originalIndex = fieldIds.indexOf(el.id);
-          s.textContent = '[' + fieldLabel(originalIndex >= 0 ? originalIndex : 0) + ']';
-          el.parentNode.replaceChild(s, el);
-        });
-        var question = (capEl ? capEl.textContent + '\n' : '') + clone.textContent.replace(/\s+/g, ' ').trim();
+        var question = questionText(cell, fieldIds, fieldLabel);
         var contexts = resolveContexts(cell);
 
         async function doFeedback(cfg) {
@@ -2974,6 +3039,11 @@
       dynamicSpecFromElement: dynamicSpecFromElement,
       resizedDynamicMatrixShape: resizedDynamicMatrixShape,
       renderTaskText: renderTaskText,
+      setQuestionContent: setQuestionContent,
+      contextText: contextText,
+      questionText: questionText,
+      resolveContexts: resolveContexts,
+      setupCell: setupCell,
       normalizeTaskMathDelimiters: normalizeTaskMathDelimiters,
       localizeStructuralLabel: localizeStructuralLabel,
       expressionAnswersXml: expressionAnswersXml,
