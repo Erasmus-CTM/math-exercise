@@ -831,6 +831,7 @@ window.Quarto = {
   <li><a href="#several-exercises-sharing-one-context" id="toc-several-exercises-sharing-one-context" class="nav-link" data-scroll-target="#several-exercises-sharing-one-context">Several exercises sharing one context</a></li>
   <li><a href="#opting-out-of-context" id="toc-opting-out-of-context" class="nav-link" data-scroll-target="#opting-out-of-context">Opting out of context</a></li>
   <li><a href="#multi-field-feedback" id="toc-multi-field-feedback" class="nav-link" data-scroll-target="#multi-field-feedback">Multi-field feedback</a></li>
+  <li><a href="#mathematics-in-ai-context" id="toc-mathematics-in-ai-context" class="nav-link" data-scroll-target="#mathematics-in-ai-context">Mathematics in AI context</a></li>
   <li><a href="#working-with-different-ai-providers" id="toc-working-with-different-ai-providers" class="nav-link" data-scroll-target="#working-with-different-ai-providers">Working with different AI providers</a></li>
   </ul>
 </nav>
@@ -875,7 +876,7 @@ window.Quarto = {
 <p>When feedback is requested, the model receives the task, the student’s current work, the checker result, the current hint level, and relevant explanatory text from the page. The examples below show how an author controls that context.</p>
 <section id="automatic-section-context" class="level2">
 <h2 class="anchored" data-anchor-id="automatic-section-context">Automatic section context</h2>
-<p>No author option is needed for automatic context. The nearest preceding heading starts a context section. Visible prose, lists, and callouts after that heading are collected until the exercise; code blocks and other exercises are excluded. A new heading starts a new section, and only the most recent 1,500 characters are retained. This keeps feedback grounded in the local explanation without sending the whole page.</p>
+<p>No author option is needed for automatic context. The nearest preceding heading starts a context section. Visible prose, lists, and callouts after that heading are collected until the exercise; code blocks and other exercises are excluded. A new heading starts a new section. The most recent whole blocks are retained up to 1,500 characters, without cutting a formula. Use explicit context for explanations that exceed this limit. This keeps feedback grounded in the local explanation without sending the whole page.</p>
 <div class="callout callout-style-default callout-note callout-titled" title="Automatically collected context">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -889,8 +890,8 @@ window.Quarto = {
 <p>For <span class="math inline">\(ax^2+bx+c=0\)</span>, the discriminant is <span class="math inline">\(D=b^2-4ac\)</span>. The sign of <span class="math inline">\(D\)</span> determines the number of real roots. This visible callout is automatically available to the feedback model for the exercise immediately below it.</p>
 </div>
 </div>
-<div class="math-exercise-cell" id="math-exercise-1" data-label="ai-auto-context" data-mode="equivalent" data-reject="" data-vars="a,b,c" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[&quot;Discriminant&quot;]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Automatic section context No author option is needed for automatic context. The nearest preceding heading starts a context section. Visible prose, lists, and callouts after that heading are collected until the exercise; code blocks and other exercises are excluded. A new heading starts a new section, and only the most recent 1,500 characters are retained. This keeps feedback grounded in the local explanation without sending the whole page. Automatically collected context For ax^2+bx+c=0, the discriminant is D=b^2-4ac. The sign of D determines the number of real roots. This visible callout is automatically available to the feedback model for the exercise immediately below it.&quot;" data-fields="[&quot;math-exercise-1-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
-<div class="math-exercise-question">For \(2x^2+3x-2=0\), compute the discriminant: <input type="text" id="math-exercise-1-f1" data-answer="25" data-vars="a,b,c" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
+<div class="math-exercise-cell" id="math-exercise-1" data-label="ai-auto-context" data-mode="equivalent" data-reject="" data-vars="a,b,c" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[&quot;Discriminant&quot;]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Automatic section context\nNo author option is needed for automatic context. The nearest preceding heading starts a context section. Visible prose, lists, and callouts after that heading are collected until the exercise; code blocks and other exercises are excluded. A new heading starts a new section. The most recent whole blocks are retained up to 1,500 characters, without cutting a formula. Use explicit context for explanations that exceed this limit. This keeps feedback grounded in the local explanation without sending the whole page.\nAutomatically collected context\nFor \\(ax^2+bx+c=0\\), the discriminant is \\(D=b^2-4ac\\). The sign of \\(D\\) determines the number of real roots. This visible callout is automatically available to the feedback model for the exercise immediately below it.&quot;" data-fields="[&quot;math-exercise-1-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-question" data-math-exercise-source="For \(2x^2+3x-2=0\), compute the discriminant: <input type=&quot;text&quot; id=&quot;math-exercise-1-f1&quot; data-vars=&quot;a,b,c&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>">For \(2x^2+3x-2=0\), compute the discriminant: <input type="text" id="math-exercise-1-f1" data-answer="25" data-vars="a,b,c" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -927,7 +928,7 @@ For $2x^2+3x-2=0$, compute the discriminant: _[25]
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Newton’s method uses <span class="math inline">\(x_{k+1}=x_k-f(x_k)/f'(x_k)\)</span>. Evaluate the function and derivative at the current iterate before forming the next iterate.</p>
+<p>Newton’s method uses <span data-math-exercise-tex="x_{k+1}=x_k-f(x_k)/f'(x_k)" data-math-exercise-display="false"><span class="math inline">\(x_{k+1}=x_k-f(x_k)/f'(x_k)\)</span></span>. Evaluate the function and derivative at the current iterate before forming the next iterate.</p>
 </div>
 </div>
 </div>
@@ -941,8 +942,8 @@ Show context-block source
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>current iterate before forming the next iterate.</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>:::</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div class="math-exercise-cell" id="math-exercise-2" data-label="ai-explicit-context" data-mode="numeric" data-reject="" data-vars="" data-tolerance="0.001" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="explicit" data-context-refs="newton-rule" data-context="&quot;Reusable explicit context An explicitly identified context block can be reused by exercises elsewhere on the page. The block remains visible to students, and the exercise refers to it by id with context: newton-rule. Multiple ids may be listed when a task needs several sources. Explicit context is read from the rendered page when feedback is requested, so mathematical notation and text generated by other Quarto extensions are included. Explicit feedback context: Newton’s methodNewton’s method uses x_{k+1}=x_k-f(x_k)/f'(x_k). Evaluate the function and derivative at the current iterate before forming the next iterate. Show context-block source&quot;" data-fields="[&quot;math-exercise-2-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
-<div class="math-exercise-question">For \(f(x)=x^2-2\) and \(x_0=1.5\), compute \(x_1\): <input type="text" id="math-exercise-2-f1" data-answer="17/12" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
+<div class="math-exercise-cell" id="math-exercise-2" data-label="ai-explicit-context" data-mode="numeric" data-reject="" data-vars="" data-tolerance="0.001" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="explicit" data-context-refs="newton-rule" data-context="&quot;Reusable explicit context\nAn explicitly identified context block can be reused by exercises elsewhere on the page. The block remains visible to students, and the exercise refers to it by id with context: newton-rule. Multiple ids may be listed when a task needs several sources. Explicit context is read from the rendered page when feedback is requested, so mathematical notation and text generated by other Quarto extensions are included.\nExplicit feedback context: Newton’s methodNewton’s method uses \\(x_{k+1}=x_k-f(x_k)/f'(x_k)\\). Evaluate the function and derivative at the current iterate before forming the next iterate.\nShow context-block source&quot;" data-fields="[&quot;math-exercise-2-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-question" data-math-exercise-source="For \(f(x)=x^2-2\) and \(x_0=1.5\), compute \(x_1\): <input type=&quot;text&quot; id=&quot;math-exercise-2-f1&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>">For \(f(x)=x^2-2\) and \(x_0=1.5\), compute \(x_1\): <input type="text" id="math-exercise-2-f1" data-answer="17/12" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -969,7 +970,8 @@ For $f(x)=x^2-2$ and $x_0=1.5$, compute $x_1$: _[17/12]
 <section id="several-exercises-sharing-one-context" class="level2">
 <h2 class="anchored" data-anchor-id="several-exercises-sharing-one-context">Several exercises sharing one context</h2>
 <div class="math-exercise-cell" id="math-exercise-3" data-label="ai-explicit-context-second" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="explicit" data-context-refs="newton-rule" data-context="&quot;Several exercises sharing one context&quot;" data-fields="[&quot;math-exercise-3-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
-<div class="math-exercise-question">For \(f(x)=x^3-1\), write the Newton update as a function of \(x_k\):<br>
+<div class="math-exercise-question" data-math-exercise-source="For \(f(x)=x^3-1\), write the Newton update as a function of \(x_k\):<br>
+<input type=&quot;text&quot; id=&quot;math-exercise-3-f1&quot; data-vars=&quot;x&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-medium&quot;>">For \(f(x)=x^3-1\), write the Newton update as a function of \(x_k\):<br>
 <input type="text" id="math-exercise-3-f1" data-answer="x-(x^3-1)/(3*x^2)" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
 
 <div class="math-exercise-controls">
@@ -997,8 +999,8 @@ __[x-(x^3-1)/(3*x^2)]
 <section id="opting-out-of-context" class="level2">
 <h2 class="anchored" data-anchor-id="opting-out-of-context">Opting out of context</h2>
 <p>Use <code>context: none</code> when surrounding prose should not be sent with a feedback request. This disables both automatic collection and accidental inheritance from the current section.</p>
-<div class="math-exercise-cell" id="math-exercise-4" data-label="ai-no-context" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="none" data-context-refs="none" data-context="&quot;Opting out of context Use context: none when surrounding prose should not be sent with a feedback request. This disables both automatic collection and accidental inheritance from the current section.&quot;" data-fields="[&quot;math-exercise-4-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
-<div class="math-exercise-question">Compute \(12/3\): <input type="text" id="math-exercise-4-f1" data-answer="4" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
+<div class="math-exercise-cell" id="math-exercise-4" data-label="ai-no-context" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="none" data-context-refs="none" data-context="&quot;Opting out of context\nUse context: none when surrounding prose should not be sent with a feedback request. This disables both automatic collection and accidental inheritance from the current section.&quot;" data-fields="[&quot;math-exercise-4-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-question" data-math-exercise-source="Compute \(12/3\): <input type=&quot;text&quot; id=&quot;math-exercise-4-f1&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>">Compute \(12/3\): <input type="text" id="math-exercise-4-f1" data-answer="4" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -1023,8 +1025,9 @@ Compute $12/3$: _[4]
 <section id="multi-field-feedback" class="level2">
 <h2 class="anchored" data-anchor-id="multi-field-feedback">Multi-field feedback</h2>
 <p>Meaningful labels make hints clearer and prevent generic references such as “field 2”.</p>
-<div class="math-exercise-cell" id="math-exercise-5" data-label="ai-field-labels" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[&quot;Derivative&quot;,&quot;Value at x=2&quot;,&quot;Tangent slope&quot;]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Multi-field feedback Meaningful labels make hints clearer and prevent generic references such as “field 2”.&quot;" data-fields="[&quot;math-exercise-5-f1&quot;,&quot;math-exercise-5-f2&quot;,&quot;math-exercise-5-f3&quot;]" data-structural-field-labels="[&quot;&quot;,&quot;&quot;,&quot;&quot;]">
-<div class="math-exercise-question">For \(f(x)=x^3\), enter \(f'(x)=\) <input type="text" id="math-exercise-5-f1" data-answer="3*x^2" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">, \(f'(2)=\) <input type="text" id="math-exercise-5-f2" data-answer="12" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">, and the slope of the<br>
+<div class="math-exercise-cell" id="math-exercise-5" data-label="ai-field-labels" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[&quot;Derivative&quot;,&quot;Value at x=2&quot;,&quot;Tangent slope&quot;]" data-vecdir="col" data-context-mode="auto" data-context-refs="" data-context="&quot;Multi-field feedback\nMeaningful labels make hints clearer and prevent generic references such as “field 2”.&quot;" data-fields="[&quot;math-exercise-5-f1&quot;,&quot;math-exercise-5-f2&quot;,&quot;math-exercise-5-f3&quot;]" data-structural-field-labels="[&quot;&quot;,&quot;&quot;,&quot;&quot;]">
+<div class="math-exercise-question" data-math-exercise-source="For \(f(x)=x^3\), enter \(f'(x)=\) <input type=&quot;text&quot; id=&quot;math-exercise-5-f1&quot; data-vars=&quot;x&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>, \(f'(2)=\) <input type=&quot;text&quot; id=&quot;math-exercise-5-f2&quot; data-vars=&quot;x&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>, and the slope of the<br>
+tangent at \(x=2\): <input type=&quot;text&quot; id=&quot;math-exercise-5-f3&quot; data-vars=&quot;x&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>.">For \(f(x)=x^3\), enter \(f'(x)=\) <input type="text" id="math-exercise-5-f1" data-answer="3*x^2" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">, \(f'(2)=\) <input type="text" id="math-exercise-5-f2" data-answer="12" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">, and the slope of the<br>
 tangent at \(x=2\): <input type="text" id="math-exercise-5-f3" data-answer="12" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">.</div>
 
 <div class="math-exercise-controls">
@@ -1048,6 +1051,48 @@ For $f(x)=x^3$, enter $f'(x)=$ _[3*x^2], $f'(2)=$ _[12], and the slope of the
 tangent at $x=2$: _[12].
 ```</code></pre>
 </details>
+</section>
+<section id="mathematics-in-ai-context" class="level2">
+<h2 class="anchored" data-anchor-id="mathematics-in-ai-context">Mathematics in AI context</h2>
+<p>Mathematics is sent as LaTeX source, including fractions, powers, subscripts, matrices and aligned equations. The source is preserved before typesetting, so MathJax and KaTeX produce the same mathematical context. The question and its caption are preserved too; loading another pool question refreshes its source.</p>
+<div id="solenoid-notation" class="math-exercise-context">
+<p>A long solenoid has <span data-math-exercise-tex="N" data-math-exercise-display="false"><span class="math inline">\(N\)</span></span> turns over a length <span data-math-exercise-tex="l" data-math-exercise-display="false"><span class="math inline">\(l\)</span></span>. Its turn density is <span data-math-exercise-tex="n=\frac{N}{l}" data-math-exercise-display="false"><span class="math inline">\(n=\frac{N}{l}\)</span></span>, measured in <span data-math-exercise-tex="\mathrm{m}^{-1}" data-math-exercise-display="false"><span class="math inline">\(\mathrm{m}^{-1}\)</span></span>. In vacuum, <span data-math-exercise-tex="\mu_0\approx 4\pi\times10^{-7}\,\mathrm{H/m}" data-math-exercise-display="false"><span class="math inline">\(\mu_0\approx 4\pi\times10^{-7}\,\mathrm{H/m}\)</span></span>. For radius <span data-math-exercise-tex="2a" data-math-exercise-display="false"><span class="math inline">\(2a\)</span></span>, the ideal long-solenoid approximation gives</p>
+<p><span data-math-exercise-tex="
+L=\frac{4\pi\mu_0N^2a^2}{l}.
+" data-math-exercise-display="true"><span class="math display">\[
+L=\frac{4\pi\mu_0N^2a^2}{l}.
+\]</span></span></p>
+</div>
+<div class="math-exercise-cell" id="math-exercise-6" data-label="ai-solenoid-source" data-mode="equivalent" data-reject="" data-vars="N,l" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[&quot;Turn density&quot;]" data-vecdir="col" data-context-mode="explicit" data-context-refs="solenoid-notation" data-context="&quot;Mathematics in AI context\nMathematics is sent as LaTeX source, including fractions, powers, subscripts, matrices and aligned equations. The source is preserved before typesetting, so MathJax and KaTeX produce the same mathematical context. The question and its caption are preserved too; loading another pool question refreshes its source.\nA long solenoid has \\(N\\) turns over a length \\(l\\). Its turn density is \\(n=\\frac{N}{l}\\), measured in \\(\\mathrm{m}^{-1}\\). In vacuum, \\(\\mu_0\\approx 4\\pi\\times10^{-7}\\,\\mathrm{H/m}\\). For radius \\(2a\\), the ideal long-solenoid approximation gives\\[\nL=\\frac{4\\pi\\mu_0N^2a^2}{l}.\n\\]&quot;" data-fields="[&quot;math-exercise-6-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-caption math-exercise-toggle" data-math-exercise-source="Turn density" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>Turn density</div>
+
+<div class="math-exercise-body" aria-hidden="true">
+<div class="math-exercise-question" data-math-exercise-source="Write the turn density in terms of \(N\) and \(l\): <input type=&quot;text&quot; id=&quot;math-exercise-6-f1&quot; data-vars=&quot;N,l&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>">Write the turn density in terms of \(N\) and \(l\): <input type="text" id="math-exercise-6-f1" data-answer="N/l" data-vars="N,l" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
+
+<div class="math-exercise-controls">
+  <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
+  <button type="button" class="btn btn-light math-legend-btn">ⓘ&nbsp;Input help</button>
+  <div class="btn-group">
+    <button type="button" class="btn btn-light math-feedback-btn">💬&nbsp;Feedback</button>
+    <button type="button" class="btn btn-light math-reconfig-btn" title="Change AI configuration">⚙</button>
+  </div>
+</div>
+<div class="math-legend-panel" style="display:none;"></div>
+<div class="math-feedback-area"></div>
+</div>
+</div>
+<details class="math-example-source">
+  <summary>Show source</summary>
+  <pre><code class="language-markdown">```{math-exercise}
+#| label: ai-solenoid-source
+#| caption: Turn density
+#| context: solenoid-notation
+#| vars: N,l
+#| field-labels: Turn density
+Write the turn density in terms of $N$ and $l$: _[N/l]
+```</code></pre>
+</details>
+<p>For this example, the outgoing context retains <code>\frac{N}{l}</code> and <code>10^{-7}</code>. To inspect it, open your browser’s Network panel, request feedback, and inspect <code>messages[1].content</code> in the chat-completions request. The <code>&lt;task&gt;</code> block uses <code>[Turn density]</code> for the input; the answer stored by the checker is not copied into that block.</p>
 </section>
 <section id="working-with-different-ai-providers" class="level2">
 <h2 class="anchored" data-anchor-id="working-with-different-ai-providers">Working with different AI providers</h2>
@@ -2886,6 +2931,13 @@ tangent at $x=2$: _[12].
     };
   }
 
+  // Pool questions are replaced on every draw. Save this draw's source before
+  // typesetting, without answer keys; input ids remain for current field labels.
+  function setQuestionContent(el, rendered) {
+    el.dataset.mathExerciseSource = rendered.html.replace(/ data-answer="[^"]*"/g, '');
+    el.innerHTML = rendered.html;
+  }
+
   function localizeStructuralLabel(token) {
     if (!token) return '';
     if (/^v\d+$/.test(token)) return L.vecComponent(token.slice(1));
@@ -3715,20 +3767,26 @@ tangent at $x=2$: _[12].
   //                referenced by id via #| context: id1, id2. Resolved here,
   //                lazily, from the live rendered DOM: elements may appear
   //                anywhere on the page and in any order, and this also
-  //                captures KaTeX-rendered math cleanly (as LaTeX source)
-  //                instead of a build-time plain-text stringify.
+  //                preserves source math saved by the filter and recovers
+  //                MathJax/KaTeX source for dynamically generated content.
   //   "none"     – #| context: none; no context is sent.
   // ---------------------------------------------------------------------------
 
   var MAX_FEEDBACK_CONTEXT_CHARS = 6000;
 
-  // Extracts a clean text/LaTeX rendering of a context element's *current*
-  // visible content: skips hidden/UI-chrome nodes, turns KaTeX spans back
-  // into their original $...$ source (rather than KaTeX's generated markup),
-  // and normalizes block-level tags to newlines so paragraphs/list items
-  // don't run together.
-  function contextText(root) {
+  // One serializer for context, captions and questions. Never infer mathematics
+  // from rendered glyphs: fraction bars, powers and SVG text are not plain text.
+  // fieldLabels is supplied only for the question, not for surrounding context.
+  function contextText(root, fieldLabels) {
+    if (!root) return '';
     var parts = [];
+    var mathItems = new Map();
+    var mathDocument = window.MathJax && window.MathJax.startup && window.MathJax.startup.document;
+    if (mathDocument && typeof mathDocument.getMathItemsWithin === 'function') {
+      mathDocument.getMathItemsWithin([root]).forEach(function (item) {
+        if (item.typesetRoot) mathItems.set(item.typesetRoot, item);
+      });
+    }
     var blockTags = {
       ADDRESS: true, ARTICLE: true, ASIDE: true, BLOCKQUOTE: true,
       DIV: true, FIGCAPTION: true, FIGURE: true, FOOTER: true,
@@ -3741,26 +3799,70 @@ tangent at $x=2$: _[12].
       if (parts.length && parts[parts.length - 1] !== '\n') parts.push('\n');
     }
 
+    function math(tex, display) {
+      parts.push({ math: (display ? '\\[' : '\\(') + tex + (display ? '\\]' : '\\)') });
+    }
+
+    function missingMath() {
+      console.warn('math-exercise: mathematical source unavailable; rendered glyphs were not sent to AI.');
+      parts.push('[Mathematical source unavailable]');
+    }
+
     function walk(node) {
       if (node.nodeType === Node.TEXT_NODE) {
         parts.push(node.nodeValue || '');
+        return;
+      }
+      if (node.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
+        Array.prototype.forEach.call(node.childNodes, walk);
         return;
       }
       if (node.nodeType !== Node.ELEMENT_NODE) return;
 
       var el = node;
       if (el.matches(
-        'script, style, noscript, template, button, input, textarea, select, ' +
+        'script, style, noscript, template, button, select, ' +
         '.math-exercise-cell, .math-exercise-controls, .math-feedback-area, ' +
-        '.math-legend-panel, [hidden], [aria-hidden="true"]'
+        '.math-legend-panel, .math-dynamic-matrix-controls, [hidden], [aria-hidden="true"]'
       )) return;
 
       var style = window.getComputedStyle(el);
       if (style.display === 'none' || style.visibility === 'hidden') return;
 
-      if (el.classList.contains('katex')) {
+      if (el.matches('input, textarea')) {
+        if (fieldLabels && Object.prototype.hasOwnProperty.call(fieldLabels, el.id)) {
+          parts.push('[' + fieldLabels[el.id] + ']');
+        }
+        return;
+      }
+      if (fieldLabels && el.classList.contains('math-dynamic-matrix-wrap')) {
+        parts.push('[Matrix ' + (el.dataset.matrixName || '') + ']');
+        return;
+      }
+
+      // Authored context math survives either renderer and asynchronous loading.
+      if (el.hasAttribute('data-math-exercise-tex')) {
+        math(el.dataset.mathExerciseTex, el.dataset.mathExerciseDisplay === 'true');
+        return;
+      }
+
+      if (el.matches('.katex, .katex-display')) {
         var annotation = el.querySelector('annotation[encoding="application/x-tex"]');
-        parts.push(annotation ? '$' + annotation.textContent.trim() + '$' : el.textContent);
+        if (annotation) math(annotation.textContent, el.classList.contains('katex-display'));
+        else missingMath();
+        return;
+      }
+
+      if (el.matches('mjx-container') || mathItems.has(el)) {
+        var item = mathItems.get(el);
+        var latex = el.querySelector('mjx-math[data-latex], [data-mml-node="math"][data-latex]');
+        var texAnnotation = el.querySelector('annotation[encoding="application/x-tex"]');
+        if (item && typeof item.math === 'string') math(item.math, item.display);
+        // MathJax 4 exposes source on the root math node. Use the outermost
+        // expression only; never concatenate the source of individual glyphs.
+        else if (latex) math(latex.getAttribute('data-latex'), el.getAttribute('display') === 'true');
+        else if (texAnnotation) math(texAnnotation.textContent, el.getAttribute('display') === 'true');
+        else missingMath();
         return;
       }
 
@@ -3772,6 +3874,7 @@ tangent at $x=2$: _[12].
       var isBlock = !!blockTags[el.tagName];
       if (isBlock) newline();
       if (el.tagName === 'LI') parts.push('- ');
+      if (el.tagName === 'TD' || el.tagName === 'TH') parts.push(' | ');
 
       Array.prototype.forEach.call(el.childNodes, walk);
 
@@ -3779,12 +3882,35 @@ tangent at $x=2$: _[12].
     }
 
     walk(root);
-    return parts.join('')
-      .replace(/\u00a0/g, ' ')
-      .replace(/[ \t]+/g, ' ')
-      .replace(/ *\n */g, '\n')
-      .replace(/\n{3,}/g, '\n\n')
-      .trim();
+    var text = '', prose = '';
+    function flush() {
+      text += prose.replace(/\u00a0/g, ' ').replace(/[ \t]+/g, ' ')
+        .replace(/ *\n */g, '\n').replace(/\n{3,}/g, '\n\n');
+      prose = '';
+    }
+    parts.forEach(function (part) {
+      if (typeof part === 'string') prose += part;
+      else { flush(); text += part.math; }
+    });
+    flush();
+    return text.trim();
+  }
+
+  function sourceText(el, fieldLabels) {
+    if (!el) return '';
+    if (!el.hasAttribute('data-math-exercise-source')) return contextText(el, fieldLabels);
+    // Inert HTML: no scripts, image requests or custom element constructors.
+    var template = document.createElement('template');
+    template.innerHTML = el.dataset.mathExerciseSource;
+    return contextText(template.content, fieldLabels);
+  }
+
+  function questionText(cell, fieldIds, fieldLabel) {
+    var labels = Object.create(null);
+    fieldIds.forEach(function (id, index) { labels[id] = fieldLabel(index); });
+    var caption = sourceText(cell.querySelector('.math-exercise-caption'));
+    var question = sourceText(cell.querySelector('.math-exercise-question'), labels);
+    return (caption ? caption + '\n' : '') + question;
   }
 
   // Resolves #| context: id1, id2, ... against the live DOM. Duplicate,
@@ -4067,7 +4193,7 @@ tangent at $x=2$: _[12].
       }
       var r = renderTaskText(poolTasks[idx], cell.id, vars, vecdir, mode);
       var qDiv = cell.querySelector('.math-exercise-question');
-      qDiv.innerHTML = r.html;
+      setQuestionContent(qDiv, r);
       cell.dataset.fields = JSON.stringify(r.fieldIds);
       cell.dataset.structuralFieldLabels = JSON.stringify(r.structuralLabels);
       structuralFieldLabels = r.structuralLabels;
@@ -4261,7 +4387,7 @@ tangent at $x=2$: _[12].
 
         var r = renderTaskText(poolTasks[next], cell.id, vars, vecdir, mode);
         var qDivR = cell.querySelector('.math-exercise-question');
-        qDivR.innerHTML = r.html;
+        setQuestionContent(qDivR, r);
         cell.dataset.fields = JSON.stringify(r.fieldIds);
         cell.dataset.structuralFieldLabels = JSON.stringify(r.structuralLabels);
         fieldIds = r.fieldIds;
@@ -4294,23 +4420,7 @@ tangent at $x=2$: _[12].
           fbDiv.innerHTML = '<div class="math-fb-empty">' + L.needAnswerFirst + '</div>';
           return;
         }
-        var qDiv   = cell.querySelector('.math-exercise-question');
-        var capEl  = cell.querySelector('.math-exercise-caption');
-        var clone  = qDiv.cloneNode(true);
-        clone.querySelectorAll('.math-dynamic-matrix-wrap').forEach(function (wrap) {
-          var marker = document.createElement('span');
-          marker.textContent = '[Matrix ' + (wrap.dataset.matrixName || '') + ']';
-          wrap.parentNode.replaceChild(marker, wrap);
-        });
-        clone.querySelectorAll('.math-dynamic-matrix-controls').forEach(function (controls) { controls.remove(); });
-        var clonedFields = clone.querySelectorAll('input, textarea');
-        clonedFields.forEach(function (el) {
-          var s = document.createElement('span');
-          var originalIndex = fieldIds.indexOf(el.id);
-          s.textContent = '[' + fieldLabel(originalIndex >= 0 ? originalIndex : 0) + ']';
-          el.parentNode.replaceChild(s, el);
-        });
-        var question = (capEl ? capEl.textContent + '\n' : '') + clone.textContent.replace(/\s+/g, ' ').trim();
+        var question = questionText(cell, fieldIds, fieldLabel);
         var contexts = resolveContexts(cell);
 
         async function doFeedback(cfg) {
@@ -4435,6 +4545,11 @@ tangent at $x=2$: _[12].
       dynamicSpecFromElement: dynamicSpecFromElement,
       resizedDynamicMatrixShape: resizedDynamicMatrixShape,
       renderTaskText: renderTaskText,
+      setQuestionContent: setQuestionContent,
+      contextText: contextText,
+      questionText: questionText,
+      resolveContexts: resolveContexts,
+      setupCell: setupCell,
       normalizeTaskMathDelimiters: normalizeTaskMathDelimiters,
       localizeStructuralLabel: localizeStructuralLabel,
       expressionAnswersXml: expressionAnswersXml,
