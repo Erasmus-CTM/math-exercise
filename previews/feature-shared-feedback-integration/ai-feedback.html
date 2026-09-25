@@ -3395,7 +3395,7 @@ Write the turn density in terms of $N$ and $l$: _[N/l]
     function invalidateFeedback() {
       revision++;
       checkedEvidence = null;
-      if (output) output.replaceChildren();
+      if (output && feedbackHandle) output.replaceChildren();
       if (feedbackHandle) feedbackHandle.cancel();
     }
     function localSnapshot() {
@@ -3558,7 +3558,7 @@ Write the turn density in terms of $N$ and $l$: _[N/l]
         fbDiv.innerHTML = '<div class="math-fb-err">&#9888;&nbsp;' + friendlyError(String(err)) + '</div>';
       } finally {
         checkBtn.disabled = false;
-        if (feedbackBtn) feedbackBtn.disabled = false;
+        if (feedbackBtn) feedbackBtn.disabled = !feedbackHandle;
       }
     }
 

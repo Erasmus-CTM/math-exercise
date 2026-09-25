@@ -3549,7 +3549,7 @@ Skriv radmatrisen $(1,2,3,4,5,6)$: mat[1,2,3,4,5,6]
     function invalidateFeedback() {
       revision++;
       checkedEvidence = null;
-      if (output) output.replaceChildren();
+      if (output && feedbackHandle) output.replaceChildren();
       if (feedbackHandle) feedbackHandle.cancel();
     }
     function localSnapshot() {
@@ -3712,7 +3712,7 @@ Skriv radmatrisen $(1,2,3,4,5,6)$: mat[1,2,3,4,5,6]
         fbDiv.innerHTML = '<div class="math-fb-err">&#9888;&nbsp;' + friendlyError(String(err)) + '</div>';
       } finally {
         checkBtn.disabled = false;
-        if (feedbackBtn) feedbackBtn.disabled = false;
+        if (feedbackBtn) feedbackBtn.disabled = !feedbackHandle;
       }
     }
 
