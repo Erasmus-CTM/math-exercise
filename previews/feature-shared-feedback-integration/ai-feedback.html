@@ -3572,7 +3572,7 @@ Write the turn density in terms of $N$ and $l$: _[N/l]
       });
     }
 
-    questionDiv.addEventListener('input', function () { invalidateFeedback(); fbDiv.innerHTML = ''; });
+    questionDiv.addEventListener('input', clearAssessmentAfterResize);
     checkBtn.addEventListener('click', runCheck);
     attachKeyListeners();
 

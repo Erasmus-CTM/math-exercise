@@ -3726,7 +3726,7 @@ Skriv radmatrisen $(1,2,3,4,5,6)$: mat[1,2,3,4,5,6]
       });
     }
 
-    questionDiv.addEventListener('input', function () { invalidateFeedback(); fbDiv.innerHTML = ''; });
+    questionDiv.addEventListener('input', clearAssessmentAfterResize);
     checkBtn.addEventListener('click', runCheck);
     attachKeyListeners();
 

@@ -4009,7 +4009,7 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
       });
     }
 
-    questionDiv.addEventListener('input', function () { invalidateFeedback(); fbDiv.innerHTML = ''; });
+    questionDiv.addEventListener('input', clearAssessmentAfterResize);
     checkBtn.addEventListener('click', runCheck);
     attachKeyListeners();
 

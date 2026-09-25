@@ -3527,7 +3527,7 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
       });
     }
 
-    questionDiv.addEventListener('input', function () { invalidateFeedback(); fbDiv.innerHTML = ''; });
+    questionDiv.addEventListener('input', clearAssessmentAfterResize);
     checkBtn.addEventListener('click', runCheck);
     attachKeyListeners();
 
