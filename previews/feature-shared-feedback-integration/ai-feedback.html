@@ -81,10 +81,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="site_libs/bootstrap/bootstrap-55617497126496852ff9f5a59253c640.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
-<script src="site_libs/quarto-contrib/ai-feedback-0.2.0/feedback-core.js"></script>
-<script src="site_libs/quarto-contrib/ai-feedback-0.2.0/feedback-dom.js"></script>
-<script src="site_libs/quarto-contrib/ai-feedback-0.2.0/ai-feedback.js"></script>
-<link href="site_libs/quarto-contrib/ai-feedback-0.2.0/ai-feedback.css" rel="stylesheet">
+<script src="site_libs/quarto-contrib/ai-feedback-0.2.1/feedback-core.js"></script>
+<script src="site_libs/quarto-contrib/ai-feedback-0.2.1/feedback-dom.js"></script>
+<script src="site_libs/quarto-contrib/ai-feedback-0.2.1/ai-feedback.js"></script>
+<link href="site_libs/quarto-contrib/ai-feedback-0.2.1/ai-feedback.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -389,6 +389,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 /* ---- Buttons ---- */
 .math-exercise-controls {
   display: flex;
+  align-items: center;
   gap: .5em;
   margin-bottom: .75em;
   flex-wrap: wrap;
@@ -551,6 +552,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 }
 .math-fb-llm-body .katex-display {
   margin: 0;
+}
+
+/* Shared settings must not stretch the existing Bootstrap controls. */
+.math-exercise-controls .ai-feedback-gear {
+  margin: 0;
+  padding: .375rem .75rem;
+  font-size: inherit;
+  line-height: 1.5;
 }
 
 </style>
@@ -765,7 +774,7 @@ For $2x^2+3x-2=0$, compute the discriminant: _[25]
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Newton’s method uses <span data-math-exercise-tex="x_{k+1}=x_k-f(x_k)/f'(x_k)" data-math-exercise-display="false"><span class="math inline">\(x_{k+1}=x_k-f(x_k)/f'(x_k)\)</span></span>. Evaluate the function and derivative at the current iterate before forming the next iterate.</p>
+<p>Newton’s method uses <span data-math-exercise-display="false" data-math-exercise-tex="x_{k+1}=x_k-f(x_k)/f'(x_k)"><span class="math inline">\(x_{k+1}=x_k-f(x_k)/f'(x_k)\)</span></span>. Evaluate the function and derivative at the current iterate before forming the next iterate.</p>
 </div>
 </div>
 </div>
@@ -893,10 +902,10 @@ tangent at $x=2$: _[12].
 <h2 class="anchored" data-anchor-id="mathematics-in-ai-context">Mathematics in AI context</h2>
 <p>Mathematics is sent as LaTeX source, including fractions, powers, subscripts, matrices and aligned equations. The source is preserved before typesetting, so MathJax and KaTeX produce the same mathematical context. The question and its caption are preserved too; loading another pool question refreshes its source.</p>
 <div id="solenoid-notation" class="math-exercise-context">
-<p>A long solenoid has <span data-math-exercise-tex="N" data-math-exercise-display="false"><span class="math inline">\(N\)</span></span> turns over a length <span data-math-exercise-tex="l" data-math-exercise-display="false"><span class="math inline">\(l\)</span></span>. Its turn density is <span data-math-exercise-tex="n=\frac{N}{l}" data-math-exercise-display="false"><span class="math inline">\(n=\frac{N}{l}\)</span></span>, measured in <span data-math-exercise-tex="\mathrm{m}^{-1}" data-math-exercise-display="false"><span class="math inline">\(\mathrm{m}^{-1}\)</span></span>. In vacuum, <span data-math-exercise-tex="\mu_0\approx 4\pi\times10^{-7}\,\mathrm{H/m}" data-math-exercise-display="false"><span class="math inline">\(\mu_0\approx 4\pi\times10^{-7}\,\mathrm{H/m}\)</span></span>. For radius <span data-math-exercise-tex="2a" data-math-exercise-display="false"><span class="math inline">\(2a\)</span></span>, the ideal long-solenoid approximation gives</p>
-<p><span data-math-exercise-tex="
+<p>A long solenoid has <span data-math-exercise-display="false" data-math-exercise-tex="N"><span class="math inline">\(N\)</span></span> turns over a length <span data-math-exercise-display="false" data-math-exercise-tex="l"><span class="math inline">\(l\)</span></span>. Its turn density is <span data-math-exercise-display="false" data-math-exercise-tex="n=\frac{N}{l}"><span class="math inline">\(n=\frac{N}{l}\)</span></span>, measured in <span data-math-exercise-display="false" data-math-exercise-tex="\mathrm{m}^{-1}"><span class="math inline">\(\mathrm{m}^{-1}\)</span></span>. In vacuum, <span data-math-exercise-display="false" data-math-exercise-tex="\mu_0\approx 4\pi\times10^{-7}\,\mathrm{H/m}"><span class="math inline">\(\mu_0\approx 4\pi\times10^{-7}\,\mathrm{H/m}\)</span></span>. For radius <span data-math-exercise-display="false" data-math-exercise-tex="2a"><span class="math inline">\(2a\)</span></span>, the ideal long-solenoid approximation gives</p>
+<p><span data-math-exercise-display="true" data-math-exercise-tex="
 L=\frac{4\pi\mu_0N^2a^2}{l}.
-" data-math-exercise-display="true"><span class="math display">\[
+"><span class="math display">\[
 L=\frac{4\pi\mu_0N^2a^2}{l}.
 \]</span></span></p>
 </div>
