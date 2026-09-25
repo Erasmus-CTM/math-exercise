@@ -2052,7 +2052,7 @@
     function invalidateFeedback() {
       revision++;
       checkedEvidence = null;
-      if (output) output.replaceChildren();
+      if (output && feedbackHandle) output.replaceChildren();
       if (feedbackHandle) feedbackHandle.cancel();
     }
     function localSnapshot() {
@@ -2215,7 +2215,7 @@
         fbDiv.innerHTML = '<div class="math-fb-err">&#9888;&nbsp;' + friendlyError(String(err)) + '</div>';
       } finally {
         checkBtn.disabled = false;
-        if (feedbackBtn) feedbackBtn.disabled = false;
+        if (feedbackBtn) feedbackBtn.disabled = !feedbackHandle;
       }
     }
 

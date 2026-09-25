@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { loadPage } from './helpers/ai-context.mjs';
 
-function setup({mode = 'equivalent', question = 'Compute 6 times 7: _[SECRET_EXPECTED]', lang = 'en', graph = false} = {}) {
+function setup({mode = 'equivalent', question = 'Compute 6 times 7: _[SECRET_EXPECTED]', lang = 'en', graph = false, runtimeVersion} = {}) {
   const p = loadPage(`<div id="cell" class="math-exercise-cell" data-label="test" data-context-mode="none" data-mode="${mode}"><div class="math-exercise-question"></div><button class="math-check-btn">Check</button><button class="math-legend-btn">Help</button><button class="math-feedback-btn">Feedback</button><button class="math-reconfig-btn">Settings</button><div class="math-legend-panel" style="display:none"></div><div class="math-feedback-area"></div></div>`, {lang});
   const cell = p.document.querySelector('#cell');
   const rendered = p.api.renderTaskText(question, 'cell', '', 'col', mode);
@@ -13,6 +13,7 @@ function setup({mode = 'equivalent', question = 'Compute 6 times 7: _[SECRET_EXP
   let runs = 0, result = {status: 'wrong', score: 0, feedback: 'SECRET_CHECK_MESSAGE', expected: 'SECRET_RESULT'};
   p.window.mainPyodide = {loadPackage: async () => {}, globals: {set() {}}, runPythonAsync: async () => { runs++; return JSON.stringify(result); }};
   if (graph) cell.dataset.response = 'jsxgraph:graph';
+  if (runtimeVersion) p.window.AIFeedback.version = runtimeVersion;
   p.api.setupCell(cell);
   for (const input of cell.querySelectorAll('.math-input')) input.value = '40';
   const F = p.window.AIFeedback;
@@ -157,5 +158,15 @@ test('canonical math context excludes other shared activities and previous feedb
   assert.match(data(body).materials[0].text, /Allowed lesson/);
   assert.match(data(body).materials[0].text, /x\^2/);
   assert.doesNotMatch(JSON.stringify(body), /PRIVATE_|WRONG_GLYPHS/);
+  p.dom.window.close();
+});
+
+test('minimum-version gate survives editing and a successful Check', async () => {
+  const p = setup({runtimeVersion: '0.1.0'});
+  edit(p, '42'); p.result({status: 'correct', score: 1}); await check(p);
+  assert.ok(p.cell.querySelector('.math-fb-ok'));
+  assert.equal(p.cell.querySelector('.math-feedback-btn').disabled, true);
+  assert.match(p.cell.querySelector('.ai-feedback-output').textContent, /Update.*ai-feedback/);
+  p.cell.querySelector('.math-feedback-btn').click(); assert.equal(p.requests.length, 0);
   p.dom.window.close();
 });
