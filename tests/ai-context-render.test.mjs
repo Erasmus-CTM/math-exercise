@@ -66,7 +66,7 @@ for (const renderer of ['mathjax', 'katex']) {
           assert.doesNotMatch(payload, /SECRET_|data-answer/);
           assert.ok(payload.includes('[Answer]'));
           assert.ok(payload.includes('STUDENT_WORK'));
-          const task = /<task>([\s\S]*?)<\/task>/.exec(payload)[1];
+          const task = JSON.parse(payload).task;
           assert.ok(task.includes(draw ? String.raw`\frac{4\pi\mu_0N^2a^2}{l}` : String.raw`\frac{N}{l}`));
           assert.doesNotMatch(task, /STUDENT_WORK/);
         }

@@ -1,0 +1,12 @@
+{
+  "repository": "Erasmus-CTM/ai-feedback",
+  "version": "0.2.0",
+  "revision": "35dfe705db4cee98e6eade38a301f756d67c6ab8",
+  "source_dirty": false,
+  "files": {
+    "feedback-core.js": "62ec5853a1812eed06003a1d9b92f5fd39a0000813c463d7bb16bc541cd1be4e",
+    "feedback-dom.js": "e86e4ea246b88ad8602ca1dd0ef9602b5214b4c75749fc779967311c8febd9b7",
+    "ai-feedback.js": "281500ef51e72c90e281144b230ef99fc181243c61bbdf53da18a75db6b85e2a",
+    "ai-feedback.css": "49454716e416388f456a3d2c00201aa750d5260aa49d469f92cd59078bc544f1"
+  }
+}

@@ -1,5 +1,9 @@
 # Reliable AI feedback across OpenAI-compatible providers
 
+> Historical design record: provider transport, settings and rendering now live
+> in the shared ai-feedback runtime. See the README AI feedback section for
+> current behavior; provider presets and the old model picker are no longer shipped.
+
 ## Problem statement
 
 `math-exercise` can send feedback requests to many services that expose an

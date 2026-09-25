@@ -4,14 +4,16 @@ import { JSDOM } from 'jsdom';
 import katex from 'katex';
 
 const require = createRequire(import.meta.url);
+const shared = await Promise.all(['feedback-core.js', 'feedback-dom.js', 'ai-feedback.js'].map(name => readFile(new URL('../../_extensions/math-exercise/ai-feedback/' + name, import.meta.url), 'utf8')));
 const source = await readFile(new URL('../../_extensions/math-exercise/math-exercise.js', import.meta.url), 'utf8');
 
-export function loadPage(html = '') {
+export function loadPage(html = '', config = {}) {
   const dom = new JSDOM(html, { url: 'https://example.invalid/exercises', runScripts: 'outside-only' });
   const w = dom.window;
   // Exercise extraction and the real request builder, without CDN/Pyodide startup.
   w.document.addEventListener = () => {};
   w.__mathExerciseTestMode = true;
+  w.__mathExerciseConfig = config;
   const warnings = [];
   w.console.warn = (...args) => warnings.push(args.join(' '));
   const requests = [];
@@ -22,6 +24,8 @@ export function loadPage(html = '') {
       json: async () => ({ choices: [{ finish_reason: 'stop', message: { content: 'Which area carries the shared flux?' } }] }),
     };
   };
+  shared.forEach(code => w.eval(code));
+  w.AIFeedback.typesetFeedback = async () => {};
   w.eval(source);
   return { dom, window: w, document: w.document, api: w.__mathExerciseTestApi, warnings, requests };
 }
@@ -73,9 +77,9 @@ export async function clickFeedback(page, cell) {
     runPythonAsync: async () => JSON.stringify({ status: 'wrong', score: 0 }),
     globals: { set() {} },
   };
-  page.window.localStorage.setItem('math-exercise-llm-config', JSON.stringify({
+  page.window.AIFeedback.saveConfig({ mode: 'api', storage: 'local',
     baseUrl: 'https://example.invalid/v1', apiKey: 'test-only', model: 'test-model',
-  }));
+  });
   const count = page.requests.length;
   const button = cell.querySelector('.math-feedback-btn');
   button.click();

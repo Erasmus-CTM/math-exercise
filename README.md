@@ -557,18 +557,27 @@ A = _[pi * 49] cm²
 
 ## AI feedback
 
-Every exercise has a **Feedback** button. On the first click, the
-**"Set up AI feedback"** dialog opens:
+Every exercise has a **Feedback** button using the shared
+[ai-feedback runtime](https://github.com/Erasmus-CTM/ai-feedback). By default it
+builds a copyable prompt without an API account. The cogwheel opens the shared
+settings dialog for copy/API mode, base URL, model, API key and browser storage.
+No provider presets are bundled. Existing math credentials are available through
+an explicit import in that dialog; they are never selected silently.
 
-| Field | Meaning |
-|-------|---------|
-| Provider preset | fills in the base URL + example model for Cerebras, OpenRouter, OpenAI, or Ollama |
-| Base URL | the API endpoint, e.g. `https://api.cerebras.ai/v1` |
-| API key | stays strictly local in the browser |
-| Model | freely editable (e.g. `gpt-oss-120b`); **"Fetch models"** lists the provider's available models |
+**Check** runs the mathematical checker. **Feedback** does not run Python or the
+checker: it collects the current response and reuses only matching prior Check
+results. Editing, resizing or selecting another pool variant invalidates that
+evidence and pending feedback. Graph payloads stay local; only the explicitly
+provided AI summary and optional image are sent for feedback.
 
-Credentials are stored in `localStorage` and available on **all pages of the
-same project** – set up once, use everywhere.
+Unchanged standalone documents work because the extension ships an identical,
+generated copy of the shared runtime. Using both current filters loads one dependency
+and one settings dialog, regardless of filter order. If an older explicitly
+installed ai-feedback extension wins Quarto dependency selection, Check remains
+available and Feedback displays an instruction to upgrade to 0.2.0 or later. Maintainers refresh the
+fallback with `python scripts/sync-ai-feedback.py /path/to/ai-feedback`; its
+provenance records the source revision, dirty state and individual file hashes.
+The common ai-feedback builder rejects mismatched copies.
 
 ### Progressive hints
 
@@ -583,7 +592,8 @@ the feedback more concrete:
 | 4th+ | A concise complete worked solution with substitutions, calculations, and the final answer |
 
 The attempt count is stored per page path and exercise label in
-`localStorage`, so it survives a page reload.
+`sessionStorage`, so it survives a page reload within the browser session.
+Failed, cancelled and stale requests do not consume a hint.
 
 Before producing any hint, the tutor is instructed to treat the exact task and
 learning context as authoritative. It must preserve stated givens, grouping,
@@ -596,94 +606,28 @@ guiding question rather than invent an interpretation.
 
 ### How the feedback prompt is assembled
 
-The extension builds two messages for the OpenAI-compatible chat-completions
-request. The **system message** is assembled in this order:
+The shared API builds a structured request with task, materials, labelled current
+responses, private checker evidence, localized teaching criteria and an explicit
+hint step. Mathematics retains its English, German and Norwegian Bokmål teaching
+instructions: exact givens and notation, private assessment, short feedback,
+LaTeX formatting and the four levels above. Step four permits a full solution;
+earlier steps prohibit it.
 
-1. **Private assessment rules** – checker statuses may guide the response but
-   must never be quoted, summarized, or described as fields being "marked"
-   correct or incorrect. Correct work may be acknowledged naturally; the tutor
-   should otherwise move directly to the next mathematical idea.
-2. **Mathematical grounding rules** – the exact task and learning context are
-   authoritative. Givens, structure, notation, signs, units, domains,
-   assumptions, and constraints must be preserved, and unsupported plausibility
-   claims or imported conventions are forbidden.
-3. **Output rules** – use the document language, remain concise, render
-   mathematics with LaTeX delimiters, and output student-facing feedback only;
-   chain-of-thought, scratch work, hidden analysis, and reasoning tags are
-   forbidden.
-4. **Context rules** *(when context is present)* – use it to select the right
-   method and notation, but do not copy worked examples or prematurely reveal
-   formulas and values.
-5. **Current hint level** – levels 1–3 prohibit progressively less information;
-   only level 4 permits a complete solution.
-6. **Final language guard** – the requested output language is repeated as the
-   last system instruction and is also included as an explicit
-   `<output_language>` element in the user message. Responses containing an
-   obviously unexpected writing system are retried once with a localized
-   correction. A second mismatch is shown as a localized error instead of
-   displaying feedback in the wrong script.
-
-The **user message** contains clearly separated blocks:
-
-```xml
-<output_language code="nb">Norwegian Bokmål</output_language>
-<learning_context>...</learning_context>
-<task>...</task>
-<student_response>
-  <field label="...">student input</field>
-</student_response>
-<private_field_assessment never_quote="true">
-  <field label="..." score="...">correct | partial | incorrect | empty | invalid | submitted</field>
-  <exercise status="..." score="...">optional custom-checker feedback</exercise>
-</private_field_assessment>
-```
-
-There may be several `<learning_context>` and `<field>` blocks. The expected
-answer is never included. Built-in checks may include a private normalized score.
-For `mode: custom`, fields are marked only as submitted or empty and a single
-exercise-level assessment carries the joint result, because the checker may
-depend on all expressions together.
-
-Before display, the extension rejects empty responses and responses truncated
-by the provider's completion limit. It also detects leaked `<think>`,
-`<analysis>`, or `<reasoning>` tags. Such a response is never shown: the request
-is retried once with a corrective student-facing-only instruction. If the retry
-still leaks internal reasoning, a localized error is displayed instead. Failed
-requests do not consume a hint attempt. The automatic retry can result in one
-additional provider request.
+Evidence includes only statuses, finite scores and known matrix row/column
+assessments from an unchanged earlier Check. Expected answers, checker code,
+checker messages, arbitrary result properties and Python errors are excluded.
+Copy mode exposes the same prompt policy as API mode. Images must be attached
+separately when using a copied prompt.
 
 ### Provider and model portability
 
-See [Reliable AI feedback across OpenAI-compatible providers](docs/model-capability-adapter.md)
-for the problem statement, design decisions, compatibility guarantees, and
-test strategy behind the adapter.
-
-The normal request body deliberately uses only the portable OpenAI-compatible
-fields `model`, `messages`, and `max_tokens`. A small capability adapter adds
-optional low-reasoning controls only for model families with documented
-support. Currently this covers Kimi K2.5/K2.6, GLM-5.2, and GPT-OSS.
-
-OpenAI-compatible gateways do not expose these controls consistently. If a
-provider rejects an optional control with HTTP 400, 415, or 422, the extension
-removes it and retries once with the portable body. The result is cached for 30
-days per base URL and model, so later feedback requests avoid the rejected
-field. Image compatibility is tested separately: a provider that rejects image
-content can still retain an accepted reasoning control.
-
-The model picker is advisory rather than authoritative. Known instant and
-instruction models are listed first, models whose names clearly indicate
-reasoning are marked as potentially slow, and obvious embedding models are
-removed because they cannot generate feedback. Unknown model names remain
-available and receive the portable request without guessed provider fields.
-The extension never silently changes the selected model. A request is stopped
-after 60 seconds with a localized suggestion to choose an instant or
-non-reasoning model; timeouts are not automatically retried.
-
-Compatible with any **OpenAI-compatible API** (Cerebras, OpenRouter, OpenAI,
-Ollama, …). AI responses support a small safe Markdown subset and render
-LaTeX written with `\(...\)` or `\[...\]`. The prompt asks models to prefer
-short paragraphs and lists; a strict, HTML-escaped fallback renders valid
-Markdown tables responsively when a model emits one anyway.
+The shared runtime owns provider negotiation, the 60-second timeout,
+cancellation, capability caching and safe Markdown/LaTeX rendering. Mathematics
+adds a language-script validation retry and allows an image-unsupported endpoint
+to retry using the explicit graphical summary. Errors never consume hint steps.
+See the [shared API](https://github.com/Erasmus-CTM/ai-feedback/blob/main/docs/api.md)
+for current settings, request limits and transport behavior. The
+[original provider design note](docs/model-capability-adapter.md) is historical.
 
 ### AI feedback context
 
@@ -773,8 +717,8 @@ are needed.
 
 The AI request contains the selected context, the task, and the student's
 current response as individually labelled fields. A separate private assessment
-block contains only the corresponding checker statuses and normalized scores
-(`correct`, `partial`, `incorrect`, `empty`, `submitted`, or `invalid`) and is explicitly marked as internal evidence that must
+list, when a matching Check exists, contains only the corresponding checker statuses and normalized scores
+(`correct`, `partial`, `incorrect`, `empty`, or `invalid`) and is labelled as internal evidence that must
 never be quoted or summarized to the student. Everything is clearly delimited
 and accompanied by an instruction to treat it as data rather than as
 instructions (a prompt-injection mitigation, given that both course content and

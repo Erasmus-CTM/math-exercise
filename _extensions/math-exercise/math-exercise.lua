@@ -171,6 +171,11 @@ end
 local function ensureSetup()
   if hasSetup then return end
   hasSetup = true
+  quarto.doc.add_html_dependency({
+    name = "ai-feedback", version = "0.2.0",
+    scripts = {"ai-feedback/feedback-core.js", "ai-feedback/feedback-dom.js", "ai-feedback/ai-feedback.js"},
+    stylesheets = {"ai-feedback/ai-feedback.css"}
+  })
   local css = readFile("math-exercise.css")
   quarto.doc.include_text("in-header",
     "<style type=\"text/css\">\n" .. css .. "\n</style>")
@@ -814,7 +819,7 @@ local function walkBlocks(blocks, state)
     elseif b.t == "CodeBlock" then
       out:insert(b) -- code isn't useful prose context; don't accumulate
 
-    elseif b.t == "Div" and b.attr.classes:includes("math-exercise-context") then
+    elseif b.t == "Div" and (b.attr.classes:includes("math-exercise-context") or b.attr.classes:includes("ai-feedback-context") or b.attr.classes:includes("ai-context")) then
       appendContext(state, b)
       out:insert(preserveContextMath(b)) -- still rendered normally
 

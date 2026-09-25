@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
@@ -12,6 +13,7 @@ function loadBundle(lang, replies = []) {
   const requests = [];
   let replyIndex = 0;
   const context = {
+    URL, AbortController,
     console,
     document: { addEventListener() {} },
     setTimeout,
@@ -32,6 +34,10 @@ function loadBundle(lang, replies = []) {
     },
   };
   vm.createContext(context);
+  for (const name of ['feedback-core.js', 'feedback-dom.js']) {
+    vm.runInContext(readFileSync(new URL('../_extensions/math-exercise/ai-feedback/' + name, import.meta.url), 'utf8'), context);
+    context.window.AIFeedback = context.AIFeedback;
+  }
   vm.runInContext(source, context);
   return { api: context.window.__mathExerciseTestApi, requests };
 }

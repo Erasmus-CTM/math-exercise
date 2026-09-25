@@ -503,149 +503,8 @@
     return msg;
   }
 
-  // Sanitizes LLM output: escapes HTML first (prevents XSS), then re-adds a
-  // deliberately small Markdown subset as safe HTML. Block parsing avoids raw
-  // list markers and gives paragraphs/display math predictable spacing.
-  function simpleMarkdownInline(text) {
-    return text
-      .replace(/\*\*([^\n]*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*([^\n]*?)\*/g,     '<em>$1</em>')
-      .replace(/`([^`\n]*)`/g,        '<code>$1</code>');
-  }
+  function simpleMarkdown(text) { return window.AIFeedback.renderMarkdown(text); }
 
-  function splitMarkdownTableRow(line) {
-    var text = line.trim();
-    if (text.charAt(0) === '|') text = text.slice(1);
-    if (text.charAt(text.length - 1) === '|') text = text.slice(0, -1);
-    var cells = [], cell = '';
-    for (var i = 0; i < text.length; i++) {
-      var ch = text.charAt(i);
-      if (ch === '|' && (i === 0 || text.charAt(i - 1) !== '\\')) {
-        cells.push(cell.trim());
-        cell = '';
-      } else {
-        cell += ch;
-      }
-    }
-    cells.push(cell.trim());
-    return cells;
-  }
-
-  // Deliberately strict GFM-table fallback.  Requiring at least two columns,
-  // a separator row, one data row, and an equal cell count prevents ordinary
-  // prose or mathematical |x| notation from being mistaken for a table.
-  function markdownTableAt(lines, start) {
-    if (start + 2 >= lines.length || lines[start].indexOf('|') < 0) return null;
-    var header = splitMarkdownTableRow(lines[start]);
-    var separators = splitMarkdownTableRow(lines[start + 1]);
-    if (header.length < 2 || separators.length !== header.length ||
-        !separators.every(function (cell) { return /^:?-{3,}:?$/.test(cell); })) return null;
-
-    var rows = [], i = start + 2;
-    while (i < lines.length && lines[i].trim() && lines[i].indexOf('|') >= 0) {
-      var row = splitMarkdownTableRow(lines[i]);
-      if (row.length !== header.length) break;
-      rows.push(row);
-      i++;
-    }
-    if (rows.length === 0) return null;
-
-    function renderRow(tag, cells) {
-      return '<tr>' + cells.map(function (cell) {
-        return '<' + tag + '>' + simpleMarkdownInline(cell) + '</' + tag + '>';
-      }).join('') + '</tr>';
-    }
-    return {
-      html: '<div class="math-fb-table-wrap"><table class="math-fb-table"><thead>' +
-        renderRow('th', header) + '</thead><tbody>' + rows.map(function (row) {
-          return renderRow('td', row);
-        }).join('') + '</tbody></table></div>',
-      next: i,
-    };
-  }
-
-  function simpleMarkdown(text) {
-    var lines = escHtml(String(text).replace(/\r\n?/g, '\n')).split('\n');
-    var out = [], paragraph = [], listType = null, listItems = [];
-
-    function flushParagraph() {
-      if (!paragraph.length) return;
-      out.push('<p>' + simpleMarkdownInline(paragraph.join(' ')) + '</p>');
-      paragraph = [];
-    }
-    function flushList() {
-      if (!listType) return;
-      out.push('<' + listType + '>' + listItems.map(function (item) {
-        return '<li>' + simpleMarkdownInline(item) + '</li>';
-      }).join('') + '</' + listType + '>');
-      listType = null;
-      listItems = [];
-    }
-
-    for (var i = 0; i < lines.length; i++) {
-      var line = lines[i], trimmed = line.trim(), match;
-      if (!trimmed) {
-        flushParagraph();
-        if (listType) {
-          var j = i + 1;
-          while (j < lines.length && !lines[j].trim()) j++;
-          var next = j < lines.length ? lines[j].trim() : '';
-          var continuesList = listType === 'ul'
-            ? /^[-*+]\s+/.test(next)
-            : /^\d+[.)]\s+/.test(next);
-          if (!continuesList) flushList();
-        }
-        continue;
-      }
-
-      var table = markdownTableAt(lines, i);
-      if (table) {
-        flushParagraph(); flushList();
-        out.push(table.html);
-        i = table.next - 1;
-        continue;
-      }
-
-      // Keep display-TeX delimiters and content together for KaTeX auto-render.
-      if (trimmed.indexOf('$$') === 0 || trimmed.indexOf('\\[') === 0) {
-        flushParagraph(); flushList();
-        var closing = trimmed.indexOf('$$') === 0 ? '$$' : '\\]';
-        var math = [line];
-        while (math[math.length - 1].trim().slice(-closing.length) !== closing && i + 1 < lines.length) {
-          math.push(lines[++i]);
-        }
-        out.push('<div class="math-fb-display">' + math.join('\n') + '</div>');
-        continue;
-      }
-
-      match = trimmed.match(/^[-*+]\s+(.+)$/);
-      if (match) {
-        flushParagraph();
-        if (listType && listType !== 'ul') flushList();
-        listType = 'ul';
-        listItems.push(match[1]);
-        continue;
-      }
-      match = trimmed.match(/^\d+[.)]\s+(.+)$/);
-      if (match) {
-        flushParagraph();
-        if (listType && listType !== 'ol') flushList();
-        listType = 'ol';
-        listItems.push(match[1]);
-        continue;
-      }
-
-      flushList();
-      paragraph.push(trimmed);
-    }
-    flushParagraph();
-    flushList();
-    return out.join('');
-  }
-
-  // Loads a script exactly once. If its tag already exists but has not finished
-  // loading, wait for its load event instead of resolving immediately. Otherwise,
-  // a second extension could access globals that do not exist yet.
   function loadScript(src) {
     return new Promise(function (resolve, reject) {
       var existing = document.querySelector('script[src="' + src + '"]');
@@ -1686,16 +1545,6 @@
     return { response: response, ai: null };
   }
 
-  // Shared by runCheck and doFeedback so the empty/score-0 fallback and the
-  // collect-then-check sequence for mode: custom exist in exactly one place.
-  async function collectAndCheckCustom(fieldIds, opts, includeAI, structuredInputs) {
-    var transport = await collectCustomResponse(fieldIds, opts, includeAI, structuredInputs);
-    var result = transport.empty
-      ? { status: 'empty', score: 0 }
-      : await checkCustom(transport.response, opts);
-    return { transport: transport, result: result };
-  }
-
   function externalAISummary(ai) {
     if (!ai || ai.summary === undefined || ai.summary === null) return '';
     var text = typeof ai.summary === 'string' ? ai.summary : JSON.stringify(ai.summary);
@@ -1816,437 +1665,10 @@
   // LLM / AI-Feedback  (OpenAI-compatible API, config stored in localStorage)
   // ---------------------------------------------------------------------------
 
-  var LLM_CFG_KEY = 'math-exercise-llm-config';
-  var LLM_CNT_NS  = 'math-fb-cnt';
-  var LLM_CAP_NS  = 'math-exercise-model-capability-v1';
-  var LLM_CAP_TTL = 30 * 24 * 60 * 60 * 1000;
-  var LLM_TIMEOUT_MS = 60000;
-
-  function loadCfg()    { try { return JSON.parse(localStorage.getItem(LLM_CFG_KEY) || 'null'); } catch(e) { return null; } }
-  function saveCfg(cfg) { try { localStorage.setItem(LLM_CFG_KEY, JSON.stringify(cfg)); } catch(e) {} }
-  function getCnt(lbl)  { try { return parseInt(localStorage.getItem(LLM_CNT_NS + '|' + location.pathname + '|' + lbl) || '0'); } catch(e) { return 0; } }
-  function incCnt(lbl)  { var n = getCnt(lbl) + 1; try { localStorage.setItem(LLM_CNT_NS + '|' + location.pathname + '|' + lbl, String(n)); } catch(e) {} return n; }
-
-  function capabilityKey(baseUrl, model) {
-    return String(baseUrl || '').replace(/\/+$/, '').toLowerCase() + '|' +
-      String(model || '').trim().toLowerCase();
-  }
-
+  // Provider transport, credentials and settings belong to the shared runtime.
+  function modelPolicy(model) { return window.AIFeedback.modelPolicy(model); }
   function loadCapability(baseUrl, model) {
-    try {
-      var all = JSON.parse(localStorage.getItem(LLM_CAP_NS) || '{}');
-      var entry = all[capabilityKey(baseUrl, model)];
-      if (!entry || Date.now() - Number(entry.updatedAt || 0) > LLM_CAP_TTL) return null;
-      return entry.state === 'supported' || entry.state === 'unsupported' ? entry.state : null;
-    } catch (e) { return null; }
-  }
-
-  function saveCapability(baseUrl, model, state) {
-    try {
-      var all = JSON.parse(localStorage.getItem(LLM_CAP_NS) || '{}');
-      all[capabilityKey(baseUrl, model)] = { state: state, updatedAt: Date.now() };
-      localStorage.setItem(LLM_CAP_NS, JSON.stringify(all));
-    } catch (e) {}
-  }
-
-  // /models is not standardised beyond the model id.  Keep classification
-  // advisory and add request fields only for positively identified families.
-  function modelPolicy(model) {
-    var id = String(model || '').trim().toLowerCase();
-    var optionalBody = {};
-    var systemPrefix = '';
-
-    if (id.indexOf('gpt-oss') !== -1) {
-      systemPrefix = 'Reasoning: low\n\n';
-      optionalBody.include_reasoning = false;
-    }
-    if (/kimi-k2\.(?:5|6)(?:$|[-_.:/])/i.test(id) || /glm-5\.2(?:$|[-_.:/])/i.test(id)) {
-      optionalBody.thinking = { type: 'disabled' };
-    }
-
-    var incompatible = /(?:^|[/_.-])(?:embedding|embeddings|e5|bge|gte)(?:$|[/_.-])/i.test(id);
-    var slow = /(?:reasoning|thinking|magistral|gpt-oss|glm-5\.2|kimi-k2\.(?:5|6)(?!-instant)|minimax[^/]*m3)/i.test(id);
-    var recommended = !incompatible && !slow && /(?:instant|instruct|mistral-medium|borealis)/i.test(id);
-    return {
-      id: id,
-      incompatible: incompatible,
-      slow: slow,
-      recommended: recommended,
-      systemPrefix: systemPrefix,
-      optionalBody: optionalBody,
-      hasOptionalBody: Object.keys(optionalBody).length > 0,
-    };
-  }
-
-  // ---------------------------------------------------------------------------
-  // Provider presets
-  // ---------------------------------------------------------------------------
-
-  var ME_PRESETS = {
-    cerebras:   { label: L.presetCerebras,   baseUrl: 'https://api.cerebras.ai/v1',   model: 'gpt-oss-120b',                           modelsUrl: 'https://inference-docs.cerebras.ai/introduction' },
-    openrouter: { label: L.presetOpenrouter, baseUrl: 'https://openrouter.ai/api/v1', model: 'meta-llama/llama-3.3-70b-instruct:free', modelsUrl: 'https://openrouter.ai/models?max_price=0' },
-    openai:     { label: L.presetOpenai,     baseUrl: 'https://api.openai.com/v1',    model: 'gpt-4o-mini',                            modelsUrl: 'https://platform.openai.com/docs/models' },
-    ollama:     { label: L.presetOllama,     baseUrl: 'http://localhost:11434/v1',    model: '' },
-  };
-
-  // ---------------------------------------------------------------------------
-  // Config modal (singleton)
-  // ---------------------------------------------------------------------------
-
-  var _modal = null;
-  var _meFetchedModels = [];
-
-  function meMakeField(labelText, controlEl) {
-    var wrap = document.createElement('div');
-    wrap.className = 'math-modal-field';
-    var span = document.createElement('span');
-    span.textContent = labelText;
-    wrap.appendChild(span);
-    wrap.appendChild(controlEl);
-    return wrap;
-  }
-
-  function meFreeModel(m) {
-    if (typeof m.id === 'string' && m.id.endsWith(':free')) return true;
-    var p = m.pricing;
-    if (p && ('prompt' in p || 'completion' in p))
-      return Number(p.prompt || 0) === 0 && Number(p.completion || 0) === 0;
-    return null;
-  }
-
-  function getModal() {
-    if (_modal) return _modal;
-
-    var backdrop = document.createElement('div');
-    backdrop.className = 'math-modal-backdrop';
-    backdrop.style.display = 'none';
-
-    var dialog = document.createElement('div');
-    dialog.className = 'math-modal';
-    dialog.setAttribute('role', 'dialog');
-
-    // --- Header ---
-    var header = document.createElement('div');
-    header.className = 'math-modal-header';
-    var title = document.createElement('strong');
-    title.textContent = L.modalTitle;
-    var closeBtn = document.createElement('button');
-    closeBtn.className = 'math-modal-close';
-    closeBtn.type = 'button';
-    closeBtn.setAttribute('aria-label', L.modalClose);
-    closeBtn.innerHTML = '&times;';
-    header.appendChild(title);
-    header.appendChild(closeBtn);
-
-    // --- Body ---
-    var body = document.createElement('div');
-    body.className = 'math-modal-body';
-
-    var hint = document.createElement('p');
-    hint.className = 'math-modal-hint';
-    hint.textContent = L.modalHint;
-    body.appendChild(hint);
-
-    // Preset dropdown
-    var presetSel = document.createElement('select');
-    presetSel.className = 'math-modal-input';
-    presetSel.add(new Option(L.presetPlaceholder, ''));
-    for (var pk in ME_PRESETS) presetSel.add(new Option(ME_PRESETS[pk].label, pk));
-    body.appendChild(meMakeField(L.fieldPreset, presetSel));
-
-    // Base URL
-    var urlInput = document.createElement('input');
-    urlInput.type = 'text';
-    urlInput.className = 'math-modal-input';
-    urlInput.placeholder = L.phBaseUrl;
-    urlInput.autocomplete = 'off';
-    body.appendChild(meMakeField('Base URL', urlInput));
-
-    // API Key
-    var keyInput = document.createElement('input');
-    keyInput.type = 'password';
-    keyInput.className = 'math-modal-input';
-    keyInput.placeholder = L.phApiKey;
-    keyInput.autocomplete = 'off';
-    body.appendChild(meMakeField('API Key', keyInput));
-
-    // Model input + fetch button
-    var modelInput = document.createElement('input');
-    modelInput.type = 'text';
-    modelInput.className = 'math-modal-input';
-    modelInput.placeholder = L.phModel;
-    modelInput.autocomplete = 'off';
-
-    var fetchBtn = document.createElement('button');
-    fetchBtn.type = 'button';
-    fetchBtn.className = 'btn btn-light btn-sm';
-    fetchBtn.textContent = L.fetchModelsBtn;
-
-    var modelRow = document.createElement('div');
-    modelRow.className = 'math-modal-inputrow';
-    modelRow.appendChild(modelInput);
-    modelRow.appendChild(fetchBtn);
-    body.appendChild(meMakeField(L.fieldModel, modelRow));
-
-    // Model hint (link when auto-fetch fails)
-    var modelHintEl = document.createElement('div');
-    modelHintEl.className = 'math-modal-model-hint';
-    modelHintEl.style.display = 'none';
-    body.appendChild(modelHintEl);
-
-    // Model list (shown after successful fetch)
-    var modelListDiv = document.createElement('div');
-    modelListDiv.className = 'math-modal-modellist';
-    modelListDiv.style.display = 'none';
-
-    var modelListInfo = document.createElement('div');
-    modelListInfo.className = 'math-modal-modellist-info';
-
-    var freeOnlyLabel = document.createElement('label');
-    var freeOnlyCb = document.createElement('input');
-    freeOnlyCb.type = 'checkbox';
-    freeOnlyCb.checked = true;
-    freeOnlyLabel.appendChild(freeOnlyCb);
-    freeOnlyLabel.appendChild(document.createTextNode(L.freeModelsOnly));
-
-    var modelPicker = document.createElement('select');
-    modelPicker.className = 'math-modal-input';
-
-    var modelSelectionInfo = document.createElement('div');
-    modelSelectionInfo.className = 'math-modal-model-selection-info';
-
-    modelListDiv.appendChild(modelListInfo);
-    modelListDiv.appendChild(freeOnlyLabel);
-    modelListDiv.appendChild(modelPicker);
-    modelListDiv.appendChild(modelSelectionInfo);
-    body.appendChild(modelListDiv);
-
-    function updateModelSelectionInfo() {
-      var selected = _meFetchedModels.find(function (m) { return m.id === modelPicker.value; });
-      if (!selected) {
-        modelSelectionInfo.textContent = '';
-        return;
-      }
-      var policy = modelPolicy(selected.id);
-      var details = [];
-      if (policy.recommended) details.push(L.modelRecommended);
-      else if (policy.slow) details.push(L.modelSlow);
-      if (selected.free === true) details.push(L.modelFree);
-      else if (selected.free === false) details.push(L.modelPaid);
-      modelSelectionInfo.textContent = details.join(' · ');
-    }
-
-    function renderModelList() {
-      var hasPricing = _meFetchedModels.some(function (m) { return m.free !== null; });
-      freeOnlyLabel.style.display = hasPricing ? 'block' : 'none';
-      var models = _meFetchedModels;
-      if (hasPricing && freeOnlyCb.checked)
-        models = models.filter(function (m) { return m.free === true; });
-      models = models.slice().sort(function (a, b) {
-        var pa = modelPolicy(a.id), pb = modelPolicy(b.id);
-        var rankA = pa.recommended ? 0 : (pa.slow ? 2 : 1);
-        var rankB = pb.recommended ? 0 : (pb.slow ? 2 : 1);
-        return rankA - rankB || (b.free === true) - (a.free === true) || a.id.localeCompare(b.id);
-      });
-      modelPicker.innerHTML = '';
-      modelPicker.add(new Option(L.modelChoose(models.length), ''));
-      [
-        { label: L.modelRecommended, test: function (p) { return p.recommended; } },
-        { label: L.modelOther, test: function (p) { return !p.recommended && !p.slow; } },
-        { label: L.modelSlow, test: function (p) { return p.slow; } }
-      ].forEach(function (group) {
-        var groupModels = models.filter(function (m) { return group.test(modelPolicy(m.id)); });
-        if (groupModels.length === 0) return;
-        var optgroup = document.createElement('optgroup');
-        optgroup.label = group.label;
-        groupModels.forEach(function (m) {
-          optgroup.appendChild(new Option(m.id, m.id));
-        });
-        modelPicker.appendChild(optgroup);
-      });
-      if (models.some(function (m) { return m.id === modelInput.value; }))
-        modelPicker.value = modelInput.value;
-      modelListInfo.textContent = hasPricing ? L.modelListSelect : L.modelListNoPricing;
-      updateModelSelectionInfo();
-      modelListDiv.style.display = 'block';
-    }
-
-    freeOnlyCb.onchange = renderModelList;
-    modelPicker.onchange = function () {
-      if (modelPicker.value) modelInput.value = modelPicker.value;
-      updateModelSelectionInfo();
-    };
-
-    async function doFetchModels(isAuto) {
-      var baseUrl = urlInput.value.trim();
-      if (!baseUrl) {
-        if (isAuto) return;
-        modelListInfo.textContent = L.errNeedBaseUrl;
-        freeOnlyLabel.style.display = 'none';
-        modelPicker.innerHTML = '';
-        modelListDiv.style.display = 'block';
-        return;
-      }
-      var origLabel = fetchBtn.textContent;
-      fetchBtn.disabled = true;
-      fetchBtn.textContent = L.fetchModelsBusy;
-      try {
-        var headers = {};
-        var key = keyInput.value.trim();
-        if (key) headers['Authorization'] = 'Bearer ' + key;
-        var resp = await fetch(baseUrl.replace(/\/+$/, '') + '/models', { headers: headers });
-        if (!resp.ok) throw new Error('HTTP ' + resp.status + ' ' + resp.statusText);
-        var data = await resp.json();
-        var list = Array.isArray(data.data) ? data.data
-                 : Array.isArray(data.models) ? data.models : [];
-        _meFetchedModels = list
-          .map(function (m) {
-            return typeof m === 'string'
-              ? { id: m, free: null }
-              : { id: m && (m.id || m.name), free: meFreeModel(m || {}) };
-          })
-          .filter(function (m) {
-            return typeof m.id === 'string' && m.id && !modelPolicy(m.id).incompatible;
-          });
-        if (_meFetchedModels.length === 0) throw new Error(L.errNoModels);
-        var freeOnes = _meFetchedModels.filter(function (m) { return m.free === true; });
-        var pool = freeOnes.length > 0 ? freeOnes : _meFetchedModels;
-        pool = pool.slice().sort(function (a, b) {
-          var pa = modelPolicy(a.id), pb = modelPolicy(b.id);
-          var rankA = pa.recommended ? 0 : (pa.slow ? 2 : 1);
-          var rankB = pb.recommended ? 0 : (pb.slow ? 2 : 1);
-          return rankA - rankB || a.id.localeCompare(b.id);
-        });
-        modelInput.value = pool[0].id;
-        modelHintEl.style.display = 'none';
-        modelHintEl.innerHTML = '';
-        renderModelList();
-      } catch (err) {
-        if (isAuto) {
-          var preset = ME_PRESETS[presetSel.value];
-          if (preset && preset.modelsUrl) {
-            modelHintEl.innerHTML = L.modelHintKeyNeeded(preset.modelsUrl);
-            modelHintEl.style.display = '';
-          }
-          return;
-        }
-        modelListInfo.textContent = L.errModelListFailed(err.message || err);
-        freeOnlyLabel.style.display = 'none';
-        modelPicker.innerHTML = '';
-        modelListDiv.style.display = 'block';
-      } finally {
-        fetchBtn.disabled = false;
-        fetchBtn.textContent = origLabel;
-      }
-    }
-
-    fetchBtn.addEventListener('click', function () { doFetchModels(false); });
-
-    presetSel.addEventListener('change', function () {
-      var preset = ME_PRESETS[presetSel.value];
-      if (preset) {
-        urlInput.value = preset.baseUrl;
-        modelInput.value = '';
-        modelHintEl.style.display = 'none';
-        modelHintEl.innerHTML = '';
-        _meFetchedModels = [];
-        modelListDiv.style.display = 'none';
-        doFetchModels(true);
-      }
-    });
-
-    // Info button + help box
-    var infoBtn = document.createElement('button');
-    infoBtn.type = 'button';
-    infoBtn.className = 'btn btn-light btn-sm math-modal-info-btn';
-    infoBtn.textContent = L.infoBtn;
-
-    var helpDiv = document.createElement('div');
-    helpDiv.className = 'math-modal-help';
-    helpDiv.style.display = 'none';
-    helpDiv.innerHTML = L.helpBox;
-
-    infoBtn.addEventListener('click', function () {
-      helpDiv.style.display = helpDiv.style.display === 'none' ? 'block' : 'none';
-    });
-
-    body.appendChild(infoBtn);
-    body.appendChild(helpDiv);
-
-    // --- Footer ---
-    var footer = document.createElement('div');
-    footer.className = 'math-modal-footer';
-
-    var saveBtn = document.createElement('button');
-    saveBtn.type = 'button';
-    saveBtn.className = 'btn btn-primary';
-    saveBtn.textContent = L.saveBtn;
-
-    var cancelBtn = document.createElement('button');
-    cancelBtn.type = 'button';
-    cancelBtn.className = 'btn btn-light';
-    cancelBtn.textContent = L.cancelBtn;
-
-    footer.appendChild(saveBtn);
-    footer.appendChild(cancelBtn);
-
-    // --- Assemble ---
-    dialog.appendChild(header);
-    dialog.appendChild(body);
-    dialog.appendChild(footer);
-    backdrop.appendChild(dialog);
-    document.body.appendChild(backdrop);
-
-    // --- Behaviour ---
-    function close() { backdrop.style.display = 'none'; backdrop._cb = null; }
-
-    closeBtn.addEventListener('click', close);
-    cancelBtn.addEventListener('click', close);
-    backdrop.addEventListener('click', function (e) { if (e.target === backdrop) close(); });
-
-    saveBtn.addEventListener('click', function () {
-      var cfg = {
-        baseUrl: urlInput.value.trim(),
-        apiKey:  keyInput.value.trim(),
-        model:   modelInput.value.trim(),
-        preset:  presetSel.value,
-      };
-      if (!cfg.baseUrl || !cfg.apiKey || !cfg.model) {
-        hint.textContent = L.modalFillAll;
-        hint.style.color = '#dc3545';
-        return;
-      }
-      hint.textContent = L.modalHint;
-      hint.style.color = '';
-      saveCfg(cfg);
-      var cb = backdrop._cb;
-      close();
-      if (cb) cb(cfg);
-    });
-
-    // Store named refs on the backdrop element for showModal()
-    backdrop._urlInput   = urlInput;
-    backdrop._keyInput   = keyInput;
-    backdrop._modelInput = modelInput;
-    backdrop._presetSel  = presetSel;
-    backdrop._hint       = hint;
-
-    _modal = backdrop;
-    return backdrop;
-  }
-
-  function showModal(cb) {
-    var m = getModal(), cfg = loadCfg();
-    if (cfg) {
-      m._urlInput.value   = cfg.baseUrl || '';
-      m._keyInput.value   = cfg.apiKey  || '';
-      m._modelInput.value = cfg.model   || '';
-      if (cfg.preset) m._presetSel.value = cfg.preset;
-    }
-    m._hint.textContent = L.modalHint;
-    m._hint.style.color = '';
-    m._cb = cb;
-    m.style.display = 'flex';
+    return window.AIFeedback.createClient({ baseUrl: baseUrl, model: model }, { storage: typeof localStorage === 'undefined' ? null : localStorage }).loadCapability();
   }
 
   // ---------------------------------------------------------------------------
@@ -2317,6 +1739,7 @@
       if (el.matches(
         'script, style, noscript, template, button, select, ' +
         '.math-exercise-cell, .math-exercise-controls, .math-feedback-area, ' +
+        '.ai-feedback-activity, .ai-feedback-output, .ai-feedback-settings, ' +
         '.math-legend-panel, .math-dynamic-matrix-controls, [hidden], [aria-hidden="true"]'
       )) return;
 
@@ -2335,6 +1758,10 @@
       }
 
       // Authored context math survives either renderer and asynchronous loading.
+      if (el.hasAttribute('data-ai-feedback-tex')) {
+        math(el.dataset.aiFeedbackTex, el.dataset.aiFeedbackDisplay === 'true');
+        return;
+      }
       if (el.hasAttribute('data-math-exercise-tex')) {
         math(el.dataset.mathExerciseTex, el.dataset.mathExerciseDisplay === 'true');
         return;
@@ -2425,7 +1852,7 @@
         console.warn('math-exercise: context "' + id + '" was not found.');
         return;
       }
-      if (!el.classList.contains('math-exercise-context')) {
+      if (!(el.classList.contains('math-exercise-context') || el.classList.contains('ai-feedback-context') || el.classList.contains('ai-context'))) {
         console.warn(
           'math-exercise: element "' + id +
           '" is not a .math-exercise-context and was ignored.'
@@ -2499,130 +1926,25 @@
       '\n</private_field_assessment>';
   }
 
+  // Compatibility entry point for the domain prompt regression suite. All HTTP,
+  // compatibility retries and cancellation are implemented by ai-feedback.
   async function callLLM(question, answer, assessment, contexts, n, cfg, aiVisual) {
-    async function requestOnce(extraSystemPrompt) {
-      var policy = modelPolicy(cfg.model);
-
-      var system = sysPrompt(n, contexts.length > 0) +
-        (extraSystemPrompt ? ' ' + extraSystemPrompt : '');
-      if (aiVisual && aiVisual.image) system += ' ' + L.promptVisual;
-      system = policy.systemPrefix + system;
-
-      var promptText = buildUserPrompt(question, answer, assessment, contexts);
-      var userContent = promptText;
-      if (aiVisual && typeof aiVisual.image === 'string' && /^data:image\/(?:png|jpeg|jpg|webp);base64,/i.test(aiVisual.image)) {
-        userContent = [
-          { type: 'text', text: promptText },
-          { type: 'image_url', image_url: { url: aiVisual.image } }
-        ];
-      }
-
-      function makeBody(useVisual, useOptionalBody) {
-        var body = {
-          model: cfg.model,
-          messages: [
-            { role: 'system', content: system },
-            { role: 'user', content: useVisual ? userContent : promptText },
-          ],
-
-          // Some reasoning endpoints count hidden and visible output together.
-          // Keep enough headroom even though the visible hint is at most 120 words.
-          max_tokens: 8192,
-        };
-        if (useOptionalBody) {
-          Object.keys(policy.optionalBody).forEach(function (key) {
-            body[key] = policy.optionalBody[key];
-          });
-        }
-        return body;
-      }
-
-      async function send(body) {
-        var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-        var timer = controller ? setTimeout(function () { controller.abort(); }, LLM_TIMEOUT_MS) : null;
-        try {
-          return await fetch(cfg.baseUrl.replace(/\/+$/, '') + '/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Content-Type':  'application/json',
-              'Authorization': 'Bearer ' + cfg.apiKey,
-            },
-            body: JSON.stringify(body),
-            signal: controller ? controller.signal : undefined,
-          });
-        } catch (err) {
-          if (err && err.name === 'AbortError') throw new Error(L.errModelTimeout);
-          throw err;
-        } finally {
-          if (timer) clearTimeout(timer);
-        }
-      }
-
-      var retryStatuses = [400, 415, 422];
-      var useVisual = Array.isArray(userContent);
-      var useOptionalBody = policy.hasOptionalBody &&
-        loadCapability(cfg.baseUrl, cfg.model) !== 'unsupported';
-      var resp = await send(makeBody(useVisual, useOptionalBody));
-
-      // Image support and optional reasoning controls fail with the same broad
-      // class of compatibility errors.  Remove them separately so a provider
-      // that accepts one but not the other is learned correctly.
-      if (!resp.ok && useVisual && retryStatuses.indexOf(resp.status) !== -1) {
-        useVisual = false;
-        resp = await send(makeBody(false, useOptionalBody));
-      }
-      if (!resp.ok && useOptionalBody && retryStatuses.indexOf(resp.status) !== -1) {
-        useOptionalBody = false;
-        saveCapability(cfg.baseUrl, cfg.model, 'unsupported');
-        resp = await send(makeBody(false, false));
-      } else if (resp.ok && useOptionalBody) {
-        saveCapability(cfg.baseUrl, cfg.model, 'supported');
-      }
-      if (!resp.ok) { var t = await resp.text(); throw new Error('API ' + resp.status + ': ' + t.slice(0, 200)); }
-      var data = await resp.json();
-      var choice = data && data.choices && data.choices[0];
-      if (choice && choice.finish_reason === 'length') {
-        throw new Error(L.errModelTruncated);
-      }
-
-      var content = choice && choice.message && choice.message.content;
-      // A few OpenAI-compatible providers return content as typed text parts.
-      if (Array.isArray(content)) {
-        content = content.map(function (part) {
-          return part && part.type === 'text' && typeof part.text === 'string' ? part.text : '';
-        }).join('');
-      }
-      if (typeof content !== 'string' || !content.trim()) {
-        throw new Error(L.errModelEmpty);
-      }
-      return content.trim();
+    var content = buildUserPrompt(question, answer, assessment, contexts);
+    if (aiVisual && aiVisual.image && /^data:image\/(?:png|jpeg|jpg|webp);base64,/i.test(aiVisual.image)) {
+      content = [{ type: 'text', text: content }, { type: 'image_url', image_url: { url: aiVisual.image } }];
     }
+    var result;
+    try { result = await window.AIFeedback.createClient(cfg, { storage: typeof localStorage === 'undefined' ? null : localStorage }).complete([
+      { role: 'system', content: sysPrompt(n, contexts.length > 0) + (aiVisual && aiVisual.image ? ' ' + L.promptVisual : '') },
+      { role: 'user', content: content }
+    ], { imageFallback: 'text', validate: validateFeedbackLanguage });
+    } catch (error) { if (error.code === 'VALIDATION') throw new Error(L.errModelLanguage); throw error; }
+    return result.text;
+  }
 
-    function leaksReasoning(text) {
-      return /<\/?(?:think|analysis|reasoning)(?:\s[^>]*)?>/i.test(text);
-    }
-
-    function usesUnexpectedScript(text) {
-      // All currently shipped feedback languages use Latin script.  A compact
-      // script guard catches the reported Russian failure and other obvious
-      // language drift without adding an unreliable short-text detector.
-      var foreign = String(text).match(/[\u0400-\u052f\u0590-\u05ff\u0600-\u06ff\u0750-\u077f\u0900-\u097f\u0e00-\u0e7f\u3040-\u30ff\u4e00-\u9fff\uac00-\ud7af]/g) || [];
-      return foreign.length >= 3;
-    }
-
-    var content = await requestOnce('');
-    var wrongLanguage = usesUnexpectedScript(content);
-    var reasoningLeak = leaksReasoning(content);
-    if (wrongLanguage || reasoningLeak) {
-      content = await requestOnce(
-        (wrongLanguage ? L.promptLanguageRetry : '') +
-        (wrongLanguage && reasoningLeak ? ' ' : '') +
-        (reasoningLeak ? L.promptReasoningRetry : '')
-      );
-    }
-    if (usesUnexpectedScript(content)) throw new Error(L.errModelLanguage);
-    if (leaksReasoning(content)) throw new Error(L.errModelReasoningLeak);
-    return content;
+  function validateFeedbackLanguage(text) {
+    var foreign = String(text).match(/[\u0400-\u052f\u0590-\u05ff\u0600-\u06ff\u0750-\u077f\u0900-\u097f\u0e00-\u0e7f\u3040-\u30ff\u4e00-\u9fff\uac00-\ud7af]/g) || [];
+    return foreign.length >= 3 ? L.promptLanguageRetry : '';
   }
 
   // ---------------------------------------------------------------------------
@@ -2723,6 +2045,37 @@
     var legendBuilt = false;
     var questionDiv = cell.querySelector('.math-exercise-question');
     var structuralLabelById = {};
+    var checkedEvidence = null;
+    var feedbackHandle = null;
+    var revision = 0;
+    var visualKey = null, visual = null;
+    function invalidateFeedback() {
+      revision++;
+      checkedEvidence = null;
+      if (output) output.replaceChildren();
+      if (feedbackHandle) feedbackHandle.cancel();
+    }
+    function localSnapshot() {
+      refreshFields();
+      return JSON.stringify({ task: questionText(cell, fieldIds, fieldLabel),
+        variant: poolTasks ? idx : null,
+        fields: fieldIds.map(function (id, i) { return [id, fieldLabel(i), document.getElementById(id).value.trim()]; }),
+        matrices: collectDynamicMatrixInputs(questionDiv), options: checkOpts, revision: revision });
+    }
+    function safeResult(result) {
+      var status = normalizedAssessmentStatus(result.status);
+      if (!status && /^(rejected|not_exact|not_form)$/.test(result.status)) status = result.score > 0 ? 'partial' : 'incorrect';
+      var value = { status: status || 'invalid' };
+      if (typeof result.score === 'number' && Number.isFinite(result.score)) value.score = result.score;
+      var allowed = {};
+      Object.keys(collectDynamicMatrixInputs(questionDiv)).forEach(function (name) {
+        if (result.assessment && result.assessment[name]) allowed[name] = result.assessment[name];
+      });
+      var matrices = structuredAssessmentXml(allowed);
+      if (matrices) value.matrices = matrices;
+      return value;
+    }
+
 
     function rememberCurrentLabels() {
       fieldIds.forEach(function (id, index) {
@@ -2744,6 +2097,7 @@
     }
 
     function clearAssessmentAfterResize() {
+      invalidateFeedback();
       questionDiv.querySelectorAll('.math-input').forEach(function (input) {
         input.classList.remove('math-input-ok', 'math-input-dependent', 'math-input-partial', 'math-input-wrong', 'math-input-err');
       });
@@ -2795,7 +2149,12 @@
 
     // ---- Check ----
     async function runCheck() {
+      if (checkBtn.disabled) return;
       refreshFields();
+      if (feedbackHandle) feedbackHandle.cancel();
+      checkedEvidence = null;
+      var checkSnapshot = localSnapshot();
+      var results = [];
       checkBtn.disabled = true;
       if (feedbackBtn) feedbackBtn.disabled = true;
       fbDiv.innerHTML = '<div class="math-fb-checking">' + L.checking + '</div>';
@@ -2805,9 +2164,11 @@
         var parts = [];
         var fieldElements = fieldIds.map(function (id) { return document.getElementById(id); });
         if (mode === 'custom') {
-          var custom = (await collectAndCheckCustom(
-            fieldIds, checkOpts, false, collectDynamicMatrixInputs(questionDiv)
-          )).result;
+          var transport = await collectCustomResponse(fieldIds, checkOpts, false, collectDynamicMatrixInputs(questionDiv));
+          if (checkSnapshot !== localSnapshot()) return;
+          var custom = transport.empty ? { status: 'empty', score: 0 } : await checkCustom(transport.response, checkOpts);
+          if (checkSnapshot !== localSnapshot()) return;
+          checkedEvidence = { snapshot: checkSnapshot, graph: JSON.stringify(transport.response), results: [safeResult(custom)] };
           applyCustomAssessment(questionDiv, custom);
           var customMessage = custom.feedback ? ' ' + escHtml(custom.feedback) : '';
           var customPct = Math.round((Number(custom.score) || 0) * 100);
@@ -2832,6 +2193,8 @@
           if (!el) continue;
           var prefix = fieldIds.length > 1 ? escHtml(fieldLabel(i)) + ': ' : '';
           var res    = await checkField(el, mode, checkOpts);
+          if (checkSnapshot !== localSnapshot()) return;
+          results.push({ label: fieldLabel(i), result: safeResult(res) });
           el.classList.remove('math-input-ok', 'math-input-dependent', 'math-input-partial', 'math-input-wrong', 'math-input-err');
           if (typeof res.score === 'number') { totalScore += res.score; scoredFields++; }
           if      (res.status === 'empty')    { parts.push('<div class="math-fb-empty">'  + prefix + L.resEmpty + '</div>'); }
@@ -2846,6 +2209,7 @@
         if (checkOpts.partialCredit && fieldIds.length > 1 && scoredFields === fieldIds.length) {
           parts.push('<div class="math-fb-score">' + L.resScore(Math.round(100 * totalScore / scoredFields)) + '</div>');
         }
+        checkedEvidence = { snapshot: checkSnapshot, results: results };
         fbDiv.innerHTML = parts.join('');
       } catch (err) {
         fbDiv.innerHTML = '<div class="math-fb-err">&#9888;&nbsp;' + friendlyError(String(err)) + '</div>';
@@ -2865,18 +2229,21 @@
       });
     }
 
+    questionDiv.addEventListener('input', function () { invalidateFeedback(); fbDiv.innerHTML = ''; });
     checkBtn.addEventListener('click', runCheck);
     attachKeyListeners();
 
     // ---- Pool reload ----
     if (reloadBtn && poolTasks) {
       reloadBtn.addEventListener('click', function () {
+        invalidateFeedback();
         var cur;
         try { cur = parseInt(sessionStorage.getItem(poolKey)); } catch(e) {}
         var next = cur;
         if (poolTasks.length > 1) {
           while (next === cur) { next = Math.floor(Math.random() * poolTasks.length); }
         }
+        idx = next;
         try { sessionStorage.setItem(poolKey, String(next)); } catch(e) {}
 
         var r = renderTaskText(poolTasks[next], cell.id, vars, vecdir, mode);
@@ -2897,124 +2264,69 @@
       });
     }
 
-    // ---- AI Feedback ----
+    // ---- Shared AI Feedback adapter: collection never invokes Python ----
     if (feedbackBtn) {
-      feedbackBtn.addEventListener('click', function () {
-        refreshFields();
-        var structuredInputs = collectDynamicMatrixInputs(questionDiv);
-        var responses = fieldIds.map(function (id, index) {
-          var el = document.getElementById(id);
-          return { index: index + 1, label: fieldLabel(index), value: el ? el.value.trim() : '', element: el };
-        });
-        var zeroSizedMatrixSubmitted = Object.keys(structuredInputs).some(function (name) {
-          return structuredInputs[name].rows === 0 || structuredInputs[name].cols === 0;
-        });
-        if (!checkOpts.responseSource && !zeroSizedMatrixSubmitted &&
-            !responses.some(function (field) { return field.value !== ''; })) {
-          fbDiv.innerHTML = '<div class="math-fb-empty">' + L.needAnswerFirst + '</div>';
-          return;
+      var F = window.AIFeedback;
+      var output = document.createElement('div');
+      output.className = 'ai-feedback-output';
+      fbDiv.after(output);
+      output.setAttribute('aria-live', 'polite');
+      var version = F && String(F.version || '').split('.').map(Number);
+      if (!version || !(version[0] > 0 || version[1] >= 2)) {
+        feedbackBtn.disabled = true;
+        output.textContent = 'Math feedback requires ai-feedback 0.2.0 or later. Update the installed ai-feedback extension and render this page again. Check remains available.';
+        if (reconfigBtn && F) reconfigBtn.replaceWith(F.settingsButton(L.outputLanguageCode));
+        return;
+      }
+      feedbackHandle = F.attach({
+        id: 'math-' + label, button: feedbackBtn, output: output,
+        uiLanguage: L.outputLanguageCode,
+        client: { request: async function (request, options) {
+          if (F.loadConfig().mode !== 'api') return { text: F.buildPrompt(request), format: 'prompt' };
+          return F.getClient().complete(F.buildMessages(request), {
+            signal: options.signal, imageFallback: 'text', validate: validateFeedbackLanguage
+          });
+        } },
+        getRequest: async function (state) {
+          var before = localSnapshot();
+          var structuredInputs = collectDynamicMatrixInputs(questionDiv);
+          var responses = fieldIds.map(function (id, i) {
+            return { label: fieldLabel(i), value: document.getElementById(id).value.trim(), element: document.getElementById(id) };
+          });
+          var zeroSized = Object.keys(structuredInputs).some(function (name) {
+            return structuredInputs[name].rows === 0 || structuredInputs[name].cols === 0;
+          });
+          if (!checkOpts.responseSource && !zeroSized && !responses.some(function (field) { return field.value; })) throw new Error(L.needAnswerFirst);
+          var external = checkOpts.responseSource ? await collectCustomResponse(fieldIds, checkOpts, true, structuredInputs) : null;
+          if (before !== localSnapshot()) throw new Error('The response changed. Request feedback again.');
+          var evidence = checkedEvidence && checkedEvidence.snapshot === before &&
+            (!external || checkedEvidence.graph === JSON.stringify(external.response)) ? checkedEvidence.results : [];
+          var level = Math.min(state.hintLevel, 4);
+          var ai = external && external.ai;
+          var key = external ? JSON.stringify([external.response, externalAISummary(ai)]) : null;
+          if (key !== visualKey) { visualKey = key; visual = ai && ai.image; }
+          if (ai) ai = { summary: ai.summary, image: visual };
+          return {
+            _responseIdentity: external ? JSON.stringify(external.response) : before,
+            profile: 'mathematics', task: questionText(cell, fieldIds, fieldLabel),
+            materials: resolveContexts(cell).map(function (ctx) { return { id: ctx.id || 'context', role: 'context', text: ctx.content }; }),
+            responses: [{ id: 'answer', format: 'text', value: external
+              ? (externalAISummary(ai) || 'Interactive graphical response submitted; no textual summary is available.')
+              : expressionAnswersXml(responses, structuredInputs) }],
+            criteria: [L.promptResponseReview, L.promptGrounding, L.promptNoReasoning, L.promptFormatting, L.promptBase, L.promptContext, L.promptVisual, L.promptLanguageGuard],
+            evidence: evidence.map(function (result) { return { label: 'Private check assessment', text: JSON.stringify(result) }; }),
+            attachments: ai && ai.image && /^data:image\/(?:png|jpeg|jpg|webp);base64,/i.test(ai.image)
+              ? [{ id: 'graph', role: 'response', label: 'Current graph', dataUrl: ai.image }] : [],
+            feedback: { mode: 'hints', language: L.outputLanguageCode, level: level, maxWords: 120,
+              allowFullRewrite: level === 4, steps: [L.promptHint1, L.promptHint2, L.promptHint3, L.promptHint4] }
+          };
         }
-        var question = questionText(cell, fieldIds, fieldLabel);
-        var contexts = resolveContexts(cell);
-
-        async function doFeedback(cfg) {
-          // Failed/empty/truncated requests must not consume a hint attempt.
-          var n = getCnt(label) + 1;
-          feedbackBtn.disabled = true;
-          checkBtn.disabled = true;
-          fbDiv.innerHTML = '<div class="math-fb-checking">' + L.fetchingFeedback + '</div>';
-          try {
-            await ensureSympy();
-            await ensurePackages(checkOpts.packages);
-            var overallAssessment = '';
-            var structuredAssessment = {};
-            var externalAI = null;
-            if (mode === 'custom') {
-              var customOutcome = await collectAndCheckCustom(fieldIds, checkOpts, true, structuredInputs);
-              externalAI = customOutcome.transport.ai;
-              var customResult = customOutcome.result;
-              structuredAssessment = customResult.assessment || {};
-              responses.forEach(function (field) {
-                field.status = field.value === '' ? 'empty' : 'submitted';
-              });
-              var overallStatus = customResult.status === 'wrong' ? 'incorrect' : customResult.status;
-              overallAssessment = '<exercise status="' + promptXmlEsc(overallStatus || 'invalid') + '"' +
-                ' score="' + promptXmlEsc(typeof customResult.score === 'number' ? customResult.score : '') + '">' +
-                promptXmlEsc(customResult.feedback || '') + '</exercise>';
-            } else {
-              for (var i = 0; i < responses.length; i++) {
-                var result;
-                try {
-                  result = responses[i].element
-                    ? await checkField(responses[i].element, mode, checkOpts)
-                    : { status: 'error' };
-                } catch (e) {
-                  result = { status: 'error' };
-                }
-                responses[i].score = typeof result.score === 'number' ? result.score : '';
-                if (result.status === 'correct') responses[i].status = 'correct';
-                else if (result.status === 'empty') responses[i].status = 'empty';
-                else if (result.status === 'partial' ||
-                         ((result.status === 'not_exact' || result.status === 'not_form') && result.score > 0)) {
-                  responses[i].status = 'partial';
-                } else if (result.status === 'wrong' || result.status === 'rejected' ||
-                           result.status === 'not_exact' || result.status === 'not_form') {
-                  responses[i].status = 'incorrect';
-                } else responses[i].status = 'invalid';
-              }
-            }
-            var summary = externalAISummary(externalAI);
-            var answers = checkOpts.responseSource
-              ? '<jsxgraph_response>' + promptXmlEsc(summary || 'Interactive graphical response submitted.') + '</jsxgraph_response>'
-              : expressionAnswersXml(responses, structuredInputs);
-            var assessment = responses.filter(function (field) {
-              return !(field.element && field.element.dataset.dynamicMatrixName);
-            }).map(function (field) {
-              var scoreAttr = typeof field.score === 'number' ? ' score="' + promptXmlEsc(field.score) + '"' : '';
-              return '<field label="' + promptXmlEsc(field.label) + '"' + scoreAttr + '>' +
-                field.status + '</field>';
-            }).join('\n');
-            var matrixAssessment = structuredAssessmentXml(structuredAssessment);
-            if (matrixAssessment) assessment += (assessment ? '\n' : '') + matrixAssessment;
-            if (overallAssessment) assessment += (assessment ? '\n' : '') + overallAssessment;
-            var reply = await callLLM(question, answers, assessment, contexts, n, cfg, externalAI);
-            incCnt(label);
-            fbDiv.innerHTML =
-              '<div class="math-fb-llm">'
-              + '<div class="math-fb-llm-header">&#128161;&nbsp;' + L.feedbackTitle
-              + (n > 1 ? ' <span class="math-fb-llm-cnt">(' + L.feedbackAttempt(n) + ')</span>' : '')
-              + '</div>'
-              + '<div class="math-fb-llm-body">' + simpleMarkdown(reply) + '</div>'
-              + '</div>';
-            var replyBody = fbDiv.querySelector('.math-fb-llm-body');
-            if (replyBody && typeof renderMathInElementFn === 'function') {
-              renderMathInElementFn(replyBody, {
-                delimiters: KATEX_DELIMITERS,
-                throwOnError: false,
-              });
-            }
-          } catch (err) {
-            fbDiv.innerHTML =
-              '<div class="math-fb-err">&#9888;&nbsp;' + L.errorPrefix + ' ' + escHtml(displayErrorMessage(err))
-              + '&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-light math-fb-reconfig">&#9881;&nbsp;' + L.reconfigBtn + '</button>'
-              + '</div>';
-            var fbRecfg = fbDiv.querySelector('.math-fb-reconfig');
-            if (fbRecfg) fbRecfg.addEventListener('click', function () { showModal(function (c) { doFeedback(c); }); });
-          } finally {
-            feedbackBtn.disabled = false;
-            checkBtn.disabled = false;
-          }
-        }
-
-        var cfg = loadCfg();
-        if (cfg) { doFeedback(cfg); }
-        else      { showModal(function (c) { doFeedback(c); }); }
       });
+      questionDiv.addEventListener('input', function () { output.replaceChildren(); });
+      if (reloadBtn) reloadBtn.addEventListener('click', function () { output.replaceChildren(); });
     }
+    if (reconfigBtn) reconfigBtn.replaceWith(window.AIFeedback.settingsButton(L.outputLanguageCode));
 
-    if (reconfigBtn) {
-      reconfigBtn.addEventListener('click', function () { showModal(function () {}); });
-    }
   }
 
   // ---------------------------------------------------------------------------
