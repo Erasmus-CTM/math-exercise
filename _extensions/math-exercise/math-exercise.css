@@ -274,6 +274,7 @@
 /* ---- Buttons ---- */
 .math-exercise-controls {
   display: flex;
+  align-items: center;
   gap: .5em;
   margin-bottom: .75em;
   flex-wrap: wrap;
@@ -436,4 +437,12 @@
 }
 .math-fb-llm-body .katex-display {
   margin: 0;
+}
+
+/* Shared settings must not stretch the existing Bootstrap controls. */
+.math-exercise-controls .ai-feedback-gear {
+  margin: 0;
+  padding: .375rem .75rem;
+  font-size: inherit;
+  line-height: 1.5;
 }

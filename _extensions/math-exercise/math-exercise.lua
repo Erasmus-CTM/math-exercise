@@ -172,7 +172,7 @@ local function ensureSetup()
   if hasSetup then return end
   hasSetup = true
   quarto.doc.add_html_dependency({
-    name = "ai-feedback", version = "0.2.0",
+    name = "ai-feedback", version = "0.2.1",
     scripts = {"ai-feedback/feedback-core.js", "ai-feedback/feedback-dom.js", "ai-feedback/ai-feedback.js"},
     stylesheets = {"ai-feedback/ai-feedback.css"}
   })
