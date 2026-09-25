@@ -37,12 +37,13 @@ test('math Feedback never checks work; matching Check evidence is allowlisted an
   let body = await feedback(p);
   assert.equal(p.runs(), 0); assert.equal(data(body).evidence.length, 0);
   assert.doesNotMatch(JSON.stringify(body), /SECRET_/);
-  await check(p); const runs = p.runs();
+  p.result({status: 'correct', score: 1});
+  await check(p); assert.ok(p.cell.querySelector('.math-input-ok')); const runs = p.runs();
   body = await feedback(p); assert.equal(p.runs(), runs);
   assert.equal(data(body).evidence.length, 1);
-  assert.match(data(body).evidence[0].text, /incorrect/);
+  assert.match(data(body).evidence[0].text, /correct/);
   assert.doesNotMatch(JSON.stringify(body), /SECRET_/);
-  edit(p, '41'); body = await feedback(p);
+  edit(p, '41'); assert.equal(p.cell.querySelector('.math-input-ok'), null); body = await feedback(p);
   assert.equal(p.runs(), runs); assert.equal(data(body).evidence.length, 0);
   p.dom.window.close();
 });

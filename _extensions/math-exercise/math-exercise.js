@@ -2229,7 +2229,7 @@
       });
     }
 
-    questionDiv.addEventListener('input', function () { invalidateFeedback(); fbDiv.innerHTML = ''; });
+    questionDiv.addEventListener('input', clearAssessmentAfterResize);
     checkBtn.addEventListener('click', runCheck);
     attachKeyListeners();
 
