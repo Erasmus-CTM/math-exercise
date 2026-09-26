@@ -5,40 +5,18 @@ lang: en
 toc: false
 ---
 
-`math-exercise` turns ordinary Quarto content into browser-based practice
-activities. Authors write the task, expected answer, and checking policy in a
-short `{math-exercise}` block. During rendering, the extension replaces answer
-markers with input fields and connects them to a checker. When a student
-selects **Check**, Pyodide and SymPy run locally in the browser; a grading
-server is not required.
+Give students a question they can try while reading your notes. They might
+complete a calculation, compare equivalent expressions, or move points on a
+diagram. These examples show ways to make that practice part of the lesson.
 
-The extension supports symbolic equivalence, required algebraic forms,
-numerical tolerances, vectors and matrices, author-defined Python/SymPy
-checkers, and structured answers from JSXGraph. Optional AI feedback can use
-the task, the current answer, the checker result, and relevant page context to
-give a progressive hint without replacing deterministic answer checking.
-
-It is well suited to self-study notes, formative exercises, interactive
-textbooks, laboratory instructions, and visual mathematical exploration on a
-static Quarto website. It is not intended as a secure high-stakes examination
-system: expected answers and checker code are delivered to the student's
-browser.
-
-Choose a page below to try common exercise types and see the corresponding
-Quarto source. Every source example is collapsed until you choose **Show
-source**.
+Choose a page below. Try an answer and select **Check**; if you need help,
+**Feedback** can suggest a next step. Open **Show source** beneath an activity
+when you want to adapt it for your students.
 
 ::: {.callout-tip title="Trying the exercises"}
-Type in the empty answer fields and select **Check**. Some exercises are hidden
-under a clickable heading. For mathematical input, use forms such as `x^2`,
-`2*x`, `sqrt(2)`, `sin(x)`, and `pi`; **Input help** provides a complete
-reference. Graphical exercises explain directly which points or curves to move.
-:::
-
-::: {.callout-note}
-All answer checking runs locally in the browser through SymPy and Pyodide.
-AI-generated progressive feedback is optional and works with OpenAI-compatible
-providers configured by the user.
+Use `x^2` for a power, `2*x` for multiplication and `sqrt(2)` for a square root.
+**Input help** explains more. For graphical tasks, follow the instructions to
+move points or draw a curve before checking your answer.
 :::
 
 ::: {.grid}
@@ -59,8 +37,8 @@ tolerances, solution sets, derivatives, and integrals.
 ::: {.g-col-12 .g-col-md-6}
 ### [AI feedback](ai-feedback.qmd)
 
-Automatic section context, reusable explicit context, context opt-out,
-meaningful field labels, and the model capability adapter.
+Help that uses your lesson explanation, with hints that leave students
+something to work out for themselves.
 :::
 
 ::: {.g-col-12 .g-col-md-6}

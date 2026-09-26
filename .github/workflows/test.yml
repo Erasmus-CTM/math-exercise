@@ -41,8 +41,8 @@ jobs:
           grep -Fq '"lang":"nb"' nb-render.html
           grep -Fq 'Tilbakemelding' nb-render.html
           grep -Fq 'Basic exercise features' _site/index.html
-          grep -Fq 'browser-based practice activities' _site/index.html
-          grep -Fq 'not intended as a secure high-stakes examination system' _site/index.html
+          grep -Fq 'Give students a question' _site/index.html
+          grep -Fq 'Choose a page below' _site/index.html
           grep -Fq 'Expressions and equivalence' _site/sympy-examples.html
           grep -Fq 'Entering answers' _site/basic-features.html
           grep -Fq 'Automatic section context' _site/ai-feedback.html
@@ -72,7 +72,7 @@ jobs:
           original_line="$(grep -n 'Draw and refine a non-decreasing curve' _site/graphics-examples.html | head -1 | cut -d: -f1)"
           imported_line="$(grep -n 'Coordinate transformations' _site/graphics-examples.html | head -1 | cut -d: -f1)"
           test "$original_line" -lt "$imported_line"
-          grep -Fq 'Automatically collected context' _site/ai-feedback.html
+          grep -Fq 'Remember the discriminant' _site/ai-feedback.html
           grep -Fq 'Explicit feedback context' _site/ai-feedback.html
           grep -Fq 'class="math-example-source"' _site/basic-features.html
           grep -Fq 'Show source' _site/sympy-examples.html
