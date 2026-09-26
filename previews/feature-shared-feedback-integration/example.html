@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Open-ended and custom assessment – math-exercise</title>
+<title>math-exercise example – math-exercise</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -524,35 +524,6 @@ ul.task-list li input[type="checkbox"] {
 
 </style>
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 <link rel="stylesheet" href="example-site.css">
 </head>
@@ -583,7 +554,7 @@ window.Quarto = {
 <span class="menu-text">All check modes</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./example.html"> 
+    <a class="nav-link active" href="./example.html" aria-current="page"> 
 <span class="menu-text">Minimal feedback example</span></a>
   </li>  
   <li class="nav-item">
@@ -599,7 +570,7 @@ window.Quarto = {
 <span class="menu-text">AI feedback</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="./custom-assessment.html" aria-current="page"> 
+    <a class="nav-link" href="./custom-assessment.html"> 
 <span class="menu-text">Open-ended assessment</span></a>
   </li>  
   <li class="nav-item">
@@ -640,11 +611,7 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#assess-a-mathematical-property" id="toc-assess-a-mathematical-property" class="nav-link active" data-scroll-target="#assess-a-mathematical-property">1. Assess a mathematical property</a></li>
-  <li><a href="#assess-several-fields-together" id="toc-assess-several-fields-together" class="nav-link" data-scroll-target="#assess-several-fields-together">2. Assess several fields together</a></li>
-  <li><a href="#check-relationships-between-symbolic-answers" id="toc-check-relationships-between-symbolic-answers" class="nav-link" data-scroll-target="#check-relationships-between-symbolic-answers">3. Check relationships between symbolic answers</a></li>
-  <li><a href="#validate-a-numerical-process" id="toc-validate-a-numerical-process" class="nav-link" data-scroll-target="#validate-a-numerical-process">4. Validate a numerical process</a></li>
-  <li><a href="#assess-a-matrix-constraint" id="toc-assess-a-matrix-constraint" class="nav-link" data-scroll-target="#assess-a-matrix-constraint">5. Assess a matrix constraint</a></li>
+  <li><a href="#solve-an-equation" id="toc-solve-an-equation" class="nav-link active" data-scroll-target="#solve-an-equation">Solve an equation</a></li>
   </ul>
 </nav>
     </div>
@@ -656,7 +623,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Open-ended and custom assessment</h1>
+<h1 class="title">math-exercise example</h1>
 </div>
 
 
@@ -673,44 +640,11 @@ window.Quarto = {
 </header>
 
 
-<div class="callout callout-style-default callout-tip callout-titled" title="Entering answers">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Entering answers
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Type answers in the empty fields, then select <strong>Check</strong>. Use <code>*</code> for multiplication, <code>^</code> for powers, and parentheses to make grouping clear. Common forms include <code>sqrt(2)</code>, <code>sin(x)</code>, <code>exp(x)</code>, and <code>pi</code>. Enter an exact value unless the question asks for a decimal approximation. Algebraically equivalent expressions are normally accepted; when a particular form is required, the question says so. <strong>Input help</strong> shows the full notation reference.</p>
-</div>
-</div>
-<p>These tasks accept a family of valid answers rather than one predetermined expression. A trusted, instructor-authored checker evaluates the complete response and can award partial credit.</p>
-<p>For authors, <code>mode: custom</code> provides the checker with the parsed expressions and declared symbols. The collapsed source below each example shows the complete Python/SymPy checker and its feedback rules.</p>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Warning
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Checker code is included in the generated HTML and executes in browser-side Pyodide. It must come only from trusted document authors. It is assessment logic, not a secure place for secrets or high-stakes exam answers.</p>
-</div>
-</div>
-<section id="assess-a-mathematical-property" class="level2">
-<h2 class="anchored" data-anchor-id="assess-a-mathematical-property">1. Assess a mathematical property</h2>
-<p>A function is non-decreasing on <span class="math inline">\([0,1]\)</span> when <span class="math inline">\(f(x_2)\ge f(x_1)\)</span> whenever <span class="math inline">\(0\le x_1&lt;x_2\le1\)</span>. This exercise accepts any such function whose value at 1 is strictly greater than its value at 0; there is no single canonical answer. Examples include <code>x</code>, <code>x^2</code>, and <code>x^3+x</code>.</p>
-<div class="math-exercise-cell" id="math-exercise-1" data-label="custom-monotone" data-mode="custom" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    f = response[\&quot;expressions\&quot;][0]\n    x = symbols[\&quot;x\&quot;]\n    derivative_min = minimum(diff(f, x), x, Interval(0, 1))\n    rise = simplify(f.subs(x, 1) - f.subs(x, 0))\n    valid = (\n        derivative_min.is_nonnegative is True\n        and rise.is_positive is True\n    )\n    return {\n        \&quot;correct\&quot;: valid,\n        \&quot;feedback\&quot;: \&quot;The derivative must stay non-negative and the endpoint value must increase.\&quot;\n    }&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="auto" data-context="&quot;1. Assess a mathematical property\nA function is non-decreasing on \\([0,1]\\) when \\(f(x_2)\\ge f(x_1)\\) whenever \\(0\\le x_1<x_2\\le1\\). This exercise accepts any such function whose value at 1 is strictly greater than its value at 0; there is no single canonical answer. Examples include x, x^2, and x^3+x.&quot;" data-fields="[&quot;math-exercise-1-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
-<div class="math-exercise-caption math-exercise-toggle" data-math-exercise-source="Any non-decreasing function that rises overall" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>Any non-decreasing function that rises overall</div>
-
-<div class="math-exercise-body" aria-hidden="true">
-<div class="math-exercise-question" data-math-exercise-source="Give a function that is non-decreasing on \([0,1]\) and satisfies \(f(1)>f(0)\):<br>
-\(f(x)=\) <textarea id=&quot;math-exercise-1-f1&quot; data-vars=&quot;x&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-large&quot; rows=&quot;2&quot;></textarea>">Give a function that is non-decreasing on \([0,1]\) and satisfies \(f(1)&gt;f(0)\):<br>
-\(f(x)=\) <textarea id="math-exercise-1-f1" data-answer="" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-large" rows="2"></textarea></div>
+<section id="solve-an-equation" class="level2">
+<h2 class="anchored" data-anchor-id="solve-an-equation">Solve an equation</h2>
+<p>Subtract the same quantity from both sides to keep an equation balanced.</p>
+<div class="math-exercise-cell" id="math-exercise-1" data-label="equation" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Solve an equation\nSubtract the same quantity from both sides to keep an equation balanced.&quot;" data-fields="[&quot;math-exercise-1-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-question" data-math-exercise-source="For \(3x+2=14\), enter \(x=\) <input type=&quot;text&quot; id=&quot;math-exercise-1-f1&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>.">For \(3x+2=14\), enter \(x=\) <input type="text" id="math-exercise-1-f1" data-answer="4" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">.</div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -723,234 +657,7 @@ Warning
 <div class="math-legend-panel" style="display:none;"></div>
 <div class="math-feedback-area"></div>
 </div>
-</div>
-<details class="math-example-source">
-  <summary>Show source</summary>
-  <pre><code class="language-markdown">```{math-exercise}
-#| label: custom-monotone
-#| caption: Any non-decreasing function that rises overall
-#| vars: x
-#| mode: custom
-#| checker: |
-#|   def check(response, symbols):
-#|       f = response["expressions"][0]
-#|       x = symbols["x"]
-#|       derivative_min = minimum(diff(f, x), x, Interval(0, 1))
-#|       rise = simplify(f.subs(x, 1) - f.subs(x, 0))
-#|       valid = (
-#|           derivative_min.is_nonnegative is True
-#|           and rise.is_positive is True
-#|       )
-#|       return {
-#|           "correct": valid,
-#|           "feedback": "The derivative must stay non-negative and the endpoint value must increase."
-#|       }
-
-Give a function that is non-decreasing on $[0,1]$ and satisfies $f(1)&gt;f(0)$:
-$f(x)=$ ___[]
-```</code></pre>
-</details>
-</section>
-<section id="assess-several-fields-together" class="level2">
-<h2 class="anchored" data-anchor-id="assess-several-fields-together">2. Assess several fields together</h2>
-<p>A Pythagorean triple consists of positive integers <span class="math inline">\((a,b,c)\)</span> satisfying <span class="math inline">\(a^2+b^2=c^2\)</span>. Any such triple is accepted, not only <span class="math inline">\((3,4,5)\)</span>, provided the entries are ordered as <span class="math inline">\(a&lt;b&lt;c\)</span>.</p>
-<div class="math-exercise-cell" id="math-exercise-2" data-label="custom-pythagorean" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    a, b, c = response[\&quot;expressions\&quot;]\n    integers = all(v.is_integer is True and v.is_positive is True for v in (a, b, c))\n    ordered = (a < b) is S.true and (b < c) is S.true\n    equation = simplify(a**2 + b**2 - c**2) == 0\n    score = (int(integers) + int(ordered) + int(equation)) / 3\n    return {\n        \&quot;score\&quot;: score,\n        \&quot;feedback\&quot;: \&quot;Check positivity, a < b < c, and the equation a²+b²=c².\&quot;\n    }&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[&quot;a&quot;,&quot;b&quot;,&quot;c&quot;]" data-vecdir="col" data-context-mode="auto" data-context-refs="auto" data-context="&quot;2. Assess several fields together\nA Pythagorean triple consists of positive integers \\((a,b,c)\\) satisfying \\(a^2+b^2=c^2\\). Any such triple is accepted, not only \\((3,4,5)\\), provided the entries are ordered as \\(a<b<c\\).&quot;" data-fields="[&quot;math-exercise-2-f1&quot;,&quot;math-exercise-2-f2&quot;,&quot;math-exercise-2-f3&quot;]" data-structural-field-labels="[&quot;&quot;,&quot;&quot;,&quot;&quot;]">
-<div class="math-exercise-caption math-exercise-toggle" data-math-exercise-source="A positive integer Pythagorean triple" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>A positive integer Pythagorean triple</div>
-
-<div class="math-exercise-body" aria-hidden="true">
-<div class="math-exercise-question" data-math-exercise-source="Enter positive integers \(a<b<c\) satisfying \(a^2+b^2=c^2\):<br>
-\(a=\) <input type=&quot;text&quot; id=&quot;math-exercise-2-f1&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>, \(b=\) <input type=&quot;text&quot; id=&quot;math-exercise-2-f2&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>, \(c=\) <input type=&quot;text&quot; id=&quot;math-exercise-2-f3&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>">Enter positive integers \(a<b<c\) satisfying="" \(a^2+b^2="c^2\):<br">
-\(a=\) <input type="text" id="math-exercise-2-f1" data-answer="" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">, \(b=\) <input type="text" id="math-exercise-2-f2" data-answer="" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">, \(c=\) <input type="text" id="math-exercise-2-f3" data-answer="" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></b<c\)></div>
-
-<div class="math-exercise-controls">
-  <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
-  <button type="button" class="btn btn-light math-legend-btn">ⓘ&nbsp;Input help</button>
-  <div class="btn-group">
-    <button type="button" class="btn btn-light math-feedback-btn">💬&nbsp;Feedback</button>
-    <button type="button" class="btn btn-light math-reconfig-btn" title="Change AI configuration">⚙</button>
-  </div>
-</div>
-<div class="math-legend-panel" style="display:none;"></div>
-<div class="math-feedback-area"></div>
-</div>
-</div>
-<details class="math-example-source">
-  <summary>Show source</summary>
-  <pre><code class="language-markdown">```{math-exercise}
-#| label: custom-pythagorean
-#| caption: A positive integer Pythagorean triple
-#| mode: custom
-#| field-labels: a, b, c
-#| checker: |
-#|   def check(response, symbols):
-#|       a, b, c = response["expressions"]
-#|       integers = all(v.is_integer is True and v.is_positive is True for v in (a, b, c))
-#|       ordered = (a &lt; b) is S.true and (b &lt; c) is S.true
-#|       equation = simplify(a**2 + b**2 - c**2) == 0
-#|       score = (int(integers) + int(ordered) + int(equation)) / 3
-#|       return {
-#|           "score": score,
-#|           "feedback": "Check positivity, a &lt; b &lt; c, and the equation a²+b²=c²."
-#|       }
-
-Enter positive integers $a&lt;b&lt;c$ satisfying $a^2+b^2=c^2$:
-$a=$ _[], $b=$ _[], $c=$ _[]
-```</code></pre>
-</details>
-</section>
-<section id="check-relationships-between-symbolic-answers" class="level2">
-<h2 class="anchored" data-anchor-id="check-relationships-between-symbolic-answers">3. Check relationships between symbolic answers</h2>
-<p>The polynomial and its proposed roots are assessed as one response. A monic quadratic has leading coefficient 1, so every valid answer has the form <span class="math inline">\(p(x)=(x-r_1)(x-r_2)\)</span> with <span class="math inline">\(r_1\ne r_2\)</span>.</p>
-<div class="math-exercise-cell" id="math-exercise-3" data-label="custom-polynomial-roots" data-mode="custom" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    p, r1, r2 = response[\&quot;expressions\&quot;]\n    x = symbols[\&quot;x\&quot;]\n    try:\n        polynomial = Poly(p, x)\n        monic_quadratic = polynomial.degree() == 2 and polynomial.LC() == 1\n    except Exception:\n        monic_quadratic = False\n    distinct = simplify(r1 - r2) != 0\n    consistent = simplify(p - (x-r1)*(x-r2)) == 0\n    score = (int(monic_quadratic) + int(distinct) + int(consistent)) / 3\n    return {\n        \&quot;score\&quot;: score,\n        \&quot;feedback\&quot;: \&quot;The polynomial must be monic, quadratic, and equal to (x-r₁)(x-r₂).\&quot;\n    }&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[&quot;Polynomial&quot;,&quot;First root&quot;,&quot;Second root&quot;]" data-vecdir="col" data-context-mode="auto" data-context-refs="auto" data-context="&quot;3. Check relationships between symbolic answers\nThe polynomial and its proposed roots are assessed as one response. A monic quadratic has leading coefficient 1, so every valid answer has the form \\(p(x)=(x-r_1)(x-r_2)\\) with \\(r_1\\ne r_2\\).&quot;" data-fields="[&quot;math-exercise-3-f1&quot;,&quot;math-exercise-3-f2&quot;,&quot;math-exercise-3-f3&quot;]" data-structural-field-labels="[&quot;&quot;,&quot;&quot;,&quot;&quot;]">
-<div class="math-exercise-caption math-exercise-toggle" data-math-exercise-source="A polynomial consistent with two proposed roots" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>A polynomial consistent with two proposed roots</div>
-
-<div class="math-exercise-body" aria-hidden="true">
-<div class="math-exercise-question" data-math-exercise-source="Give a monic quadratic \(p(x)\) and two distinct roots:<br>
-\(p(x)=\) <input type=&quot;text&quot; id=&quot;math-exercise-3-f1&quot; data-vars=&quot;x&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-medium&quot;>, \(r_1=\) <input type=&quot;text&quot; id=&quot;math-exercise-3-f2&quot; data-vars=&quot;x&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>, \(r_2=\) <input type=&quot;text&quot; id=&quot;math-exercise-3-f3&quot; data-vars=&quot;x&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>">Give a monic quadratic \(p(x)\) and two distinct roots:<br>
-\(p(x)=\) <input type="text" id="math-exercise-3-f1" data-answer="" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium">, \(r_1=\) <input type="text" id="math-exercise-3-f2" data-answer="" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">, \(r_2=\) <input type="text" id="math-exercise-3-f3" data-answer="" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
-
-<div class="math-exercise-controls">
-  <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
-  <button type="button" class="btn btn-light math-legend-btn">ⓘ&nbsp;Input help</button>
-  <div class="btn-group">
-    <button type="button" class="btn btn-light math-feedback-btn">💬&nbsp;Feedback</button>
-    <button type="button" class="btn btn-light math-reconfig-btn" title="Change AI configuration">⚙</button>
-  </div>
-</div>
-<div class="math-legend-panel" style="display:none;"></div>
-<div class="math-feedback-area"></div>
-</div>
-</div>
-<details class="math-example-source">
-  <summary>Show source</summary>
-  <pre><code class="language-markdown">```{math-exercise}
-#| label: custom-polynomial-roots
-#| caption: A polynomial consistent with two proposed roots
-#| vars: x
-#| mode: custom
-#| field-labels: Polynomial, First root, Second root
-#| checker: |
-#|   def check(response, symbols):
-#|       p, r1, r2 = response["expressions"]
-#|       x = symbols["x"]
-#|       try:
-#|           polynomial = Poly(p, x)
-#|           monic_quadratic = polynomial.degree() == 2 and polynomial.LC() == 1
-#|       except Exception:
-#|           monic_quadratic = False
-#|       distinct = simplify(r1 - r2) != 0
-#|       consistent = simplify(p - (x-r1)*(x-r2)) == 0
-#|       score = (int(monic_quadratic) + int(distinct) + int(consistent)) / 3
-#|       return {
-#|           "score": score,
-#|           "feedback": "The polynomial must be monic, quadratic, and equal to (x-r₁)(x-r₂)."
-#|       }
-
-Give a monic quadratic $p(x)$ and two distinct roots:
-$p(x)=$ __[], $r_1=$ _[], $r_2=$ _[]
-```</code></pre>
-</details>
-</section>
-<section id="validate-a-numerical-process" class="level2">
-<h2 class="anchored" data-anchor-id="validate-a-numerical-process">4. Validate a numerical process</h2>
-<p>To approximate <span class="math inline">\(\sqrt2\)</span>, apply Newton’s method to <span class="math inline">\(f(x)=x^2-2\)</span>. Its update formula simplifies to <span class="math display">\[
-x_{n+1}=x_n-\frac{x_n^2-2}{2x_n}
-       =\frac12\left(x_n+\frac{2}{x_n}\right).
-\]</span> This square-root iteration is also known as the Babylonian method. Choose any positive starting value other than the exact root, then apply the displayed formula twice. For example, you may begin with <span class="math inline">\(x_0=1\)</span>.</p>
-<div class="math-exercise-cell" id="math-exercise-4" data-label="custom-newton-sequence" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    x0, x1, x2 = response[\&quot;expressions\&quot;]\n    step = lambda value: (value + 2/value) / 2\n    start_ok = x0.is_positive is True and simplify(x0**2 - 2) != 0\n    first_ok = simplify(x1 - step(x0)) == 0\n    second_ok = simplify(x2 - step(x1)) == 0\n    score = (int(start_ok) + int(first_ok) + int(second_ok)) / 3\n    return {\n        \&quot;score\&quot;: score,\n        \&quot;feedback\&quot;: \&quot;Each new value must equal (x + 2/x)/2 for the preceding value.\&quot;\n    }&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[&quot;x₀&quot;,&quot;x₁&quot;,&quot;x₂&quot;]" data-vecdir="col" data-context-mode="auto" data-context-refs="auto" data-context="&quot;4. Validate a numerical process\nTo approximate \\(\\sqrt2\\), apply Newton’s method to \\(f(x)=x^2-2\\). Its update formula simplifies to \\[\nx_{n+1}=x_n-\\frac{x_n^2-2}{2x_n}\n       =\\frac12\\left(x_n+\\frac{2}{x_n}\\right).\n\\] This square-root iteration is also known as the Babylonian method. Choose any positive starting value other than the exact root, then apply the displayed formula twice. For example, you may begin with \\(x_0=1\\).&quot;" data-fields="[&quot;math-exercise-4-f1&quot;,&quot;math-exercise-4-f2&quot;,&quot;math-exercise-4-f3&quot;]" data-structural-field-labels="[&quot;&quot;,&quot;&quot;,&quot;&quot;]">
-<div class="math-exercise-caption math-exercise-toggle" data-math-exercise-source="Two consistent iterations toward sqrt(2)" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>Two consistent iterations toward sqrt(2)</div>
-
-<div class="math-exercise-body" aria-hidden="true">
-<div class="math-exercise-question" data-math-exercise-source="Choose a positive \(x_0\ne\sqrt2\) and apply<br>
-\(x_{n+1}=(x_n+2/x_n)/2\) twice:<br>
-\(x_0=\) <input type=&quot;text&quot; id=&quot;math-exercise-4-f1&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>, \(x_1=\) <input type=&quot;text&quot; id=&quot;math-exercise-4-f2&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>, \(x_2=\) <input type=&quot;text&quot; id=&quot;math-exercise-4-f3&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>">Choose a positive \(x_0\ne\sqrt2\) and apply<br>
-\(x_{n+1}=(x_n+2/x_n)/2\) twice:<br>
-\(x_0=\) <input type="text" id="math-exercise-4-f1" data-answer="" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">, \(x_1=\) <input type="text" id="math-exercise-4-f2" data-answer="" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">, \(x_2=\) <input type="text" id="math-exercise-4-f3" data-answer="" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
-
-<div class="math-exercise-controls">
-  <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
-  <button type="button" class="btn btn-light math-legend-btn">ⓘ&nbsp;Input help</button>
-  <div class="btn-group">
-    <button type="button" class="btn btn-light math-feedback-btn">💬&nbsp;Feedback</button>
-    <button type="button" class="btn btn-light math-reconfig-btn" title="Change AI configuration">⚙</button>
-  </div>
-</div>
-<div class="math-legend-panel" style="display:none;"></div>
-<div class="math-feedback-area"></div>
-</div>
-</div>
-<details class="math-example-source">
-  <summary>Show source</summary>
-  <pre><code class="language-markdown">```{math-exercise}
-#| label: custom-newton-sequence
-#| caption: Two consistent iterations toward sqrt(2)
-#| mode: custom
-#| field-labels: x₀, x₁, x₂
-#| checker: |
-#|   def check(response, symbols):
-#|       x0, x1, x2 = response["expressions"]
-#|       step = lambda value: (value + 2/value) / 2
-#|       start_ok = x0.is_positive is True and simplify(x0**2 - 2) != 0
-#|       first_ok = simplify(x1 - step(x0)) == 0
-#|       second_ok = simplify(x2 - step(x1)) == 0
-#|       score = (int(start_ok) + int(first_ok) + int(second_ok)) / 3
-#|       return {
-#|           "score": score,
-#|           "feedback": "Each new value must equal (x + 2/x)/2 for the preceding value."
-#|       }
-
-Choose a positive $x_0\ne\sqrt2$ and apply
-$x_{n+1}=(x_n+2/x_n)/2$ twice:
-$x_0=$ _[], $x_1=$ _[], $x_2=$ _[]
-```</code></pre>
-</details>
-</section>
-<section id="assess-a-matrix-constraint" class="level2">
-<h2 class="anchored" data-anchor-id="assess-a-matrix-constraint">5. Assess a matrix constraint</h2>
-<p>Every cell is parsed separately, then reconstructed inside the checker. Any integer <span class="math inline">\(2\times2\)</span> matrix with determinant 1 is accepted except the identity matrix <span class="math inline">\(I_2=\begin{pmatrix}1&amp;0\\0&amp;1\end{pmatrix}\)</span>.</p>
-<div class="math-exercise-cell" id="math-exercise-5" data-label="custom-special-linear-matrix" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    values = response[\&quot;expressions\&quot;]\n    A = Matrix(2, 2, values)\n    integer_entries = all(value.is_integer is True for value in values)\n    determinant_one = simplify(A.det() - 1) == 0\n    nonidentity = A != eye(2)\n    score = (int(integer_entries) + int(determinant_one) + int(nonidentity)) / 3\n    return {\n        \&quot;score\&quot;: score,\n        \&quot;feedback\&quot;: \&quot;Require integer entries, determinant 1, and a matrix different from I₂.\&quot;\n    }&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="auto" data-context="&quot;5. Assess a matrix constraint\nEvery cell is parsed separately, then reconstructed inside the checker. Any integer \\(2\\times2\\) matrix with determinant 1 is accepted except the identity matrix \\(I_2=\\begin{pmatrix}1&amp;0\\\\0&amp;1\\end{pmatrix}\\).&quot;" data-fields="[&quot;math-exercise-5-f1&quot;,&quot;math-exercise-5-f2&quot;,&quot;math-exercise-5-f3&quot;,&quot;math-exercise-5-f4&quot;]" data-structural-field-labels="[&quot;m1,1&quot;,&quot;m1,2&quot;,&quot;m2,1&quot;,&quot;m2,2&quot;]">
-<div class="math-exercise-caption math-exercise-toggle" data-math-exercise-source="A non-identity integer matrix with determinant 1" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>A non-identity integer matrix with determinant 1</div>
-
-<div class="math-exercise-body" aria-hidden="true">
-<div class="math-exercise-question" data-math-exercise-source="Enter an integer matrix \(A\ne I_2\) with \(\det(A)=1\):<br>
-\(A=\) <span class=&quot;math-mat&quot; style=&quot;--cols:2&quot;><input type=&quot;text&quot; id=&quot;math-exercise-5-f1&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-mat-cell&quot;><input type=&quot;text&quot; id=&quot;math-exercise-5-f2&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-mat-cell&quot;><input type=&quot;text&quot; id=&quot;math-exercise-5-f3&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-mat-cell&quot;><input type=&quot;text&quot; id=&quot;math-exercise-5-f4&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-mat-cell&quot;></span>">Enter an integer matrix \(A\ne I_2\) with \(\det(A)=1\):<br>
-\(A=\) <span class="math-mat" style="--cols:2"><input type="text" id="math-exercise-5-f1" data-answer="" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-5-f2" data-answer="" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-5-f3" data-answer="" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-5-f4" data-answer="" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span></div>
-
-<div class="math-exercise-controls">
-  <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
-  <button type="button" class="btn btn-light math-legend-btn">ⓘ&nbsp;Input help</button>
-  <div class="btn-group">
-    <button type="button" class="btn btn-light math-feedback-btn">💬&nbsp;Feedback</button>
-    <button type="button" class="btn btn-light math-reconfig-btn" title="Change AI configuration">⚙</button>
-  </div>
-</div>
-<div class="math-legend-panel" style="display:none;"></div>
-<div class="math-feedback-area"></div>
-</div>
-</div>
-<details class="math-example-source">
-  <summary>Show source</summary>
-  <pre><code class="language-markdown">```{math-exercise}
-#| label: custom-special-linear-matrix
-#| caption: A non-identity integer matrix with determinant 1
-#| mode: custom
-#| checker: |
-#|   def check(response, symbols):
-#|       values = response["expressions"]
-#|       A = Matrix(2, 2, values)
-#|       integer_entries = all(value.is_integer is True for value in values)
-#|       determinant_one = simplify(A.det() - 1) == 0
-#|       nonidentity = A != eye(2)
-#|       score = (int(integer_entries) + int(determinant_one) + int(nonidentity)) / 3
-#|       return {
-#|           "score": score,
-#|           "feedback": "Require integer entries, determinant 1, and a matrix different from I₂."
-#|       }
-
-Enter an integer matrix $A\ne I_2$ with $\det(A)=1$:
-$A=$ mat[,;,]
-```</code></pre>
-</details>
+<p>Choose Check to test your answer, then Feedback for progressively more help.</p>
 
 
 </section>
