@@ -41,10 +41,10 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="site_libs/bootstrap/bootstrap-f53186b9ac0866246e638800b9d808a6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
-<script src="site_libs/quarto-contrib/ai-feedback-0.5.0/feedback-core.js"></script>
-<script src="site_libs/quarto-contrib/ai-feedback-0.5.0/feedback-dom.js"></script>
-<script src="site_libs/quarto-contrib/ai-feedback-0.5.0/ai-feedback.js"></script>
-<link href="site_libs/quarto-contrib/ai-feedback-0.5.0/ai-feedback.css" rel="stylesheet">
+<script src="site_libs/quarto-contrib/ai-feedback-0.6.0/feedback-core.js"></script>
+<script src="site_libs/quarto-contrib/ai-feedback-0.6.0/feedback-dom.js"></script>
+<script src="site_libs/quarto-contrib/ai-feedback-0.6.0/ai-feedback.js"></script>
+<link href="site_libs/quarto-contrib/ai-feedback-0.6.0/ai-feedback.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -617,7 +617,7 @@ ul.task-list li input[type="checkbox"] {
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
-<script>window.__aiFeedbackPolicies = {"layers":[]};</script>
+<script>window.__aiFeedbackPolicies = {"layers":[],"pageLayers":[]};</script>
 <script>window.__aiFeedbackConfig = {"baseUrl":"","mode":"copy","model":"","storage":"local"};</script>
 <script>window.__mathExerciseConfig = {"lang":"en"};</script>
 
@@ -643,7 +643,7 @@ ul.task-list li input[type="checkbox"] {
 <section id="solve-an-equation" class="level2">
 <h2 class="anchored" data-anchor-id="solve-an-equation">Solve an equation</h2>
 <p>Subtract the same quantity from both sides to keep an equation balanced.</p>
-<div class="math-exercise-cell" id="math-exercise-1" data-label="equation" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Solve an equation\nSubtract the same quantity from both sides to keep an equation balanced.&quot;" data-fields="[&quot;math-exercise-1-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" id="math-exercise-1" data-label="equation" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;equation&quot;,&quot;name&quot;:&quot;&quot;}" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Solve an equation\nSubtract the same quantity from both sides to keep an equation balanced.&quot;" data-fields="[&quot;math-exercise-1-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div class="math-exercise-question" data-math-exercise-source="For \(3x+2=14\), enter \(x=\) <input type=&quot;text&quot; id=&quot;math-exercise-1-f1&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>.">For \(3x+2=14\), enter \(x=\) <input type="text" id="math-exercise-1-f1" data-answer="4" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">.</div>
 
 <div class="math-exercise-controls">
@@ -2748,7 +2748,7 @@ ul.task-list li input[type="checkbox"] {
         return;
       }
       feedbackHandle = F.attach({
-        integration: 'math-exercise', requestOptions: {imageFallback:'text'}, id: 'math-' + label, button: feedbackBtn, output: output,
+        integration: 'math-exercise', policySelection: JSON.parse(cell.dataset.feedbackPolicy || '{}'), requestOptions: {imageFallback:'text'}, id: 'math-' + label, button: feedbackBtn, output: output,
         uiLanguage: L.outputLanguageCode,
         getRequest: async function (state) {
           var before = localSnapshot();
