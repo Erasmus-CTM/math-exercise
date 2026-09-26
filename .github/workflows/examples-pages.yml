@@ -27,7 +27,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: Erasmus-CTM/ai-feedback
-          ref: 094b763ac942da049a22d5d0a6e349d52fbabced
+          ref: ac7817733b7bc7ce729537e8fb539efe83c339d9
           path: _feedback-source
       - uses: quarto-dev/quarto-actions/setup@v2
         with:
@@ -39,6 +39,8 @@ jobs:
         run: |
           quarto render
           test -f _site/index.html
+          test -f _site/examples.html
+          test -f _site/example.html
           test -f _site/basic-features.html
           test -f _site/sympy-examples.html
           test -f _site/ai-feedback.html

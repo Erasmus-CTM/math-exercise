@@ -1,0 +1,18 @@
+---
+title: "math-exercise example"
+format: html
+filters: [math-exercise]
+ai-feedback:
+  mode: copy
+---
+
+## Solve an equation
+
+Subtract the same quantity from both sides to keep an equation balanced.
+
+```{math-exercise}
+#| label: equation
+For $3x+2=14$, enter $x=$ _[4].
+```
+
+Choose Check to test your answer, then Feedback for progressively more help.

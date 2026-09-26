@@ -14,6 +14,7 @@ project:
     - dynamic-matrix-tests.qmd
     - graph-theory.qmd
     - examples.qmd
+    - example.qmd
 
 website:
   title: "math-exercise"
@@ -21,6 +22,10 @@ website:
     left:
       - href: index.qmd
         text: Overview
+      - href: examples.qmd
+        text: All check modes
+      - href: example.qmd
+        text: Minimal feedback example
       - href: basic-features.qmd
         text: Basic features
       - href: sympy-examples.qmd
