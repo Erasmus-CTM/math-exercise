@@ -818,3 +818,15 @@ makes sense of Mathematics” (2023-1-NO01-KA220-HED-000166744).
 ## License
 
 This project is licensed under the [GNU Affero General Public License v3.0](LICENSE).
+
+## Configurable shared teaching policies
+
+With ai-feedback 0.4.0, use `ai-feedback.policy-files` in Quarto metadata to
+load one YAML file or an ordered list. Each file defines `ai-feedback.defaults`
+and/or `ai-feedback.integrations` with this integration’s name. Configure `prompt`,
+`steps`, `language`, `max-words`, `max-issues`, `allow-full-solution` and
+`reset-on-run`. Later step lists replace earlier lists; `steps: []` selects review
+mode. Run/Check resets progression by default; set `reset-on-run: false` to keep it.
+Explicit Reset always restarts at step one.
+
+See the [shared policy guide](https://github.com/Erasmus-CTM/ai-feedback/blob/main/docs/feedback-policies.md).

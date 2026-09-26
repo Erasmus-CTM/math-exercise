@@ -172,7 +172,7 @@ local function ensureSetup()
   if hasSetup then return end
   hasSetup = true
   quarto.doc.add_html_dependency({
-    name = "ai-feedback", version = "0.3.0",
+    name = "ai-feedback", version = "0.4.0",
     scripts = {"ai-feedback/feedback-core.js", "ai-feedback/feedback-dom.js", "ai-feedback/ai-feedback.js"},
     stylesheets = {"ai-feedback/ai-feedback.css"}
   })
@@ -776,6 +776,7 @@ local function resolveLang(meta)
 end
 
 local function Meta(meta)
+  if quarto.doc.is_format("html") then dofile(quarto.utils.resolve_path("ai-feedback/feedback-policy.lua")).emit(meta) end
   lang = resolveLang(meta)
 
   -- math-exercise.js reads this to pick its LOCALES entry.

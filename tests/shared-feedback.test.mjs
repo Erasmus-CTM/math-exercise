@@ -52,7 +52,7 @@ test('four API teaching steps permit a complete solution only at step four', asy
   const p = setup();
   for (let n = 1; n <= 4; n++) {
     const body = await feedback(p);
-    assert.ok(body.messages[0].content.includes(p.api.locale['promptHint' + n]));
+    assert.ok(body.messages[0].content.includes(p.F.shippedPolicies.integrations['math-exercise'].steps[n-1].prompt));
     assert.equal(body.messages[0].content.includes('A complete rewrite or solution is permitted'), n === 4);
     assert.equal(p.cell.querySelector('.ai-feedback-hint').textContent, 'Hint ' + n);
   }
@@ -64,7 +64,7 @@ test('copy prompts use the same four teaching steps, shared settings and no tran
   for (let n = 1; n <= 4; n++) {
     await feedback(p);
     const prompt = p.cell.querySelector('pre').textContent;
-    assert.ok(prompt.includes(p.api.locale['promptHint' + n]));
+    assert.ok(prompt.includes(p.F.shippedPolicies.integrations['math-exercise'].steps[n-1].prompt));
     assert.equal(prompt.includes('A complete rewrite or solution is permitted'), n === 4);
     assert.doesNotMatch(prompt, /SECRET_/);
   }
@@ -88,7 +88,7 @@ test('Check completing after an edit cannot become feedback evidence', async () 
 test('failed and cancelled replies do not advance hints or restore stale advice', async () => {
   const p = setup();
   p.window.fetch = async () => ({ok: false, status: 500, text: async () => 'failure'});
-  await feedback(p); assert.equal(p.window.sessionStorage.getItem('ai-feedback-hints|/exercises|math-test'), null);
+  await feedback(p); assert.equal(p.window.sessionStorage.getItem('ai-feedback-hints-v2|/exercises|math-test'), null);
   let finish;
   p.window.fetch = () => new Promise(r => { finish = r; });
   const button = p.cell.querySelector('.math-feedback-btn'); button.click();
@@ -96,7 +96,7 @@ test('failed and cancelled replies do not advance hints or restore stale advice'
   finish({ok: true, json: async () => ({choices: [{message: {content: 'OLD ADVICE'}}]})});
   await settle(button);
   assert.doesNotMatch(p.cell.querySelector('.ai-feedback-output').textContent, /OLD ADVICE/);
-  assert.equal(p.window.sessionStorage.getItem('ai-feedback-hints|/exercises|math-test'), null);
+  assert.equal(p.window.sessionStorage.getItem('ai-feedback-hints-v2|/exercises|math-test'), null);
   p.dom.window.close();
 });
 
@@ -144,8 +144,7 @@ test('graph requests send only curated AI summary/image while private payload st
 for (const lang of ['en', 'de', 'nb']) test('actual adapter preserves ' + lang + ' teaching policy', async () => {
   const p = setup({lang});
   const body = await feedback(p);
-  assert.ok(body.messages[0].content.includes(p.api.locale.promptHint1));
-  assert.ok(body.messages[0].content.includes(p.api.locale.promptLanguageGuard));
+  assert.ok(body.messages[0].content.includes(p.F.shippedPolicies.integrations['math-exercise'].steps[0].prompt));
   assert.ok(body.messages[0].content.includes('Write explanations in ' + lang));
   p.dom.window.close();
 });
@@ -170,4 +169,12 @@ test('minimum-version gate survives editing and a successful Check', async () =>
   assert.match(p.cell.querySelector('.ai-feedback-output').textContent, /Update.*ai-feedback/);
   p.cell.querySelector('.math-feedback-btn').click(); assert.equal(p.requests.length, 0);
   p.dom.window.close();
+});
+
+test('Check restarts shared hint progression by default; an override can preserve it',async()=>{
+ const p=setup();await feedback(p);await feedback(p);
+ assert.equal(p.cell.querySelector('.ai-feedback-hint').textContent,'Hint 2');
+ await check(p);await feedback(p);assert.equal(p.cell.querySelector('.ai-feedback-hint').textContent,'Hint 1');
+ p.window.__aiFeedbackPolicies={layers:[{integrations:{'math-exercise':{'reset-on-run':false}}}]};
+ await feedback(p);await check(p);await feedback(p);assert.equal(p.cell.querySelector('.ai-feedback-hint').textContent,'Hint 2');p.dom.window.close();
 });

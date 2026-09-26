@@ -9,7 +9,7 @@ source = args.source / '_extensions' / 'ai-feedback'
 target = Path(__file__).resolve().parents[1] / '_extensions' / 'math-exercise' / 'ai-feedback'
 target.mkdir(exist_ok=True)
 hashes = {}
-for name in ('feedback-core.js', 'feedback-dom.js', 'ai-feedback.js', 'ai-feedback.css'):
+for name in ('feedback-core.js', 'feedback-dom.js', 'ai-feedback.js', 'ai-feedback.css', 'feedback-policy.lua', 'feedback-defaults.yml'):
     data = (source / name).read_bytes()
     (target / name).write_bytes(data)
     hashes[name] = hashlib.sha256(data).hexdigest()

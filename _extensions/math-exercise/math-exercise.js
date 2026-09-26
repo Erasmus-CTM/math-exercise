@@ -2150,6 +2150,7 @@
     // ---- Check ----
     async function runCheck() {
       if (checkBtn.disabled) return;
+      feedbackHandle?.reset('run');
       refreshFields();
       if (feedbackHandle) feedbackHandle.cancel();
       checkedEvidence = null;
@@ -2272,19 +2273,19 @@
       fbDiv.after(output);
       output.setAttribute('aria-live', 'polite');
       var version = F && String(F.version || '').split('.').map(Number);
-      if (!version || !(version[0] > 0 || version[1] >= 2)) {
+      if (!version || !(version[0] > 0 || version[1] >= 4)) {
         feedbackBtn.disabled = true;
-        output.textContent = 'Math feedback requires ai-feedback 0.2.0 or later. Update the installed ai-feedback extension and render this page again. Check remains available.';
+        output.textContent = 'Math feedback requires ai-feedback 0.4.0 or later. Update the installed ai-feedback extension and render this page again. Check remains available.';
         if (reconfigBtn && F) reconfigBtn.replaceWith(F.settingsButton(L.outputLanguageCode));
         return;
       }
       feedbackHandle = F.attach({
-        id: 'math-' + label, button: feedbackBtn, output: output,
+        integration: 'math-exercise', id: 'math-' + label, button: feedbackBtn, output: output,
         uiLanguage: L.outputLanguageCode,
         client: { request: async function (request, options) {
           if (F.loadConfig().mode !== 'api') return { text: F.buildPrompt(request), format: 'prompt' };
           return F.getClient().complete(F.buildMessages(request), {
-            signal: options.signal, imageFallback: 'text', validate: validateFeedbackLanguage
+            signal: options.signal, imageFallback: 'text', validate: request.feedback.language === L.outputLanguageCode ? validateFeedbackLanguage : undefined
           });
         } },
         getRequest: async function (state) {
@@ -2301,7 +2302,6 @@
           if (before !== localSnapshot()) throw new Error('The response changed. Request feedback again.');
           var evidence = checkedEvidence && checkedEvidence.snapshot === before &&
             (!external || checkedEvidence.graph === JSON.stringify(external.response)) ? checkedEvidence.results : [];
-          var level = Math.min(state.hintLevel, 4);
           var ai = external && external.ai;
           var key = external ? JSON.stringify([external.response, externalAISummary(ai)]) : null;
           if (key !== visualKey) { visualKey = key; visual = ai && ai.image; }
@@ -2313,17 +2313,17 @@
             responses: [{ id: 'answer', format: 'text', value: external
               ? (externalAISummary(ai) || 'Interactive graphical response submitted; no textual summary is available.')
               : expressionAnswersXml(responses, structuredInputs) }],
-            criteria: [L.promptResponseReview, L.promptGrounding, L.promptNoReasoning, L.promptFormatting, L.promptBase, L.promptContext, L.promptVisual, L.promptLanguageGuard],
+
+            criteria: [L.promptResponseReview, L.promptGrounding, L.promptContext, L.promptVisual],
             evidence: evidence.map(function (result) { return { label: 'Private check assessment', text: JSON.stringify(result) }; }),
             attachments: ai && ai.image && /^data:image\/(?:png|jpeg|jpg|webp);base64,/i.test(ai.image)
               ? [{ id: 'graph', role: 'response', label: 'Current graph', dataUrl: ai.image }] : [],
-            feedback: { mode: 'hints', language: L.outputLanguageCode, level: level, maxWords: 120,
-              allowFullRewrite: level === 4, steps: [L.promptHint1, L.promptHint2, L.promptHint3, L.promptHint4] }
+            feedback: {language: L.outputLanguageCode}
           };
         }
       });
       questionDiv.addEventListener('input', function () { output.replaceChildren(); });
-      if (reloadBtn) reloadBtn.addEventListener('click', function () { output.replaceChildren(); });
+      if (reloadBtn) reloadBtn.addEventListener('click', function () { feedbackHandle.reset(); });
     }
     if (reconfigBtn) reconfigBtn.replaceWith(window.AIFeedback.settingsButton(L.outputLanguageCode));
 
