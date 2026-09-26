@@ -574,12 +574,12 @@ Install ai-feedback once with `quarto add Erasmus-CTM/ai-feedback`. The math
 filter loads that shared installation automatically; no runtime is bundled here.
 An explicit ai-feedback filter also works, in either order. Missing shared files
 produce an actionable render error. For this integration preview use
-`ai-feedback@feature/shared-context` (0.5.0).
+`ai-feedback@feature/scoped-policies` (0.5.0).
 
 All context collection and teaching instructions now belong to ai-feedback.
 Omitted `context` collects preceding section prose; `context: none` opts out;
 `context: id1,id2` selects reusable `.ai-context` blocks shared with text and both
-Python integrations. See the [shared guide](https://github.com/Erasmus-CTM/ai-feedback/blob/feature/shared-context/README.md).
+Python integrations. See the [shared guide](https://github.com/Erasmus-CTM/ai-feedback/blob/feature/scoped-policies/README.md).
 Tests use the installed dependency through `AI_FEEDBACK_EXTENSION=/absolute/path/to/ai-feedback/_extensions/ai-feedback`.
 
 ### Progressive hints
@@ -836,7 +836,7 @@ See the [shared policy guide](https://github.com/Erasmus-CTM/ai-feedback/blob/ma
 
 ### Standalone example
 
-`example.qmd` demonstrates this package with shared feedback. Install `Erasmus-CTM/ai-feedback@feature/shared-context`, then run `quarto render example.qmd`. No other integration extension is required. The example builds automatically on pushes and pull requests; download the `standalone-example` Actions artifact. Feedback defaults to copy mode, which needs no API key.
+`example.qmd` demonstrates this package with shared feedback. Install `Erasmus-CTM/ai-feedback@feature/scoped-policies`, then run `quarto render example.qmd`. No other integration extension is required. The example builds automatically on pushes and pull requests; download the `standalone-example` Actions artifact. Feedback defaults to copy mode, which needs no API key.
 
 ### Page and exercise feedback policies
 
