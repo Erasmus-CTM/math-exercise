@@ -5,6 +5,8 @@ format:
   html:
     toc: true
 engine: markdown
+ai-feedback:
+  page-policy-files: feedback/policy-comparison.yml
 filters:
   - _filters/example-source.lua
   - jsxgraph
@@ -921,6 +923,46 @@ it can be represented without a separate sign bit for the exponent itself.
 What does the biased exponent field store instead of directly – the true
 exponent, or the true exponent plus 15? __[true exponent plus 15]
 ```
+
+
+### Same problem, different feedback policies
+
+::: {.callout-note .example-author-notes}
+### For course authors
+
+Both exercises have identical problem text and the same unfinished answer.
+Choose **Feedback** on each: the first requests one guiding question; the second
+permits a worked solution immediately. In copy mode, compare the generated
+prompts; API replies depend on the model. The difference comes entirely from
+the named YAML policies, not from different learner instructions.
+:::
+
+#### A — Guiding question
+
+```{math-exercise}
+#| label: policy-question
+#| context: none
+#| feedback-policy: guiding-question
+Solve $3x+2=14$: $x=$ _[4].
+```
+
+#### B — Worked explanation
+
+```{math-exercise}
+#| label: policy-worked
+#| context: none
+#| feedback-policy: worked-explanation
+Solve $3x+2=14$: $x=$ _[4].
+```
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  for (const label of ['policy-question', 'policy-worked']) {
+    const input = document.querySelector('[data-label="' + label + '"] .math-input');
+    if (input) { input.value = '3'; input.dispatchEvent(new Event('input', {bubbles:true})); }
+  }
+});
+</script>
 
 ## AI feedback with reusable mini-machine context
 
