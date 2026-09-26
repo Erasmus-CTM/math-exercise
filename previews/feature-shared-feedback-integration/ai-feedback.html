@@ -755,15 +755,13 @@ window.Quarto = {
 <div class="math-legend-panel" style="display:none;"></div>
 <div class="math-feedback-area"></div>
 </div>
-<details class="math-example-source">
-  <summary>Show source</summary>
-  <pre><code class="language-markdown">```{math-exercise}
+<div class="example-author-notes ai-feedback-ignore"><details class="math-example-source"><summary>Show source and policy YAML</summary><pre><code class="language-markdown">```{math-exercise}
 #| label: ai-auto-context
 #| vars: a,b,c
 #| field-labels: Discriminant
 For $2x^2+3x-2=0$, compute the discriminant: _[25]
 ```</code></pre>
-</details>
+</details></div>
 </section>
 <section id="reusable-explicit-context" class="level2">
 <h2 class="anchored" data-anchor-id="reusable-explicit-context">Reusable explicit context</h2>
@@ -779,7 +777,7 @@ For $2x^2+3x-2=0$, compute the discriminant: _[25]
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Newton’s method uses <span data-ai-feedback-display="false" data-ai-feedback-tex="x_{k+1}=x_k-f(x_k)/f'(x_k)"><span class="math inline">\(x_{k+1}=x_k-f(x_k)/f'(x_k)\)</span></span>. Evaluate the function and derivative at the current iterate before forming the next iterate.</p>
+<p>Newton’s method uses <span data-ai-feedback-tex="x_{k+1}=x_k-f(x_k)/f'(x_k)" data-ai-feedback-display="false"><span class="math inline">\(x_{k+1}=x_k-f(x_k)/f'(x_k)\)</span></span>. Evaluate the function and derivative at the current iterate before forming the next iterate.</p>
 </div>
 </div>
 </div>
@@ -811,16 +809,14 @@ Show context-block source"><pre class="sourceCode markdown code-with-copy"><code
 <div class="math-legend-panel" style="display:none;"></div>
 <div class="math-feedback-area"></div>
 </div>
-<details class="math-example-source">
-  <summary>Show source</summary>
-  <pre><code class="language-markdown">```{math-exercise}
+<div class="example-author-notes ai-feedback-ignore"><details class="math-example-source"><summary>Show source and policy YAML</summary><pre><code class="language-markdown">```{math-exercise}
 #| label: ai-explicit-context
 #| context: newton-rule
 #| mode: numeric
 #| tolerance: 0.001
 For $f(x)=x^2-2$ and $x_0=1.5$, compute $x_1$: _[17/12]
 ```</code></pre>
-</details>
+</details></div>
 </section>
 <section id="several-exercises-sharing-one-context" class="level2">
 <h2 class="anchored" data-anchor-id="several-exercises-sharing-one-context">Several exercises sharing one context</h2>
@@ -840,16 +836,14 @@ For $f(x)=x^2-2$ and $x_0=1.5$, compute $x_1$: _[17/12]
 <div class="math-legend-panel" style="display:none;"></div>
 <div class="math-feedback-area"></div>
 </div>
-<details class="math-example-source">
-  <summary>Show source</summary>
-  <pre><code class="language-markdown">```{math-exercise}
+<div class="example-author-notes ai-feedback-ignore"><details class="math-example-source"><summary>Show source and policy YAML</summary><pre><code class="language-markdown">```{math-exercise}
 #| label: ai-explicit-context-second
 #| context: newton-rule
 #| vars: x
 For $f(x)=x^3-1$, write the Newton update as a function of $x_k$:
 __[x-(x^3-1)/(3*x^2)]
 ```</code></pre>
-</details>
+</details></div>
 </section>
 <section id="opting-out-of-context" class="level2">
 <h2 class="anchored" data-anchor-id="opting-out-of-context">Opting out of context</h2>
@@ -868,14 +862,12 @@ __[x-(x^3-1)/(3*x^2)]
 <div class="math-legend-panel" style="display:none;"></div>
 <div class="math-feedback-area"></div>
 </div>
-<details class="math-example-source">
-  <summary>Show source</summary>
-  <pre><code class="language-markdown">```{math-exercise}
+<div class="example-author-notes ai-feedback-ignore"><details class="math-example-source"><summary>Show source and policy YAML</summary><pre><code class="language-markdown">```{math-exercise}
 #| label: ai-no-context
 #| context: none
 Compute $12/3$: _[4]
 ```</code></pre>
-</details>
+</details></div>
 </section>
 <section id="multi-field-feedback" class="level2">
 <h2 class="anchored" data-anchor-id="multi-field-feedback">Multi-field feedback</h2>
@@ -896,25 +888,23 @@ tangent at \(x=2\): <input type="text" id="math-exercise-5-f3" data-answer="12" 
 <div class="math-legend-panel" style="display:none;"></div>
 <div class="math-feedback-area"></div>
 </div>
-<details class="math-example-source">
-  <summary>Show source</summary>
-  <pre><code class="language-markdown">```{math-exercise}
+<div class="example-author-notes ai-feedback-ignore"><details class="math-example-source"><summary>Show source and policy YAML</summary><pre><code class="language-markdown">```{math-exercise}
 #| label: ai-field-labels
 #| vars: x
 #| field-labels: Derivative, Value at x=2, Tangent slope
 For $f(x)=x^3$, enter $f'(x)=$ _[3*x^2], $f'(2)=$ _[12], and the slope of the
 tangent at $x=2$: _[12].
 ```</code></pre>
-</details>
+</details></div>
 </section>
 <section id="mathematics-in-ai-context" class="level2">
 <h2 class="anchored" data-anchor-id="mathematics-in-ai-context">Mathematics in AI context</h2>
 <p>Mathematics is sent as LaTeX source, including fractions, powers, subscripts, matrices and aligned equations. The source is preserved before typesetting, so MathJax and KaTeX produce the same mathematical context. The question and its caption are preserved too; loading another pool question refreshes its source.</p>
 <div id="solenoid-notation" class="math-exercise-context">
-<p>A long solenoid has <span data-ai-feedback-display="false" data-ai-feedback-tex="N"><span class="math inline">\(N\)</span></span> turns over a length <span data-ai-feedback-display="false" data-ai-feedback-tex="l"><span class="math inline">\(l\)</span></span>. Its turn density is <span data-ai-feedback-display="false" data-ai-feedback-tex="n=\frac{N}{l}"><span class="math inline">\(n=\frac{N}{l}\)</span></span>, measured in <span data-ai-feedback-display="false" data-ai-feedback-tex="\mathrm{m}^{-1}"><span class="math inline">\(\mathrm{m}^{-1}\)</span></span>. In vacuum, <span data-ai-feedback-display="false" data-ai-feedback-tex="\mu_0\approx 4\pi\times10^{-7}\,\mathrm{H/m}"><span class="math inline">\(\mu_0\approx 4\pi\times10^{-7}\,\mathrm{H/m}\)</span></span>. For radius <span data-ai-feedback-display="false" data-ai-feedback-tex="2a"><span class="math inline">\(2a\)</span></span>, the ideal long-solenoid approximation gives</p>
-<p><span data-ai-feedback-display="true" data-ai-feedback-tex="
+<p>A long solenoid has <span data-ai-feedback-tex="N" data-ai-feedback-display="false"><span class="math inline">\(N\)</span></span> turns over a length <span data-ai-feedback-tex="l" data-ai-feedback-display="false"><span class="math inline">\(l\)</span></span>. Its turn density is <span data-ai-feedback-tex="n=\frac{N}{l}" data-ai-feedback-display="false"><span class="math inline">\(n=\frac{N}{l}\)</span></span>, measured in <span data-ai-feedback-tex="\mathrm{m}^{-1}" data-ai-feedback-display="false"><span class="math inline">\(\mathrm{m}^{-1}\)</span></span>. In vacuum, <span data-ai-feedback-tex="\mu_0\approx 4\pi\times10^{-7}\,\mathrm{H/m}" data-ai-feedback-display="false"><span class="math inline">\(\mu_0\approx 4\pi\times10^{-7}\,\mathrm{H/m}\)</span></span>. For radius <span data-ai-feedback-tex="2a" data-ai-feedback-display="false"><span class="math inline">\(2a\)</span></span>, the ideal long-solenoid approximation gives</p>
+<p><span data-ai-feedback-tex="
 L=\frac{4\pi\mu_0N^2a^2}{l}.
-"><span class="math display">\[
+" data-ai-feedback-display="true"><span class="math display">\[
 L=\frac{4\pi\mu_0N^2a^2}{l}.
 \]</span></span></p>
 </div>
@@ -936,9 +926,7 @@ L=\frac{4\pi\mu_0N^2a^2}{l}.
 <div class="math-feedback-area"></div>
 </div>
 </div>
-<details class="math-example-source">
-  <summary>Show source</summary>
-  <pre><code class="language-markdown">```{math-exercise}
+<div class="example-author-notes ai-feedback-ignore"><details class="math-example-source"><summary>Show source and policy YAML</summary><pre><code class="language-markdown">```{math-exercise}
 #| label: ai-solenoid-source
 #| caption: Turn density
 #| context: solenoid-notation
@@ -946,7 +934,7 @@ L=\frac{4\pi\mu_0N^2a^2}{l}.
 #| field-labels: Turn density
 Write the turn density in terms of $N$ and $l$: _[N/l]
 ```</code></pre>
-</details>
+</details></div>
 <p>For this example, the outgoing context retains <code>\frac{N}{l}</code> and <code>10^{-7}</code>. To inspect it, open your browser’s Network panel, request feedback, and inspect <code>messages[1].content</code> in the chat-completions request. The <code>&lt;task&gt;</code> block uses <code>[Turn density]</code> for the input; the answer stored by the checker is not copied into that block.</p>
 </section>
 <section id="working-with-different-ai-providers" class="level2">

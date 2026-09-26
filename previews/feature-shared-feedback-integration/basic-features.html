@@ -677,13 +677,11 @@ ul.task-list li input[type="checkbox"] {
 <div class="math-legend-panel" style="display:none;"></div>
 <div class="math-feedback-area"></div>
 </div>
-<details class="math-example-source">
-  <summary>Show source</summary>
-  <pre><code class="language-markdown">```{math-exercise}
+<div class="example-author-notes ai-feedback-ignore"><details class="math-example-source"><summary>Show source and policy YAML</summary><pre><code class="language-markdown">```{math-exercise}
 #| label: basic-single
 What is $7\cdot 6$? _[42]
 ```</code></pre>
-</details>
+</details></div>
 <p>Open <strong>Show source</strong> below the exercise to see its authoring syntax. The value inside the square brackets is the expected answer; the rendered exercise shows an empty field instead.</p>
 </section>
 <section id="answer-fields-of-different-widths" class="level2">
@@ -710,9 +708,7 @@ Enter the expression \((1+2+3+4+5)^2\): <textarea id="math-exercise-2-f3" data-a
 <div class="math-legend-panel" style="display:none;"></div>
 <div class="math-feedback-area"></div>
 </div>
-<details class="math-example-source">
-  <summary>Show source</summary>
-  <pre><code class="language-markdown">```{math-exercise}
+<div class="example-author-notes ai-feedback-ignore"><details class="math-example-source"><summary>Show source and policy YAML</summary><pre><code class="language-markdown">```{math-exercise}
 #| label: basic-widths
 #| field-labels: Short answer, Medium answer, Long answer
 Enter $2$: _[2]
@@ -721,7 +717,7 @@ Enter the six-digit number $123456$: __[123456]
 
 Enter the expression $(1+2+3+4+5)^2$: ___[(1+2+3+4+5)^2]
 ```</code></pre>
-</details>
+</details></div>
 </section>
 <section id="a-collapsible-exercise" class="level2">
 <h2 class="anchored" data-anchor-id="a-collapsible-exercise">A collapsible exercise</h2>
@@ -743,14 +739,12 @@ Enter the expression $(1+2+3+4+5)^2$: ___[(1+2+3+4+5)^2]
 <div class="math-feedback-area"></div>
 </div>
 </div>
-<details class="math-example-source">
-  <summary>Show source</summary>
-  <pre><code class="language-markdown">```{math-exercise}
+<div class="example-author-notes ai-feedback-ignore"><details class="math-example-source"><summary>Show source and policy YAML</summary><pre><code class="language-markdown">```{math-exercise}
 #| label: basic-caption
 #| caption: Click this heading to open the exercise
 Compute $5^2$: _[25]
 ```</code></pre>
-</details>
+</details></div>
 </section>
 <section id="multiple-fields-and-meaningful-labels" class="level2">
 <h2 class="anchored" data-anchor-id="multiple-fields-and-meaningful-labels">Multiple fields and meaningful labels</h2>
@@ -770,16 +764,14 @@ difference <input type="text" id="math-exercise-4-f3" data-answer="4" data-vars=
 <div class="math-legend-panel" style="display:none;"></div>
 <div class="math-feedback-area"></div>
 </div>
-<details class="math-example-source">
-  <summary>Show source</summary>
-  <pre><code class="language-markdown">```{math-exercise}
+<div class="example-author-notes ai-feedback-ignore"><details class="math-example-source"><summary>Show source and policy YAML</summary><pre><code class="language-markdown">```{math-exercise}
 #| label: basic-labels
 #| field-labels: Sum, Product, Difference
 #| partial-credit: true
 For the numbers $7$ and $3$, enter their sum _[10], product _[21], and
 difference _[4].
 ```</code></pre>
-</details>
+</details></div>
 </section>
 <section id="requiring-a-particular-form" class="level2">
 <h2 class="anchored" data-anchor-id="requiring-a-particular-form">Requiring a particular form</h2>
@@ -801,16 +793,14 @@ difference _[4].
 <div class="math-feedback-area"></div>
 </div>
 </div>
-<details class="math-example-source">
-  <summary>Show source</summary>
-  <pre><code class="language-markdown">```{math-exercise}
+<div class="example-author-notes ai-feedback-ignore"><details class="math-example-source"><summary>Show source and policy YAML</summary><pre><code class="language-markdown">```{math-exercise}
 #| label: basic-factored
 #| caption: Equivalent is not enough when a form is requested
 #| vars: x
 #| form: factored
 Factor $x^2+5x+6$: __[(x+2)*(x+3)]
 ```</code></pre>
-</details>
+</details></div>
 </section>
 <section id="case-insensitive-text" class="level2">
 <h2 class="anchored" data-anchor-id="case-insensitive-text">Case-insensitive text</h2>
@@ -828,14 +818,12 @@ Factor $x^2+5x+6$: __[(x+2)*(x+3)]
 <div class="math-legend-panel" style="display:none;"></div>
 <div class="math-feedback-area"></div>
 </div>
-<details class="math-example-source">
-  <summary>Show source</summary>
-  <pre><code class="language-markdown">```{math-exercise}
+<div class="example-author-notes ai-feedback-ignore"><details class="math-example-source"><summary>Show source and policy YAML</summary><pre><code class="language-markdown">```{math-exercise}
 #| label: basic-text
 #| mode: string_ci
 Write the conventional name of the constant $\pi$: __[pi]
 ```</code></pre>
-</details>
+</details></div>
 </section>
 <section id="a-random-task-pool" class="level2">
 <h2 class="anchored" data-anchor-id="a-random-task-pool">A random task pool</h2>
@@ -859,9 +847,7 @@ Write the conventional name of the constant $\pi$: __[pi]
 <div class="math-feedback-area"></div>
 </div>
 </div>
-<details class="math-example-source">
-  <summary>Show source</summary>
-  <pre><code class="language-markdown">```{math-exercise}
+<div class="example-author-notes ai-feedback-ignore"><details class="math-example-source"><summary>Show source and policy YAML</summary><pre><code class="language-markdown">```{math-exercise}
 #| label: basic-pool
 #| caption: Random arithmetic task
 #| pool: true
@@ -876,7 +862,7 @@ $9\cdot6=$ _[54]
 
 $2^8=$ _[256]
 ```</code></pre>
-</details>
+</details></div>
 </section>
 <section id="rejecting-a-specific-unfinished-form" class="level2">
 <h2 class="anchored" data-anchor-id="rejecting-a-specific-unfinished-form">Rejecting a specific unfinished form</h2>
@@ -894,15 +880,13 @@ $2^8=$ _[256]
 <div class="math-legend-panel" style="display:none;"></div>
 <div class="math-feedback-area"></div>
 </div>
-<details class="math-example-source">
-  <summary>Show source</summary>
-  <pre><code class="language-markdown">```{math-exercise}
+<div class="example-author-notes ai-feedback-ignore"><details class="math-example-source"><summary>Show source and policy YAML</summary><pre><code class="language-markdown">```{math-exercise}
 #| label: basic-reject
 #| vars: x
 #| reject: (x+1)^2
 Expand $(x+1)^2$: __[x^2+2*x+1]
 ```</code></pre>
-</details>
+</details></div>
 
 
 </section>
