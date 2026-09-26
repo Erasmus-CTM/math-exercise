@@ -570,14 +570,17 @@ results. Editing, resizing or selecting another pool variant invalidates that
 evidence and pending feedback. Graph payloads stay local; only the explicitly
 provided AI summary and optional image are sent for feedback.
 
-Unchanged standalone documents work because the extension ships an identical,
-generated copy of the shared runtime. Using both current filters loads one dependency
-and one settings dialog, regardless of filter order. If an older explicitly
-installed ai-feedback extension wins Quarto dependency selection, Check remains
-available and Feedback displays an instruction to upgrade to 0.2.0 or later. Maintainers refresh the
-fallback with `python scripts/sync-ai-feedback.py /path/to/ai-feedback`; its
-provenance records the source revision, dirty state and individual file hashes.
-The common ai-feedback builder rejects mismatched copies.
+Install ai-feedback once with `quarto add Erasmus-CTM/ai-feedback`. The math
+filter loads that shared installation automatically; no runtime is bundled here.
+An explicit ai-feedback filter also works, in either order. Missing shared files
+produce an actionable render error. For this integration preview use
+`ai-feedback@feature/layered-feedback` (0.5.0).
+
+All context collection and teaching instructions now belong to ai-feedback.
+Omitted `context` collects preceding section prose; `context: none` opts out;
+`context: id1,id2` selects reusable `.ai-context` blocks shared with text and both
+Python integrations. See the [shared guide](https://github.com/Erasmus-CTM/ai-feedback/blob/feature/layered-feedback/README.md).
+Tests use the installed dependency through `AI_FEEDBACK_EXTENSION=/absolute/path/to/ai-feedback/_extensions/ai-feedback`.
 
 ### Progressive hints
 

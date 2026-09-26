@@ -20,19 +20,20 @@ for (const renderer of ['mathjax', 'katex']) {
         fixture = fixture.replace('html-math-method: mathjax', 'html-math-method: ' + renderer)
           .replace('REPLACE_WITH_OVERSIZED_MATH_PARAGRAPH', 'Oversized formula $\\frac{' + 'x+'.repeat(800) + '1}{l}$ ends here.');
         await writeFile(path.join(dir, 'fixture.qmd'), fixture);
+        await cp(process.env.AI_FEEDBACK_EXTENSION, path.join(dir, '_extensions/ai-feedback'), {recursive:true});
         const render = spawnSync(quarto, ['render', 'fixture.qmd', '--to', 'html'], { cwd: dir, encoding: 'utf8', timeout: 120000 });
         assert.equal(render.status, 0, render.stderr || render.error?.message);
         const html = await readFile(path.join(dir, 'fixture.html'), 'utf8');
         page = loadPage(html);
         const cell = label => page.document.querySelector(`[data-label="${label}"]`);
 
-        const source = page.document.querySelector('#coil-context [data-math-exercise-tex]');
-        assert.equal(source.dataset.mathExerciseTex, String.raw`\frac{N}{l}`);
-        const auto = page.api.resolveContexts(cell('auto'))[0].content;
+        const source = page.document.querySelector('#coil-context [data-ai-feedback-tex]');
+        assert.equal(source.dataset.aiFeedbackTex, String.raw`\frac{N}{l}`);
+        const auto = page.api.resolveContexts(cell('auto'))[0].text;
         assert.ok(auto.includes(String.raw`\(10^{-7}\)`));
         assert.ok(auto.includes(String.raw`\(\frac{N}{l}\)`));
         assert.doesNotMatch(auto, /DO_NOT_SEND_CODE/);
-        const budget = page.api.resolveContexts(cell('budget'))[0].content;
+        const budget = page.api.resolveContexts(cell('budget'))[0].text;
         assert.equal(budget, String.raw`Recent whole paragraph: \(\frac{N}{l}\), strøm, blåbær.`);
         assert.ok(budget.length <= 1500);
 

@@ -1,3 +1,4 @@
+local feedback = nil
 ----
 -- math-exercise.lua
 --
@@ -171,11 +172,6 @@ end
 local function ensureSetup()
   if hasSetup then return end
   hasSetup = true
-  quarto.doc.add_html_dependency({
-    name = "ai-feedback", version = "0.4.0",
-    scripts = {"ai-feedback/feedback-core.js", "ai-feedback/feedback-dom.js", "ai-feedback/ai-feedback.js"},
-    stylesheets = {"ai-feedback/ai-feedback.css"}
-  })
   local css = readFile("math-exercise.css")
   quarto.doc.include_text("in-header",
     "<style type=\"text/css\">\n" .. css .. "\n</style>")
@@ -291,47 +287,6 @@ end
 --
 -- Keep whole recent blocks: slicing a string can split a formula or UTF-8
 -- character. Math is serialized from the AST before any renderer touches it.
-----
-local function contextBlockText(block)
-  local source = block:walk({
-    Math = function(math)
-      local display = math.mathtype == "DisplayMath"
-      return pandoc.Str((display and "\\[" or "\\(") .. math.text ..
-        (display and "\\]" or "\\)"))
-    end,
-    CodeBlock = function() return {} end,
-  })
-  return pandoc.utils.stringify(source):match("^%s*(.-)%s*$")
-end
-
-local function appendContext(state, block)
-  local text = contextBlockText(block)
-  if text ~= "" then table.insert(state.sectionCtx, text) end
-end
-
-local function boundedContext(blocks)
-  local kept, length = {}, 0
-  for i = #blocks, 1, -1 do
-    local size = utf8.len(blocks[i])
-    local separator = #kept > 0 and 1 or 0
-    if length + separator + size > MAX_CONTEXT_CHARS then break end
-    table.insert(kept, 1, blocks[i])
-    length = length + separator + size
-  end
-  return table.concat(kept, "\n")
-end
-
-local function preserveContextMath(block)
-  return block:walk({
-    Math = function(math)
-      return pandoc.Span({ math }, pandoc.Attr("", {}, {
-        ["data-math-exercise-tex"] = math.text,
-        ["data-math-exercise-display"] = math.mathtype == "DisplayMath" and "true" or "false",
-      }))
-    end,
-  })
-end
-
 ----
 local function scalarFieldHtml(fid, answer, vars, underscoreCount)
   local base = ' id="'          .. fid             .. '"'
@@ -624,12 +579,6 @@ end
 --   "explicit" – #| context: id1, id2, ...  (resolved client-side, see JS)
 --   "auto"     – no #| context: option, falls back to the auto section text
 ----
-local function contextMode(opts)
-  local ref = opts["context"]
-  if ref == "none" then return "none" end
-  if ref and ref ~= "" then return "explicit" end
-  return "auto"
-end
 
 ----
 -- Exercise cell builder (called from the document-order block walk below so
@@ -687,9 +636,9 @@ local function buildExercise(el, state)
              .. ' data-form-credit="' .. attrEsc(formCredit) .. '"'
              .. ' data-field-labels="' .. jsonArrAttr(fieldLabels) .. '"'
              .. ' data-vecdir="' .. vecdir .. '"'
-             .. ' data-context-mode="' .. contextMode(opts) .. '"'
-             .. ' data-context-refs="' .. attrEsc(opts["context"] or "") .. '"'
-             .. ' data-context="'      .. attrEsc('"' .. jsonEsc(boundedContext(state.sectionCtx)) .. '"') .. '"'
+             .. ' data-context-mode="' .. feedback.context(el, opts).mode .. '"'
+             .. ' data-context-refs="' .. attrEsc(feedback.context(el, opts).refs) .. '"'
+             .. ' data-context="'      .. attrEsc('"' .. jsonEsc(el.attributes["data-ai-feedback-context"] or "") .. '"') .. '"'
 
   local questionHtml
 
@@ -776,7 +725,6 @@ local function resolveLang(meta)
 end
 
 local function Meta(meta)
-  if quarto.doc.is_format("html") then dofile(quarto.utils.resolve_path("ai-feedback/feedback-policy.lua")).emit(meta) end
   lang = resolveLang(meta)
 
   -- math-exercise.js reads this to pick its LOCALES entry.
@@ -806,39 +754,16 @@ end
 -- adds source metadata to their math, still visible on the page.
 ----
 local function walkBlocks(blocks, state)
-  local out = pandoc.Blocks({})
-  for _, b in ipairs(blocks) do
-    if b.t == "Header" then
-      -- Seed the new section's context with its own heading text.
-      state.sectionCtx = {}
-      appendContext(state, b)
-      out:insert(b)
-
-    elseif b.t == "CodeBlock" and b.attr.classes:includes("{math-exercise}") then
-      out:insert(buildExercise(b, state))
-
-    elseif b.t == "CodeBlock" then
-      out:insert(b) -- code isn't useful prose context; don't accumulate
-
-    elseif b.t == "Div" and (b.attr.classes:includes("math-exercise-context") or b.attr.classes:includes("ai-feedback-context") or b.attr.classes:includes("ai-context")) then
-      appendContext(state, b)
-      out:insert(preserveContextMath(b)) -- still rendered normally
-
-    elseif b.t == "Div" or b.t == "BlockQuote" then
-      b.content = walkBlocks(b.content, state)
-      out:insert(b)
-
-    else
-      -- Para, Plain, BulletList, OrderedList, DefinitionList, Table, … :
-      -- flatten to plain text and fold into the running section context.
-      appendContext(state, b)
-      out:insert(b)
-    end
-  end
-  return out
+  return blocks:walk({CodeBlock = function(b)
+    if b.classes:includes("{math-exercise}") then return buildExercise(b, state) end
+  end})
 end
 
 local function Pandoc(doc)
+  if quarto.doc.is_format("html") then
+    feedback = dofile(quarto.utils.resolve_path("feedback-loader.lua"))()
+    doc = feedback.prepare(doc)
+  end
   doc.meta = Meta(doc.meta)
 
   if quarto.doc.is_format("html") then
@@ -850,5 +775,12 @@ local function Pandoc(doc)
 end
 
 return {
+  { Callout = function(c)
+      if true and quarto.doc.is_format("html") then
+        feedback = feedback or dofile(quarto.utils.resolve_path("feedback-loader.lua"))()
+        return feedback.markCallout(c)
+      end
+      return c
+    end },
   { Pandoc = Pandoc },
 }

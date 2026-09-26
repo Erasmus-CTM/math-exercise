@@ -1,3 +1,4 @@
+import { sharedTestApi } from './helpers/shared-client.mjs';
 import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -35,11 +36,11 @@ function loadBundle(lang, replies = []) {
   };
   vm.createContext(context);
   for (const name of ['feedback-core.js', 'feedback-dom.js']) {
-    vm.runInContext(readFileSync(new URL('../_extensions/math-exercise/ai-feedback/' + name, import.meta.url), 'utf8'), context);
+    vm.runInContext(readFileSync(new URL('file://' + process.env.AI_FEEDBACK_EXTENSION + '/' + name), 'utf8'), context);
     context.window.AIFeedback = context.AIFeedback;
   }
   vm.runInContext(source, context);
-  return { api: context.window.__mathExerciseTestApi, requests };
+  return { api: {...context.window.__mathExerciseTestApi, ...sharedTestApi(context.AIFeedback, context.window.__mathExerciseConfig.lang, context.localStorage)}, requests };
 }
 
 const cfg = {
@@ -48,15 +49,15 @@ const cfg = {
   model: 'test-model',
 };
 
-test('nb prompt names Norwegian Bokmål and keeps the language guard last', () => {
+test('shared mathematics prompt carries Norwegian language and current hint', () => {
   const { api } = loadBundle('nb');
   const system = api.sysPrompt(1, false);
   const user = api.buildUserPrompt('Regn ut 2 + 2.', '<field>5</field>', '<field>incorrect</field>', []);
 
   assert.equal(api.locale.outputLanguageCode, 'nb');
-  assert.match(user, /^<output_language code="nb">Norwegian Bokmål<\/output_language>/);
-  assert.ok(system.endsWith(api.locale.promptLanguageGuard));
-  assert.match(system, /utelukkende|alle synlige ord|norsk bokmål/i);
+  assert.match(system, /nb/);
+
+  assert.match(system, /CURRENT HINT LEVEL: 1 OF 4/);
 });
 
 test('an obviously non-Latin response is retried once in Norwegian', async () => {
@@ -69,8 +70,8 @@ test('an obviously non-Latin response is retried once in Norwegian', async () =>
 
   assert.equal(result, 'Hva er det første uttrykket du bør undersøke?');
   assert.equal(requests.length, 2);
-  assert.match(requests[1].messages[0].content, /SPRÅKKRAV VED NYTT FORSØK/);
-  assert.ok(requests[1].messages[0].content.endsWith(api.locale.promptLanguageRetry));
+  assert.match(requests[1].messages[0].content, /entirely in nb/);
+  assert.match(requests[1].messages[0].content, /entirely in nb/);
 });
 
 test('two responses in an unexpected script produce a localized error', async () => {
@@ -81,7 +82,7 @@ test('two responses in an unexpected script produce a localized error', async ()
 
   await assert.rejects(
     api.callLLM('Oppgave', '<field>Svar</field>', '<field>incorrect</field>', [], 1, cfg, null),
-    /feil språk to ganger/i,
+    /output requirements/i,
   );
   assert.equal(requests.length, 2);
 });

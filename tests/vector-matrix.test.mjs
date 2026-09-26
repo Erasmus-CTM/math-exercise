@@ -26,7 +26,7 @@ function loadBundle(lang = 'en') {
   };
   vm.createContext(context);
   for (const name of ['feedback-core.js', 'feedback-dom.js']) {
-    vm.runInContext(readFileSync(new URL('../_extensions/math-exercise/ai-feedback/' + name, import.meta.url), 'utf8'), context);
+    vm.runInContext(readFileSync(new URL('file://' + process.env.AI_FEEDBACK_EXTENSION + '/' + name), 'utf8'), context);
     context.window.AIFeedback = context.AIFeedback;
   }
   vm.runInContext(source, context);

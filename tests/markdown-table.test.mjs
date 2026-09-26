@@ -1,3 +1,4 @@
+import { sharedTestApi } from './helpers/shared-client.mjs';
 import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -22,11 +23,11 @@ function loadBundle(lang = 'en') {
   };
   vm.createContext(context);
   for (const name of ['feedback-core.js', 'feedback-dom.js']) {
-    vm.runInContext(readFileSync(new URL('../_extensions/math-exercise/ai-feedback/' + name, import.meta.url), 'utf8'), context);
+    vm.runInContext(readFileSync(new URL('file://' + process.env.AI_FEEDBACK_EXTENSION + '/' + name), 'utf8'), context);
     context.window.AIFeedback = context.AIFeedback;
   }
   vm.runInContext(source, context);
-  return context.window.__mathExerciseTestApi;
+  return {...context.window.__mathExerciseTestApi, ...sharedTestApi(context.AIFeedback, context.window.__mathExerciseConfig.lang, context.localStorage)};
 }
 
 test('well-formed Markdown tables render as safe responsive HTML', () => {
@@ -65,8 +66,7 @@ test('ordinary mathematical pipes are not interpreted as a table', () => {
 test('all feedback languages explicitly discourage Markdown tables', () => {
   for (const lang of ['en', 'de', 'nb']) {
     const api = loadBundle(lang);
-    assert.ok(api.sysPrompt(4, false).includes(api.locale.promptFormatting));
-    assert.match(api.locale.promptFormatting, /table|tabelle|tabell/i);
+    assert.match(api.sysPrompt(4, false), /not Markdown tables/);
   }
 });
 

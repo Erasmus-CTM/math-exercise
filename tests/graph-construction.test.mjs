@@ -1,3 +1,4 @@
+import { sharedTestApi } from './helpers/shared-client.mjs';
 import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -31,11 +32,11 @@ function loadBundle(loadPackage) {
   };
   vm.createContext(context);
   for (const name of ['feedback-core.js', 'feedback-dom.js']) {
-    vm.runInContext(readFileSync(new URL('../_extensions/math-exercise/ai-feedback/' + name, import.meta.url), 'utf8'), context);
+    vm.runInContext(readFileSync(new URL('file://' + process.env.AI_FEEDBACK_EXTENSION + '/' + name), 'utf8'), context);
     context.window.AIFeedback = context.AIFeedback;
   }
   vm.runInContext(source, context);
-  return context.window.__mathExerciseTestApi;
+  return {...context.window.__mathExerciseTestApi, ...sharedTestApi(context.AIFeedback, context.window.__mathExerciseConfig.lang, context.localStorage)};
 }
 
 function sympyBootstrap() {
@@ -239,9 +240,9 @@ test('graphical AI context keeps topology, assessment, and learning context sepa
     '<exercise status="partial" score="0.6">The graph contains a cycle.</exercise>',
     [{ id: 'tree-notes', content: 'A tree is connected and acyclic.' }],
   );
-  assert.match(prompt, /<learning_context id="tree-notes">/);
-  assert.match(prompt, /<student_response>\n<jsxgraph_response>/);
-  assert.match(prompt, /<private_field_assessment never_quote="true">\n<exercise status="partial" score="0\.6">/);
+  assert.equal(JSON.parse(prompt).materials[0].id, 'tree-notes');
+  assert.match(JSON.parse(prompt).responses[0].value, /<jsxgraph_response>/);
+  assert.match(JSON.parse(prompt).evidence[0].text, /score="0.6"/);
 });
 
 test('graph theory is the final examples tab and exercises use the requested order', () => {

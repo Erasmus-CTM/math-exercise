@@ -1,3 +1,4 @@
+import { sharedTestApi } from './helpers/shared-client.mjs';
 import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -47,11 +48,11 @@ function loadBundle(fetchImpl) {
   };
   vm.createContext(context);
   for (const name of ['feedback-core.js', 'feedback-dom.js']) {
-    vm.runInContext(readFileSync(new URL('../_extensions/math-exercise/ai-feedback/' + name, import.meta.url), 'utf8'), context);
+    vm.runInContext(readFileSync(new URL('file://' + process.env.AI_FEEDBACK_EXTENSION + '/' + name), 'utf8'), context);
     context.window.AIFeedback = context.AIFeedback;
   }
   vm.runInContext(source, context);
-  return { api: context.window.__mathExerciseTestApi, requests };
+  return { api: {...context.window.__mathExerciseTestApi, ...sharedTestApi(context.AIFeedback, context.window.__mathExerciseConfig.lang, context.localStorage)}, requests };
 }
 
 function cfg(model) {
