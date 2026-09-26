@@ -1681,7 +1681,7 @@
         return;
       }
       feedbackHandle = F.attach({
-        integration: 'math-exercise', requestOptions: {imageFallback:'text'}, id: 'math-' + label, button: feedbackBtn, output: output,
+        integration: 'math-exercise', policySelection: JSON.parse(cell.dataset.feedbackPolicy || '{}'), requestOptions: {imageFallback:'text'}, id: 'math-' + label, button: feedbackBtn, output: output,
         uiLanguage: L.outputLanguageCode,
         getRequest: async function (state) {
           var before = localSnapshot();

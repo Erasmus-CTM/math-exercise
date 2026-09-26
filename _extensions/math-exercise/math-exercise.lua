@@ -636,6 +636,7 @@ local function buildExercise(el, state)
              .. ' data-form-credit="' .. attrEsc(formCredit) .. '"'
              .. ' data-field-labels="' .. jsonArrAttr(fieldLabels) .. '"'
              .. ' data-vecdir="' .. vecdir .. '"'
+             .. ' data-feedback-policy="' .. attrEsc(quarto.json.encode(feedback.selection(el, opts))) .. '"'
              .. ' data-context-mode="' .. feedback.context(el, opts).mode .. '"'
              .. ' data-context-refs="' .. attrEsc(feedback.context(el, opts).refs) .. '"'
              .. ' data-context="'      .. attrEsc('"' .. jsonEsc(el.attributes["data-ai-feedback-context"] or "") .. '"') .. '"'
