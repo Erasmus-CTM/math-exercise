@@ -27,7 +27,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: Erasmus-CTM/ai-feedback
-          ref: 9bac4b8c9f4fa1f24ecffd8b6c07218cdd602fcc
+          ref: bf23e36028c0bfcff6038874e10b109558437b1b
           path: _feedback-source
       - uses: quarto-dev/quarto-actions/setup@v2
         with:
@@ -35,6 +35,8 @@ jobs:
       - name: Install shared Quarto dependency
         run: quarto add ./_feedback-source --no-prompt
 
+      - name: Install variant build dependency
+        run: python3 -m pip install PyYAML==6.0.2
       - name: Render examples
         run: |
           quarto render

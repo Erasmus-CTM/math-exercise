@@ -15,6 +15,7 @@ project:
     - graph-theory.qmd
     - examples.qmd
     - example.qmd
+    - generated-variants.qmd
 
 website:
   title: "math-exercise"

@@ -1,0 +1,36 @@
+```{math-exercise}
+#| label: variant-perpendicular
+#| mode: custom
+#| context: none
+#| parameters:
+#|   a:
+#|   - 2
+#|   - 3
+#|   b:
+#|   - 1
+#|   - 4
+#| tests:
+#| - name: perpendicular
+#|   answers:
+#|   - -{{b}}
+#|   - '{{a}}'
+#|   expected: correct
+#| - name: zero vector
+#|   answers:
+#|   - 0
+#|   - 0
+#|   expected: wrong
+#| - name: parallel
+#|   answers:
+#|   - '{{a}}'
+#|   - '{{b}}'
+#|   expected: wrong
+#| checker: |
+#|   def check(response, symbols):
+#|       a = response['variant']['parameters']['a']
+#|       b = response['variant']['parameters']['b']
+#|       u, v = response['expressions']
+#|       return {'correct': (u != 0 or v != 0) and simplify(a*u+b*v) == 0}
+
+Give a **nonzero** vector perpendicular to $({{a}},{{b}})$: _[0], _[0].
+```
