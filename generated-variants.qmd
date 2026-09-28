@@ -28,10 +28,7 @@ and **Copy selection** to replace selection options in its source file.
 
 ## Geometric construction
 
-```{jsxgraph}
-//| assessment_id: variant-point
-//| width: 480
-//| height: 360
+```{.jsxgraph assessment_id="variant-point" width="480" height="360"}
 var board=JXG.JSXGraph.initBoard(BOARDID,{boundingbox:[-3,3,3,-3],axis:true,keepaspectratio:true});
 var p=board.create('point',[0.5,0.5],{name:'P',snapToGrid:false});
 JXG.QuartoAssessment.register({board:board,response:function(){return {point:{x:p.X(),y:p.Y()}};}});

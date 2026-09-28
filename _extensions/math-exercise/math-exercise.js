@@ -1478,6 +1478,7 @@
         details.open=false;
       }
       if (target) {
+        target.classList.add('ai-feedback-ignore');
         if(window.MathJax?.typesetClear)window.MathJax.typesetClear([target]);
         target.innerHTML=record.solution;
         renderMathInQuestion(target);
