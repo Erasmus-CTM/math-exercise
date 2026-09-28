@@ -55,3 +55,7 @@ Developed by the **CTM team** for the Erasmus+ project
 **“Computational Thinking makes sense of Mathematics”**
 (**2023-1-NO01-KA220-HED-000166744**).
 [Funding and acknowledgements](docs/acknowledgements.md).
+
+## Generated variants
+
+Author one template instead of repeated pools. See [build-time generation and optional review](docs/build-time-variants.md) and [the examples](generated-variants.qmd). Generated templates require Python 3 and PyYAML at build time.
