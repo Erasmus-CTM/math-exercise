@@ -243,12 +243,12 @@ local function jsonArrAttr(t)
   for _, v in ipairs(t) do
     table.insert(parts, '"' .. jsonEsc(v) .. '"')
   end
-  return ("[" .. table.concat(parts, ",") .. "]"):gsub('"', '&quot;')
+  return attrEsc("[" .. table.concat(parts, ",") .. "]")
 end
 
 -- Same idea as jsonArrAttr, but for a single string (used for data-context).
 local function jsonStrAttr(s)
-  return ('"' .. jsonEsc(s) .. '"'):gsub('"', '&quot;')
+  return attrEsc('"' .. jsonEsc(s) .. '"')
 end
 
 local function splitCsv(s)
