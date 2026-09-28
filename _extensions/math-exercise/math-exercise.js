@@ -303,8 +303,14 @@
     }));
   }
 
-  async function ensureSympy() {
+  var sympyLoading = null;
+  function ensureSympy() {
+    if (!sympyLoading) sympyLoading = initializeSympy().catch(function(error){sympyLoading=null;throw error;});
+    return sympyLoading;
+  }
+  async function initializeSympy() {
     if (sympyReady) return;
+    await ensurePyodide();
     await mainPyodide.loadPackage('sympy');
     await mainPyodide.runPythonAsync([
       'from sympy import *',
@@ -1314,7 +1320,14 @@
   var CHECK_PY = '_mj.dumps(_math_check())';
   var CHECK_CUSTOM_PY = '_mj.dumps(_math_check_custom())';
 
-  async function checkField(el, mode, opts) {
+  // Python globals are shared: keep each set-globals/evaluate transaction together.
+  var assessmentQueue = Promise.resolve();
+  function assessmentTransaction(run) {
+    var result=assessmentQueue.then(run);assessmentQueue=result.catch(function(){});return result;
+  }
+  function checkField(el, mode, opts) {var field={value:el.value,dataset:Object.assign({},el.dataset)}, options=JSON.parse(JSON.stringify(opts||{}));return assessmentTransaction(function(){return checkFieldNow(field,mode,options);});}
+  function checkCustom(response, opts) {var answer=JSON.parse(JSON.stringify(response)),options=JSON.parse(JSON.stringify(opts));return assessmentTransaction(function(){return checkCustomNow(answer,options);});}
+  async function checkFieldNow(el, mode, opts) {
     var val = el.value.trim();
     if (!val) return { status: 'empty', score: 0.0 };
     opts = opts || {};
@@ -1332,7 +1345,11 @@
     return JSON.parse(await mainPyodide.runPythonAsync(CHECK_PY));
   }
 
-  async function checkCustom(response, opts) {
+  async function checkCustomNow(response, opts) {
+    if (opts.variant) {
+      if (!response || typeof response !== 'object' || Array.isArray(response)) throw new Error('Generated custom responses must be objects');
+      response = Object.assign({}, response, {variant: opts.variant});
+    }
     mainPyodide.globals.set('_math_response_json', JSON.stringify(response));
     mainPyodide.globals.set('_math_vars', opts.vars || '');
     mainPyodide.globals.set('_math_checker', opts.checker || '');
@@ -1345,12 +1362,52 @@
   function resolveContexts(cell) {
     var text = '';
     try { text = JSON.parse(cell.dataset.context || '""'); } catch (_) {}
-    return window.AIFeedback.contextMaterials({mode:cell.dataset.contextMode || 'auto', refs:cell.dataset.contextRefs || '', text});
+    var materials = window.AIFeedback.contextMaterials({mode:cell.dataset.contextMode || 'auto', refs:cell.dataset.contextRefs || '', text});
+    if (cell.dataset.contextMode !== 'none' && cell.mathExercise?.getVariant()?.context) {
+      materials.push({id:cell.dataset.label + '-variant', title:'Variant context', text:cell.mathExercise.getVariant().context});
+    }
+    return materials;
   }
 
   // ---------------------------------------------------------------------------
   // Exercise cell setup
   // ---------------------------------------------------------------------------
+
+  function setupVariantReview(cell, generated) {
+    var panel=document.createElement('details');panel.className='math-variant-review ai-feedback-ignore';
+    var summary=document.createElement('summary');summary.textContent='Review variants ('+generated.variants.length+')'+(generated.staleReview?' — previous approval is outdated':'');panel.append(summary);
+    var runners=[], table=document.createElement('table'), selected=new Set(generated.variants.filter(v=>v.included).map(v=>v.id));
+    var heading=document.createElement('tr');['Include','Variant','Parameters','Tests'].forEach(function(text){var th=document.createElement('th');th.textContent=text;heading.append(th);});table.append(heading);
+    generated.variants.forEach(function(record,index){
+      var tr=document.createElement('tr'),choose=document.createElement('td'),input=document.createElement('input');input.type='checkbox';input.checked=selected.has(record.id);input.setAttribute('aria-label','Include '+record.id);
+      input.addEventListener('change',function(){if(input.checked)selected.add(record.id);else selected.delete(record.id);});choose.append(input);tr.append(choose);
+      var label=document.createElement('td'),inspect=document.createElement('button');inspect.type='button';inspect.textContent=(index+1)+' · '+record.id;inspect.addEventListener('click',function(){cell.mathExercise.selectVariant(record.id);});label.append(inspect);tr.append(label);
+      var params=document.createElement('td');params.textContent=JSON.stringify(record.parameters);tr.append(params);
+      var tests=document.createElement('td'),run=document.createElement('button');run.type='button';run.textContent=record.tests.length?'Run '+record.tests.length+' tests':'No authored tests';run.disabled=!record.tests.length;
+      var result=document.createElement('span');result.setAttribute('role','status');
+      var runTests=async function(){
+        run.disabled=true;result.textContent=' Running…';
+        try{
+          for(var fixture of record.tests){
+            var actual=(await cell.mathExercise.checkFixture(record,fixture)).map(x=>x.status);
+            var expected=Array.isArray(fixture.expected)?fixture.expected:[fixture.expected];
+            if(JSON.stringify(actual)!==JSON.stringify(expected))throw new Error((fixture.name||'Fixture')+': expected '+expected+', got '+actual);
+          }
+          result.textContent=' Passed';
+        }catch(error){result.textContent=' Failed: '+error.message;}finally{run.disabled=false;}
+      };run.addEventListener('click',runTests);if(record.tests.length)runners.push(runTests);tests.append(run,result);tr.append(tests);table.append(tr);
+    });panel.append(table);
+    var runAll=document.createElement('button');runAll.type='button';runAll.textContent='Run all authored tests';runAll.disabled=!runners.length;
+    runAll.addEventListener('click',async function(){runAll.disabled=true;try{for(var run of runners)await run();}finally{runAll.disabled=false;}});panel.append(runAll);
+    var exportButton=document.createElement('button');exportButton.type='button';exportButton.textContent='Copy selection';
+    var output=document.createElement('textarea');output.rows=5;output.readOnly=true;output.setAttribute('aria-label','Selection options to replace in the exercise QMD');
+    exportButton.addEventListener('click',function(){
+      if(!selected.size){output.value='Select at least one variant.';return;}
+      output.value='#| reviewed-fingerprint: '+generated.fingerprint+'\n#| include-variants: '+JSON.stringify(Array.from(selected).sort())+'\n';
+      output.focus();output.select();
+      if(navigator.clipboard)navigator.clipboard.writeText(output.value).catch(function(){});
+    });panel.append(exportButton,output);cell.append(panel);
+  }
 
   function setupCell(cell) {
     var vars   = cell.dataset.vars   || '';
@@ -1396,6 +1453,37 @@
       }
     }
 
+    var generated = cell.dataset.variants ? JSON.parse(cell.dataset.variants) : null;
+    function currentVariant() {
+      if (!generated) return null;
+      var record = generated.variants[idx];
+      return JSON.parse(JSON.stringify({id:record.id, parameters:record.parameters, derived:record.derived,
+        fingerprint:record.fingerprint, context:record['variant-context']}));
+    }
+    function publishVariant() {
+      if (!generated) return;
+      var record = generated.variants[idx];
+      checkOpts.variant = currentVariant();
+      checkOpts.checker = record.checker;
+      cell.dataset.variantId = record.id;
+      try { sessionStorage.setItem(poolKey + '|id', record.id); } catch (_) {}
+      var target = generated.solutionTarget && document.getElementById(generated.solutionTarget);
+      if (!target && record.solution) {
+        var details = cell.querySelector('.math-variant-solution');
+        if (!details) {
+          details = document.createElement('details'); details.className='math-variant-solution ai-feedback-ignore';
+          var summary=document.createElement('summary');summary.textContent='Løsningsforslag / Solution';details.append(summary);
+          target=document.createElement('div');target.className='math-variant-solution-body';details.append(target);cell.append(details);
+        } else target=details.querySelector('.math-variant-solution-body');
+        details.open=false;
+      }
+      if (target) {
+        if(window.MathJax?.typesetClear)window.MathJax.typesetClear([target]);
+        target.innerHTML=record.solution;
+        renderMathInQuestion(target);
+      }
+      cell.dispatchEvent(new CustomEvent('math-exercise:variant-change', {bubbles:true, detail:{label:label, variant:currentVariant()}}));
+    }
     var poolRaw   = cell.dataset.pool;
     var poolTasks = poolRaw ? JSON.parse(poolRaw) : null;
     var poolKey   = 'math-pool|' + location.pathname + '|' + label;
@@ -1403,7 +1491,10 @@
     // Pool: pick a stored or random task index, then render the question
     if (poolTasks) {
       var idx;
-      try { idx = parseInt(sessionStorage.getItem(poolKey)); } catch(e) {}
+      try {
+        idx = generated ? generated.variants.findIndex(function(v){return v.id === sessionStorage.getItem(poolKey + '|id');})
+          : parseInt(sessionStorage.getItem(poolKey));
+      } catch(e) {}
       if (isNaN(idx) || idx < 0 || idx >= poolTasks.length) {
         idx = Math.floor(Math.random() * poolTasks.length);
         try { sessionStorage.setItem(poolKey, String(idx)); } catch(e) {}
@@ -1635,35 +1726,47 @@
     checkBtn.addEventListener('click', runCheck);
     attachKeyListeners();
 
-    // ---- Pool reload ----
-    if (reloadBtn && poolTasks) {
-      reloadBtn.addEventListener('click', function () {
-        invalidateFeedback();
-        var cur;
-        try { cur = parseInt(sessionStorage.getItem(poolKey)); } catch(e) {}
-        var next = cur;
-        if (poolTasks.length > 1) {
-          while (next === cur) { next = Math.floor(Math.random() * poolTasks.length); }
+    // Selection is shared by random reload and author review; always invalidates old feedback.
+    function selectTask(next) {
+      if (!poolTasks || !Number.isInteger(next) || next < 0 || next >= poolTasks.length) throw new Error('Invalid variant selection');
+      invalidateFeedback();
+      if (feedbackHandle) feedbackHandle.reset();
+      idx = next;
+      try { sessionStorage.setItem(poolKey, String(next)); } catch(e) {}
+      var r = renderTaskText(poolTasks[next], cell.id, vars, vecdir, mode);
+      setQuestionContent(questionDiv, r);
+      cell.dataset.fields = JSON.stringify(r.fieldIds);
+      cell.dataset.structuralFieldLabels = JSON.stringify(r.structuralLabels);
+      fieldIds = r.fieldIds; structuralFieldLabels = r.structuralLabels; structuralLabelById = {};
+      rememberCurrentLabels(); setupDynamicMatrices(); warnExtraFieldLabels();
+      renderMathInQuestion(questionDiv); attachKeyListeners(); fbDiv.innerHTML = '';
+      publishVariant();
+    }
+    if (reloadBtn && poolTasks) reloadBtn.addEventListener('click', function () {
+      var next = idx;
+      if (poolTasks.length > 1) next = (idx + 1 + Math.floor(Math.random() * (poolTasks.length - 1))) % poolTasks.length;
+      selectTask(next);
+    });
+    if (generated) {
+      cell.mathExercise = {
+        getVariant: currentVariant,
+        selectVariant: function(id) {selectTask(generated.variants.findIndex(function(v){return v.id===id;}));},
+        checkFixture: async function(record, fixture) {
+          await ensureSympy(); await ensurePackages(checkOpts.packages);
+          var options=Object.assign({}, checkOpts, {checker:record.checker,
+            variant:JSON.parse(JSON.stringify({id:record.id, parameters:record.parameters, derived:record.derived, fingerprint:record.fingerprint, context:record['variant-context']}))});
+          if(mode==='custom') return [await checkCustom(fixture.response || {kind:'expressions', raw:fixture.answers || [], inputs:{}}, options)];
+          var rendered=renderTaskText(record.question, cell.id+'-review', vars, vecdir, mode);
+          var box=document.createElement('div');box.innerHTML=rendered.html;
+          var fields=Array.from(box.querySelectorAll('input[data-answer],textarea[data-answer]'));
+          if(fields.length!==(fixture.answers || []).length) throw new Error('Fixture answer count does not match fields');
+          var results=[];
+          for(var i=0;i<fields.length;i++){fields[i].value=fixture.answers[i];results.push(await checkField(fields[i],mode,options));}
+          return results;
         }
-        idx = next;
-        try { sessionStorage.setItem(poolKey, String(next)); } catch(e) {}
-
-        var r = renderTaskText(poolTasks[next], cell.id, vars, vecdir, mode);
-        var qDivR = cell.querySelector('.math-exercise-question');
-        setQuestionContent(qDivR, r);
-        cell.dataset.fields = JSON.stringify(r.fieldIds);
-        cell.dataset.structuralFieldLabels = JSON.stringify(r.structuralLabels);
-        fieldIds = r.fieldIds;
-        structuralFieldLabels = r.structuralLabels;
-        structuralLabelById = {};
-        rememberCurrentLabels();
-        setupDynamicMatrices();
-        warnExtraFieldLabels();
-        renderMathInQuestion(qDivR);
-
-        attachKeyListeners();
-        fbDiv.innerHTML = '';
-      });
+      };
+      publishVariant();
+      if(generated.review) setupVariantReview(cell, generated);
     }
 
     // ---- Shared AI Feedback adapter: collection never invokes Python ----

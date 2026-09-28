@@ -1,0 +1,42 @@
+```{math-exercise}
+#| label: variant-matrix
+#| mode: custom
+#| context: none
+#| parameters:
+#|   a:
+#|   - 2
+#|   - 3
+#| tests:
+#| - response:
+#|     kind: expressions
+#|     raw: []
+#|     inputs:
+#|       A:
+#|         type: matrix
+#|         rows: 2
+#|         cols: 2
+#|         raw:
+#|         - '{{a}}'
+#|         - 0
+#|         - 0
+#|         - -{{a}}
+#|   expected: correct
+#| - response:
+#|     kind: expressions
+#|     raw: []
+#|     inputs:
+#|       A:
+#|         type: matrix
+#|         rows: 1
+#|         cols: 1
+#|         raw:
+#|         - '{{a}}'
+#|   expected: wrong
+#| checker: |
+#|   def check(response, symbols):
+#|       a = response['variant']['parameters']['a']
+#|       A = response['inputs']['A']['matrix']
+#|       return {'correct': A.shape == (2,2) and simplify(A*A-a*a*eye(2)) == zeros(2)}
+
+Find a $2\times 2$ matrix $A$ with $A^2={{a}}^2 I$: mat{name=A, rows=2, cols=2}.
+```

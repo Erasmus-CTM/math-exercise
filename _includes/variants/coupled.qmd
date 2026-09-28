@@ -1,0 +1,29 @@
+```{math-exercise}
+#| label: variant-coupled
+#| mode: custom
+#| context: none
+#| parameters:
+#|   total:
+#|   - 3
+#|   - 5
+#| tests:
+#| - answers:
+#|   - 1
+#|   - '{{total}}-1'
+#|   expected: correct
+#| - answers:
+#|   - 0
+#|   - '{{total}}'
+#|   expected: wrong
+#| - answers:
+#|   - '{{total}}'
+#|   - '{{total}}'
+#|   expected: wrong
+#| checker: |
+#|   def check(response, symbols):
+#|       total = response['variant']['parameters']['total']
+#|       u,v = response['expressions']
+#|       return {'correct': u.is_positive and v.is_positive and simplify(u+v-total)==0}
+
+Give two positive numbers whose sum is ${{total}}$: _[0], _[0].
+```

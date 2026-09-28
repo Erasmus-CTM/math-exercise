@@ -590,6 +590,8 @@ local function buildExercise(el, state)
   local eid = "math-exercise-" .. exerciseCount
 
   local opts, questionText = parseOptions(el.text)
+  local variants = dofile(quarto.utils.resolve_path("variants.lua")).generate(el.text, questionText, opts, state.review)
+  if variants then opts = variants.options; opts["pool"] = "true" end
 
   local caption   = opts["caption"]   or nil
   local label     = opts["label"]     or eid
@@ -645,6 +647,11 @@ local function buildExercise(el, state)
 
   if isPool then
     local tasks = splitTasks(questionText)
+    if variants then
+      tasks = {}
+      for _, record in ipairs(variants.variants) do tasks[#tasks+1] = record.question end
+      attrs = attrs .. ' data-variants="' .. attrEsc(quarto.json.encode(variants)) .. '"'
+    end
     attrs        = attrs .. ' data-pool="'   .. jsonArrAttr(tasks) .. '"'
                          .. ' data-fields="[]"'
                          .. ' data-structural-field-labels="[]"'
@@ -768,7 +775,7 @@ local function Pandoc(doc)
   doc.meta = Meta(doc.meta)
 
   if quarto.doc.is_format("html") then
-    local state = { sectionCtx = {} }
+    local state = { sectionCtx = {}, review = doc.meta["math-exercise-review"] == true }
     doc.blocks = walkBlocks(doc.blocks, state)
   end
 

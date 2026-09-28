@@ -1,0 +1,40 @@
+---
+title: "Build-time variants"
+engine: markdown
+filters: [jsxgraph, math-exercise]
+math-exercise-review: true
+---
+
+Each problem below is a separate included QMD. Review is enabled **only on
+this author page**. Ordinary course pages can include the same files without
+`math-exercise-review: true`. Use **Run all authored tests**, inspect a variant,
+and **Copy selection** to replace selection options in its source file.
+
+## Expression answers
+
+{{< include _includes/variants/triangle.qmd >}}
+
+## Perpendicular vectors
+
+{{< include _includes/variants/perpendicular.qmd >}}
+
+## Matrix relations
+
+{{< include _includes/variants/matrix.qmd >}}
+
+## Coupled answers
+
+{{< include _includes/variants/coupled.qmd >}}
+
+## Geometric construction
+
+```{jsxgraph}
+//| assessment_id: variant-point
+//| width: 480
+//| height: 360
+var board=JXG.JSXGraph.initBoard(BOARDID,{boundingbox:[-3,3,3,-3],axis:true,keepaspectratio:true});
+var p=board.create('point',[0.5,0.5],{name:'P',snapToGrid:false});
+JXG.QuartoAssessment.register({board:board,response:function(){return {point:{x:p.X(),y:p.Y()}};}});
+```
+
+{{< include _includes/variants/geometry.qmd >}}
