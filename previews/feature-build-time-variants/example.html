@@ -2552,6 +2552,7 @@ For $3x+2=14$, enter $x=$ _[4].
         details.open=false;
       }
       if (target) {
+        target.classList.add('ai-feedback-ignore');
         if(window.MathJax?.typesetClear)window.MathJax.typesetClear([target]);
         target.innerHTML=record.solution;
         renderMathInQuestion(target);

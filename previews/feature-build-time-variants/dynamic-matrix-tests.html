@@ -3255,6 +3255,7 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
         details.open=false;
       }
       if (target) {
+        target.classList.add('ai-feedback-ignore');
         if(window.MathJax?.typesetClear)window.MathJax.typesetClear([target]);
         target.innerHTML=record.solution;
         renderMathInQuestion(target);

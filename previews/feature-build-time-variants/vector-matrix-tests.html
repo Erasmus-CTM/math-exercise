@@ -2963,6 +2963,7 @@ Skriv radmatrisen $(1,2,3,4,5,6)$: mat[1,2,3,4,5,6]
         details.open=false;
       }
       if (target) {
+        target.classList.add('ai-feedback-ignore');
         if(window.MathJax?.typesetClear)window.MathJax.typesetClear([target]);
         target.innerHTML=record.solution;
         renderMathInQuestion(target);

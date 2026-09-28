@@ -39,7 +39,7 @@
     "href": "generated-variants.html#geometric-construction",
     "title": "Build-time variants",
     "section": "Geometric construction",
-    "text": "Geometric construction\n//| assessment_id: variant-point\n//| width: 480\n//| height: 360\nvar board=JXG.JSXGraph.initBoard(BOARDID,{boundingbox:[-3,3,3,-3],axis:true,keepaspectratio:true});\nvar p=board.create('point',[0.5,0.5],{name:'P',snapToGrid:false});\nJXG.QuartoAssessment.register({board:board,response:function(){return {point:{x:p.X(),y:p.Y()}};}});\n\n↻\n\n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙"
+    "text": "Geometric construction\n\n\n↻\n\n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙"
   },
   {
     "objectID": "examples.html",
