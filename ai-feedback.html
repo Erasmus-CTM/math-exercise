@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.10.18">
+<meta name="generator" content="quarto-1.10.19">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -77,10 +77,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-3e9b1289f5f353c49b617ce48ad2bc38.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-55617497126496852ff9f5a59253c640.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -928,7 +928,7 @@ For $2x^2+3x-2=0$, compute the discriminant: _[25]
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Newton’s method uses <span data-math-exercise-tex="x_{k+1}=x_k-f(x_k)/f'(x_k)" data-math-exercise-display="false"><span class="math inline">\(x_{k+1}=x_k-f(x_k)/f'(x_k)\)</span></span>. Evaluate the function and derivative at the current iterate before forming the next iterate.</p>
+<p>Newton’s method uses <span data-math-exercise-display="false" data-math-exercise-tex="x_{k+1}=x_k-f(x_k)/f'(x_k)"><span class="math inline">\(x_{k+1}=x_k-f(x_k)/f'(x_k)\)</span></span>. Evaluate the function and derivative at the current iterate before forming the next iterate.</p>
 </div>
 </div>
 </div>
@@ -1056,10 +1056,10 @@ tangent at $x=2$: _[12].
 <h2 class="anchored" data-anchor-id="mathematics-in-ai-context">Mathematics in AI context</h2>
 <p>Mathematics is sent as LaTeX source, including fractions, powers, subscripts, matrices and aligned equations. The source is preserved before typesetting, so MathJax and KaTeX produce the same mathematical context. The question and its caption are preserved too; loading another pool question refreshes its source.</p>
 <div id="solenoid-notation" class="math-exercise-context">
-<p>A long solenoid has <span data-math-exercise-tex="N" data-math-exercise-display="false"><span class="math inline">\(N\)</span></span> turns over a length <span data-math-exercise-tex="l" data-math-exercise-display="false"><span class="math inline">\(l\)</span></span>. Its turn density is <span data-math-exercise-tex="n=\frac{N}{l}" data-math-exercise-display="false"><span class="math inline">\(n=\frac{N}{l}\)</span></span>, measured in <span data-math-exercise-tex="\mathrm{m}^{-1}" data-math-exercise-display="false"><span class="math inline">\(\mathrm{m}^{-1}\)</span></span>. In vacuum, <span data-math-exercise-tex="\mu_0\approx 4\pi\times10^{-7}\,\mathrm{H/m}" data-math-exercise-display="false"><span class="math inline">\(\mu_0\approx 4\pi\times10^{-7}\,\mathrm{H/m}\)</span></span>. For radius <span data-math-exercise-tex="2a" data-math-exercise-display="false"><span class="math inline">\(2a\)</span></span>, the ideal long-solenoid approximation gives</p>
-<p><span data-math-exercise-tex="
+<p>A long solenoid has <span data-math-exercise-display="false" data-math-exercise-tex="N"><span class="math inline">\(N\)</span></span> turns over a length <span data-math-exercise-display="false" data-math-exercise-tex="l"><span class="math inline">\(l\)</span></span>. Its turn density is <span data-math-exercise-display="false" data-math-exercise-tex="n=\frac{N}{l}"><span class="math inline">\(n=\frac{N}{l}\)</span></span>, measured in <span data-math-exercise-display="false" data-math-exercise-tex="\mathrm{m}^{-1}"><span class="math inline">\(\mathrm{m}^{-1}\)</span></span>. In vacuum, <span data-math-exercise-display="false" data-math-exercise-tex="\mu_0\approx 4\pi\times10^{-7}\,\mathrm{H/m}"><span class="math inline">\(\mu_0\approx 4\pi\times10^{-7}\,\mathrm{H/m}\)</span></span>. For radius <span data-math-exercise-display="false" data-math-exercise-tex="2a"><span class="math inline">\(2a\)</span></span>, the ideal long-solenoid approximation gives</p>
+<p><span data-math-exercise-display="true" data-math-exercise-tex="
 L=\frac{4\pi\mu_0N^2a^2}{l}.
-" data-math-exercise-display="true"><span class="math display">\[
+"><span class="math display">\[
 L=\frac{4\pi\mu_0N^2a^2}{l}.
 \]</span></span></p>
 </div>
@@ -1504,6 +1504,101 @@ Write the turn density in terms of $N$ and $l$: _[N/l]
   </script>
 </div> <!-- /content -->
 <script type="text/javascript">
+// Shared classic-script bootstrap for math-exercise and stack-sympy.
+// Keep the vendored copy in stack-sympy byte-identical to this file.
+(function (root) {
+  'use strict';
+
+  if (root.MathExerciseRuntime) return;
+
+  var indexURL = 'https://cdn.jsdelivr.net/pyodide/v0.27.2/full/';
+
+  function loadScript(src) {
+    if (src === indexURL + 'pyodide.js' && typeof root.loadPyodide === 'function') {
+      return Promise.resolve();
+    }
+
+    if (typeof document === 'undefined') {
+      if (typeof root.importScripts !== 'function') {
+        return Promise.reject(new Error('Cannot load Pyodide: no document or importScripts'));
+      }
+      try {
+        root.importScripts(src);
+        return Promise.resolve();
+      } catch (error) {
+        return Promise.reject(error);
+      }
+    }
+
+    return new Promise(function (resolve, reject) {
+      var script = document.querySelector('script[src="' + src + '"]');
+      if (script && script.dataset.qLoaded === '1') { resolve(); return; }
+
+      function loaded() {
+        script.dataset.qLoaded = '1';
+        resolve();
+      }
+      function failed() {
+        // A failed tag must not trap a later attempt waiting for an event that
+        // will never fire. This also permits a retry after a temporary outage.
+        if (typeof script.remove === 'function') script.remove();
+        reject(new Error('Failed to load: ' + src));
+      }
+
+      if (script) {
+        script.addEventListener('load', loaded, { once: true });
+        script.addEventListener('error', failed, { once: true });
+        return;
+      }
+      script = document.createElement('script');
+      script.src = src;
+      script.onload = loaded;
+      script.onerror = failed;
+      document.head.appendChild(script);
+    });
+  }
+
+  async function ensurePyodide() {
+    // Some Quarto integrations declare these with top-level `let`, which is
+    // visible to classic scripts but is not a property of globalThis.
+    var coatless = typeof qpyodideInstance !== 'undefined'
+      ? qpyodideInstance : root.qpyodideInstance;
+    if (typeof coatless !== 'undefined') {
+      root.mainPyodide = await coatless;
+      return root.mainPyodide;
+    }
+    var existing = typeof mainPyodide !== 'undefined'
+      ? mainPyodide : root.mainPyodide;
+    if (typeof existing !== 'undefined') {
+      root.mainPyodide = await existing;
+      return root.mainPyodide;
+    }
+
+    // Share the in-flight initialization with all consumers on this page or
+    // worker. Install the promise before either extension can start another.
+    if (!root.__qExercisePyodide) {
+      root.__qExercisePyodide = (async function () {
+        await loadScript(indexURL + 'pyodide.js');
+        return root.loadPyodide({ indexURL: indexURL });
+      })();
+    }
+    var pending = root.__qExercisePyodide;
+    try {
+      root.mainPyodide = await pending;
+      return root.mainPyodide;
+    } catch (error) {
+      if (root.__qExercisePyodide === pending) root.__qExercisePyodide = undefined;
+      throw error;
+    }
+  }
+
+  root.MathExerciseRuntime = {
+    indexURL: indexURL,
+    loadScript: loadScript,
+    ensurePyodide: ensurePyodide
+  };
+})(globalThis);
+
 (function () {
   'use strict';
 
@@ -2149,47 +2244,12 @@ Write the turn density in terms of $N$ and $l$: _[N/l]
     return out.join('');
   }
 
-  // Loads a script exactly once. If its tag already exists but has not finished
-  // loading, wait for its load event instead of resolving immediately. Otherwise,
-  // a second extension could access globals that do not exist yet.
-  function loadScript(src) {
-    return new Promise(function (resolve, reject) {
-      var existing = document.querySelector('script[src="' + src + '"]');
-      if (existing) {
-        if (existing.dataset.qLoaded === '1') { resolve(); return; }
-        existing.addEventListener('load', function () { resolve(); });
-        existing.addEventListener('error', function () {
-          reject(new Error('Failed to load: ' + src));
-        });
-        return;
-      }
-      var s = document.createElement('script');
-      s.src = src;
-      s.onload = function () { s.dataset.qLoaded = '1'; resolve(); };
-      s.onerror = function () { reject(new Error('Failed to load: ' + src)); };
-      document.head.appendChild(s);
-    });
-  }
-
   // ---------------------------------------------------------------------------
   // Pyodide bootstrap  (reuse coatless instance if present)
   // ---------------------------------------------------------------------------
 
   async function ensurePyodide() {
-    if (typeof qpyodideInstance !== 'undefined') {
-      window.mainPyodide = await qpyodideInstance; return;
-    }
-    if (typeof mainPyodide !== 'undefined') return;
-    // Standalone mode. Use a shared promise so math-exercise and py-exercise on
-    // the same page do not start two Pyodide instances or interfere while loading.
-    var cdn = 'https://cdn.jsdelivr.net/pyodide/v0.27.2/full/';
-    if (!globalThis.__qExercisePyodide) {
-      globalThis.__qExercisePyodide = (async function () {
-        await loadScript(cdn + 'pyodide.js');
-        return await loadPyodide({ indexURL: cdn });
-      })();
-    }
-    window.mainPyodide = await globalThis.__qExercisePyodide;
+    return globalThis.MathExerciseRuntime.ensurePyodide();
   }
 
   // ---------------------------------------------------------------------------
