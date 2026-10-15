@@ -643,47 +643,12 @@
     return out.join('');
   }
 
-  // Loads a script exactly once. If its tag already exists but has not finished
-  // loading, wait for its load event instead of resolving immediately. Otherwise,
-  // a second extension could access globals that do not exist yet.
-  function loadScript(src) {
-    return new Promise(function (resolve, reject) {
-      var existing = document.querySelector('script[src="' + src + '"]');
-      if (existing) {
-        if (existing.dataset.qLoaded === '1') { resolve(); return; }
-        existing.addEventListener('load', function () { resolve(); });
-        existing.addEventListener('error', function () {
-          reject(new Error('Failed to load: ' + src));
-        });
-        return;
-      }
-      var s = document.createElement('script');
-      s.src = src;
-      s.onload = function () { s.dataset.qLoaded = '1'; resolve(); };
-      s.onerror = function () { reject(new Error('Failed to load: ' + src)); };
-      document.head.appendChild(s);
-    });
-  }
-
   // ---------------------------------------------------------------------------
   // Pyodide bootstrap  (reuse coatless instance if present)
   // ---------------------------------------------------------------------------
 
   async function ensurePyodide() {
-    if (typeof qpyodideInstance !== 'undefined') {
-      window.mainPyodide = await qpyodideInstance; return;
-    }
-    if (typeof mainPyodide !== 'undefined') return;
-    // Standalone mode. Use a shared promise so math-exercise and py-exercise on
-    // the same page do not start two Pyodide instances or interfere while loading.
-    var cdn = 'https://cdn.jsdelivr.net/pyodide/v0.27.2/full/';
-    if (!globalThis.__qExercisePyodide) {
-      globalThis.__qExercisePyodide = (async function () {
-        await loadScript(cdn + 'pyodide.js');
-        return await loadPyodide({ indexURL: cdn });
-      })();
-    }
-    window.mainPyodide = await globalThis.__qExercisePyodide;
+    return globalThis.MathExerciseRuntime.ensurePyodide();
   }
 
   // ---------------------------------------------------------------------------

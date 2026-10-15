@@ -174,9 +174,10 @@ local function ensureSetup()
   local css = readFile("math-exercise.css")
   quarto.doc.include_text("in-header",
     "<style type=\"text/css\">\n" .. css .. "\n</style>")
+  local runtime = readFile("shared/pyodide-runtime.js")
   local js = readFile("math-exercise.js")
   quarto.doc.include_text("after-body",
-    "<script type=\"text/javascript\">\n" .. js .. "\n</script>")
+    "<script type=\"text/javascript\">\n" .. runtime .. "\n" .. js .. "\n</script>")
 end
 
 ----
