@@ -68,7 +68,7 @@ jobs:
           grep -Fq 'cube-transform-board' _site/graphics-examples.html
           grep -Fq 'polar-sector-board' _site/graphics-examples.html
           grep -Fq 'cylindrical-sector-board' _site/graphics-examples.html
-          grep -Fq 'Show JSXGraph source' _site/graphics-examples.html
+          grep -Fq 'Show JSXGraph code' _site/graphics-examples.html
           ! grep -Fq 'rotation-order-board' _site/graphics-examples.html
           test "$(grep -Fc 'class="math-example-source"' _site/graphics-examples.html)" -eq 16
           original_line="$(grep -n 'Draw and refine a non-decreasing curve' _site/graphics-examples.html | head -1 | cut -d: -f1)"
