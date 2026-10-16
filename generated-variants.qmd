@@ -1,7 +1,7 @@
 ---
 title: "Build-time variants"
 engine: markdown
-filters: [jsxgraph, math-exercise]
+filters: [_filters/example-source.lua, jsxgraph, math-exercise]
 math-exercise-review: true
 ---
 

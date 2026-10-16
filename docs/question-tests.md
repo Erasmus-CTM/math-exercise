@@ -113,7 +113,9 @@ tested with a path, a cycle, a disconnected graph, or an invalid edge without
 simulating clicks or drags.
 
 Tests and checkers are trusted author Python code executed during a build.
-These tests currently target `mode: custom`. They check the authored
+These Python assertion blocks currently target `mode: custom`. Generated
+parameter variants retain their existing YAML fixture-list format; see
+[build-time variants](build-time-variants.md). They check the authored
 assessment logic using the same Python helpers shipped to the browser, but
 they do not test expression-entry parsing, UI gestures, network loading, or
 complete CPython/Pyodide parity. Keep those browser checks separate.
