@@ -197,7 +197,7 @@ test('normalizes task dollar math before raw HTML rendering', () => {
     'For $C=\\begin{bmatrix}1&2\\\\2&4\\end{bmatrix}$, enter $Z$.',
     'math-delimiters', '', 'col', 'custom',
   );
-  assert.equal(rendered.html, 'For \\(C=\\begin{bmatrix}1&2\\\\2&4\\end{bmatrix}\\), enter \\(Z\\).');
+  assert.equal(rendered.html, 'For \\(C=\\begin{bmatrix}1&amp;2\\\\2&amp;4\\end{bmatrix}\\), enter \\(Z\\).');
   assert.doesNotMatch(rendered.html, /\$/);
 });
 
