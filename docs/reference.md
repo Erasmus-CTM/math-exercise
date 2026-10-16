@@ -69,6 +69,25 @@ Enter a vector: vec[x+1,2*x]
 Enter a matrix: mat[1,0;0,x]
 ```
 
+### Optional starting answers
+
+Fields are empty by default. Only an activity that intentionally asks students to
+revise an existing draft should declare `initial-values`:
+
+````markdown
+```{math-exercise}
+#| initial-values: ["40"]
+What is $6\cdot7$? _[42]
+```
+````
+
+The JSON array contains one string per answer field, in displayed order (matrix
+entries row by row). Use `""` for a field that should remain empty. These are
+starting responses, never replacement answer keys. The array must match the
+initial fields; pooled tasks reapply it when another task is selected. Omit the
+option for ordinary exercises. No page script or MutationObserver is needed.
+
+
 ---
 
 ## Options (`#|`)

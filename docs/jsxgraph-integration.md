@@ -39,3 +39,24 @@ The fork uses the official jsDelivr JSXGraph assets for interactive HTML so it
 does not duplicate the large upstream distribution files in this repository.
 Static SVG/PDF export still follows the upstream filter implementation and may
 require explicitly configured local `src_jxg` and `src_css` paths.
+
+## Use a diagram as feedback context
+
+With AI Feedback 0.7.0 and math-exercise 0.8.0, ordinary typed-answer activities
+can reference a separate applet without making the applet their answer source:
+
+```yaml
+#| context: lesson-context, jsxgraph:diagram-id
+```
+
+Give the JSXGraph block `assessment_id="diagram-id"`, register its board and
+JSON state with the API above, and enable `ai.render`. Include all relevant
+current geometry and view bounds in `response`; it supplies context here, not
+the student's answer. Feedback attaches the current rendered board as an image
+with role `context` and its state as a context material. The typed answer keeps
+role `response`. A missing/unregistered board fails with an explicit message.
+
+A plain-text activity uses `context="jsxgraph:diagram-id"` the same way. Copy
+prompt mode shows the diagram image and a download link: attach that image when
+pasting into an AI chat. Direct API mode includes it in the provider request.
+The sandboxed iframe is accessed through the existing assessment message bridge.

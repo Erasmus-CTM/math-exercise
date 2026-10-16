@@ -1604,6 +1604,16 @@
     rememberCurrentLabels();
     setupDynamicMatrices();
 
+    function fillInitialValues() {
+      var values = JSON.parse(cell.dataset.initialValues || '[]');
+      if (!values.length) return;
+      if (values.length !== fieldIds.length) {
+        throw new Error('math-exercise: initial-values must match the number of answer fields in ' + label);
+      }
+      fieldIds.forEach(function(id, index) { document.getElementById(id).value = values[index]; });
+    }
+    fillInitialValues();
+
     function fieldLabel(index) {
       var supplied = configuredFieldLabels[index];
       if (typeof supplied === 'string' && supplied.trim()) return supplied.trim();
@@ -1734,7 +1744,7 @@
       cell.dataset.fields = JSON.stringify(r.fieldIds);
       cell.dataset.structuralFieldLabels = JSON.stringify(r.structuralLabels);
       fieldIds = r.fieldIds; structuralFieldLabels = r.structuralLabels; structuralLabelById = {};
-      rememberCurrentLabels(); setupDynamicMatrices(); warnExtraFieldLabels();
+      rememberCurrentLabels(); setupDynamicMatrices(); fillInitialValues(); warnExtraFieldLabels();
       renderMathInQuestion(questionDiv); attachKeyListeners(); fbDiv.innerHTML = '';
       publishVariant();
     }
@@ -1780,9 +1790,13 @@
         return;
       }
       feedbackHandle = F.attach({
+        contextRefs: function () { return cell.dataset.contextMode === 'none' ? '' : cell.dataset.contextRefs; },
         integration: 'math-exercise', policySelection: JSON.parse(cell.dataset.feedbackPolicy || '{}'), requestOptions: {imageFallback:'text'}, id: 'math-' + label, button: feedbackBtn, output: output,
         uiLanguage: L.outputLanguageCode,
         getRequest: async function (state) {
+          if (cell.dataset.contextMode !== 'none' && /(^|,)\s*jsxgraph:/.test(cell.dataset.contextRefs || '') && !F.collectVisualContexts) {
+            throw new Error('JSXGraph feedback context requires AI Feedback 0.7.0 or later. Update the shared extension and render again.');
+          }
           var before = localSnapshot();
           var structuredInputs = collectDynamicMatrixInputs(questionDiv);
           var responses = fieldIds.map(function (id, i) {
