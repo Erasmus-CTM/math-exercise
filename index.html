@@ -2,23 +2,17 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.10.19">
+<meta name="generator" content="quarto-1.8.27">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
 <title>math-exercise examples – math-exercise</title>
 <style>
-/* Default styles provided by pandoc.
-** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
-*/
+code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: 1.5em;}
-div.column{flex: auto;}
-@media screen {
-div.columns{gap: min(4vw, 1.5em);}
-div.column{overflow-x: auto;}
-}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -38,14 +32,15 @@ ul.task-list li input[type="checkbox"] {
 <meta name="quarto:offset" content="./">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-55617497126496852ff9f5a59253c640.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-f53186b9ac0866246e638800b9d808a6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -98,6 +93,14 @@ ul.task-list li input[type="checkbox"] {
   <li class="nav-item">
     <a class="nav-link active" href="./index.html" aria-current="page"> 
 <span class="menu-text">Overview</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./examples.html"> 
+<span class="menu-text">All check modes</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./example.html"> 
+<span class="menu-text">Minimal feedback example</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./basic-features.html"> 
@@ -172,10 +175,8 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p><code>math-exercise</code> turns ordinary Quarto content into browser-based practice activities. Authors write the task, expected answer, and checking policy in a short <code>{math-exercise}</code> block. During rendering, the extension replaces answer markers with input fields and connects them to a checker. When a student selects <strong>Check</strong>, Pyodide and SymPy run locally in the browser; a grading server is not required.</p>
-<p>The extension supports symbolic equivalence, required algebraic forms, numerical tolerances, vectors and matrices, author-defined Python/SymPy checkers, and structured answers from JSXGraph. Optional AI feedback can use the task, the current answer, the checker result, and relevant page context to give a progressive hint without replacing deterministic answer checking.</p>
-<p>It is well suited to self-study notes, formative exercises, interactive textbooks, laboratory instructions, and visual mathematical exploration on a static Quarto website. It is not intended as a secure high-stakes examination system: expected answers and checker code are delivered to the student’s browser.</p>
-<p>Choose a page below to try common exercise types and see the corresponding Quarto source. Every source example is collapsed until you choose <strong>Show source</strong>.</p>
+<p>Give students a question they can try while reading your notes. They might complete a calculation, compare equivalent expressions, or move points on a diagram. These examples show ways to make that practice part of the lesson.</p>
+<p>Choose a page below. Try an answer and select <strong>Check</strong>; if you need help, <strong>Feedback</strong> can suggest a next step. Open <strong>Show source</strong> beneath an activity when you want to adapt it for your students.</p>
 <div class="callout callout-style-default callout-tip callout-titled" title="Trying the exercises">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -186,53 +187,40 @@ ul.task-list li input[type="checkbox"] {
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Type in the empty answer fields and select <strong>Check</strong>. Some exercises are hidden under a clickable heading. For mathematical input, use forms such as <code>x^2</code>, <code>2*x</code>, <code>sqrt(2)</code>, <code>sin(x)</code>, and <code>pi</code>; <strong>Input help</strong> provides a complete reference. Graphical exercises explain directly which points or curves to move.</p>
-</div>
-</div>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Note
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>All answer checking runs locally in the browser through SymPy and Pyodide. AI-generated progressive feedback is optional and works with OpenAI-compatible providers configured by the user.</p>
+<p>Use <code>x^2</code> for a power, <code>2*x</code> for multiplication and <code>sqrt(2)</code> for a square root. <strong>Input help</strong> explains more. For graphical tasks, follow the instructions to move points or draw a curve before checking your answer.</p>
 </div>
 </div>
 <div class="grid">
 <section id="basic-exercise-features" class="level3 g-col-12 g-col-md-6">
-<h3 class="anchored" data-anchor-id="basic-exercise-features"><a href="./basic-features.html">Basic exercise features</a></h3>
+<h3 class="anchored" data-anchor-id="basic-exercise-features"><a href="basic-features.html">Basic exercise features</a></h3>
 <p>Input widths, captions, multiple fields, labels, partial credit, forms, and random task pools.</p>
 </section>
 <section id="expressions-and-equivalence" class="level3 g-col-12 g-col-md-6">
-<h3 class="anchored" data-anchor-id="expressions-and-equivalence"><a href="./sympy-examples.html">Expressions and equivalence</a></h3>
+<h3 class="anchored" data-anchor-id="expressions-and-equivalence"><a href="sympy-examples.html">Expressions and equivalence</a></h3>
 <p>Equivalent expressions, required algebraic forms, exact answers, numerical tolerances, solution sets, derivatives, and integrals.</p>
 </section>
 <section id="ai-feedback" class="level3 g-col-12 g-col-md-6">
-<h3 class="anchored" data-anchor-id="ai-feedback"><a href="./ai-feedback.html">AI feedback</a></h3>
-<p>Automatic section context, reusable explicit context, context opt-out, meaningful field labels, and the model capability adapter.</p>
+<h3 class="anchored" data-anchor-id="ai-feedback"><a href="ai-feedback.html">AI feedback</a></h3>
+<p>Help that uses your lesson explanation, with hints that leave students something to work out for themselves.</p>
 </section>
 <section id="vektorer-og-matriser" class="level3 g-col-12 g-col-md-6">
-<h3 class="anchored" data-anchor-id="vektorer-og-matriser"><a href="./vector-matrix-tests.html">Vektorer og matriser</a></h3>
+<h3 class="anchored" data-anchor-id="vektorer-og-matriser"><a href="vector-matrix-tests.html">Vektorer og matriser</a></h3>
 <p>En fullstendig norsk testside for rad- og kolonnevektorer, matriser, symbolske uttrykk, numerisk toleranse og oppgavepooler.</p>
 </section>
 <section id="open-ended-assessment" class="level3 g-col-12 g-col-md-6">
-<h3 class="anchored" data-anchor-id="open-ended-assessment"><a href="./custom-assessment.html">Open-ended assessment</a></h3>
+<h3 class="anchored" data-anchor-id="open-ended-assessment"><a href="custom-assessment.html">Open-ended assessment</a></h3>
 <p>Five tasks where many answers can be correct: mathematical properties, relationships between fields, iterative processes, and matrix constraints.</p>
 </section>
 <section id="dynamic-matrix-input" class="level3 g-col-12 g-col-md-6">
-<h3 class="anchored" data-anchor-id="dynamic-matrix-input"><a href="./dynamic-matrix-tests.html">Dynamic matrix input</a></h3>
+<h3 class="anchored" data-anchor-id="dynamic-matrix-input"><a href="dynamic-matrix-tests.html">Dynamic matrix input</a></h3>
 <p>Nine custom-assessment examples with student-selected dimensions, including the canonical empty matrix and whole-vector assessment.</p>
 </section>
 <section id="graphical-answers" class="level3 g-col-12 g-col-md-6">
-<h3 class="anchored" data-anchor-id="graphical-answers"><a href="./graphics-examples.html">Graphical answers</a></h3>
+<h3 class="anchored" data-anchor-id="graphical-answers"><a href="graphics-examples.html">Graphical answers</a></h3>
 <p>Click points, move graph handles, select one period, and draw or refine curves directly in JSXGraph.</p>
 </section>
 <section id="graph-theory" class="level3 g-col-12 g-col-md-6">
-<h3 class="anchored" data-anchor-id="graph-theory"><a href="./graph-theory.html">Graph theory</a></h3>
+<h3 class="anchored" data-anchor-id="graph-theory"><a href="graph-theory.html">Graph theory</a></h3>
 <p>Construct freely placed graphs and check trees, Euler circuits, planarity, and bipartiteness with NetworkX.</p>
 </section>
 </div>
