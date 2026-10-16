@@ -32,7 +32,7 @@ judgment or the exercise's checks.
 
 ## Open an example in your editor
 
-[Example source — download and open in your editor](https://github.com/Erasmus-CTM/math-exercise/blob/feature/shared-feedback-integration/example.qmd).
+[Example source — download and open in your editor](https://github.com/Erasmus-CTM/math-exercise/blob/main/example.qmd).
 
 On GitHub, choose **Download raw file**, then open the saved `.qmd` in your
 editor—for example, **VS Code**. The link above is editable Quarto source; use
