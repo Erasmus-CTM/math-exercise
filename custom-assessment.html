@@ -708,7 +708,7 @@ Warning
 <div class="math-exercise-caption math-exercise-toggle" data-math-exercise-source="Any non-decreasing function that rises overall" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>Any non-decreasing function that rises overall</div>
 
 <div class="math-exercise-body" aria-hidden="true">
-<div class="math-exercise-question" data-math-exercise-source="Give a real function with a continuous derivative that is non-decreasing on \([0,1]\) and satisfies \(f(1)>f(0)\):<br>
+<div class="math-exercise-question" data-math-exercise-source="Give a real function with a continuous derivative that is non-decreasing on \([0,1]\) and satisfies \(f(1)&amp;gt;f(0)\):<br>
 \(f(x)=\) <textarea id=&quot;math-exercise-1-f1&quot; data-vars=&quot;x&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-large&quot; rows=&quot;2&quot;></textarea>">Give a real function with a continuous derivative that is non-decreasing on \([0,1]\) and satisfies \(f(1)&gt;f(0)\):<br>
 \(f(x)=\) <textarea id="math-exercise-1-f1" data-answer="" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-large" rows="2"></textarea></div>
 
@@ -768,9 +768,9 @@ $f(x)=$ ___[]
 <div class="math-exercise-caption math-exercise-toggle" data-math-exercise-source="A positive integer Pythagorean triple" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>A positive integer Pythagorean triple</div>
 
 <div class="math-exercise-body" aria-hidden="true">
-<div class="math-exercise-question" data-math-exercise-source="Enter positive integers \(a<b<c\) satisfying \(a^2+b^2=c^2\):<br>
-\(a=\) <input type=&quot;text&quot; id=&quot;math-exercise-2-f1&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>, \(b=\) <input type=&quot;text&quot; id=&quot;math-exercise-2-f2&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>, \(c=\) <input type=&quot;text&quot; id=&quot;math-exercise-2-f3&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>">Enter positive integers \(a<b<c\) satisfying="" \(a^2+b^2="c^2\):<br">
-\(a=\) <input type="text" id="math-exercise-2-f1" data-answer="" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">, \(b=\) <input type="text" id="math-exercise-2-f2" data-answer="" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">, \(c=\) <input type="text" id="math-exercise-2-f3" data-answer="" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></b<c\)></div>
+<div class="math-exercise-question" data-math-exercise-source="Enter positive integers \(a&amp;lt;b&amp;lt;c\) satisfying \(a^2+b^2=c^2\):<br>
+\(a=\) <input type=&quot;text&quot; id=&quot;math-exercise-2-f1&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>, \(b=\) <input type=&quot;text&quot; id=&quot;math-exercise-2-f2&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>, \(c=\) <input type=&quot;text&quot; id=&quot;math-exercise-2-f3&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>">Enter positive integers \(a&lt;b&lt;c\) satisfying \(a^2+b^2=c^2\):<br>
+\(a=\) <input type="text" id="math-exercise-2-f1" data-answer="" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">, \(b=\) <input type="text" id="math-exercise-2-f2" data-answer="" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">, \(c=\) <input type="text" id="math-exercise-2-f3" data-answer="" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
   <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
@@ -2383,8 +2383,10 @@ $A=$ mat[,;,]
     return output;
   }
 
-  function renderTaskText(text, exerciseId, vars, vecdir, mode) {
-    text = normalizeTaskMathDelimiters(text);
+  function renderTaskText(text, exerciseId, vars, vecdir, mode, questionIsHtml) {
+    // Generated variants have already been rendered by Pandoc; preserve their
+    // markup and source annotations. Ordinary exercise bodies are plain text.
+    if (!questionIsHtml) text = normalizeTaskMathDelimiters(text);
     mode = mode || 'equivalent';
     var count = 0, fieldIds = [], structuralLabels = [], output = [], position = 0;
     var dynamicNames = {};
@@ -2399,7 +2401,13 @@ $A=$ mat[,;,]
       var brace = dynamicMatrix ? matchBalanced(text, position + headLength - 1, '{', '}') : null;
       var balanced = bracket || brace;
 
-      if (!balanced) { output.push(text.charAt(position++)); continue; }
+      // Task prose and TeX are text, never HTML; generated controls below
+      // remain markup. In particular, a<b<c must reach the math renderer.
+      if (!balanced) {
+        var character = text.charAt(position++);
+        output.push(questionIsHtml ? character : escHtml(character));
+        continue;
+      }
 
       var content = balanced.slice(1, -1), rendered;
       if (scalar) {
@@ -2966,7 +2974,7 @@ $A=$ mat[,;,]
         idx = Math.floor(Math.random() * poolTasks.length);
         try { sessionStorage.setItem(poolKey, String(idx)); } catch(e) {}
       }
-      var r = renderTaskText(poolTasks[idx], cell.id, vars, vecdir, mode);
+      var r = renderTaskText(poolTasks[idx], cell.id, vars, vecdir, mode, !!generated);
       var qDiv = cell.querySelector('.math-exercise-question');
       setQuestionContent(qDiv, r);
       cell.dataset.fields = JSON.stringify(r.fieldIds);
@@ -3200,7 +3208,7 @@ $A=$ mat[,;,]
       if (feedbackHandle) feedbackHandle.reset();
       idx = next;
       try { sessionStorage.setItem(poolKey, String(next)); } catch(e) {}
-      var r = renderTaskText(poolTasks[next], cell.id, vars, vecdir, mode);
+      var r = renderTaskText(poolTasks[next], cell.id, vars, vecdir, mode, !!generated);
       setQuestionContent(questionDiv, r);
       cell.dataset.fields = JSON.stringify(r.fieldIds);
       cell.dataset.structuralFieldLabels = JSON.stringify(r.structuralLabels);
@@ -3223,7 +3231,7 @@ $A=$ mat[,;,]
           var options=Object.assign({}, checkOpts, {checker:record.checker,
             variant:JSON.parse(JSON.stringify({id:record.id, parameters:record.parameters, derived:record.derived, fingerprint:record.fingerprint, context:record['variant-context']}))});
           if(mode==='custom') return [await checkCustom(fixture.response || {kind:'expressions', raw:fixture.answers || [], inputs:{}}, options)];
-          var rendered=renderTaskText(record.question, cell.id+'-review', vars, vecdir, mode);
+          var rendered=renderTaskText(record.question, cell.id+'-review', vars, vecdir, mode, true);
           var box=document.createElement('div');box.innerHTML=rendered.html;
           var fields=Array.from(box.querySelectorAll('input[data-answer],textarea[data-answer]'));
           if(fields.length!==(fixture.answers || []).length) throw new Error('Fixture answer count does not match fields');

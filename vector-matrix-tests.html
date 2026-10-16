@@ -890,7 +890,7 @@ $D=$ mat[1,0,0;0,2,0;0,0,3]
 <div class="math-exercise-caption math-exercise-toggle" data-math-exercise-source="Symbolske uttrykk og ekvivalenskontroll" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>Symbolske uttrykk og ekvivalenskontroll</div>
 
 <div class="math-exercise-body" aria-hidden="true">
-<div class="math-exercise-question" data-math-exercise-source="Skriv matrisen \(\begin{bmatrix}(x+1)^2&amp;0\\0&amp;x^2-1\end{bmatrix}\):<br>
+<div class="math-exercise-question" data-math-exercise-source="Skriv matrisen \(\begin{bmatrix}(x+1)^2&amp;amp;0\\0&amp;amp;x^2-1\end{bmatrix}\):<br>
 <span class=&quot;math-mat&quot; style=&quot;--cols:2&quot;><input type=&quot;text&quot; id=&quot;math-exercise-8-f1&quot; data-vars=&quot;x&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-mat-cell&quot;><input type=&quot;text&quot; id=&quot;math-exercise-8-f2&quot; data-vars=&quot;x&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-mat-cell&quot;><input type=&quot;text&quot; id=&quot;math-exercise-8-f3&quot; data-vars=&quot;x&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-mat-cell&quot;><input type=&quot;text&quot; id=&quot;math-exercise-8-f4&quot; data-vars=&quot;x&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-mat-cell&quot;></span>">Skriv matrisen \(\begin{bmatrix}(x+1)^2&amp;0\\0&amp;x^2-1\end{bmatrix}\):<br>
 <span class="math-mat" style="--cols:2"><input type="text" id="math-exercise-8-f1" data-answer="(x+1)^2" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-8-f2" data-answer="0" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-8-f3" data-answer="0" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-8-f4" data-answer="(x-1)*(x+1)" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span></div>
 
@@ -2484,8 +2484,10 @@ Skriv radmatrisen $(1,2,3,4,5,6)$: mat[1,2,3,4,5,6]
     return output;
   }
 
-  function renderTaskText(text, exerciseId, vars, vecdir, mode) {
-    text = normalizeTaskMathDelimiters(text);
+  function renderTaskText(text, exerciseId, vars, vecdir, mode, questionIsHtml) {
+    // Generated variants have already been rendered by Pandoc; preserve their
+    // markup and source annotations. Ordinary exercise bodies are plain text.
+    if (!questionIsHtml) text = normalizeTaskMathDelimiters(text);
     mode = mode || 'equivalent';
     var count = 0, fieldIds = [], structuralLabels = [], output = [], position = 0;
     var dynamicNames = {};
@@ -2500,7 +2502,13 @@ Skriv radmatrisen $(1,2,3,4,5,6)$: mat[1,2,3,4,5,6]
       var brace = dynamicMatrix ? matchBalanced(text, position + headLength - 1, '{', '}') : null;
       var balanced = bracket || brace;
 
-      if (!balanced) { output.push(text.charAt(position++)); continue; }
+      // Task prose and TeX are text, never HTML; generated controls below
+      // remain markup. In particular, a<b<c must reach the math renderer.
+      if (!balanced) {
+        var character = text.charAt(position++);
+        output.push(questionIsHtml ? character : escHtml(character));
+        continue;
+      }
 
       var content = balanced.slice(1, -1), rendered;
       if (scalar) {
@@ -3067,7 +3075,7 @@ Skriv radmatrisen $(1,2,3,4,5,6)$: mat[1,2,3,4,5,6]
         idx = Math.floor(Math.random() * poolTasks.length);
         try { sessionStorage.setItem(poolKey, String(idx)); } catch(e) {}
       }
-      var r = renderTaskText(poolTasks[idx], cell.id, vars, vecdir, mode);
+      var r = renderTaskText(poolTasks[idx], cell.id, vars, vecdir, mode, !!generated);
       var qDiv = cell.querySelector('.math-exercise-question');
       setQuestionContent(qDiv, r);
       cell.dataset.fields = JSON.stringify(r.fieldIds);
@@ -3301,7 +3309,7 @@ Skriv radmatrisen $(1,2,3,4,5,6)$: mat[1,2,3,4,5,6]
       if (feedbackHandle) feedbackHandle.reset();
       idx = next;
       try { sessionStorage.setItem(poolKey, String(next)); } catch(e) {}
-      var r = renderTaskText(poolTasks[next], cell.id, vars, vecdir, mode);
+      var r = renderTaskText(poolTasks[next], cell.id, vars, vecdir, mode, !!generated);
       setQuestionContent(questionDiv, r);
       cell.dataset.fields = JSON.stringify(r.fieldIds);
       cell.dataset.structuralFieldLabels = JSON.stringify(r.structuralLabels);
@@ -3324,7 +3332,7 @@ Skriv radmatrisen $(1,2,3,4,5,6)$: mat[1,2,3,4,5,6]
           var options=Object.assign({}, checkOpts, {checker:record.checker,
             variant:JSON.parse(JSON.stringify({id:record.id, parameters:record.parameters, derived:record.derived, fingerprint:record.fingerprint, context:record['variant-context']}))});
           if(mode==='custom') return [await checkCustom(fixture.response || {kind:'expressions', raw:fixture.answers || [], inputs:{}}, options)];
-          var rendered=renderTaskText(record.question, cell.id+'-review', vars, vecdir, mode);
+          var rendered=renderTaskText(record.question, cell.id+'-review', vars, vecdir, mode, true);
           var box=document.createElement('div');box.innerHTML=rendered.html;
           var fields=Array.from(box.querySelectorAll('input[data-answer],textarea[data-answer]'));
           if(fields.length!==(fixture.answers || []).length) throw new Error('Fixture answer count does not match fields');
