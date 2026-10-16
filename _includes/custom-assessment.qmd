@@ -16,7 +16,7 @@ logic, not a secure place for secrets or high-stakes exam answers.
 
 A function is non-decreasing on $[0,1]$ when
 $f(x_2)\ge f(x_1)$ whenever $0\le x_1<x_2\le1$. This exercise accepts any
-such function whose value at 1 is strictly greater than its value at 0; there
+such continuously differentiable real function whose value at 1 is strictly greater than its value at 0; there
 is no single canonical answer. Examples include `x`, `x^2`, and `x^3+x`.
 
 ```{math-exercise}
@@ -26,20 +26,32 @@ is no single canonical answer. Examples include `x`, `x^2`, and `x^3+x`.
 #| mode: custom
 #| checker: |
 #|   def check(response, symbols):
+#|       from sympy.calculus.util import continuous_domain
 #|       f = response["expressions"][0]
 #|       x = symbols["x"]
-#|       derivative_min = minimum(diff(f, x), x, Interval(0, 1))
-#|       rise = simplify(f.subs(x, 1) - f.subs(x, 0))
-#|       valid = (
-#|           derivative_min.is_nonnegative is True
-#|           and rise.is_positive is True
-#|       )
-#|       return {
-#|           "correct": valid,
-#|           "feedback": "The derivative must stay non-negative and the endpoint value must increase."
-#|       }
+#|       interval = Interval(0, 1)
+#|       try:
+#|           derivative = diff(f, x)
+#|           regular = (f.free_symbols <= {x}
+#|                      and f.subs(x, 0).is_real is True
+#|                      and continuous_domain(f, x, interval) == interval
+#|                      and continuous_domain(derivative, x, interval) == interval)
+#|           lower = minimum(derivative, x, interval) if regular else S.NegativeInfinity
+#|           rise = simplify(f.subs(x, 1) - f.subs(x, 0))
+#|           valid = regular and lower.is_nonnegative is True and rise.is_positive is True
+#|       except (NotImplementedError, ValueError, TypeError):
+#|           valid = False
+#|       return {"correct": valid,
+#|               "feedback": "Require a real function with a continuous derivative, non-negative derivative throughout [0,1], and a positive endpoint rise. Use an expression whose domain and derivative sign SymPy can establish."}
+#| tests: |
+#|   def test(check, symbols):
+#|       x = symbols["x"]
+#|       for f in (x, x**2, exp(x), x**3+x):
+#|           assert check({"expressions": [f]}, symbols)["correct"]
+#|       for f in (S.One, -x, x-1/(100*(x-Rational(1,2))), I*x):
+#|           assert not check({"expressions": [f]}, symbols)["correct"]
 
-Give a function that is non-decreasing on $[0,1]$ and satisfies $f(1)>f(0)$:
+Give a real function with a continuous derivative that is non-decreasing on $[0,1]$ and satisfies $f(1)>f(0)$:
 $f(x)=$ ___[]
 ```
 
@@ -58,13 +70,18 @@ entries are ordered as $a<b<c$.
 #|   def check(response, symbols):
 #|       a, b, c = response["expressions"]
 #|       integers = all(v.is_integer is True and v.is_positive is True for v in (a, b, c))
-#|       ordered = (a < b) is S.true and (b < c) is S.true
+#|       real = all(v.is_real is True and v.is_finite is True for v in (a, b, c))
+#|       ordered = real and (a < b) is S.true and (b < c) is S.true
 #|       equation = simplify(a**2 + b**2 - c**2) == 0
 #|       score = (int(integers) + int(ordered) + int(equation)) / 3
-#|       return {
-#|           "score": score,
-#|           "feedback": "Check positivity, a < b < c, and the equation a²+b²=c²."
-#|       }
+#|       return {"score": score,
+#|               "feedback": "Check positivity, a < b < c, and the equation a²+b²=c²."}
+#| tests: |
+#|   def test(check, symbols):
+#|       for values in ((3,4,5), (5,12,13)):
+#|           assert check({"expressions": list(map(sympify, values))}, symbols)["score"] == 1
+#|       for values in ((0,0,0), (4,3,5), (I,2,3), (3,4,6)):
+#|           assert check({"expressions": list(map(sympify, values))}, symbols)["score"] < 1
 
 Enter positive integers $a<b<c$ satisfying $a^2+b^2=c^2$:
 $a=$ _[], $b=$ _[], $c=$ _[]
@@ -88,16 +105,23 @@ $p(x)=(x-r_1)(x-r_2)$ with $r_1\ne r_2$.
 #|       x = symbols["x"]
 #|       try:
 #|           polynomial = Poly(p, x)
-#|           monic_quadratic = polynomial.degree() == 2 and polynomial.LC() == 1
-#|       except Exception:
+#|           monic_quadratic = (polynomial.degree() == 2 and polynomial.LC() == 1
+#|                              and p.free_symbols <= {x})
+#|       except (PolynomialError, TypeError):
 #|           monic_quadratic = False
-#|       distinct = simplify(r1 - r2) != 0
-#|       consistent = simplify(p - (x-r1)*(x-r2)) == 0
+#|       constant_roots = all(r.is_number is True and r.is_finite is True for r in (r1, r2))
+#|       distinct = constant_roots and simplify(r1 - r2).is_zero is False
+#|       consistent = constant_roots and simplify(p - (x-r1)*(x-r2)) == 0
 #|       score = (int(monic_quadratic) + int(distinct) + int(consistent)) / 3
-#|       return {
-#|           "score": score,
-#|           "feedback": "The polynomial must be monic, quadratic, and equal to (x-r₁)(x-r₂)."
-#|       }
+#|       return {"score": score,
+#|               "feedback": "Use two distinct finite constant roots and a monic quadratic equal to (x-r₁)(x-r₂)."}
+#| tests: |
+#|   def test(check, symbols):
+#|       x = symbols["x"]
+#|       for values in ((x**2-3*x+2,1,2), (x**2+1,I,-I)):
+#|           assert check({"expressions": list(map(sympify, values))}, symbols)["score"] == 1
+#|       for values in ((x**2,-x,x/2), (x**2,0,0), (2*x**2-6*x+4,1,2)):
+#|           assert check({"expressions": list(map(sympify, values))}, symbols)["score"] < 1
 
 Give a monic quadratic $p(x)$ and two distinct roots:
 $p(x)=$ __[], $r_1=$ _[], $r_2=$ _[]
@@ -123,15 +147,20 @@ formula twice. For example, you may begin with $x_0=1$.
 #| checker: |
 #|   def check(response, symbols):
 #|       x0, x1, x2 = response["expressions"]
+#|       if not all(v.is_number is True and v.is_real is True and v.is_finite is True for v in (x0, x1, x2)):
+#|           return {"score": 0, "feedback": "Enter finite real numbers for all three iterates."}
 #|       step = lambda value: (value + 2/value) / 2
-#|       start_ok = x0.is_positive is True and simplify(x0**2 - 2) != 0
-#|       first_ok = simplify(x1 - step(x0)) == 0
-#|       second_ok = simplify(x2 - step(x1)) == 0
+#|       start_ok = x0.is_positive is True and simplify(x0**2 - 2).is_zero is False
+#|       first_ok = x0 != 0 and simplify(x1 - step(x0)) == 0
+#|       second_ok = x1 != 0 and simplify(x2 - step(x1)) == 0
 #|       score = (int(start_ok) + int(first_ok) + int(second_ok)) / 3
-#|       return {
-#|           "score": score,
-#|           "feedback": "Each new value must equal (x + 2/x)/2 for the preceding value."
-#|       }
+#|       return {"score": score,
+#|               "feedback": "Start with a positive number other than sqrt(2); each new value must equal (x + 2/x)/2 for the preceding value."}
+#| tests: |
+#|   def test(check, symbols):
+#|       assert check({"expressions": [S.One,Rational(3,2),Rational(17,12)]}, symbols)["score"] == 1
+#|       for values in ((0,0,0), (sqrt(2),sqrt(2),sqrt(2)), (-1,Rational(-3,2),Rational(-17,12)), (1,2,3)):
+#|           assert check({"expressions": list(map(sympify, values))}, symbols)["score"] < 1
 
 Choose a positive $x_0\ne\sqrt2$ and apply
 $x_{n+1}=(x_n+2/x_n)/2$ twice:
@@ -160,6 +189,11 @@ matrix $I_2=\begin{pmatrix}1&0\\0&1\end{pmatrix}$.
 #|           "score": score,
 #|           "feedback": "Require integer entries, determinant 1, and a matrix different from I₂."
 #|       }
+#| tests: |
+#|   def test(check, symbols):
+#|       assert check({"expressions": list(map(sympify, [1,1,0,1]))}, symbols)["score"] == 1
+#|       for values in ([1,0,0,1], [Rational(1,2),1,0,2]):
+#|           assert check({"expressions": list(map(sympify, values))}, symbols)["score"] < 1
 
 Enter an integer matrix $A\ne I_2$ with $\det(A)=1$:
 $A=$ mat[,;,]

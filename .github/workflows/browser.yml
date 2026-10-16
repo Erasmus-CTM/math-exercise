@@ -1,0 +1,43 @@
+name: Browser interactions
+on:
+  pull_request:
+    paths: ['_extensions/**', '_includes/**', '*.qmd', 'tests/browser/**', 'playwright.config.mjs', 'package*.json', '.github/workflows/browser.yml']
+  push:
+    paths: ['_extensions/**', '_includes/**', '*.qmd', 'tests/browser/**', 'playwright.config.mjs', 'package*.json', '.github/workflows/browser.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: '1.8.27'
+      - uses: actions/checkout@v4
+        with:
+          repository: Erasmus-CTM/ai-feedback
+          ref: bf23e36028c0bfcff6038874e10b109558437b1b
+          path: _feedback-source
+      - run: quarto add ./_feedback-source --no-prompt
+      - run: python -m pip install sympy==1.14.0 networkx==3.4.2 PyYAML==6.0.2
+      - run: npm ci --ignore-scripts
+      - run: npx playwright install --with-deps chromium
+      - run: quarto render
+      - run: npm run test:browser
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-failure-evidence
+          path: |
+            playwright-report/
+            test-results/browser/

@@ -7,6 +7,7 @@ For example, `2*(x+1)` and `2*x+2` represent the same answer.
 
 ```{math-exercise}
 #| label: sympy-expand
+#| form: expanded
 #| vars: x
 Expand $(2x-3)(x+4)$: __[2*x^2+5*x-12]
 ```
@@ -78,7 +79,21 @@ __[2*x*sin(x)+x^2*cos(x)]
 ```{math-exercise}
 #| label: sympy-antiderivative
 #| vars: x
-Give one antiderivative of $3x^2-4$: __[x^3-4*x]
+#| mode: custom
+#| checker: |
+#|   def check(response, symbols):
+#|       x = symbols["x"]
+#|       constant = simplify(response["expressions"][0] - (x**3 - 4*x))
+#|       valid = not constant.free_symbols and constant.is_real is True and constant.is_finite is True
+#|       return {"correct": valid, "feedback": "Any finite real constant of integration is allowed; the derivative must be 3*x^2 - 4."}
+#| tests: |
+#|   def test(check, symbols):
+#|       x = symbols["x"]
+#|       for f in (x**3-4*x, x**3-4*x+7, x**3-4*x+sqrt(2)):
+#|           assert check({"expressions": [f]}, symbols)["correct"]
+#|       for f in (x**3-4*x**2, x**3-4*x+I):
+#|           assert not check({"expressions": [f]}, symbols)["correct"]
+Give one real antiderivative of $3x^2-4$ (any numerical real constant is allowed): __[]
 ```
 
 ## Complex numbers
@@ -103,8 +118,9 @@ List all roots of $x^3-x=0$: __[-1,0,1]
 ## Numerical checking
 
 The first task accepts answers within a fixed absolute distance of the target;
-the second uses a percentage of the target value. The last two require the
-stated number of decimal places or significant figures.
+the second uses a percentage of the target value. The last two compare values after rounding to the
+stated number of decimal places or significant figures; they do not enforce
+the number of digits typed.
 
 ```{math-exercise}
 #| label: sympy-absolute-tolerance

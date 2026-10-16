@@ -4,8 +4,9 @@ local summary, jsxSummary = 'Show source and policy YAML', 'Show JSXGraph source
 local function escape(text)
   return text:gsub('&','&amp;'):gsub('<','&lt;'):gsub('>','&gt;'):gsub('"','&quot;')
 end
-local function panel(source, title)
+local function panel(source, title, testsPanel)
   local pieces = {'<div class="example-author-notes ai-feedback-ignore"><details class="math-example-source"><summary>'..title..'</summary><pre><code class="language-markdown">'..escape(source)..'</code></pre>'}
+  if testsPanel then table.insert(pieces, testsPanel) end
   for _, file in ipairs(policyFiles) do
     table.insert(pieces, '<p><strong>Policy YAML: '..escape(file.name)..'</strong></p><pre><code class="language-yaml">'..escape(file.content)..'</code></pre>')
   end
@@ -48,7 +49,15 @@ local function code(el)
     opening='{'..table.concat(args,' ')..'}'
   end
   if not opening then return end
-  return {el,panel('```'..opening..'\n'..el.text..'\n```',jsx and jsxSummary or summary)}
+  local testsPanel
+  local tests=el.text:match('#|%s*tests:%s*([^\r\n]+)')
+  if opening=='{math-exercise}' and tests and tests:match('%.py$') then
+    local base=quarto.project.directory or pandoc.path.directory(quarto.doc.input_file)
+    local f=assert(io.open(pandoc.path.join({base,tests}),'r'),'Cannot read author tests: '..tests)
+    local contents=f:read('*a');f:close()
+    testsPanel='<details class="math-example-tests"><summary>Author tests: '..escape(tests)..'</summary><pre><code class="language-python">'..escape(contents)..'</code></pre></details>'
+  end
+  return {el,panel('```'..opening..'\n'..el.text..'\n```',jsx and jsxSummary or summary,testsPanel)}
 end
 local function div(el)
   if not quarto.doc.is_format('html') or not el.classes:includes('ai-feedback') then return end

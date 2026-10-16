@@ -49,7 +49,8 @@ return assess_basis(
     matrix,
     axis="columns",          # or "rows"
     target_dimension=d,
-    belongs=lambda vector: ...,  # True exactly for vectors in the target space
+    belongs=lambda vector: all(value.is_number is True and value.is_real is True and value.is_finite is True for value in vector)
+#|               and ...,  # True exactly for vectors in the target space
     name="B",                # the name used in mat{name=B, ...}
     space_name="target space",
 )
@@ -65,7 +66,8 @@ target space. See the README for the complete API contract and scoring formula.
 ## Bases with an unknown number of vectors
 
 The number of basis vectors is the dimension of the subspace, so the student
-must determine both the entries and the number of vectors.
+must determine both the entries and the number of vectors. These vector spaces
+are over $\mathbb{R}$; enter finite real coordinates.
 
 ::: {#dynamic-basis-method .math-exercise-context}
 
@@ -93,10 +95,12 @@ To check a proposed basis:
 #|           Z,
 #|           axis="columns",
 #|           target_dimension=C.cols - C.rank(),
-#|           belongs=lambda vector: Z.rows == C.cols and C * vector == zeros(C.rows, 1),
+#|           belongs=lambda vector: all(value.is_number is True and value.is_real is True and value.is_finite is True for value in vector)
+#|               and Z.rows == C.cols and C * vector == zeros(C.rows, 1),
 #|           name="Z",
 #|           space_name="null space",
 #|       )
+#| tests: _includes/tests/dynamic-nullspace-basis.py
 
 Give a basis for the null space of
 $C=\begin{bmatrix}1&2&3\\2&4&6\end{bmatrix}$.
@@ -121,10 +125,12 @@ $Z=$ mat{name=Z, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}
 #|           B,
 #|           axis="columns",
 #|           target_dimension=A.rank(),
-#|           belongs=lambda vector: B.rows == A.rows and A.row_join(vector).rank() == A.rank(),
+#|           belongs=lambda vector: all(value.is_number is True and value.is_real is True and value.is_finite is True for value in vector)
+#|               and B.rows == A.rows and A.row_join(vector).rank() == A.rank(),
 #|           name="B",
 #|           space_name="column space",
 #|       )
+#| tests: _includes/tests/dynamic-column-space-basis.py
 
 Compute a basis for the column space of
 $A=\begin{bmatrix}1&2&0\\0&1&1\\1&3&1\end{bmatrix}$.
@@ -149,10 +155,12 @@ $B=$ mat{name=B, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}
 #|           R,
 #|           axis="rows",
 #|           target_dimension=A.rank(),
-#|           belongs=lambda vector: R.cols == A.cols and A.col_join(vector).rank() == A.rank(),
+#|           belongs=lambda vector: all(value.is_number is True and value.is_real is True and value.is_finite is True for value in vector)
+#|               and R.cols == A.cols and A.col_join(vector).rank() == A.rank(),
 #|           name="R",
 #|           space_name="row space",
 #|       )
+#| tests: _includes/tests/dynamic-row-space-basis.py
 
 Compute a basis for the row space of
 $A=\begin{bmatrix}1&0&1&2\\0&1&1&1\\1&1&2&3\end{bmatrix}$.
@@ -178,10 +186,12 @@ $R=$ mat{name=R, rows=auto, cols=4, initial-rows=1, min-rows=0, max-rows=3}
 #|           E,
 #|           axis="columns",
 #|           target_dimension=constraint.cols - constraint.rank(),
-#|           belongs=lambda vector: E.rows == A.rows and constraint * vector == zeros(A.rows, 1),
+#|           belongs=lambda vector: all(value.is_number is True and value.is_real is True and value.is_finite is True for value in vector)
+#|               and E.rows == A.rows and constraint * vector == zeros(A.rows, 1),
 #|           name="E",
 #|           space_name="eigenspace",
 #|       )
+#| tests: _includes/tests/dynamic-eigenspace-basis.py
 
 Find a basis for the eigenspace of
 $A=\begin{bmatrix}2&1&1\\0&2&0\\0&0&2\end{bmatrix}$
@@ -206,10 +216,12 @@ $E=$ mat{name=E, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}
 #|           P,
 #|           axis="columns",
 #|           target_dimension=constraints.cols - constraints.rank(),
-#|           belongs=lambda vector: P.rows == constraints.cols and constraints * vector == zeros(constraints.rows, 1),
+#|           belongs=lambda vector: all(value.is_number is True and value.is_real is True and value.is_finite is True for value in vector)
+#|               and P.rows == constraints.cols and constraints * vector == zeros(constraints.rows, 1),
 #|           name="Pcoef",
 #|           space_name="polynomial subspace",
 #|       )
+#| tests: _includes/tests/dynamic-polynomial-basis.py
 
 Let $W$ be the subspace of polynomials
 $p(x)=a+bx+cx^2+dx^3$ satisfying $p(1)=0$ and $p'(-1)=0$.
@@ -246,6 +258,7 @@ basis. Read the task before changing the initial size.
 #|           "feedback": "" if score == 1 else "A Hessian has one row and one column for every variable. After fixing the size, check each second derivative.",
 #|           "assessment": {"H": {"rows": row_status}}
 #|       }
+#| tests: _includes/tests/dynamic-hessian.py
 
 Find the Hessian of
 $f(x,y,z)=x^2+xy+2y^2+yz+3z^2$.
@@ -276,6 +289,14 @@ $H_f=$ mat{name=H, rows=auto, cols=auto, initial-rows=2, initial-cols=2, min-row
 #|           "feedback": "" if score == 1 else "The matrix must be square. Put 1 exactly where consecutive vertices meet and 0 everywhere else.",
 #|           "assessment": {"Pth": {"rows": row_status}}
 #|       }
+#| tests: |
+#|   def test(check, symbols):
+#|       def score(P):
+#|           return check({"inputs": {"Pth": {"matrix": P}}}, symbols)["score"]
+#|       assert score(Matrix([[0,1],[1,0]])) == 1
+#|       assert score(Matrix([[0,1,0],[1,0,1],[0,1,0]])) == 1
+#|       assert score(eye(3)) < 1
+#|       assert score(ones(2,3)) == 0
 
 Choose between two and five ordered vertices. Enter the adjacency matrix of the
 path $v_1-v_2-\cdots-v_n$. The number of rows and columns chooses $n$.
@@ -293,20 +314,21 @@ $P_n=$ mat{name=Pth, rows=auto, cols=auto, initial-rows=2, initial-cols=2, min-r
 #| checker: |
 #|   def check(response, symbols):
 #|       P = response["inputs"]["P"]["matrix"]
-#|       seen = set()
+#|       seen = []
 #|       row_status = []
 #|       for i in range(P.rows):
-#|           point = tuple(P.row(i))
-#|           valid = simplify(P[i, 1] - 2*P[i, 0]) == 0 and point not in seen
+#|           point = tuple(simplify(value) for value in P.row(i))
+#|           real = all(value.is_number is True and value.is_real is True and value.is_finite is True for value in point)
+#|           duplicate = any(all(simplify(a-b) == 0 for a,b in zip(point, previous)) for previous in seen)
+#|           valid = real and simplify(point[1] - 2*point[0]) == 0 and not duplicate
 #|           row_status.append(valid)
 #|           if valid:
-#|               seen.add(point)
-#|       score = sum(row_status) / P.rows
-#|       return {
-#|           "score": score,
-#|           "feedback": "" if score == 1 else "Each red row must be changed: it is either off the line or duplicates an earlier point.",
-#|           "assessment": {"P": {"rows": row_status}}
-#|       }
+#|               seen.append(point)
+#|       score = sum(row_status) / P.rows if 2 <= P.rows <= 4 else 0
+#|       return {"score": score,
+#|               "feedback": "" if score == 1 else "Use two to four distinct finite real points on y=2x; equivalent coordinates count as duplicates.",
+#|               "assessment": {"P": {"rows": row_status}}}
+#| tests: _includes/tests/dynamic-point-rows.py
 
 Give between two and four distinct points on the line $y=2x$. Enter one point
 $(x,y)$ per row. Use the row controls to choose how many points to submit:
@@ -330,6 +352,14 @@ $P=$ mat{name=P, rows=auto, cols=2, initial-rows=2, min-rows=2, max-rows=4}
 #|           "score": score,
 #|           "feedback": "" if score == 1 else "The matrix must have different numbers of rows and columns, and every entry must be zero."
 #|       }
+#| tests: |
+#|   def test(check, symbols):
+#|       def score(A):
+#|           return check({"inputs": {"A": {"matrix": A}}}, symbols)["score"]
+#|       assert score(zeros(2,3)) == 1
+#|       assert score(zeros(3,2)) == 1
+#|       assert score(zeros(2)) < 1
+#|       assert score(ones(2,3)) < 1
 
 Give any non-square zero matrix with at least one row and one column. Both its
 size and its entries are part of the answer:
@@ -358,6 +388,10 @@ other configured dimension.
 #|           "correct": correct,
 #|           "feedback": "" if correct else "The null space contains only the zero vector, so its basis contains no vectors. Remove the remaining column."
 #|       }
+#| tests: |
+#|   def test(check, symbols):
+#|       assert check({"inputs": {"Z0": {"matrix": zeros(0,0)}}}, symbols)["correct"]
+#|       assert not check({"inputs": {"Z0": {"matrix": zeros(1,1)}}}, symbols)["correct"]
 
 Give a basis for the null space of $I_2$. Because this null space is trivial,
 its basis is empty. Remove the remaining column:
@@ -379,6 +413,10 @@ $Z_0=$ mat{name=Z0, rows=2, cols=auto, initial-cols=1, min-cols=0, max-cols=2}
 #|           "correct": correct,
 #|           "feedback": "" if correct else "Remove every row to submit the empty matrix."
 #|       }
+#| tests: |
+#|   def test(check, symbols):
+#|       assert check({"inputs": {"T": {"matrix": zeros(0,0)}}}, symbols)["correct"]
+#|       assert not check({"inputs": {"T": {"matrix": zeros(1,1)}}}, symbols)["correct"]
 
 Use the row control to remove the only row. After checking the empty state, add
 a row again: the two configured columns should reappear.

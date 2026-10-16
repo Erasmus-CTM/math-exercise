@@ -73,13 +73,24 @@ definite truth value, not an unresolved symbolic relation.
 #|           target_dimension=C.cols - C.rank(),
 #|           belongs=lambda vector: (
 #|               Z.rows == C.cols
+#|               and all(v.is_real is True and v.is_finite is True for v in vector)
 #|               and C * vector == zeros(C.rows, 1)
 #|           ),
 #|           name="Z",
 #|           space_name="null space",
 #|       )
+#| tests: |
+#|   def test(check, symbols):
+#|       def score(B):
+#|           return check({"inputs": {"Z": {"matrix": B}}}, symbols)["score"]
+#|       B = Matrix([[-2,-3],[1,0],[0,1]])
+#|       assert score(B) == score(B[:, ::-1]) == 1
+#|       assert 0 < score(B[:, :1]) < 1
+#|       assert score(B.row_join(B[:, :1])) < 1
+#|       assert score(I*B) < 1
+#|       assert score(zeros(0,0)) == 0
 
-Give a basis for the null space of C:
+Give a real basis for the null space of C:
 Z = mat{name=Z, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}
 ```
 ````

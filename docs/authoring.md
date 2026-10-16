@@ -73,3 +73,9 @@ reply inside the exercise page, use the AI service arranged for your course;
 the connection details are in the [setup guide](installation.md).
 
 [All options](reference.md) · [Project overview](../README.md)
+
+## Keep checker tests with the exercise
+
+Custom exercises can include short inline Python assertions or reference a
+neighboring test file. The same shipped runner works in Quarto, the VS Code
+terminal, and GitHub Actions. See the [question-test guide](question-tests.md).

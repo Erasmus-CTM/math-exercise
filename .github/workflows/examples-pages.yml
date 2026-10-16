@@ -36,7 +36,7 @@ jobs:
         run: quarto add ./_feedback-source --no-prompt
 
       - name: Install variant build dependency
-        run: python3 -m pip install PyYAML==6.0.2
+        run: python3 -m pip install PyYAML==6.0.2 sympy==1.14.0 networkx==3.4.2
       - name: Render examples
         run: |
           quarto render

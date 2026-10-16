@@ -179,7 +179,7 @@ Try `1, 2`, then `1, 2, 5`, and finally all four solutions.
 ## `mode: custom` — monotone increasing with flat points allowed
 
 This checker receives the student's parsed SymPy expression and verifies that
-its derivative is non-negative on $[0,1]$ and that the function rises overall.
+it is real and continuously differentiable on $[0,1]$, its derivative is non-negative there, and the function rises overall.
 
 ```{math-exercise}
 #| label: ex-custom-monotonicity
@@ -188,21 +188,32 @@ its derivative is non-negative on $[0,1]$ and that the function rises overall.
 #| mode: custom
 #| checker: |
 #|   def check(response, symbols):
+#|       from sympy.calculus.util import continuous_domain
 #|       f = response["expressions"][0]
 #|       x = symbols["x"]
-#|       lower = minimum(diff(f, x), x, Interval(0, 1))
-#|       rise = simplify(f.subs(x, 1) - f.subs(x, 0))
-#|       if lower.is_nonnegative is True and rise.is_positive is True:
-#|           return {
-#|               "score": 1.0,
-#|               "feedback": "The derivative is non-negative and the function rises overall."
-#|           }
-#|       return {
-#|           "score": 0.0,
-#|           "feedback": "Non-decreasing behavior with an overall rise was not established."
-#|       }
+#|       interval = Interval(0, 1)
+#|       try:
+#|           derivative = diff(f, x)
+#|           regular = (f.free_symbols <= {x}
+#|                      and f.subs(x, 0).is_real is True
+#|                      and continuous_domain(f, x, interval) == interval
+#|                      and continuous_domain(derivative, x, interval) == interval)
+#|           lower = minimum(derivative, x, interval) if regular else S.NegativeInfinity
+#|           rise = simplify(f.subs(x, 1) - f.subs(x, 0))
+#|           valid = regular and lower.is_nonnegative is True and rise.is_positive is True
+#|       except (NotImplementedError, ValueError, TypeError):
+#|           valid = False
+#|       return {"correct": valid,
+#|               "feedback": "Require a real function with a continuous derivative, non-negative derivative throughout [0,1], and a positive endpoint rise. Use an expression whose domain and derivative sign SymPy can establish."}
+#| tests: |
+#|   def test(check, symbols):
+#|       x = symbols["x"]
+#|       for f in (x, x**2, exp(x), x**3+x):
+#|           assert check({"expressions": [f]}, symbols)["correct"]
+#|       for f in (S.One, -x, x-1/(100*(x-Rational(1,2))), I*x):
+#|           assert not check({"expressions": [f]}, symbols)["correct"]
 
-Give an example of a monotonically increasing function on $[0,1]$:
+Give a real, continuously differentiable, non-decreasing function on $[0,1]$ that rises overall:
 
 $f(x) =$ ___[]
 ```
@@ -308,6 +319,13 @@ JXG.QuartoAssessment.register({
 #|           "score": score,
 #|           "feedback": f"{nondecreasing} of {len(slopes)} segments are non-decreasing; the graph must also rise overall."
 #|       }
+#| tests: |
+#|   def test(check, symbols):
+#|       assert check({"points": [[i/4,i/4] for i in range(5)]}, symbols)["score"] == 1
+#|       assert check({"points": [[i/4,0 if i < 3 else 1] for i in range(5)]}, symbols)["score"] == 1
+#|       assert check({"points": [[i/4,-i/4] for i in range(5)]}, symbols)["score"] < 1
+#|       assert check({"points": [[i/4,0] for i in range(5)]}, symbols)["score"] < 1
+#|       assert check({"points": []}, symbols)["score"] == 0
 
 Use the movable points to construct a monotonically increasing
 piecewise-linear function on $[0,1]$.
@@ -435,6 +453,7 @@ function responseData() {
     coverage: coverage,
     regression: regression ? {
       degree: regressionDegree,
+      polynomialValues: Array.from({ length: 6 }, function (_, i) { return regression(i / 5); }),
       term: regression.getTerm ? regression.getTerm() : '',
       samples: fitSamples
     } : null
@@ -487,29 +506,31 @@ JXG.QuartoAssessment.register({
 #| embed-response: true
 #| checker: |
 #|   def check(response, symbols):
+#|       import math
 #|       regression = response.get("regression")
-#|       coverage = float(response.get("coverage", 0))
-#|       if not regression or len(regression.get("samples", [])) < 2:
-#|           return {"score": 0, "feedback": "Draw across the interval to create a polynomial fit."}
-#|       samples = regression["samples"]
 #|       try:
-#|           slopes = [
-#|               (float(b[1]) - float(a[1])) / (float(b[0]) - float(a[0]))
-#|               for a, b in zip(samples, samples[1:])
-#|           ]
-#|       except (TypeError, ValueError, ZeroDivisionError):
-#|           return {"score": 0, "feedback": "The fitted curve data is invalid."}
-#|       nondecreasing_fraction = sum(slope >= -1e-3 for slope in slopes) / len(slopes)
-#|       rise = float(samples[-1][1]) - float(samples[0][1])
-#|       coverage_score = min(max(coverage / 0.9, 0), 1)
-#|       rise_score = min(max(rise / 0.1, 0), 1)
-#|       score = 0.2 * coverage_score + 0.7 * nondecreasing_fraction + 0.1 * rise_score
-#|       if coverage >= 0.9 and min(slopes) >= -1e-3 and rise > 1e-3:
-#|           return {"score": 1, "feedback": "The fitted polynomial never decreases and rises overall."}
-#|       return {
-#|           "score": score,
-#|           "feedback": "Extend the drawing across the interval and remove decreasing parts; flat portions are allowed."
-#|       }
+#|           coverage = float(response.get("coverage", 0))
+#|           values = regression["polynomialValues"]
+#|           if len(values) != 6 or not all(math.isfinite(float(v)) for v in values) or not math.isfinite(coverage):
+#|               raise ValueError()
+#|           x = Symbol("x", real=True)
+#|           curve = Poly(interpolate([(Rational(i, 5), Rational(str(v))) for i, v in enumerate(values)], x), x)
+#|           derivative = curve.diff()
+#|           candidates = [S.Zero, S.One]
+#|           for (lo, hi), multiplicity in derivative.diff().intervals(eps=Rational(1, 10**12)):
+#|               point = (lo + hi) / 2
+#|               if 0 < point < 1:
+#|                   candidates.append(point)
+#|           minimum_slope = min(float(derivative.eval(point)) for point in candidates)
+#|           rise = float(curve.eval(1) - curve.eval(0))
+#|       except (KeyError, TypeError, ValueError, PolynomialError):
+#|           return {"score": 0, "feedback": "Draw across the interval to create a finite polynomial fit."}
+#|       if coverage >= 0.9 and minimum_slope >= -1e-3 and rise > 1e-3:
+#|           return {"score": 1, "feedback": "The fitted polynomial is non-decreasing within slope tolerance 0.001 and rises overall."}
+#|       score = 0.2 * min(max(coverage / 0.9, 0), 1) + 0.7 * int(minimum_slope >= -1e-3) + 0.1 * min(max(rise / 0.1, 0), 1)
+#|       return {"score": min(score, 0.99),
+#|               "feedback": "Extend the drawing across the interval and remove decreasing parts; flat portions are allowed."}
+#| tests: _includes/tests/ex-jsxgraph-freehand-monotonicity.py
 
 Draw a function on $[0,1]$ whose polynomial approximation is monotonically
 increasing, allowing flat portions. The grey line is your stroke and the red line is the
@@ -696,6 +717,7 @@ function responseData() {
     coverage: coverage,
     regression: regression ? {
       degree: regressionDegree,
+      polynomialValues: Array.from({ length: 6 }, function (_, i) { return regression(i / 5); }),
       term: regression.getTerm ? regression.getTerm() : '',
       samples: fitSamples
     } : null
@@ -749,29 +771,31 @@ JXG.QuartoAssessment.register({
 #| embed-response: true
 #| checker: |
 #|   def check(response, symbols):
+#|       import math
 #|       regression = response.get("regression")
-#|       coverage = float(response.get("coverage", 0))
-#|       if not regression or len(regression.get("samples", [])) < 2:
-#|           return {"score": 0, "feedback": "Draw across the interval to create a polynomial fit."}
-#|       samples = regression["samples"]
 #|       try:
-#|           slopes = [
-#|               (float(b[1]) - float(a[1])) / (float(b[0]) - float(a[0]))
-#|               for a, b in zip(samples, samples[1:])
-#|           ]
-#|       except (TypeError, ValueError, ZeroDivisionError):
-#|           return {"score": 0, "feedback": "The fitted curve data is invalid."}
-#|       nondecreasing_fraction = sum(slope >= -1e-3 for slope in slopes) / len(slopes)
-#|       rise = float(samples[-1][1]) - float(samples[0][1])
-#|       coverage_score = min(max(coverage / 0.9, 0), 1)
-#|       rise_score = min(max(rise / 0.1, 0), 1)
-#|       score = 0.2 * coverage_score + 0.7 * nondecreasing_fraction + 0.1 * rise_score
-#|       if coverage >= 0.9 and min(slopes) >= -1e-3 and rise > 1e-3:
-#|           return {"score": 1, "feedback": "The fitted polynomial never decreases and rises overall."}
-#|       return {
-#|           "score": score,
-#|           "feedback": "Extend the drawing across the interval and remove decreasing parts; flat portions are allowed."
-#|       }
+#|           coverage = float(response.get("coverage", 0))
+#|           values = regression["polynomialValues"]
+#|           if len(values) != 6 or not all(math.isfinite(float(v)) for v in values) or not math.isfinite(coverage):
+#|               raise ValueError()
+#|           x = Symbol("x", real=True)
+#|           curve = Poly(interpolate([(Rational(i, 5), Rational(str(v))) for i, v in enumerate(values)], x), x)
+#|           derivative = curve.diff()
+#|           candidates = [S.Zero, S.One]
+#|           for (lo, hi), multiplicity in derivative.diff().intervals(eps=Rational(1, 10**12)):
+#|               point = (lo + hi) / 2
+#|               if 0 < point < 1:
+#|                   candidates.append(point)
+#|           minimum_slope = min(float(derivative.eval(point)) for point in candidates)
+#|           rise = float(curve.eval(1) - curve.eval(0))
+#|       except (KeyError, TypeError, ValueError, PolynomialError):
+#|           return {"score": 0, "feedback": "Draw across the interval to create a finite polynomial fit."}
+#|       if coverage >= 0.9 and minimum_slope >= -1e-3 and rise > 1e-3:
+#|           return {"score": 1, "feedback": "The fitted polynomial is non-decreasing within slope tolerance 0.001 and rises overall."}
+#|       score = 0.2 * min(max(coverage / 0.9, 0), 1) + 0.7 * int(minimum_slope >= -1e-3) + 0.1 * min(max(rise / 0.1, 0), 1)
+#|       return {"score": min(score, 0.99),
+#|               "feedback": "Extend the drawing across the interval and remove decreasing parts; flat portions are allowed."}
+#| tests: _includes/tests/ex-jsxgraph-editable-freehand-monotonicity.py
 
 Draw a function on $[0,1]$ whose polynomial approximation is monotonically
 increasing, allowing flat portions. After drawing, adjust the blue points as needed.

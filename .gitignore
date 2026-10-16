@@ -13,3 +13,7 @@ tests/fixtures/*_files/
 __pycache__/
 *.pyc
 /node_modules
+
+# Browser test evidence
+/playwright-report/
+/test-results/
