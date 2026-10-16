@@ -627,6 +627,19 @@ local function buildExercise(el, state)
   local partialCredit = (opts["partial-credit"] == "true")
   local formCredit = opts["form-credit"] or "0.5"
   local fieldLabels = splitCsv(opts["field-labels"] or "")
+  local initialValues = {}
+  if opts["initial-values"] then
+    local ok, values = pcall(quarto.json.decode, opts["initial-values"])
+    if not ok or type(values) ~= "table" or not opts["initial-values"]:match("^%s*%[") then
+      error("math-exercise: initial-values must be a JSON array of strings")
+    end
+    for key, value in pairs(values) do
+      if type(key) ~= "number" or type(value) ~= "string" then
+        error("math-exercise: initial-values must be a JSON array of strings")
+      end
+    end
+    initialValues = values
+  end
   local isPool    = (opts["pool"]     == "true")
   local vecdir    = opts["vecdir"] == "row" and "row" or "col"
 
@@ -660,6 +673,10 @@ local function buildExercise(el, state)
              .. ' data-context-mode="' .. feedback.context(el, opts).mode .. '"'
              .. ' data-context-refs="' .. attrEsc(feedback.context(el, opts).refs) .. '"'
              .. ' data-context="'      .. attrEsc('"' .. jsonEsc(el.attributes["data-ai-feedback-context"] or "") .. '"') .. '"'
+
+  if opts["initial-values"] then
+    attrs = attrs .. ' data-initial-values="' .. jsonArrAttr(initialValues) .. '"'
+  end
 
   local questionHtml
 
