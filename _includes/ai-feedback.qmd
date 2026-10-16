@@ -119,4 +119,4 @@ Write the turn density in terms of $N$ and $l$: _[N/l]
 Ask for feedback and notice whether it uses the notation from the explanation.
 This is especially useful when a course introduces unfamiliar symbols.
 
-[More ways to guide feedback](https://github.com/Erasmus-CTM/math-exercise/blob/feature/shared-feedback-integration/docs/authoring.md).
+[More ways to guide feedback](https://github.com/Erasmus-CTM/math-exercise/blob/main/docs/authoring.md).

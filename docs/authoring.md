@@ -3,7 +3,7 @@
 Start with [the rendered examples](https://erasmus-ctm.github.io/math-exercise/). The extension setup is described
 separately in [Installation and setup](installation.md).
 
-[Example source — download and open in your editor](https://github.com/Erasmus-CTM/math-exercise/blob/feature/shared-feedback-integration/example.qmd).
+[Example source — download and open in your editor](https://github.com/Erasmus-CTM/math-exercise/blob/main/example.qmd).
 Use GitHub’s **Download raw file** button and open the file in an editor such as
 **VS Code**. [Getting all the accompanying files](example-source.md).
 
