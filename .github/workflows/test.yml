@@ -77,8 +77,8 @@ jobs:
           grep -Fq 'Remember the discriminant' _site/ai-feedback.html
           grep -Fq 'Explicit feedback context' _site/ai-feedback.html
           grep -Fq 'class="math-example-source"' _site/basic-features.html
-          grep -Fq 'Show source' _site/sympy-examples.html
-          grep -Fq 'Vis kildekode' _site/vector-matrix-tests.html
+          grep -Fq 'Show Quarto exercise source' _site/sympy-examples.html
+          grep -Fq 'Vis Quarto-kildekode' _site/vector-matrix-tests.html
           grep -Fq 'Slik skriver du svar' _site/vector-matrix-tests.html
           grep -Fq 'class="math-vec' _site/vector-matrix-tests.html
           grep -Fq 'class="math-mat"' _site/vector-matrix-tests.html

@@ -1,24 +1,49 @@
 -- Documentation-only source panels, emitted before the exercise filters.
 local policyFiles = {}
-local summary, jsxSummary = 'Show source and policy YAML', 'Show JSXGraph source and policy YAML'
+local summary, jsxSummary, policySummary = 'Show Quarto exercise source', 'Show JSXGraph code', 'Show policy YAML'
 local function escape(text)
   return text:gsub('&','&amp;'):gsub('<','&lt;'):gsub('>','&gt;'):gsub('"','&quot;')
 end
-local function panel(source, title, testsPanel)
-  local pieces = {'<div class="example-author-notes ai-feedback-ignore"><details class="math-example-source"><summary>'..title..'</summary><pre><code class="language-markdown">'..escape(source)..'</code></pre>'}
+local function panel(source, title, testsPanel, jsx)
+  local pieces = {'<div class="example-author-notes ai-feedback-ignore"><details class="math-example-source" data-source-kind="'..(jsx and 'jsxgraph' or 'exercise')..'"><summary>'..title..'</summary><pre><code class="language-markdown">'..escape(source)..'</code></pre>'}
   if testsPanel then table.insert(pieces, testsPanel) end
-  for _, file in ipairs(policyFiles) do
-    table.insert(pieces, '<p><strong>Policy YAML: '..escape(file.name)..'</strong></p><pre><code class="language-yaml">'..escape(file.content)..'</code></pre>')
+  table.insert(pieces, '</details>')
+  if not jsx and #policyFiles > 0 then
+    table.insert(pieces, '<details class="math-example-policy" data-source-kind="policy"><summary>'..policySummary..'</summary>')
+    for _, file in ipairs(policyFiles) do
+      table.insert(pieces, '<p><strong>'..escape(file.name)..'</strong></p><pre><code class="language-yaml">'..escape(file.content)..'</code></pre>')
+    end
+    table.insert(pieces, '</details>')
   end
-  table.insert(pieces, '</details></div>')
+  table.insert(pieces, '</div>')
   return pandoc.RawBlock('html',table.concat(pieces,'\n'))
+end
+local function defaultPolicySource(base)
+  local extensions = pandoc.path.join({base,'_extensions'})
+  local candidates = {pandoc.path.join({extensions,'ai-feedback','feedback-defaults.yml'})}
+  local ok, entries = pcall(pandoc.system.list_directory, extensions)
+  if ok then
+    for _, owner in ipairs(entries) do
+      table.insert(candidates,pandoc.path.join({extensions,owner,'ai-feedback','feedback-defaults.yml'}))
+    end
+  end
+  for _, path in ipairs(candidates) do
+    local file=io.open(path,'r')
+    if file then
+      local content=file:read('*a');file:close()
+      return {name='AI Feedback defaults (feedback-defaults.yml)',content=content}
+    end
+  end
+  error('Cannot read installed AI Feedback policy defaults')
 end
 local function meta(m)
   policyFiles = {}
   local lang=pandoc.utils.stringify(m.lang or 'en'):lower():match('^(%a+)')
-  if lang=='nb' or lang=='no' then summary,jsxSummary='Vis kildekode og policy-YAML','Vis JSXGraph-kildekode og policy-YAML'
-  elseif lang=='de' then summary,jsxSummary='Quellcode und Policy-YAML anzeigen','JSXGraph-Quellcode und Policy-YAML anzeigen'
-  else summary,jsxSummary='Show source and policy YAML','Show JSXGraph source and policy YAML' end
+  if lang=='nb' or lang=='no' then summary,jsxSummary,policySummary='Vis Quarto-kildekode for oppgaven','Vis JSXGraph-kode','Vis policy-YAML'
+  elseif lang=='de' then summary,jsxSummary,policySummary='Quarto-Aufgabenquellcode anzeigen','JSXGraph-Code anzeigen','Policy-YAML anzeigen'
+  else summary,jsxSummary,policySummary='Show Quarto exercise source','Show JSXGraph code','Show policy YAML' end
+  local base=quarto.project.directory or pandoc.path.directory(quarto.doc.input_file)
+  table.insert(policyFiles,defaultPolicySource(base))
   local cfg=m['ai-feedback'] or {}
   for _, key in ipairs({'policy-files','page-policy-files'}) do
     local files=cfg[key]
@@ -57,7 +82,7 @@ local function code(el)
     local contents=f:read('*a');f:close()
     testsPanel='<details class="math-example-tests"><summary>Author tests: '..escape(tests)..'</summary><pre><code class="language-python">'..escape(contents)..'</code></pre></details>'
   end
-  return {el,panel('```'..opening..'\n'..el.text..'\n```',jsx and jsxSummary or summary,testsPanel)}
+  return {el,panel('```'..opening..'\n'..el.text..'\n```',jsx and jsxSummary or summary,testsPanel,jsx)}
 end
 local function div(el)
   if not quarto.doc.is_format('html') or not el.classes:includes('ai-feedback') then return end
