@@ -26,7 +26,13 @@ async function position(board, x, y) {
 async function drag(page, board, from, to) {
   const a=await position(board,...from),b=await position(board,...to);
   await page.mouse.move(a.x,a.y); await page.mouse.down();
-  await page.mouse.move(b.x,b.y,{steps:16}); await page.mouse.up();
+  // JSXGraph throttles pointer moves. Pace the gesture across animation frames
+  // so its final position is processed before releasing the pointer.
+  for(let i=1;i<=16;i++){
+    await board.frame.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    await page.mouse.move(a.x+(b.x-a.x)*i/16,a.y+(b.y-a.y)*i/16);
+  }
+  await page.mouse.up();
 }
 async function correct(board) {
   await board.cell.locator('.math-check-btn').click();
@@ -56,6 +62,7 @@ test('the period handles submit the visible frame width', async ({page}) => {
   const board=await exercise(page,'/graphics-examples.html','jsxgraph-period-window');
   await drag(page,board,[0.8,-1.48],[1,-1.48]);
   await drag(page,board,[4.8,-1.48],[3.5,-1.48]);
+  await expect.poll(() => board.frame.evaluate(() => rightX()-leftX())).toBeCloseTo(2.5,1);
   await correct(board);
 });
 

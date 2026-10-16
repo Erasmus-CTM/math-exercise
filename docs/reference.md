@@ -49,6 +49,10 @@ student select the single canonical empty matrix.
 #|   def check(response, symbols):
 #|       Z = response["inputs"]["Z"]["matrix"]
 #|       return Z == Matrix(0, 0, [])
+#| tests: |
+#|   def test(check, symbols):
+#|       assert check({"inputs": {"Z": {"matrix": zeros(0,0)}}}, symbols)
+#|       assert not check({"inputs": {"Z": {"matrix": zeros(3,1)}}}, symbols)
 
 Enter a matrix whose number of columns is part of the answer:
 mat{name=Z, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}
@@ -460,6 +464,11 @@ JXG.QuartoAssessment.register({
 #|   def check(response, symbols):
 #|       x, y = response["point"]
 #|       return {"score": 1 if y > x else 0}
+#| tests: |
+#|   def test(check, symbols):
+#|       assert check({"point": [1,2]}, symbols)["score"] == 1
+#|       assert check({"point": [2,1]}, symbols)["score"] == 0
+#|       assert check({"point": [1,1]}, symbols)["score"] == 0
 
 Move the point above the line $y=x$.
 ```
