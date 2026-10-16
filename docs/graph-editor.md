@@ -226,6 +226,15 @@ editor.register();
 #|       except ValueError:
 #|           return False
 #|       return graph.number_of_nodes() >= 5 and nx.is_tree(graph)
+#| tests: |
+#|   def test(check, symbols):
+#|       path = {"representation": "undirected-graph",
+#|               "nodes": [{"id": i, "x": i, "y": 0} for i in range(5)],
+#|               "edges": [[0,1],[1,2],[2,3],[3,4]]}
+#|       assert check(path, symbols)
+#|       assert not check(dict(path, edges=path["edges"]+[[0,4]]), symbols)
+#|       assert not check(dict(path, edges=path["edges"][:-1]), symbols)
+#|       assert not check(dict(path, edges=[[0,9]]), symbols)
 
 Construct a tree with at least five vertices.
 ```

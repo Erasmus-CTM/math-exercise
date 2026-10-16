@@ -559,6 +559,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </style>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="example-site.css">
 </head>
@@ -743,16 +772,17 @@ For basis problems, prefer the shared assess_basis(...) helper. The checker only
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    matrix,</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    axis<span class="op">=</span><span class="st">"columns"</span>,          <span class="co"># or "rows"</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    target_dimension<span class="op">=</span>d,</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    belongs<span class="op">=</span><span class="kw">lambda</span> vector: ...,  <span class="co"># True exactly for vectors in the target space</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">"B"</span>,                <span class="co"># the name used in mat{name=B, ...}</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    space_name<span class="op">=</span><span class="st">"target space"</span>,</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    belongs<span class="op">=</span><span class="kw">lambda</span> vector: <span class="bu">all</span>(value.is_number <span class="kw">is</span> <span class="va">True</span> <span class="kw">and</span> value.is_real <span class="kw">is</span> <span class="va">True</span> <span class="kw">and</span> value.is_finite <span class="kw">is</span> <span class="va">True</span> <span class="cf">for</span> value <span class="kw">in</span> vector)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#|               and ...,  # True exactly for vectors in the target space</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">"B"</span>,                <span class="co"># the name used in mat{name=B, ...}</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    space_name<span class="op">=</span><span class="st">"target space"</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The helper rejects zero vectors itself, so <code>belongs</code> only needs to test membership. It returns the exercise score, qualitative feedback, and complete row or column assessment. Green means valid and independent, yellow means valid but part of a dependent submitted family, and red means zero or outside the target space. See the README for the complete API contract and scoring formula.</p>
 </div>
 </div>
 <section id="bases-with-an-unknown-number-of-vectors" class="level2">
 <h2 class="anchored" data-anchor-id="bases-with-an-unknown-number-of-vectors">Bases with an unknown number of vectors</h2>
-<p>The number of basis vectors is the dimension of the subspace, so the student must determine both the entries and the number of vectors.</p>
+<p>The number of basis vectors is the dimension of the subspace, so the student must determine both the entries and the number of vectors. These vector spaces are over <span class="math inline">\(\mathbb{R}\)</span>; enter finite real coordinates.</p>
 <div id="dynamic-basis-method" class="math-exercise-context">
 <p>To check a proposed basis:</p>
 <ol type="1">
@@ -763,7 +793,7 @@ For basis problems, prefer the shared assess_basis(...) helper. The checker only
 </div>
 <section id="null-space-basis" class="level3">
 <h3 class="anchored" data-anchor-id="null-space-basis">Null-space basis</h3>
-<div class="math-exercise-cell" id="math-exercise-1" data-label="dynamic-nullspace-basis" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    Z = response[\&quot;inputs\&quot;][\&quot;Z\&quot;][\&quot;matrix\&quot;]\n    C = Matrix([[1, 2, 3], [2, 4, 6]])\n    return assess_basis(\n        Z,\n        axis=\&quot;columns\&quot;,\n        target_dimension=C.cols - C.rank(),\n        belongs=lambda vector: Z.rows == C.cols and C * vector == zeros(C.rows, 1),\n        name=\&quot;Z\&quot;,\n        space_name=\&quot;null space\&quot;,\n    )&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;dynamic-nullspace-basis&quot;,&quot;name&quot;:&quot;&quot;}" data-context-mode="explicit" data-context-refs="dynamic-basis-method" data-context="&quot;Null-space basis&quot;" data-fields="[&quot;math-exercise-1-dm-Z-1-1&quot;,&quot;math-exercise-1-dm-Z-2-1&quot;,&quot;math-exercise-1-dm-Z-3-1&quot;]" data-structural-field-labels="[&quot;dm:Z:1,1&quot;,&quot;dm:Z:2,1&quot;,&quot;dm:Z:3,1&quot;]">
+<div class="math-exercise-cell" id="math-exercise-1" data-label="dynamic-nullspace-basis" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    Z = response[\&quot;inputs\&quot;][\&quot;Z\&quot;][\&quot;matrix\&quot;]\n    C = Matrix([[1, 2, 3], [2, 4, 6]])\n    return assess_basis(\n        Z,\n        axis=\&quot;columns\&quot;,\n        target_dimension=C.cols - C.rank(),\n        belongs=lambda vector: all(value.is_number is True and value.is_real is True and value.is_finite is True for value in vector)\n            and Z.rows == C.cols and C * vector == zeros(C.rows, 1),\n        name=\&quot;Z\&quot;,\n        space_name=\&quot;null space\&quot;,\n    )&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;dynamic-nullspace-basis&quot;,&quot;name&quot;:&quot;&quot;}" data-context-mode="explicit" data-context-refs="dynamic-basis-method" data-context="&quot;Null-space basis&quot;" data-fields="[&quot;math-exercise-1-dm-Z-1-1&quot;,&quot;math-exercise-1-dm-Z-2-1&quot;,&quot;math-exercise-1-dm-Z-3-1&quot;]" data-structural-field-labels="[&quot;dm:Z:1,1&quot;,&quot;dm:Z:2,1&quot;,&quot;dm:Z:3,1&quot;]">
 <div class="math-exercise-caption math-exercise-toggle" data-math-exercise-source="A basis without announcing nullity" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>A basis without announcing nullity</div>
 
 <div class="math-exercise-body" aria-hidden="true">
@@ -804,10 +834,12 @@ many vectors are needed:<br>
 #|           Z,
 #|           axis="columns",
 #|           target_dimension=C.cols - C.rank(),
-#|           belongs=lambda vector: Z.rows == C.cols and C * vector == zeros(C.rows, 1),
+#|           belongs=lambda vector: all(value.is_number is True and value.is_real is True and value.is_finite is True for value in vector)
+#|               and Z.rows == C.cols and C * vector == zeros(C.rows, 1),
 #|           name="Z",
 #|           space_name="null space",
 #|       )
+#| tests: _includes/tests/dynamic-nullspace-basis.py
 
 Give a basis for the null space of
 $C=\begin{bmatrix}1&amp;2&amp;3\\2&amp;4&amp;6\end{bmatrix}$.
@@ -816,11 +848,25 @@ many vectors are needed:
 
 $Z=$ mat{name=Z, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}
 ```</code></pre>
+<details class="math-example-tests"><summary>Author tests: _includes/tests/dynamic-nullspace-basis.py</summary><pre><code class="language-python">def test(check, symbols):
+    def score(B):
+        return check({"inputs": {"Z": {"matrix": B}}}, symbols)["score"]
+    B = Matrix([[-2, -3], [1, 0], [0, 1]])
+    assert score(B) == 1
+    assert score(B[:, ::-1]) == 1
+    incomplete = B[:, :1]
+    assert 0 &lt; score(incomplete) &lt; 1
+    dependent = B.row_join(B[:, :1])
+    assert score(dependent) &lt; 1
+    assert score(zeros(B.rows,B.cols)) == 0
+    assert score(I*B) &lt; 1
+    assert score(zeros(0,0)) == 0
+</code></pre></details>
 </details></div>
 </section>
 <section id="column-space-basis" class="level3">
 <h3 class="anchored" data-anchor-id="column-space-basis">Column-space basis</h3>
-<div class="math-exercise-cell" id="math-exercise-2" data-label="dynamic-column-space-basis" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    B = response[\&quot;inputs\&quot;][\&quot;B\&quot;][\&quot;matrix\&quot;]\n    A = Matrix([[1, 2, 0], [0, 1, 1], [1, 3, 1]])\n    return assess_basis(\n        B,\n        axis=\&quot;columns\&quot;,\n        target_dimension=A.rank(),\n        belongs=lambda vector: B.rows == A.rows and A.row_join(vector).rank() == A.rank(),\n        name=\&quot;B\&quot;,\n        space_name=\&quot;column space\&quot;,\n    )&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;dynamic-column-space-basis&quot;,&quot;name&quot;:&quot;&quot;}" data-context-mode="explicit" data-context-refs="dynamic-basis-method" data-context="&quot;Column-space basis&quot;" data-fields="[&quot;math-exercise-2-dm-B-1-1&quot;,&quot;math-exercise-2-dm-B-2-1&quot;,&quot;math-exercise-2-dm-B-3-1&quot;]" data-structural-field-labels="[&quot;dm:B:1,1&quot;,&quot;dm:B:2,1&quot;,&quot;dm:B:3,1&quot;]">
+<div class="math-exercise-cell" id="math-exercise-2" data-label="dynamic-column-space-basis" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    B = response[\&quot;inputs\&quot;][\&quot;B\&quot;][\&quot;matrix\&quot;]\n    A = Matrix([[1, 2, 0], [0, 1, 1], [1, 3, 1]])\n    return assess_basis(\n        B,\n        axis=\&quot;columns\&quot;,\n        target_dimension=A.rank(),\n        belongs=lambda vector: all(value.is_number is True and value.is_real is True and value.is_finite is True for value in vector)\n            and B.rows == A.rows and A.row_join(vector).rank() == A.rank(),\n        name=\&quot;B\&quot;,\n        space_name=\&quot;column space\&quot;,\n    )&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;dynamic-column-space-basis&quot;,&quot;name&quot;:&quot;&quot;}" data-context-mode="explicit" data-context-refs="dynamic-basis-method" data-context="&quot;Column-space basis&quot;" data-fields="[&quot;math-exercise-2-dm-B-1-1&quot;,&quot;math-exercise-2-dm-B-2-1&quot;,&quot;math-exercise-2-dm-B-3-1&quot;]" data-structural-field-labels="[&quot;dm:B:1,1&quot;,&quot;dm:B:2,1&quot;,&quot;dm:B:3,1&quot;]">
 <div class="math-exercise-caption math-exercise-toggle" data-math-exercise-source="Compute a basis for a column space" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>Compute a basis for a column space</div>
 
 <div class="math-exercise-body" aria-hidden="true">
@@ -861,10 +907,12 @@ Enter one basis vector per column of \(B\):<br>
 #|           B,
 #|           axis="columns",
 #|           target_dimension=A.rank(),
-#|           belongs=lambda vector: B.rows == A.rows and A.row_join(vector).rank() == A.rank(),
+#|           belongs=lambda vector: all(value.is_number is True and value.is_real is True and value.is_finite is True for value in vector)
+#|               and B.rows == A.rows and A.row_join(vector).rank() == A.rank(),
 #|           name="B",
 #|           space_name="column space",
 #|       )
+#| tests: _includes/tests/dynamic-column-space-basis.py
 
 Compute a basis for the column space of
 $A=\begin{bmatrix}1&amp;2&amp;0\\0&amp;1&amp;1\\1&amp;3&amp;1\end{bmatrix}$.
@@ -873,11 +921,25 @@ Enter one basis vector per column of $B$:
 
 $B=$ mat{name=B, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}
 ```</code></pre>
+<details class="math-example-tests"><summary>Author tests: _includes/tests/dynamic-column-space-basis.py</summary><pre><code class="language-python">def test(check, symbols):
+    def score(B):
+        return check({"inputs": {"B": {"matrix": B}}}, symbols)["score"]
+    B = Matrix([[1, 2], [0, 1], [1, 3]])
+    assert score(B) == 1
+    assert score(B[:, ::-1]) == 1
+    incomplete = B[:, :1]
+    assert 0 &lt; score(incomplete) &lt; 1
+    dependent = B.row_join(B[:, :1])
+    assert score(dependent) &lt; 1
+    assert score(zeros(B.rows,B.cols)) == 0
+    assert score(I*B) &lt; 1
+    assert score(zeros(0,0)) == 0
+</code></pre></details>
 </details></div>
 </section>
 <section id="row-space-basis" class="level3">
 <h3 class="anchored" data-anchor-id="row-space-basis">Row-space basis</h3>
-<div class="math-exercise-cell" id="math-exercise-3" data-label="dynamic-row-space-basis" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    R = response[\&quot;inputs\&quot;][\&quot;R\&quot;][\&quot;matrix\&quot;]\n    A = Matrix([[1, 0, 1, 2], [0, 1, 1, 1], [1, 1, 2, 3]])\n    return assess_basis(\n        R,\n        axis=\&quot;rows\&quot;,\n        target_dimension=A.rank(),\n        belongs=lambda vector: R.cols == A.cols and A.col_join(vector).rank() == A.rank(),\n        name=\&quot;R\&quot;,\n        space_name=\&quot;row space\&quot;,\n    )&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;dynamic-row-space-basis&quot;,&quot;name&quot;:&quot;&quot;}" data-context-mode="explicit" data-context-refs="dynamic-basis-method" data-context="&quot;Row-space basis&quot;" data-fields="[&quot;math-exercise-3-dm-R-1-1&quot;,&quot;math-exercise-3-dm-R-1-2&quot;,&quot;math-exercise-3-dm-R-1-3&quot;,&quot;math-exercise-3-dm-R-1-4&quot;]" data-structural-field-labels="[&quot;dm:R:1,1&quot;,&quot;dm:R:1,2&quot;,&quot;dm:R:1,3&quot;,&quot;dm:R:1,4&quot;]">
+<div class="math-exercise-cell" id="math-exercise-3" data-label="dynamic-row-space-basis" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    R = response[\&quot;inputs\&quot;][\&quot;R\&quot;][\&quot;matrix\&quot;]\n    A = Matrix([[1, 0, 1, 2], [0, 1, 1, 1], [1, 1, 2, 3]])\n    return assess_basis(\n        R,\n        axis=\&quot;rows\&quot;,\n        target_dimension=A.rank(),\n        belongs=lambda vector: all(value.is_number is True and value.is_real is True and value.is_finite is True for value in vector)\n            and R.cols == A.cols and A.col_join(vector).rank() == A.rank(),\n        name=\&quot;R\&quot;,\n        space_name=\&quot;row space\&quot;,\n    )&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;dynamic-row-space-basis&quot;,&quot;name&quot;:&quot;&quot;}" data-context-mode="explicit" data-context-refs="dynamic-basis-method" data-context="&quot;Row-space basis&quot;" data-fields="[&quot;math-exercise-3-dm-R-1-1&quot;,&quot;math-exercise-3-dm-R-1-2&quot;,&quot;math-exercise-3-dm-R-1-3&quot;,&quot;math-exercise-3-dm-R-1-4&quot;]" data-structural-field-labels="[&quot;dm:R:1,1&quot;,&quot;dm:R:1,2&quot;,&quot;dm:R:1,3&quot;,&quot;dm:R:1,4&quot;]">
 <div class="math-exercise-caption math-exercise-toggle" data-math-exercise-source="Compute a basis using row vectors" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>Compute a basis using row vectors</div>
 
 <div class="math-exercise-body" aria-hidden="true">
@@ -918,10 +980,12 @@ many vectors are needed:<br>
 #|           R,
 #|           axis="rows",
 #|           target_dimension=A.rank(),
-#|           belongs=lambda vector: R.cols == A.cols and A.col_join(vector).rank() == A.rank(),
+#|           belongs=lambda vector: all(value.is_number is True and value.is_real is True and value.is_finite is True for value in vector)
+#|               and R.cols == A.cols and A.col_join(vector).rank() == A.rank(),
 #|           name="R",
 #|           space_name="row space",
 #|       )
+#| tests: _includes/tests/dynamic-row-space-basis.py
 
 Compute a basis for the row space of
 $A=\begin{bmatrix}1&amp;0&amp;1&amp;2\\0&amp;1&amp;1&amp;1\\1&amp;1&amp;2&amp;3\end{bmatrix}$.
@@ -930,11 +994,25 @@ many vectors are needed:
 
 $R=$ mat{name=R, rows=auto, cols=4, initial-rows=1, min-rows=0, max-rows=3}
 ```</code></pre>
+<details class="math-example-tests"><summary>Author tests: _includes/tests/dynamic-row-space-basis.py</summary><pre><code class="language-python">def test(check, symbols):
+    def score(B):
+        return check({"inputs": {"R": {"matrix": B}}}, symbols)["score"]
+    B = Matrix([[1, 0, 1, 2], [0, 1, 1, 1]])
+    assert score(B) == 1
+    assert score(B[::-1, :]) == 1
+    incomplete = B[:1, :]
+    assert 0 &lt; score(incomplete) &lt; 1
+    dependent = B.col_join(B[:1, :])
+    assert score(dependent) &lt; 1
+    assert score(zeros(B.rows,B.cols)) == 0
+    assert score(I*B) &lt; 1
+    assert score(zeros(0,0)) == 0
+</code></pre></details>
 </details></div>
 </section>
 <section id="eigenspace-basis" class="level3">
 <h3 class="anchored" data-anchor-id="eigenspace-basis">Eigenspace basis</h3>
-<div class="math-exercise-cell" id="math-exercise-4" data-label="dynamic-eigenspace-basis" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    E = response[\&quot;inputs\&quot;][\&quot;E\&quot;][\&quot;matrix\&quot;]\n    A = Matrix([[2, 1, 1], [0, 2, 0], [0, 0, 2]])\n    constraint = A - 2*eye(3)\n    return assess_basis(\n        E,\n        axis=\&quot;columns\&quot;,\n        target_dimension=constraint.cols - constraint.rank(),\n        belongs=lambda vector: E.rows == A.rows and constraint * vector == zeros(A.rows, 1),\n        name=\&quot;E\&quot;,\n        space_name=\&quot;eigenspace\&quot;,\n    )&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;dynamic-eigenspace-basis&quot;,&quot;name&quot;:&quot;&quot;}" data-context-mode="explicit" data-context-refs="dynamic-basis-method" data-context="&quot;Eigenspace basis&quot;" data-fields="[&quot;math-exercise-4-dm-E-1-1&quot;,&quot;math-exercise-4-dm-E-2-1&quot;,&quot;math-exercise-4-dm-E-3-1&quot;]" data-structural-field-labels="[&quot;dm:E:1,1&quot;,&quot;dm:E:2,1&quot;,&quot;dm:E:3,1&quot;]">
+<div class="math-exercise-cell" id="math-exercise-4" data-label="dynamic-eigenspace-basis" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    E = response[\&quot;inputs\&quot;][\&quot;E\&quot;][\&quot;matrix\&quot;]\n    A = Matrix([[2, 1, 1], [0, 2, 0], [0, 0, 2]])\n    constraint = A - 2*eye(3)\n    return assess_basis(\n        E,\n        axis=\&quot;columns\&quot;,\n        target_dimension=constraint.cols - constraint.rank(),\n        belongs=lambda vector: all(value.is_number is True and value.is_real is True and value.is_finite is True for value in vector)\n            and E.rows == A.rows and constraint * vector == zeros(A.rows, 1),\n        name=\&quot;E\&quot;,\n        space_name=\&quot;eigenspace\&quot;,\n    )&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;dynamic-eigenspace-basis&quot;,&quot;name&quot;:&quot;&quot;}" data-context-mode="explicit" data-context-refs="dynamic-basis-method" data-context="&quot;Eigenspace basis&quot;" data-fields="[&quot;math-exercise-4-dm-E-1-1&quot;,&quot;math-exercise-4-dm-E-2-1&quot;,&quot;math-exercise-4-dm-E-3-1&quot;]" data-structural-field-labels="[&quot;dm:E:1,1&quot;,&quot;dm:E:2,1&quot;,&quot;dm:E:3,1&quot;]">
 <div class="math-exercise-caption math-exercise-toggle" data-math-exercise-source="Find a basis for an eigenspace" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>Find a basis for an eigenspace</div>
 
 <div class="math-exercise-body" aria-hidden="true">
@@ -976,10 +1054,12 @@ the number of columns is part of your answer:<br>
 #|           E,
 #|           axis="columns",
 #|           target_dimension=constraint.cols - constraint.rank(),
-#|           belongs=lambda vector: E.rows == A.rows and constraint * vector == zeros(A.rows, 1),
+#|           belongs=lambda vector: all(value.is_number is True and value.is_real is True and value.is_finite is True for value in vector)
+#|               and E.rows == A.rows and constraint * vector == zeros(A.rows, 1),
 #|           name="E",
 #|           space_name="eigenspace",
 #|       )
+#| tests: _includes/tests/dynamic-eigenspace-basis.py
 
 Find a basis for the eigenspace of
 $A=\begin{bmatrix}2&amp;1&amp;1\\0&amp;2&amp;0\\0&amp;0&amp;2\end{bmatrix}$
@@ -988,11 +1068,25 @@ the number of columns is part of your answer:
 
 $E=$ mat{name=E, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}
 ```</code></pre>
+<details class="math-example-tests"><summary>Author tests: _includes/tests/dynamic-eigenspace-basis.py</summary><pre><code class="language-python">def test(check, symbols):
+    def score(B):
+        return check({"inputs": {"E": {"matrix": B}}}, symbols)["score"]
+    B = Matrix([[1, 0], [0, 1], [0, -1]])
+    assert score(B) == 1
+    assert score(B[:, ::-1]) == 1
+    incomplete = B[:, :1]
+    assert 0 &lt; score(incomplete) &lt; 1
+    dependent = B.row_join(B[:, :1])
+    assert score(dependent) &lt; 1
+    assert score(zeros(B.rows,B.cols)) == 0
+    assert score(I*B) &lt; 1
+    assert score(zeros(0,0)) == 0
+</code></pre></details>
 </details></div>
 </section>
 <section id="basis-of-a-polynomial-subspace" class="level3">
 <h3 class="anchored" data-anchor-id="basis-of-a-polynomial-subspace">Basis of a polynomial subspace</h3>
-<div class="math-exercise-cell" id="math-exercise-5" data-label="dynamic-polynomial-basis" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    P = response[\&quot;inputs\&quot;][\&quot;Pcoef\&quot;][\&quot;matrix\&quot;]\n    constraints = Matrix([[1, 1, 1, 1], [0, 1, -2, 3]])\n    return assess_basis(\n        P,\n        axis=\&quot;columns\&quot;,\n        target_dimension=constraints.cols - constraints.rank(),\n        belongs=lambda vector: P.rows == constraints.cols and constraints * vector == zeros(constraints.rows, 1),\n        name=\&quot;Pcoef\&quot;,\n        space_name=\&quot;polynomial subspace\&quot;,\n    )&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;dynamic-polynomial-basis&quot;,&quot;name&quot;:&quot;&quot;}" data-context-mode="explicit" data-context-refs="dynamic-basis-method" data-context="&quot;Basis of a polynomial subspace&quot;" data-fields="[&quot;math-exercise-5-dm-Pcoef-1-1&quot;,&quot;math-exercise-5-dm-Pcoef-2-1&quot;,&quot;math-exercise-5-dm-Pcoef-3-1&quot;,&quot;math-exercise-5-dm-Pcoef-4-1&quot;]" data-structural-field-labels="[&quot;dm:Pcoef:1,1&quot;,&quot;dm:Pcoef:2,1&quot;,&quot;dm:Pcoef:3,1&quot;,&quot;dm:Pcoef:4,1&quot;]">
+<div class="math-exercise-cell" id="math-exercise-5" data-label="dynamic-polynomial-basis" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    P = response[\&quot;inputs\&quot;][\&quot;Pcoef\&quot;][\&quot;matrix\&quot;]\n    constraints = Matrix([[1, 1, 1, 1], [0, 1, -2, 3]])\n    return assess_basis(\n        P,\n        axis=\&quot;columns\&quot;,\n        target_dimension=constraints.cols - constraints.rank(),\n        belongs=lambda vector: all(value.is_number is True and value.is_real is True and value.is_finite is True for value in vector)\n            and P.rows == constraints.cols and constraints * vector == zeros(constraints.rows, 1),\n        name=\&quot;Pcoef\&quot;,\n        space_name=\&quot;polynomial subspace\&quot;,\n    )&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;dynamic-polynomial-basis&quot;,&quot;name&quot;:&quot;&quot;}" data-context-mode="explicit" data-context-refs="dynamic-basis-method" data-context="&quot;Basis of a polynomial subspace&quot;" data-fields="[&quot;math-exercise-5-dm-Pcoef-1-1&quot;,&quot;math-exercise-5-dm-Pcoef-2-1&quot;,&quot;math-exercise-5-dm-Pcoef-3-1&quot;,&quot;math-exercise-5-dm-Pcoef-4-1&quot;]" data-structural-field-labels="[&quot;dm:Pcoef:1,1&quot;,&quot;dm:Pcoef:2,1&quot;,&quot;dm:Pcoef:3,1&quot;,&quot;dm:Pcoef:4,1&quot;]">
 <div class="math-exercise-caption math-exercise-toggle" data-math-exercise-source="Encode polynomials as coefficient vectors" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>Encode polynomials as coefficient vectors</div>
 
 <div class="math-exercise-body" aria-hidden="true">
@@ -1035,10 +1129,12 @@ per column of \(P\):<br>
 #|           P,
 #|           axis="columns",
 #|           target_dimension=constraints.cols - constraints.rank(),
-#|           belongs=lambda vector: P.rows == constraints.cols and constraints * vector == zeros(constraints.rows, 1),
+#|           belongs=lambda vector: all(value.is_number is True and value.is_real is True and value.is_finite is True for value in vector)
+#|               and P.rows == constraints.cols and constraints * vector == zeros(constraints.rows, 1),
 #|           name="Pcoef",
 #|           space_name="polynomial subspace",
 #|       )
+#| tests: _includes/tests/dynamic-polynomial-basis.py
 
 Let $W$ be the subspace of polynomials
 $p(x)=a+bx+cx^2+dx^3$ satisfying $p(1)=0$ and $p'(-1)=0$.
@@ -1048,6 +1144,20 @@ per column of $P$:
 
 $P=$ mat{name=Pcoef, rows=4, cols=auto, initial-cols=1, min-cols=0, max-cols=4}
 ```</code></pre>
+<details class="math-example-tests"><summary>Author tests: _includes/tests/dynamic-polynomial-basis.py</summary><pre><code class="language-python">def test(check, symbols):
+    def score(B):
+        return check({"inputs": {"Pcoef": {"matrix": B}}}, symbols)["score"]
+    B = Matrix([[-3, 2], [2, -3], [1, 0], [0, 1]])
+    assert score(B) == 1
+    assert score(B[:, ::-1]) == 1
+    incomplete = B[:, :1]
+    assert 0 &lt; score(incomplete) &lt; 1
+    dependent = B.row_join(B[:, :1])
+    assert score(dependent) &lt; 1
+    assert score(zeros(B.rows,B.cols)) == 0
+    assert score(I*B) &lt; 1
+    assert score(zeros(0,0)) == 0
+</code></pre></details>
 </details></div>
 </section>
 </section>
@@ -1103,6 +1213,7 @@ First correct its size, then enter the second derivatives:<br>
 #|           "feedback": "" if score == 1 else "A Hessian has one row and one column for every variable. After fixing the size, check each second derivative.",
 #|           "assessment": {"H": {"rows": row_status}}
 #|       }
+#| tests: _includes/tests/dynamic-hessian.py
 
 Find the Hessian of
 $f(x,y,z)=x^2+xy+2y^2+yz+3z^2$.
@@ -1111,6 +1222,16 @@ First correct its size, then enter the second derivatives:
 
 $H_f=$ mat{name=H, rows=auto, cols=auto, initial-rows=2, initial-cols=2, min-rows=1, max-rows=3, min-cols=1, max-cols=3}
 ```</code></pre>
+<details class="math-example-tests"><summary>Author tests: _includes/tests/dynamic-hessian.py</summary><pre><code class="language-python">def test(check, symbols):
+    def score(H):
+        return check({"inputs": {"H": {"matrix": H}}}, symbols)["score"]
+    H = Matrix([[2,1,0],[1,4,1],[0,1,6]])
+    assert score(H) == 1
+    assert score(eye(2)) == 0
+    assert score(H+eye(3)) == 0
+    H[0,1] = 0
+    assert 0 &lt; score(H) &lt; 1
+</code></pre></details>
 </details></div>
 </section>
 <section id="adjacency-matrix-of-a-path" class="level3">
@@ -1160,6 +1281,14 @@ Consecutive vertices are joined; no other pair is joined:<br>
 #|           "feedback": "" if score == 1 else "The matrix must be square. Put 1 exactly where consecutive vertices meet and 0 everywhere else.",
 #|           "assessment": {"Pth": {"rows": row_status}}
 #|       }
+#| tests: |
+#|   def test(check, symbols):
+#|       def score(P):
+#|           return check({"inputs": {"Pth": {"matrix": P}}}, symbols)["score"]
+#|       assert score(Matrix([[0,1],[1,0]])) == 1
+#|       assert score(Matrix([[0,1,0],[1,0,1],[0,1,0]])) == 1
+#|       assert score(eye(3)) &lt; 1
+#|       assert score(ones(2,3)) == 0
 
 Choose between two and five ordered vertices. Enter the adjacency matrix of the
 path $v_1-v_2-\cdots-v_n$. The number of rows and columns chooses $n$.
@@ -1171,7 +1300,7 @@ $P_n=$ mat{name=Pth, rows=auto, cols=auto, initial-rows=2, initial-cols=2, min-r
 </section>
 <section id="a-variable-length-list-of-points" class="level3">
 <h3 class="anchored" data-anchor-id="a-variable-length-list-of-points">A variable-length list of points</h3>
-<div class="math-exercise-cell" id="math-exercise-8" data-label="dynamic-point-rows" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    P = response[\&quot;inputs\&quot;][\&quot;P\&quot;][\&quot;matrix\&quot;]\n    seen = set()\n    row_status = []\n    for i in range(P.rows):\n        point = tuple(P.row(i))\n        valid = simplify(P[i, 1] - 2*P[i, 0]) == 0 and point not in seen\n        row_status.append(valid)\n        if valid:\n            seen.add(point)\n    score = sum(row_status) / P.rows\n    return {\n        \&quot;score\&quot;: score,\n        \&quot;feedback\&quot;: \&quot;\&quot; if score == 1 else \&quot;Each red row must be changed: it is either off the line or duplicates an earlier point.\&quot;,\n        \&quot;assessment\&quot;: {\&quot;P\&quot;: {\&quot;rows\&quot;: row_status}}\n    }&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;dynamic-point-rows&quot;,&quot;name&quot;:&quot;&quot;}" data-context-mode="auto" data-context-refs="auto" data-context="&quot;A variable-length list of points&quot;" data-fields="[&quot;math-exercise-8-dm-P-1-1&quot;,&quot;math-exercise-8-dm-P-1-2&quot;,&quot;math-exercise-8-dm-P-2-1&quot;,&quot;math-exercise-8-dm-P-2-2&quot;]" data-structural-field-labels="[&quot;dm:P:1,1&quot;,&quot;dm:P:1,2&quot;,&quot;dm:P:2,1&quot;,&quot;dm:P:2,2&quot;]">
+<div class="math-exercise-cell" id="math-exercise-8" data-label="dynamic-point-rows" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    P = response[\&quot;inputs\&quot;][\&quot;P\&quot;][\&quot;matrix\&quot;]\n    seen = []\n    row_status = []\n    for i in range(P.rows):\n        point = tuple(simplify(value) for value in P.row(i))\n        real = all(value.is_number is True and value.is_real is True and value.is_finite is True for value in point)\n        duplicate = any(all(simplify(a-b) == 0 for a,b in zip(point, previous)) for previous in seen)\n        valid = real and simplify(point[1] - 2*point[0]) == 0 and not duplicate\n        row_status.append(valid)\n        if valid:\n            seen.append(point)\n    score = sum(row_status) / P.rows if 2 <= P.rows <= 4 else 0\n    return {\&quot;score\&quot;: score,\n            \&quot;feedback\&quot;: \&quot;\&quot; if score == 1 else \&quot;Use two to four distinct finite real points on y=2x; equivalent coordinates count as duplicates.\&quot;,\n            \&quot;assessment\&quot;: {\&quot;P\&quot;: {\&quot;rows\&quot;: row_status}}}&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;dynamic-point-rows&quot;,&quot;name&quot;:&quot;&quot;}" data-context-mode="auto" data-context-refs="auto" data-context="&quot;A variable-length list of points&quot;" data-fields="[&quot;math-exercise-8-dm-P-1-1&quot;,&quot;math-exercise-8-dm-P-1-2&quot;,&quot;math-exercise-8-dm-P-2-1&quot;,&quot;math-exercise-8-dm-P-2-2&quot;]" data-structural-field-labels="[&quot;dm:P:1,1&quot;,&quot;dm:P:1,2&quot;,&quot;dm:P:2,1&quot;,&quot;dm:P:2,2&quot;]">
 <div class="math-exercise-caption math-exercise-toggle" data-math-exercise-source="Choose how many points to submit" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>Choose how many points to submit</div>
 
 <div class="math-exercise-body" aria-hidden="true">
@@ -1202,26 +1331,36 @@ $P_n=$ mat{name=Pth, rows=auto, cols=auto, initial-rows=2, initial-cols=2, min-r
 #| checker: |
 #|   def check(response, symbols):
 #|       P = response["inputs"]["P"]["matrix"]
-#|       seen = set()
+#|       seen = []
 #|       row_status = []
 #|       for i in range(P.rows):
-#|           point = tuple(P.row(i))
-#|           valid = simplify(P[i, 1] - 2*P[i, 0]) == 0 and point not in seen
+#|           point = tuple(simplify(value) for value in P.row(i))
+#|           real = all(value.is_number is True and value.is_real is True and value.is_finite is True for value in point)
+#|           duplicate = any(all(simplify(a-b) == 0 for a,b in zip(point, previous)) for previous in seen)
+#|           valid = real and simplify(point[1] - 2*point[0]) == 0 and not duplicate
 #|           row_status.append(valid)
 #|           if valid:
-#|               seen.add(point)
-#|       score = sum(row_status) / P.rows
-#|       return {
-#|           "score": score,
-#|           "feedback": "" if score == 1 else "Each red row must be changed: it is either off the line or duplicates an earlier point.",
-#|           "assessment": {"P": {"rows": row_status}}
-#|       }
+#|               seen.append(point)
+#|       score = sum(row_status) / P.rows if 2 &lt;= P.rows &lt;= 4 else 0
+#|       return {"score": score,
+#|               "feedback": "" if score == 1 else "Use two to four distinct finite real points on y=2x; equivalent coordinates count as duplicates.",
+#|               "assessment": {"P": {"rows": row_status}}}
+#| tests: _includes/tests/dynamic-point-rows.py
 
 Give between two and four distinct points on the line $y=2x$. Enter one point
 $(x,y)$ per row. Use the row controls to choose how many points to submit:
 
 $P=$ mat{name=P, rows=auto, cols=2, initial-rows=2, min-rows=2, max-rows=4}
 ```</code></pre>
+<details class="math-example-tests"><summary>Author tests: _includes/tests/dynamic-point-rows.py</summary><pre><code class="language-python">def test(check, symbols):
+    def score(rows):
+        return check({"inputs": {"P": {"matrix": Matrix(rows)}}}, symbols)["score"]
+    assert score([[0,0],[1,2]]) == 1
+    assert score([[1,2],[1,2]]) &lt; 1
+    assert score([[I,2*I],[2*I,4*I]]) &lt; 1
+    assert score([[1,3],[2,4]]) &lt; 1
+    assert score([[1,2],[sin(1)**2+cos(1)**2,2]]) &lt; 1
+</code></pre></details>
 </details></div>
 </section>
 <section id="a-non-square-zero-matrix" class="level3">
@@ -1264,6 +1403,14 @@ size and its entries are part of the answer:<br>
 #|           "score": score,
 #|           "feedback": "" if score == 1 else "The matrix must have different numbers of rows and columns, and every entry must be zero."
 #|       }
+#| tests: |
+#|   def test(check, symbols):
+#|       def score(A):
+#|           return check({"inputs": {"A": {"matrix": A}}}, symbols)["score"]
+#|       assert score(zeros(2,3)) == 1
+#|       assert score(zeros(3,2)) == 1
+#|       assert score(zeros(2)) &lt; 1
+#|       assert score(ones(2,3)) &lt; 1
 
 Give any non-square zero matrix with at least one row and one column. Both its
 size and its entries are part of the answer:
@@ -1314,6 +1461,10 @@ its basis is empty. Remove the remaining column:<br>
 #|           "correct": correct,
 #|           "feedback": "" if correct else "The null space contains only the zero vector, so its basis contains no vectors. Remove the remaining column."
 #|       }
+#| tests: |
+#|   def test(check, symbols):
+#|       assert check({"inputs": {"Z0": {"matrix": zeros(0,0)}}}, symbols)["correct"]
+#|       assert not check({"inputs": {"Z0": {"matrix": zeros(1,1)}}}, symbols)["correct"]
 
 Give a basis for the null space of $I_2$. Because this null space is trivial,
 its basis is empty. Remove the remaining column:
@@ -1360,6 +1511,10 @@ a row again: the two configured columns should reappear.<br>
 #|           "correct": correct,
 #|           "feedback": "" if correct else "Remove every row to submit the empty matrix."
 #|       }
+#| tests: |
+#|   def test(check, symbols):
+#|       assert check({"inputs": {"T": {"matrix": zeros(0,0)}}}, symbols)["correct"]
+#|       assert not check({"inputs": {"T": {"matrix": zeros(1,1)}}}, symbols)["correct"]
 
 Use the row control to remove the only row. After checking the empty state, add
 a row again: the two configured columns should reappear.
