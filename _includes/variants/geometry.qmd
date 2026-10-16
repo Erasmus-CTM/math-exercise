@@ -1,0 +1,35 @@
+```{math-exercise}
+#| label: variant-geometry
+#| mode: custom
+#| context: none
+#| parameters:
+#|   radius:
+#|   - 1
+#|   - 2
+#| response: jsxgraph:variant-point
+#| tests:
+#| - response:
+#|     point:
+#|       x: '{{radius}}'
+#|       y: 0
+#|   expected: correct
+#| - response:
+#|     point:
+#|       x: 0
+#|       y: 0
+#|   expected: wrong
+#| - response:
+#|     point:
+#|       x: nan
+#|       y: 0
+#|   expected: wrong
+#| checker: |
+#|   def check(response, symbols):
+#|       import math
+#|       radius = response['variant']['parameters']['radius']
+#|       x,y = float(response['point']['x']), float(response['point']['y'])
+#|       good = math.isfinite(x) and math.isfinite(y) and abs(x*x+y*y-radius*radius) < 0.01
+#|       return {'correct': good}
+
+Move point $P$ onto the circle $x^2+y^2={{radius}}^2$.
+```

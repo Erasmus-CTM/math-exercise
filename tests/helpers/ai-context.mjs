@@ -4,14 +4,17 @@ import { JSDOM } from 'jsdom';
 import katex from 'katex';
 
 const require = createRequire(import.meta.url);
+const shared = await Promise.all(['feedback-core.js', 'feedback-dom.js', 'ai-feedback.js'].map(name => readFile(new URL('file://' + process.env.AI_FEEDBACK_EXTENSION + '/' + name), 'utf8')));
+const runtime = await readFile(new URL('../../_extensions/math-exercise/shared/pyodide-runtime.js', import.meta.url), 'utf8');
 const source = await readFile(new URL('../../_extensions/math-exercise/math-exercise.js', import.meta.url), 'utf8');
 
-export function loadPage(html = '') {
+export function loadPage(html = '', config = {}) {
   const dom = new JSDOM(html, { url: 'https://example.invalid/exercises', runScripts: 'outside-only' });
   const w = dom.window;
   // Exercise extraction and the real request builder, without CDN/Pyodide startup.
   w.document.addEventListener = () => {};
   w.__mathExerciseTestMode = true;
+  w.__mathExerciseConfig = config;
   const warnings = [];
   w.console.warn = (...args) => warnings.push(args.join(' '));
   const requests = [];
@@ -22,6 +25,9 @@ export function loadPage(html = '') {
       json: async () => ({ choices: [{ finish_reason: 'stop', message: { content: 'Which area carries the shared flux?' } }] }),
     };
   };
+  shared.forEach(code => w.eval(code));
+  w.AIFeedback.typesetFeedback = async () => {};
+  w.eval(runtime);
   w.eval(source);
   return { dom, window: w, document: w.document, api: w.__mathExerciseTestApi, warnings, requests };
 }
@@ -59,10 +65,12 @@ export function typesetKatex(el, tex, displayMode = false) {
 export async function requestFeedback(page, cell, labels = ['Answer']) {
   const ids = JSON.parse(cell.dataset.fields || '[]');
   const question = page.api.questionText(cell, ids, i => labels[i] || `Field ${i + 1}`);
-  await page.api.callLLM(question, '<field>student value</field>', '<field>incorrect</field>',
-    page.api.resolveContexts(cell), 1,
-    { baseUrl: 'https://example.invalid/v1', apiKey: 'test-only', model: 'test-model' });
-  return page.requests.at(-1).body.messages[1].content;
+  const F = page.window.AIFeedback;
+  const request = F.applyPolicy('math-exercise', {profile:'mathematics', task:question,
+    responses:[{id:'answer',value:'student value'}], materials:page.api.resolveContexts(cell), feedback:{language:'en'}}, 1);
+  await F.createClient({baseUrl:'https://example.invalid/v1',apiKey:'test-only',model:'test-model'}).request(request);
+  const payload = JSON.parse(page.requests.at(-1).body.messages[1].content);
+  return [payload.task, ...payload.materials.map(m => m.text)].join("\n");
 }
 
 export async function clickFeedback(page, cell) {
@@ -73,9 +81,9 @@ export async function clickFeedback(page, cell) {
     runPythonAsync: async () => JSON.stringify({ status: 'wrong', score: 0 }),
     globals: { set() {} },
   };
-  page.window.localStorage.setItem('math-exercise-llm-config', JSON.stringify({
+  page.window.AIFeedback.saveConfig({ mode: 'api', storage: 'local',
     baseUrl: 'https://example.invalid/v1', apiKey: 'test-only', model: 'test-model',
-  }));
+  });
   const count = page.requests.length;
   const button = cell.querySelector('.math-feedback-btn');
   button.click();

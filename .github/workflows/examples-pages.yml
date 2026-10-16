@@ -19,14 +19,30 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      AI_FEEDBACK_EXTENSION: ${{ github.workspace }}/_feedback-source/_extensions/ai-feedback
     steps:
       - uses: actions/checkout@v4
+      - name: Fetch shared feedback dependency
+        uses: actions/checkout@v4
+        with:
+          repository: Erasmus-CTM/ai-feedback
+          ref: bf23e36028c0bfcff6038874e10b109558437b1b
+          path: _feedback-source
       - uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: '1.8.27'
+      - name: Install shared Quarto dependency
+        run: quarto add ./_feedback-source --no-prompt
 
+      - name: Install variant build dependency
+        run: python3 -m pip install PyYAML==6.0.2
       - name: Render examples
         run: |
           quarto render
           test -f _site/index.html
+          test -f _site/examples.html
+          test -f _site/example.html
           test -f _site/basic-features.html
           test -f _site/sympy-examples.html
           test -f _site/ai-feedback.html

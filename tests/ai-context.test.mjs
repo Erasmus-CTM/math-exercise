@@ -91,10 +91,10 @@ test('explicit references work across nested inactive tabs and read current pros
   const cell = page.document.getElementById('cell');
   let contexts = page.api.resolveContexts(cell);
   assert.equal(contexts.length, 1);
-  assert.equal(contexts[0].content, 'Original\n\\(x^2\\)');
+  assert.equal(contexts[0].text, 'Original\n\\(x^2\\)');
   page.document.querySelector('#ctx p').textContent = 'Updated';
   contexts = page.api.resolveContexts(cell);
-  assert.match(contexts[0].content, /Updated/);
+  assert.match(contexts[0].text, /Updated/);
   page.dom.window.close();
 });
 
@@ -102,7 +102,7 @@ test('none opts out, auto uses its own source, and explicit budget omits whole b
   const page = loadPage('<div id="cell"></div><div id="big" class="math-exercise-context"></div><div id="small" class="math-exercise-context">Small \\(x^2\\)</div>');
   const cell = page.document.getElementById('cell');
   cell.dataset.context = JSON.stringify(String.raw`Auto \(\frac{1}{2}\)`);
-  assert.equal(page.api.resolveContexts(cell)[0].content, String.raw`Auto \(\frac{1}{2}\)`);
+  assert.equal(page.api.resolveContexts(cell)[0].text, String.raw`Auto \(\frac{1}{2}\)`);
   cell.dataset.contextMode = 'none';
   assert.equal(page.api.resolveContexts(cell).length, 0);
   cell.dataset.contextMode = 'explicit';
@@ -111,7 +111,7 @@ test('none opts out, auto uses its own source, and explicit budget omits whole b
   const contexts = page.api.resolveContexts(cell);
   assert.equal(contexts.length, 1);
   assert.equal(contexts[0].id, 'small');
-  assert.equal(contexts[0].content, String.raw`Small \(x^2\)`);
+  assert.equal(contexts[0].text, String.raw`Small \(x^2\)`);
   page.dom.window.close();
 });
 

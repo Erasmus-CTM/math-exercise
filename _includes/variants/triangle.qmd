@@ -1,0 +1,29 @@
+```{math-exercise}
+#| label: variant-triangle
+#| mode: numeric
+#| decplaces: 3
+#| parameters:
+#|   ab: [3, 4, 5]
+#|   offset: [1, 2]
+#| derived:
+#|   bc: ab + offset
+#|   ratio: bc / sqrt(ab^2 + bc^2)
+#| variant-context: 'Right triangle, AB={{ab}} and BC={{bc}}. AC is the hypotenuse.'
+#| solution: |
+#|   Pythagoras gives $AC=\sqrt{ {{ab}}^2+{{bc}}^2 }$.
+#|
+#|   Thus $BC/AC={{ratio:.3f}}$ to three decimal places.
+#| tests:
+#|   - name: exact expression
+#|     answers: ['{{bc}}/sqrt({{ab}}^2+{{bc}}^2)']
+#|     expected: correct
+#|   - name: rounded answer
+#|     answers: ['{{ratio:.3f}}']
+#|     expected: correct
+#|   - name: reversed ratio
+#|     answers: ['sqrt({{ab}}^2+{{bc}}^2)/{{bc}}']
+#|     expected: wrong
+
+A right triangle has legs $AB={{ab}}$ and $BC={{bc}}$.
+Find $BC/AC$, to **three decimals**: _[{{bc}}/sqrt({{ab}}^2+{{bc}}^2)].
+```

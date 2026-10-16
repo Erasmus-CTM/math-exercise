@@ -1,0 +1,25 @@
+---
+title: "Practise keeping an equation balanced"
+format: html
+filters: [_filters/example-source.lua, math-exercise]
+ai-feedback:
+  mode: copy
+---
+
+Try an answer, choose **Check**, and use **Feedback** if you need a next step.
+Open the source beneath the activity to change the equation for your students.
+
+**Feedback** prepares a message to paste into an AI chat. If your course has
+feedback set up on the page, you can receive the reply here instead.
+
+
+## Solve an equation
+
+Subtract the same quantity from both sides to keep an equation balanced.
+
+```{math-exercise}
+#| label: equation
+For $3x+2=14$, enter $x=$ _[4].
+```
+
+Choose Check to test your answer, then Feedback for progressively more help.

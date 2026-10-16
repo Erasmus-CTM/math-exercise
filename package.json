@@ -2,7 +2,7 @@
   "name": "math-exercise-regression-tests",
   "private": true,
   "scripts": {
-    "test": "node --test tests/*.test.mjs"
+    "test": "python3 -m unittest discover -s tests -p test_variants.py && node --test tests/*.test.mjs"
   },
   "devDependencies": {
     "@mathjax/src": "4.1.3",
