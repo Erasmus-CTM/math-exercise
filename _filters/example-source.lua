@@ -4,12 +4,24 @@ local summary, jsxSummary, policySummary = 'Show Quarto exercise source', 'Show 
 local function escape(text)
   return text:gsub('&','&amp;'):gsub('<','&lt;'):gsub('>','&gt;'):gsub('"','&quot;')
 end
+local function policySummaryTarget(source)
+  local maxIssues=source:match('max%-issues="(%d+)"') or ''
+  local integration='plain-text'
+  if source:find('```{math%-exercise}') then integration='math-exercise'
+  elseif source:find('```{py%-exercise}') then integration='py-exercise'
+  elseif source:find('```{pyodide%-python}') then integration='pyodide-interaktiv' end
+  local id=source:match('#|%s*label:%s*([^\n]+)') or source:match('{[^}]*#([%w_%-]+)') or ''
+  local name=source:match('#|%s*feedback%-policy:%s*([^\n]+)') or source:match('feedback%-policy="([^"]+)"') or ''
+  id=id:gsub('^%s*["\']',''):gsub('["\']%s*$','')
+  name=name:gsub('^%s*["\']',''):gsub('["\']%s*$','')
+  return '<div class="ai-feedback-policy-summary" data-max-issues="'..maxIssues..'" data-integration="'..integration..'" data-exercise="'..escape(id)..'" data-policy="'..escape(name)..'"></div>'
+end
 local function panel(source, title, testsPanel, jsx)
   local pieces = {'<div class="example-author-notes ai-feedback-ignore"><details class="math-example-source" data-source-kind="'..(jsx and 'jsxgraph' or 'exercise')..'"><summary>'..title..'</summary><pre><code class="language-markdown">'..escape(source)..'</code></pre>'}
   if testsPanel then table.insert(pieces, testsPanel) end
   table.insert(pieces, '</details>')
   if not jsx and #policyFiles > 0 then
-    table.insert(pieces, '<details class="math-example-policy" data-source-kind="policy"><summary>'..policySummary..'</summary>')
+    table.insert(pieces, '<details class="math-example-policy" data-source-kind="policy"><summary>'..policySummary..'</summary>'..policySummaryTarget(source))
     for _, file in ipairs(policyFiles) do
       table.insert(pieces, '<p><strong>'..escape(file.name)..'</strong></p><pre><code class="language-yaml">'..escape(file.content)..'</code></pre>')
     end

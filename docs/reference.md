@@ -651,7 +651,7 @@ Install ai-feedback once with `quarto add Erasmus-CTM/ai-feedback`. The math
 filter loads that shared installation automatically; no runtime is bundled here.
 An explicit ai-feedback filter also works, in either order. Missing shared files
 produce an actionable render error. For this integration preview use
-`ai-feedback@feature/scoped-policies` (0.6.0).
+`ai-feedback@main` (0.8.0).
 
 All context collection and teaching instructions now belong to ai-feedback.
 Omitted `context` collects preceding section prose; `context: none` opts out;
@@ -892,32 +892,36 @@ deployment.
 
 ## Configurable shared teaching policies
 
-With ai-feedback 0.4.0, use `ai-feedback.policy-files` in Quarto metadata to
-load one YAML file or an ordered list. Each file defines `ai-feedback.defaults`
-and/or `ai-feedback.integrations` with this integration’s name. Configure `prompt`,
-`steps`, `language`, `max-words`, `max-issues`, `allow-full-solution` and
-`reset-on-run`. Later step lists replace earlier lists; `steps: []` selects review
-mode. Run/Check resets progression by default; set `reset-on-run: false` to keep it.
-Explicit Reset always restarts at step one.
+AI Feedback 0.8 loads named definitions from `ai-feedback.policy-files` and
+`page-policy-files` (one path or an ordered list, relative to the project root).
+Files contain `ai-feedback.policies` and optional targeted `exercises` entries.
+Loading a file alone does not change the baseline. Explicitly select
+`project-policy` or `page-policy`; use `#| feedback-policy: name` on a cell for
+an exercise specialization.
+
+A named policy can `extend` another using `extends: parent-name`. Omitted fields
+inherit from its parent and effective integration baseline. `base-prompt`
+applies throughout the activity; each step adds its `step-prompt`. A supplied
+`steps` list replaces the complete inherited sequence; `steps: []` selects review
+mode. Step limits and solution permissions override policy-level values.
+Run/Check resets by default; select `reset-on-run: false` to preserve progression.
+Explicit Reset always restarts it. The old `prompt`, authored `defaults` and
+`integrations` forms are rejected.
 
 See the [shared policy guide](https://github.com/Erasmus-CTM/ai-feedback/blob/main/docs/feedback-policies.md).
 
 ### Standalone example
 
-`example.qmd` demonstrates this package with shared feedback. Install `Erasmus-CTM/ai-feedback@feature/scoped-policies`, then run `quarto render example.qmd`. No other integration extension is required. The example builds automatically on pushes and pull requests; download the `standalone-example` Actions artifact. Feedback defaults to copy mode, which needs no API key.
+`example.qmd` demonstrates this package with shared feedback. Install `Erasmus-CTM/ai-feedback@main`, then run `quarto render example.qmd`. No other integration extension is required. The example builds automatically on pushes and pull requests; download the `standalone-example` Actions artifact. Feedback defaults to copy mode, which needs no API key.
 
 ### Page and exercise feedback policies
 
-With ai-feedback 0.6.0, put all new teaching policy definitions in YAML files.
-Project `ai-feedback.policy-files` loads common policies; page front matter can
-load `ai-feedback.page-policy-files`. Both accept one path or an ordered list,
-relative to the project root. Page settings override project settings.
+Put teaching policy definitions in YAML files and activate them explicitly with
+`project-policy`, `page-policy` or a cell's `#| feedback-policy: name`. A policy
+file registers definitions; `page-policy-files` alone does not change page
+behavior. The same named policy can be reused across integrations.
 
-In a cell, `#| feedback-policy: short-hints` selects an existing entry from the
-YAML file's `ai-feedback.policies` mapping. Inline prompt/step mappings are not
-accepted. The same named policy can be reused in every integration. YAML
-`ai-feedback.exercises.<integration>.<label>` targets a specific authored label;
+YAML `ai-feedback.exercises.<integration>.<label>` targets one authored label;
 an explicit named selection takes precedence over that entry. Omitted settings
-inherit; `steps` replaces the entire list and `steps: []` disables progression.
-See [the shared policy guide](https://github.com/Erasmus-CTM/ai-feedback/blob/main/docs/feedback-policies.md).
-During preview, install `Erasmus-CTM/ai-feedback@feature/scoped-policies`.
+inherit; `steps` replaces the entire list. See the
+[shared policy guide](https://github.com/Erasmus-CTM/ai-feedback/blob/main/docs/feedback-policies.md).

@@ -23,11 +23,18 @@ jobs:
       AI_FEEDBACK_EXTENSION: ${{ github.workspace }}/_feedback-source/_extensions/ai-feedback
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Select explicit review dependencies (main keeps normal defaults)
+        id: review
+        env:
+          REVIEW_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: python3 .github/review-dependencies.py
       - name: Fetch shared feedback dependency
         uses: actions/checkout@v4
         with:
           repository: Erasmus-CTM/ai-feedback
-          ref: main
+          ref: ${{ steps.review.outputs['ai-feedback'] || 'main' }}
           path: _feedback-source
       - uses: quarto-dev/quarto-actions/setup@v2
         with:

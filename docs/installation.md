@@ -8,7 +8,7 @@ These examples currently use the integration preview. For AI feedback, install
 the shared extension once in the same Quarto project:
 
 ```sh
-quarto add Erasmus-CTM/ai-feedback@feature/scoped-policies
+quarto add Erasmus-CTM/ai-feedback@main
 ```
 
 Then install this extension:
