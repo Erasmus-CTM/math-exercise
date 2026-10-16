@@ -1,0 +1,11 @@
+ai-feedback:
+  policies:
+    guiding-question:
+      max-words: 80
+      steps:
+        - prompt: Ask one guiding question about the first algebraic step. Do not provide calculations or the answer.
+    worked-explanation:
+      max-words: 180
+      steps:
+        - prompt: Give a complete worked solution, explaining each algebraic step.
+          allow-full-solution: true
