@@ -530,7 +530,9 @@ local function processMarkers(text, exerciseId, vars, vecdir, mode)
       table.insert(output, html)
       position = position + #head - 1 + #balanced
     else
-      table.insert(output, text:sub(position, position))
+      -- Escape task text before embedding it in HTML. A TeX inequality
+      -- such as a<b<c must not be parsed as an opening HTML tag.
+      table.insert(output, (attrEsc(text:sub(position, position))))
       position = position + 1
     end
   end

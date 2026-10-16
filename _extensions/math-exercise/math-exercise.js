@@ -904,8 +904,10 @@
     return output;
   }
 
-  function renderTaskText(text, exerciseId, vars, vecdir, mode) {
-    text = normalizeTaskMathDelimiters(text);
+  function renderTaskText(text, exerciseId, vars, vecdir, mode, questionIsHtml) {
+    // Generated variants have already been rendered by Pandoc; preserve their
+    // markup and source annotations. Ordinary exercise bodies are plain text.
+    if (!questionIsHtml) text = normalizeTaskMathDelimiters(text);
     mode = mode || 'equivalent';
     var count = 0, fieldIds = [], structuralLabels = [], output = [], position = 0;
     var dynamicNames = {};
@@ -920,7 +922,13 @@
       var brace = dynamicMatrix ? matchBalanced(text, position + headLength - 1, '{', '}') : null;
       var balanced = bracket || brace;
 
-      if (!balanced) { output.push(text.charAt(position++)); continue; }
+      // Task prose and TeX are text, never HTML; generated controls below
+      // remain markup. In particular, a<b<c must reach the math renderer.
+      if (!balanced) {
+        var character = text.charAt(position++);
+        output.push(questionIsHtml ? character : escHtml(character));
+        continue;
+      }
 
       var content = balanced.slice(1, -1), rendered;
       if (scalar) {
@@ -1487,7 +1495,7 @@
         idx = Math.floor(Math.random() * poolTasks.length);
         try { sessionStorage.setItem(poolKey, String(idx)); } catch(e) {}
       }
-      var r = renderTaskText(poolTasks[idx], cell.id, vars, vecdir, mode);
+      var r = renderTaskText(poolTasks[idx], cell.id, vars, vecdir, mode, !!generated);
       var qDiv = cell.querySelector('.math-exercise-question');
       setQuestionContent(qDiv, r);
       cell.dataset.fields = JSON.stringify(r.fieldIds);
@@ -1721,7 +1729,7 @@
       if (feedbackHandle) feedbackHandle.reset();
       idx = next;
       try { sessionStorage.setItem(poolKey, String(next)); } catch(e) {}
-      var r = renderTaskText(poolTasks[next], cell.id, vars, vecdir, mode);
+      var r = renderTaskText(poolTasks[next], cell.id, vars, vecdir, mode, !!generated);
       setQuestionContent(questionDiv, r);
       cell.dataset.fields = JSON.stringify(r.fieldIds);
       cell.dataset.structuralFieldLabels = JSON.stringify(r.structuralLabels);
@@ -1744,7 +1752,7 @@
           var options=Object.assign({}, checkOpts, {checker:record.checker,
             variant:JSON.parse(JSON.stringify({id:record.id, parameters:record.parameters, derived:record.derived, fingerprint:record.fingerprint, context:record['variant-context']}))});
           if(mode==='custom') return [await checkCustom(fixture.response || {kind:'expressions', raw:fixture.answers || [], inputs:{}}, options)];
-          var rendered=renderTaskText(record.question, cell.id+'-review', vars, vecdir, mode);
+          var rendered=renderTaskText(record.question, cell.id+'-review', vars, vecdir, mode, true);
           var box=document.createElement('div');box.innerHTML=rendered.html;
           var fields=Array.from(box.querySelectorAll('input[data-answer],textarea[data-answer]'));
           if(fields.length!==(fixture.answers || []).length) throw new Error('Fixture answer count does not match fields');
