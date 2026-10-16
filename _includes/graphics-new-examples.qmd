@@ -166,6 +166,13 @@ JXG.QuartoAssessment.register({
 #|           "score": score,
 #|           "feedback": f"{matched} of {len(targets)} maxima are matched; remove extra points and inspect each crest."
 #|       }
+#| tests: |
+#|   def test(check, symbols):
+#|       import math
+#|       for variant, (a,p,b) in enumerate([(1,0,0),(.75,.55,.2),(1.1,-.7,-.1),(.85,1.05,.1)]):
+#|           points = [[math.pi/2-p+2*math.pi*k,b+a] for k in range(4)]
+#|           assert check({"variant": variant, "clicks": points}, symbols)["score"] == 1
+#|           assert check({"variant": variant, "clicks": points[:-1]}, symbols)["score"] < 1
 
 Click every local maximum visible in the function plot.
 ```
@@ -224,8 +231,8 @@ var rightHandle = board.create('glider', [4.8, -1.48, handleGuide], {
   showInfobox: false
 });
 
-function leftX() { return Math.max(0, Math.min(leftHandle.X(), rightHandle.X())); }
-function rightX() { return Math.min(plotEnd, Math.max(leftHandle.X(), rightHandle.X())); }
+function leftX() { return Math.max(0, Math.min(plotEnd, Math.min(leftHandle.X(), rightHandle.X()))); }
+function rightX() { return Math.max(0, Math.min(plotEnd, Math.max(leftHandle.X(), rightHandle.X()))); }
 
 var corners = [
   board.create('point', [leftX, yLow], { visible: false }),
@@ -244,7 +251,7 @@ frame.borders.forEach(function (border) {
 });
 
 board.create('text', [plotEnd * 0.55, 1.55, function () {
-  return 'Selected width: ' + Math.abs(rightHandle.X() - leftHandle.X()).toFixed(2);
+  return 'Selected width: ' + (rightX() - leftX()).toFixed(2);
 }], {
   fixed: true,
   fontSize: 16,
@@ -258,7 +265,7 @@ JXG.QuartoAssessment.register({
       representation: 'period-selection-window',
       left: leftX(),
       right: rightX(),
-      width: Math.abs(rightHandle.X() - leftHandle.X()),
+      width: rightX() - leftX(),
       visibleInterval: [0, plotEnd]
     };
   },
@@ -284,18 +291,27 @@ JXG.QuartoAssessment.register({
 #| embed-response: true
 #| checker: |
 #|   def check(response, symbols):
+#|       import math
+#|       try:
+#|           left, right = float(response["left"]), float(response["right"])
+#|           if not all(math.isfinite(v) for v in (left, right)) or not 0 <= left <= right <= 12.5:
+#|               raise ValueError()
+#|       except (KeyError, TypeError, ValueError):
+#|           return {"score": 0, "feedback": "Place both frame edges on the visible graph."}
 #|       target = 2.5
-#|       width = abs(float(response.get("width", 0)))
+#|       width = right - left
 #|       error = abs(width - target)
-#|       tolerance = 0.03 * target
-#|       if error <= tolerance:
-#|           return {"score": 1, "feedback": "The frame spans one complete period."}
+#|       if error <= 0.03 * target:
+#|           return {"score": 1, "feedback": "The visible frame spans one complete period."}
 #|       score = max(0, 1 - error/target)
 #|       direction = "narrower" if width > target else "wider"
-#|       return {
-#|           "score": score,
-#|           "feedback": f"Move one handle to make the frame {direction}; align repeated features to judge one cycle."
-#|       }
+#|       return {"score": score,
+#|               "feedback": f"Move one handle to make the frame {direction}; align repeated features to judge one cycle."}
+#| tests: |
+#|   def test(check, symbols):
+#|       assert check({"left": 4, "right": 6.5, "width": 2.5}, symbols)["score"] == 1
+#|       assert check({"left": 0, "right": 0.5, "width": 2.5}, symbols)["score"] < 1
+#|       assert check({"left": -1, "right": 1.5, "width": 2.5}, symbols)["score"] == 0
 
 Move the orange dots L and R so that the shaded frame between them spans
 exactly one period. The frame may be placed anywhere on the visible graph.

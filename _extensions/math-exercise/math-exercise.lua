@@ -591,6 +591,21 @@ local function buildExercise(el, state)
   local eid = "math-exercise-" .. exerciseCount
 
   local opts, questionText = parseOptions(el.text)
+
+  -- Tests opt into native build-time checking. They are never sent to the
+  -- learner runtime; exercises without tests need no native Python.
+  if opts["tests"] and opts["tests"]:match("%S") then
+    local script = quarto.utils.resolve_path("question-tests.py")
+    local python = os.getenv("MATH_EXERCISE_PYTHON") or "python3"
+    opts["tests-base"] = quarto.project.directory or pandoc.path.directory(quarto.doc.input_file)
+    local ok, result = pcall(pandoc.pipe, python, {script, "--stdin"}, quarto.json.encode(opts))
+    if not ok then
+      io.stderr:write("math-exercise: author tests failed for " .. (opts["label"] or eid) .. "\n" .. tostring(result) .. "\n")
+      io.stderr:flush()
+      os.exit(1)
+    end
+  end
+
   local variants = dofile(quarto.utils.resolve_path("variants.lua")).generate(el.text, questionText, opts, state.review)
   if variants then opts = variants.options; opts["pool"] = "true" end
 

@@ -81,6 +81,7 @@ Enter a matrix: mat[1,0;0,x]
 | `sigfigs` | integer | — | only for `mode: numeric`: round both sides to N significant figures before comparing |
 | `form` | `factored` / `expanded` / `single_fraction` / `lowest_terms` | — | representation additionally required for correctness — only for `mode: equivalent`/`exact` |
 | `checker` | multiline Python | — | trusted author checker for `mode: custom`; define `check(response, symbols)` |
+| `tests` | multiline Python or `.py` path | — | optional build-time assertions; define `test(check, symbols)` |
 | `packages` | comma-separated package names | — | Pyodide packages to load lazily before checking, e.g. `networkx`; intended for `mode: custom` |
 | `response` | `jsxgraph:iframe-id` | — | obtain arbitrary JSON from a JSXGraph assessment iframe instead of expression fields |
 | `embed-response` | `true` / `false` | `false` | move the referenced JSXGraph iframe into the exercise card, between the question and controls |
@@ -326,16 +327,33 @@ of one symbolic expression. It does not use the matrix basis helper.
 #| mode: custom
 #| checker: |
 #|   def check(response, symbols):
+#|       from sympy.calculus.util import continuous_domain
 #|       f = response["expressions"][0]
 #|       x = symbols["x"]
-#|       lower = minimum(diff(f, x), x, Interval(0, 1))
-#|       rise = simplify(f.subs(x, 1) - f.subs(x, 0))
-#|       if lower.is_nonnegative is True and rise.is_positive is True:
-#|           return {"score": 1, "feedback": "The function is non-decreasing and rises overall."}
-#|       return {"score": 0, "feedback": "Non-decreasing behavior with an overall rise was not established."}
+#|       interval = Interval(0, 1)
+#|       try:
+#|           derivative = diff(f, x)
+#|           regular = (f.free_symbols <= {x}
+#|                      and f.subs(x, 0).is_real is True
+#|                      and continuous_domain(f, x, interval) == interval
+#|                      and continuous_domain(derivative, x, interval) == interval)
+#|           lower = minimum(derivative, x, interval) if regular else S.NegativeInfinity
+#|           rise = simplify(f.subs(x, 1) - f.subs(x, 0))
+#|           valid = regular and lower.is_nonnegative is True and rise.is_positive is True
+#|       except (NotImplementedError, ValueError, TypeError):
+#|           valid = False
+#|       return {"correct": valid,
+#|               "feedback": "Require a real function with a continuous derivative, non-negative derivative throughout [0,1], and a positive endpoint rise. Use an expression whose domain and derivative sign SymPy can establish."}
+#| tests: |
+#|   def test(check, symbols):
+#|       x = symbols["x"]
+#|       for f in (x, x**2, exp(x), x**3+x):
+#|           assert check({"expressions": [f]}, symbols)["correct"]
+#|       for f in (S.One, -x, x-1/(100*(x-Rational(1,2))), I*x):
+#|           assert not check({"expressions": [f]}, symbols)["correct"]
 
-Give an example of a monotonically increasing function on $[0,1]$:
-$f(x) =$ ___[]
+Give a real function with a continuous derivative that is non-decreasing on $[0,1]$ and satisfies $f(1)>f(0)$:
+$f(x)=$ ___[]
 ```
 ````
 
@@ -344,6 +362,61 @@ and executes in browser-side Pyodide. It must therefore come only from trusted
 document authors. Student strings go through the extension's existing SymPy
 expression parser and are never concatenated into the custom checker source;
 invalid expressions and checker exceptions are shown as errors.
+
+#### Tests belong to the exercise
+
+See the [question-test guide](question-tests.md) for both formats and runner commands.
+
+For `mode: custom`, an optional `tests: |` block lives directly beside the
+checker. Define `test(check, symbols)` and use ordinary Python assertions to
+cover valid answers, invalid answers, and important edge cases. SymPy names
+and the same assessment helpers as the browser checker are available.
+
+````markdown
+```{math-exercise}
+#| label: positive-integer
+#| mode: custom
+#| checker: |
+#|   def check(response, symbols):
+#|       n = response["expressions"][0]
+#|       return {"correct": n.is_integer is True and n.is_positive is True}
+#| tests: |
+#|   def test(check, symbols):
+#|       assert check({"expressions": [Integer(3)]}, symbols)["correct"]
+#|       assert not check({"expressions": [Rational(3,2)]}, symbols)["correct"]
+#|       assert not check({"expressions": [Integer(-1)]}, symbols)["correct"]
+
+Give a positive integer: _[]
+```
+````
+
+When an exercise contains tests, `quarto render` runs them using native
+Python and stops the build on failure, identifying the exercise label. Install
+SymPy in that build environment, plus any packages imported by the checker
+(for example, NetworkX). Set `MATH_EXERCISE_PYTHON` to choose a Python
+executable. Exercises without a tests block retain their existing build
+requirements.
+
+Run the same tests directly, without rendering, with:
+
+```bash
+python _extensions/math-exercise/question-tests.py lesson.qmd
+```
+
+Pass the files that contain exercise blocks, including any included QMD files.
+For longer fixtures, keep the question readable with one line:
+`#| tests: _includes/tests/tree.py`. That file defines the same
+`test(check, symbols)` function. Paths are relative to the Quarto project root,
+or the document directory outside a project; run the standalone command from
+that directory too. Each test file belongs to its named exercise. The examples'
+source panels show referenced test files in a separate collapsed section, so
+authors can copy the exercise and its tests together.
+
+This repository's `npm test` and GitHub action call that same runner. Tests
+travel with the copied exercise and remain visible in its documentation source
+panel; they are excluded from the browser's checker payload. They are trusted
+author code executed during the build. Native tests exercise checker logic;
+they do not replace browser interaction checks or certify Pyodide parity.
 
 ### Arbitrary JSON from JSXGraph
 
