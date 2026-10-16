@@ -1,11 +1,18 @@
 ai-feedback:
   policies:
-    guiding-question:
+    algebra-practice:
+      base-prompt: Preserve the displayed equation and its notation.
+      max-words: 160
+    brief-practice:
+      extends: algebra-practice
       max-words: 80
+    guiding-question:
+      extends: brief-practice
       steps:
-        - prompt: Ask one guiding question about the first algebraic step. Do not provide calculations or the answer.
+        - step-prompt: Ask one guiding question about the first algebraic step. Do not provide calculations or the answer.
     worked-explanation:
+      extends: algebra-practice
       max-words: 180
       steps:
-        - prompt: Give a complete worked solution, explaining each algebraic step.
+        - step-prompt: Give a complete worked solution, explaining each algebraic step.
           allow-full-solution: true

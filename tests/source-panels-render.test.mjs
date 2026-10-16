@@ -16,7 +16,7 @@ for (const namespaced of [false, true]) test(`source and policy panels stay sepa
     cpSync(process.env.AI_FEEDBACK_EXTENSION, shared, {recursive:true});
     mkdirSync(join(dir, '_filters'));
     cpSync(new URL('../_filters/example-source.lua', import.meta.url), join(dir, '_filters/example-source.lua'));
-    const policy = 'ai-feedback:\n  policies:\n    custom-hint:\n      steps:\n        - prompt: Ask about the first algebraic step.\n';
+    const policy = 'ai-feedback:\n  policies:\n    custom-hint:\n      steps:\n        - step-prompt: Ask about the first algebraic step.\n';
     writeFileSync(join(dir, 'policy.yml'), policy);
     const metadata = namespaced ? 'ai-feedback:\n  page-policy-files: policy.yml\n' : '';
     writeFileSync(join(dir, 'lesson.qmd'), '---\nformat: html\nfilters: [_filters/example-source.lua, math-exercise]\n' + metadata + '---\n\n```{math-exercise}\n#| label: example\n' + (namespaced ? '#| feedback-policy: custom-hint\n' : '') + 'Compute 2+2: _[4].\n```\n');
