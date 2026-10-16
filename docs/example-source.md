@@ -2,7 +2,7 @@
 
 To try the activity first, [open the rendered examples](https://erasmus-ctm.github.io/math-exercise/).
 
-[Example source — download and open in your editor](https://github.com/Erasmus-CTM/math-exercise/blob/feature/shared-feedback-integration/example.qmd).
+[Example source — download and open in your editor](https://github.com/Erasmus-CTM/math-exercise/blob/main/example.qmd).
 On GitHub, select **Download raw file**. Open the saved file in your editor;
 **VS Code** is one option for editing Quarto documents.
 

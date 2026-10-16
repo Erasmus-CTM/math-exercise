@@ -637,7 +637,7 @@ produce an actionable render error. For this integration preview use
 All context collection and teaching instructions now belong to ai-feedback.
 Omitted `context` collects preceding section prose; `context: none` opts out;
 `context: id1,id2` selects reusable `.ai-context` blocks shared with text and both
-Python integrations. See the [shared guide](https://github.com/Erasmus-CTM/ai-feedback/blob/feature/scoped-policies/README.md).
+Python integrations. See the [shared guide](https://github.com/Erasmus-CTM/ai-feedback/blob/main/README.md).
 Tests use the installed dependency through `AI_FEEDBACK_EXTENSION=/absolute/path/to/ai-feedback/_extensions/ai-feedback`.
 
 ### Progressive hints
@@ -900,5 +900,5 @@ accepted. The same named policy can be reused in every integration. YAML
 `ai-feedback.exercises.<integration>.<label>` targets a specific authored label;
 an explicit named selection takes precedence over that entry. Omitted settings
 inherit; `steps` replaces the entire list and `steps: []` disables progression.
-See [the shared policy guide](https://github.com/Erasmus-CTM/ai-feedback/blob/feature/scoped-policies/docs/feedback-policies.md).
+See [the shared policy guide](https://github.com/Erasmus-CTM/ai-feedback/blob/main/docs/feedback-policies.md).
 During preview, install `Erasmus-CTM/ai-feedback@feature/scoped-policies`.
