@@ -7,7 +7,10 @@ On GitHub, select **Download raw file**. Open the saved file in your editor;
 **VS Code** is one option for editing Quarto documents.
 
 The demonstration uses `_filters/example-source.lua` to display expandable
-source panels. Keep that file at the same relative path beside your downloaded example, or remove its
+source panels. Each exercise has separate collapsed Quarto source and policy YAML
+panels. The policy panel shows the installed shared defaults and any configured
+policy files, so ordinary examples expose their teaching policy too. A diagram
+has its own JSXGraph code panel. Keep that file at the same relative path beside your downloaded example, or remove its
 entry from the page's `filters` list when using the activity in your own course.
 The exercise extension itself still needs to be installed in your project.
 

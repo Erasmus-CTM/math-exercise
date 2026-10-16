@@ -68,7 +68,7 @@ jobs:
           grep -Fq 'cube-transform-board' _site/graphics-examples.html
           grep -Fq 'polar-sector-board' _site/graphics-examples.html
           grep -Fq 'cylindrical-sector-board' _site/graphics-examples.html
-          grep -Fq 'Show JSXGraph source' _site/graphics-examples.html
+          grep -Fq 'Show JSXGraph code' _site/graphics-examples.html
           ! grep -Fq 'rotation-order-board' _site/graphics-examples.html
           test "$(grep -Fc 'class="math-example-source"' _site/graphics-examples.html)" -eq 16
           original_line="$(grep -n 'Draw and refine a non-decreasing curve' _site/graphics-examples.html | head -1 | cut -d: -f1)"
@@ -77,8 +77,8 @@ jobs:
           grep -Fq 'Remember the discriminant' _site/ai-feedback.html
           grep -Fq 'Explicit feedback context' _site/ai-feedback.html
           grep -Fq 'class="math-example-source"' _site/basic-features.html
-          grep -Fq 'Show source' _site/sympy-examples.html
-          grep -Fq 'Vis kildekode' _site/vector-matrix-tests.html
+          grep -Fq 'Show Quarto exercise source' _site/sympy-examples.html
+          grep -Fq 'Vis Quarto-kildekode' _site/vector-matrix-tests.html
           grep -Fq 'Slik skriver du svar' _site/vector-matrix-tests.html
           grep -Fq 'class="math-vec' _site/vector-matrix-tests.html
           grep -Fq 'class="math-mat"' _site/vector-matrix-tests.html

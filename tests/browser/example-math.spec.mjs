@@ -75,3 +75,23 @@ for (const name of pages) test(`${name}: all task formulas render, including eve
     await q.screenshot({path: test.info().outputPath('pythagorean-fixed.png')});
   }
 });
+
+for (const name of ['ai-feedback', 'examples']) test(`${name}: policy YAML opens independently of exercise source`, async ({page}) => {
+  await page.goto(`/${name}.html`, {waitUntil:'domcontentloaded'});
+  const source = page.locator('details[data-source-kind="exercise"]').first();
+  const group = source.locator('..');
+  const policy = group.locator('details[data-source-kind="policy"]');
+  await expect(source).not.toHaveAttribute('open','');
+  await expect(policy).not.toHaveAttribute('open','');
+  await source.locator('summary').click();
+  await expect(policy).not.toHaveAttribute('open','');
+  await policy.locator('summary').click();
+  await expect(source).toHaveAttribute('open','');
+  await expect(policy).toContainText('Ask exactly one guiding question');
+  await expect(source.locator('code.language-yaml')).toHaveCount(0);
+  await expect(policy.locator('code.language-markdown')).toHaveCount(0);
+  if (name === 'examples') await expect(policy).toContainText('guiding-question:');
+  await source.locator('summary').click();
+  await expect(policy).toHaveAttribute('open','');
+  await group.screenshot({path:test.info().outputPath('separate-policy-panel.png')});
+});
