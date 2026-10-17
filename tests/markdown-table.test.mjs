@@ -26,6 +26,7 @@ function loadBundle(lang = 'en') {
     vm.runInContext(readFileSync(new URL('file://' + process.env.AI_FEEDBACK_EXTENSION + '/' + name), 'utf8'), context);
     context.window.AIFeedback = context.AIFeedback;
   }
+  vm.runInContext(readFileSync(new URL('../_extensions/math-exercise/matrix-input.js', import.meta.url), 'utf8'), context);
   vm.runInContext(source, context);
   return {...context.window.__mathExerciseTestApi, ...sharedTestApi(context.AIFeedback, context.window.__mathExerciseConfig.lang, context.localStorage)};
 }

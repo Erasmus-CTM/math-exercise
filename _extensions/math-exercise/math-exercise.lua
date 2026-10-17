@@ -172,11 +172,11 @@ end
 local function ensureSetup()
   if hasSetup then return end
   hasSetup = true
-  local css = readFile("math-exercise.css")
+  local css = readFile("matrix-input.css") .. "\n" .. readFile("math-exercise.css")
   quarto.doc.include_text("in-header",
     "<style type=\"text/css\">\n" .. css .. "\n</style>")
   local runtime = readFile("shared/pyodide-runtime.js")
-  local js = readFile("math-exercise.js")
+  local js = readFile("matrix-input.js") .. "\n" .. readFile("math-exercise.js")
   quarto.doc.include_text("after-body",
     "<script type=\"text/javascript\">\n" .. runtime .. "\n" .. js .. "\n</script>")
 end

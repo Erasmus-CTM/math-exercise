@@ -925,3 +925,68 @@ YAML `ai-feedback.exercises.<integration>.<label>` targets one authored label;
 an explicit named selection takes precedence over that entry. Omitted settings
 inherit; `steps` replaces the entire list. See the
 [shared policy guide](https://github.com/Erasmus-CTM/ai-feedback/blob/main/docs/feedback-policies.md).
+# Reusable matrix-input API
+
+`_extensions/math-exercise/matrix-input.js` and `matrix-input.css` expose the
+existing dynamic editor independently of the exercise runtime, Python checker,
+and AI feedback. Include both assets and use the classic browser global:
+
+```js
+const renderer = MatrixInput.create({
+  idPrefix: 'question1',
+  zeroDimensions: 'reject',
+  maxEntries: 64,
+  labels: { matrixRows: 'Rows', matrixColumns: 'Columns' },
+  onChange({ kind, value }) {
+    // Invalidate validation, grading and feedback evidence on every change.
+    // kind is edit, resize, or write; value contains untouched raw strings.
+  },
+});
+const spec = {
+  name: 'A',
+  rows: { auto: true, initial: 2, min: 1, max: 8 },
+  cols: { auto: false, initial: 2, min: 2, max: 2 },
+};
+host.innerHTML = renderer.renderHTML(spec).html;
+const editor = renderer.mount(host.firstElementChild);
+editor.write({ rows: 2, cols: 2, raw: ['x+x', '0.1', '1/2', ''] });
+const response = editor.read(); // {type: 'matrix', rows: 2, cols: 2, raw: [...]}
+editor.resize(3, 2);
+editor.setState({ status: 'incorrect', cells: [['invalid']] });
+editor.reset();
+editor.destroy(); // Call before removing/replacing the editor.
+```
+
+Dimensions and bounds are integers up to 20. Fixed axes have equal `initial`,
+`min` and `max`; resizable axes use `auto: true`. `maxEntries`, when supplied,
+bounds the product of the configured axis maxima, so every selectable shape
+fits. Invalid writes and resizes are rejected before changing the DOM.
+`resize` preserves surviving cells by row/column; removed cells are discarded.
+`write` requires exactly `rows * cols` raw strings in row-major order. No
+trimming, scalar parsing, decimal normalization or algebraic rewriting occurs.
+`reset` restores the mounted shape and raw values. `destroy` removes component
+listeners and is idempotent. Remounting destroys the previous instance.
+
+The default `zeroDimensions: 'reject'` requires positive axes. The explicit
+`'canonical'` policy collapses any shape with a zero axis to 0 by 0 and restores
+the other configured axis when adding a row/column. Math-exercise opts into
+this historical policy and retains its custom-checker transport's whitespace
+trimming; other consumers must choose their own zero-dimension contract.
+
+Optional labels are `matrixRows`, `matrixColumns`, `matrixAddRow`,
+`matrixRemoveRow`, `matrixAddColumn`, `matrixRemoveColumn`, and `emptyMatrix`.
+Existing math-exercise locales supply them through its adapter. Each consumer
+should choose a distinct `idPrefix` for each editor group.
+
+`setState` accepts an overall `status`, optional `rows`/`columns` arrays and
+optional `cells` rows of statuses. A cell overrides its column, then its row,
+then the overall status. Supported presentation statuses are `correct`,
+`incorrect`, `invalid` (or `error`), `partial`, `dependent`, `empty`, and `''`.
+Supplied coordinates must fit the current shape. This only displays a
+consumer's assessment; it computes no score or partial-credit policy. Edits,
+resizes and writes clear supplied states before notifying the consumer.
+
+The source of this editor is math-exercise. Independent consumers may vendor
+these two files under their licenses, recording the upstream repository,
+commit and file hashes. Updates should replace the pinned files together;
+consumer parsing and grading remain outside the component.
