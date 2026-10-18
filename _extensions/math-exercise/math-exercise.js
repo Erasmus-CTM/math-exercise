@@ -859,6 +859,10 @@
   // Raw exercise bodies bypass Pandoc's Markdown math handling. Normalize
   // paired dollar delimiters before inserting HTML so a page-level MathJax
   // pass cannot claim a bare \\begin{...} environment and strand the dollars.
+  // Same placeholder as math-exercise.lua: a literal dollar becomes its own
+  // element, so neither KaTeX auto-render nor MathJax treats it as a delimiter.
+  var LITERAL_DOLLAR = '\uE024';
+  var LITERAL_DOLLAR_HTML = '<span class="math-literal-dollar">$</span>';
   function normalizeTaskMathDelimiters(text) {
     var output = '', position = 0;
     function unescapedAt(needle, start) {
@@ -872,7 +876,12 @@
       return -1;
     }
     while (position < text.length) {
-      if (text.charAt(position) !== '$' || (position > 0 && text.charAt(position - 1) === '\\')) {
+      if (text.charAt(position) === '$' && position > 0 && text.charAt(position - 1) === '\\') {
+        // Escaped dollar: placeholder, turned into its own element after escaping.
+        output = output.slice(0, -1) + LITERAL_DOLLAR; position++;
+        continue;
+      }
+      if (text.charAt(position) !== '$') {
         output += text.charAt(position++);
         continue;
       }
@@ -940,7 +949,7 @@
       position += headLength - 1 + balanced.length;
     }
     return {
-      html: output.join('').replace(/\n/g, '<br>\n'),
+      html: output.join('').split(LITERAL_DOLLAR).join(LITERAL_DOLLAR_HTML).replace(/\n/g, '<br>\n'),
       fieldIds: fieldIds,
       structuralLabels: structuralLabels
     };
@@ -1251,19 +1260,35 @@
     var val = el.value.trim();
     if (!val) return { status: 'empty', score: 0.0 };
     opts = opts || {};
+    return runOnCurrentRuntime(async function (py) {
+      await Promise.all([
+        py.globals.set('_math_student',   val),
+        py.globals.set('_math_correct',   el.dataset.answer || ''),
+        py.globals.set('_math_vars',      el.dataset.vars   || ''),
+        py.globals.set('_math_mode',      mode || 'equivalent'),
+        py.globals.set('_math_reject',    opts.reject    || ''),
+        py.globals.set('_math_tolerance', opts.tolerance || ''),
+        py.globals.set('_math_decplaces', opts.decplaces || ''),
+        py.globals.set('_math_sigfigs',   opts.sigfigs   || ''),
+        py.globals.set('_math_form',      opts.form      || ''),
+        py.globals.set('_math_partial_credit', !!opts.partialCredit),
+        py.globals.set('_math_form_credit', Number(opts.formCredit)),
+      ]);
+      return JSON.parse(await py.runPythonAsync(CHECK_PY));
+    });
+  }
+
+  // A check that was running when the runtime was replaced (Stop/restart) is
+  // repeated once on the new runtime instead of reporting a spurious error.
+  async function runOnCurrentRuntime(run) {
     var py = await ensureSympy();
-    py.globals.set('_math_student',   val);
-    py.globals.set('_math_correct',   el.dataset.answer || '');
-    py.globals.set('_math_vars',      el.dataset.vars   || '');
-    py.globals.set('_math_mode',      mode || 'equivalent');
-    py.globals.set('_math_reject',    opts.reject    || '');
-    py.globals.set('_math_tolerance', opts.tolerance || '');
-    py.globals.set('_math_decplaces', opts.decplaces || '');
-    py.globals.set('_math_sigfigs',   opts.sigfigs   || '');
-    py.globals.set('_math_form',      opts.form      || '');
-    py.globals.set('_math_partial_credit', !!opts.partialCredit);
-    py.globals.set('_math_form_credit', Number(opts.formCredit));
-    return JSON.parse(await py.runPythonAsync(CHECK_PY));
+    try {
+      return await run(py);
+    } catch (error) {
+      var current = await ensureSympy();
+      if (current === py) throw error;
+      return run(current);
+    }
   }
 
   async function checkCustomNow(response, opts) {
@@ -1271,17 +1296,29 @@
       if (!response || typeof response !== 'object' || Array.isArray(response)) throw new Error('Generated custom responses must be objects');
       response = Object.assign({}, response, {variant: opts.variant});
     }
-    var py = await ensureSympy();
-    await ensurePackages(opts.packages);
-    py.globals.set('_math_response_json', JSON.stringify(response));
-    py.globals.set('_math_vars', opts.vars || '');
-    py.globals.set('_math_checker', opts.checker || '');
-    return JSON.parse(await py.runPythonAsync(CHECK_CUSTOM_PY));
+    return runOnCurrentRuntime(async function (py) {
+      await ensurePackages(opts.packages);
+      await Promise.all([
+        py.globals.set('_math_response_json', JSON.stringify(response)),
+        py.globals.set('_math_vars', opts.vars || ''),
+        py.globals.set('_math_checker', opts.checker || ''),
+      ]);
+      return JSON.parse(await py.runPythonAsync(CHECK_CUSTOM_PY));
+    });
   }
 
   // Domain extraction delegates shared context and math-safe serialization.
-  function contextText(root, labels) { return window.AIFeedback.contextText(root, labels); }
-  function questionText(cell, ids, label) { return window.AIFeedback.questionText(cell, ids, label); }
+  // Without ai-feedback on the page (feedback off) a plain text snapshot is
+  // enough: these texts only detect edits and build feedback requests.
+  function contextText(root, labels) {
+    if (window.AIFeedback) return window.AIFeedback.contextText(root, labels);
+    return root ? root.textContent.trim() : '';
+  }
+  function questionText(cell, ids, label) {
+    if (window.AIFeedback) return window.AIFeedback.questionText(cell, ids, label);
+    var question = cell.querySelector('.math-exercise-question');
+    return question ? question.textContent.trim() : '';
+  }
   function resolveContexts(cell) {
     var text = '';
     try { text = JSON.parse(cell.dataset.context || '""'); } catch (_) {}
@@ -1660,6 +1697,17 @@
     checkBtn.addEventListener('click', runCheck);
     attachKeyListeners();
 
+    // Author-facing hint: a JSXGraph block that the jsxgraph filter did not
+    // process (extension installed but not listed in `filters`) has no iframe.
+    if (checkOpts.responseSource.indexOf('jsxgraph:') === 0) {
+      var diagramId = checkOpts.responseSource.slice('jsxgraph:'.length).trim();
+      var diagram = document.getElementById(diagramId);
+      if (!diagram || diagram.tagName !== 'IFRAME') {
+        fbDiv.innerHTML = '<div class="math-fb-err">&#9888;&nbsp;JSXGraph diagram "' + escHtml(diagramId) +
+          '" is not available. Add <code>jsxgraph</code> to the page\'s <code>filters</code>.</div>';
+      }
+    }
+
     // Selection is shared by random reload and author review; always invalidates old feedback.
     function selectTask(next) {
       if (!poolTasks || !Number.isInteger(next) || next < 0 || next >= poolTasks.length) throw new Error('Invalid variant selection');
@@ -1796,6 +1844,10 @@
       structuredGroupStatus: structuredGroupStatus,
       parsePackageList: parsePackageList,
       ensurePackages: ensurePackages,
+      ensureSympy: ensureSympy,
+      checkField: checkField,
+      installPython: INSTALL_PY,
+      runtimeCall: runtimeCall,
       notifyExternalLayout: notifyExternalLayout,
       scheduleExternalLayout: scheduleExternalLayout,
     };

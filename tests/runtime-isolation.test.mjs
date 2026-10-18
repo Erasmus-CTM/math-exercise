@@ -1,0 +1,98 @@
+// The checker runtime survives a replaced Pyodide runtime and is isolated from
+// learner code that shares the interpreter's global namespace.
+import assert from 'node:assert/strict';
+import { readFileSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { spawnSync } from 'node:child_process';
+import vm from 'node:vm';
+import test from 'node:test';
+
+const runtimeSource = readFileSync(new URL('../_extensions/math-exercise/shared/pyodide-runtime.js', import.meta.url), 'utf8');
+const exerciseSource = readFileSync(new URL('../_extensions/math-exercise/math-exercise.js', import.meta.url), 'utf8');
+const python = process.env.MATH_EXERCISE_PYTHON || 'python3';
+
+function load(globals = {}) {
+  const listeners = {};
+  const window = { __mathExerciseConfig: { lang: 'en' }, __mathExerciseTestMode: true,
+    addEventListener: (type, fn) => { (listeners[type] ||= []).push(fn); },
+    dispatch: type => (listeners[type] || []).forEach(fn => fn({ type })) };
+  const context = vm.createContext({ console, setTimeout, clearTimeout, document: { addEventListener() {} }, window, ...globals });
+  context.globalThis = context;
+  vm.runInContext(runtimeSource, context);
+  vm.runInContext(exerciseSource, context);
+  return { context, window, api: window.__mathExerciseTestApi };
+}
+
+function fakeRuntime(name, log, { failOnce } = {}) {
+  let failed = false;
+  return {
+    name,
+    loadPackage: async pkg => { log.push(name + ':load:' + pkg); },
+    globals: { set: async () => {} },
+    runPythonAsync: async code => {
+      if (code.includes('_math_runtime_source')) { log.push(name + ':install'); return undefined; }
+      if (failOnce && !failed) { failed = true; await failOnce(); throw new Error('Python was restarted.'); }
+      log.push(name + ':check');
+      return JSON.stringify({ status: 'correct', score: 1 });
+    },
+  };
+}
+
+test('SymPy setup and packages are bound to the runtime and repeated after a restart', async () => {
+  const log = [];
+  const first = fakeRuntime('a', log), second = fakeRuntime('b', log);
+  const { context, window, api } = load({ qpyodideInstance: Promise.resolve(first) });
+  assert.equal(await api.ensureSympy(), first);
+  assert.equal(await api.ensureSympy(), first);
+  await api.ensurePackages(['networkx']); await api.ensurePackages(['networkx']);
+  assert.deepEqual(log, ['a:load:sympy', 'a:install', 'a:load:networkx']);
+  window.dispatch('qpyodide-runtime-restart');
+  context.mainPyodide = undefined;
+  context.qpyodideInstance = Promise.resolve(second);
+  assert.equal(await api.ensureSympy(), second);
+  await api.ensurePackages(['networkx']);
+  assert.deepEqual(log.slice(3), ['b:load:sympy', 'b:install', 'b:load:networkx']);
+});
+
+test('a check interrupted by a restart is repeated once on the new runtime', async () => {
+  const log = [];
+  let replacement;
+  const { context, api } = load();
+  const first = fakeRuntime('a', log, { failOnce: async () => { context.mainPyodide = undefined; context.qpyodideInstance = Promise.resolve(replacement); } });
+  replacement = fakeRuntime('b', log);
+  context.qpyodideInstance = Promise.resolve(first);
+  const result = await api.checkField({ value: '1', dataset: { answer: '1' } }, 'equivalent', {});
+  assert.equal(result.status, 'correct');
+  assert.ok(log.includes('b:check'));
+});
+
+test('learner rebinding of SymPy names does not reach the checker module (CPython)', { skip: spawnSync(python, ['-c', 'import sympy']).status ? 'SymPy required' : false }, () => {
+  const { api } = load();
+  const match = exerciseSource.match(/var source = \[\n([\s\S]*?)\n    \]\.join\('\\n'\);/);
+  const source = vm.runInNewContext('[' + match[1] + ']').join('\n');
+  const dir = mkdtempSync(join(tmpdir(), 'math-isolation-'));
+  try {
+    writeFileSync(join(dir, 'case.json'), JSON.stringify({ source, install: api.installPython, call: api.runtimeCall('_math_check') }));
+    const script = String.raw`
+import json, sys
+case = json.load(open(sys.argv[1]))
+main = {'__name__': '__main__'}
+main['_math_runtime_source'] = case['source']
+exec(case['install'], main)
+assert '_math_runtime_source' not in main
+exec('symbols = None\nSymbol = None\nsympify = None\nMatrix = None\nsqrt = None\nsimplify = None\nparse_expr = None\n_mj = None', main)
+main.update({'_math_student': '6*sqrt(2)', '_math_correct': 'sqrt(72)', '_math_vars': '', '_math_mode': 'equivalent',
+  '_math_reject': '', '_math_tolerance': '', '_math_decplaces': '', '_math_sigfigs': '', '_math_form': '',
+  '_math_partial_credit': False, '_math_form_credit': 0.5})
+result = json.loads(eval(case['call'], main))
+assert result['status'] == 'correct', result
+left = [k for k in main if k.startswith('_math_')]
+assert not left, left
+print('isolated')
+`;
+    const r = spawnSync(python, ['-c', script, join(dir, 'case.json')], { encoding: 'utf8', timeout: 120000 });
+    assert.equal(r.status, 0, r.stderr);
+    assert.match(r.stdout, /isolated/);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});

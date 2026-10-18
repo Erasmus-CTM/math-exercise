@@ -1,5 +1,6 @@
 import { sharedTestApi } from './helpers/shared-client.mjs';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -9,7 +10,11 @@ import vm from 'node:vm';
 
 // The JSXGraph extension is a declared dependency (jsxgraph/jsxgraph-quarto),
 // installed with `quarto add`, not vendored here.
-const jsxgraphDir = process.env.JSXGRAPH_EXTENSION || fileURLToPath(new URL('../_extensions/jsxgraph/', import.meta.url));
+// `quarto add jsxgraph/jsxgraph-quarto` installs under an owner folder.
+const extensionsDir = fileURLToPath(new URL('../_extensions/', import.meta.url));
+const jsxgraphDir = process.env.JSXGRAPH_EXTENSION || [join(extensionsDir, 'jsxgraph'),
+  ...(existsSync(extensionsDir) ? readdirSync(extensionsDir).map(owner => join(extensionsDir, owner, 'jsxgraph')) : [])]
+  .find(dir => existsSync(join(dir, 'lua/jsxgraph.lua'))) || join(extensionsDir, 'jsxgraph');
 if (!existsSync(jsxgraphDir + '/lua/jsxgraph.lua')) {
   throw new Error('Install the JSXGraph dependency first: quarto add jsxgraph/jsxgraph-quarto@v1.1.0 (or set JSXGRAPH_EXTENSION)');
 }

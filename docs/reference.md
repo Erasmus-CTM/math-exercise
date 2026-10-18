@@ -803,10 +803,14 @@ include a solenoid example. To inspect a request, open the browser's Network
 panel, request feedback, and examine the chat-completions request's
 `messages[1].content`, especially `<learning_context>` and `<task>`.
 
-For local regression tests, install Node dependencies with `npm ci` and run
-`npm test`. The existing checker tests also require Python with SymPy and
-NetworkX. Install Quarto (or set `QUARTO_BIN`) to run the two rendered-document
-tests; they are skipped when Quarto is unavailable. CI requires and runs them.
+For local regression tests, install Node dependencies with `npm ci`, install
+the two extension dependencies (`quarto add Erasmus-CTM/ai-feedback` and
+`quarto add jsxgraph/jsxgraph-quarto`; both are git-ignored here) and run
+`npm test`. Set `AI_FEEDBACK_EXTENSION` and `JSXGRAPH_EXTENSION` to the
+installed extension folders if they are elsewhere. The checker tests also
+require Python with SymPy 1.13.3 and NetworkX 3.4.2. Install Quarto (or set
+`QUARTO_BIN`) to run the rendered-document tests; they are skipped when Quarto
+is unavailable. CI requires and runs them.
 The tests use local renderers and a mocked AI endpoint; no model or credentials
 are needed.
 
@@ -880,8 +884,10 @@ The extension works **with and without** a `{pyodide}` code block:
   longer).
 
 The checker helpers run in their own Python module, so learner code in Pyodide
-cells on the same page cannot change grading. If the Pyodide extension restarts
-its runtime (Stop), the next Check sets SymPy up again.
+cells that rebinds names such as `symbols`, `Matrix` or `sqrt` no longer breaks
+checks. Grading still runs in the learner's browser and is not tamper-proof. If
+the Pyodide extension restarts its runtime (Stop), the next Check sets SymPy up
+again, and a check that was running is repeated once on the new runtime.
 
 Combination with
 [pyodide-interaktiv](https://github.com/Erasmus-CTM/pyodide-interaktiv):

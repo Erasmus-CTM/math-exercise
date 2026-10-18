@@ -1,4 +1,7 @@
 local feedback = nil
+-- Quarto replaces the global error() with a logger that lets the render
+-- continue; authoring errors must stop the render, so fail through assert.
+local function fail(message) assert(false, message) end
 -- AI feedback: "auto" (default) uses an installed ai-feedback extension and
 -- otherwise renders exercises without the Feedback button; true requires it.
 local feedbackSetting = "auto"
@@ -215,7 +218,7 @@ end
 local function readFile(filename)
   local path = quarto.utils.resolve_path(filename)
   local f = io.open(path, "r")
-  if not f then error("math-exercise: cannot open '" .. filename .. "'") end
+  if not f then fail("math-exercise: cannot open '" .. filename .. "'") end
   local content = f:read("*a")
   f:close()
   return content
@@ -369,10 +372,10 @@ local function parseDynamicMatrixSpec(content)
   for _, part in ipairs(splitTop(content, ",")) do
     local key, value = part:match("^%s*([%w%-]+)%s*=%s*(.-)%s*$")
     if not key or value == "" then
-      error("math-exercise: mat{...} entries must use key=value")
+      fail("math-exercise: mat{...} entries must use key=value")
     end
     if spec[key] ~= nil then
-      error("math-exercise: duplicate mat{...} option " .. key)
+      fail("math-exercise: duplicate mat{...} option " .. key)
     end
     spec[key] = value
   end
@@ -385,37 +388,37 @@ local function parseDynamicMatrixSpec(content)
   }
   for key, _ in pairs(spec) do
     if not allowed[key] then
-      error("math-exercise: unknown mat{...} option " .. key)
+      fail("math-exercise: unknown mat{...} option " .. key)
     end
   end
 
   local name = spec.name or ""
   if not name:match("^[A-Za-z][A-Za-z0-9_%-]*$") then
-    error("math-exercise: mat{...} requires name beginning with a letter")
+    fail("math-exercise: mat{...} requires name beginning with a letter")
   end
 
   local function integerOption(key, default)
     if spec[key] == nil then return default end
     local value = tonumber(spec[key])
     if not value or value % 1 ~= 0 or value < 0 or value > MAX_DYNAMIC_DIMENSION then
-      error("math-exercise: " .. key .. " must be an integer from 0 to " .. MAX_DYNAMIC_DIMENSION)
+      fail("math-exercise: " .. key .. " must be an integer from 0 to " .. MAX_DYNAMIC_DIMENSION)
     end
     return value
   end
 
   local function axis(name)
     local raw = spec[name]
-    if raw == nil then error("math-exercise: mat{...} requires " .. name) end
+    if raw == nil then fail("math-exercise: mat{...} requires " .. name) end
     if raw ~= "auto" then
       local fixed = integerOption(name, nil)
       return { auto=false, initial=fixed, min=fixed, max=fixed }
     end
     local min = integerOption("min-" .. name, 0)
     local max = integerOption("max-" .. name, 8)
-    if min > max then error("math-exercise: min-" .. name .. " cannot exceed max-" .. name) end
+    if min > max then fail("math-exercise: min-" .. name .. " cannot exceed max-" .. name) end
     local initial = integerOption("initial-" .. name, math.min(max, math.max(1, min)))
     if initial < min or initial > max then
-      error("math-exercise: initial-" .. name .. " must lie between min-" .. name .. " and max-" .. name)
+      fail("math-exercise: initial-" .. name .. " must lie between min-" .. name .. " and max-" .. name)
     end
     return { auto=true, initial=initial, min=min, max=max }
   end
@@ -438,7 +441,7 @@ end
 
 local function buildDynamicMatrix(exerciseId, content, vars, mode)
   if mode ~= "custom" then
-    error("math-exercise: mat{...} currently requires mode: custom")
+    fail("math-exercise: mat{...} currently requires mode: custom")
   end
   local spec = parseDynamicMatrixSpec(content)
   local configuredRows, configuredCols = spec.rows.initial, spec.cols.initial
@@ -500,7 +503,7 @@ local function buildMatrix(exerciseId, count, content, vars)
     if columnCount == nil then
       columnCount = #columns
     elseif #columns ~= columnCount then
-      error("math-exercise: mat[...] rows must have the same number of columns")
+      fail("math-exercise: mat[...] rows must have the same number of columns")
     end
     table.insert(rows, columns)
   end
@@ -528,6 +531,10 @@ end
 -- Exercise bodies are inserted as raw HTML, outside Pandoc's Markdown math
 -- parser. Canonical delimiters keep page-level MathJax from consuming a bare
 -- \\begin{...} environment and leaving literal dollar signs behind.
+-- A literal dollar is emitted as its own element after HTML escaping, so that
+-- neither KaTeX auto-render nor MathJax can take it for a math delimiter.
+local LITERAL_DOLLAR = "\u{E024}"
+local LITERAL_DOLLAR_HTML = '<span class="math-literal-dollar">$</span>'
 -- Same rules as normalizeTaskMathDelimiters in math-exercise.js (which redraws
 -- tasks): an escaped \$ is literal, and $...$ / $$...$$ need a closing
 -- delimiter that is not escaped.
@@ -545,7 +552,10 @@ local function normalizeTaskMathDelimiters(text)
   local output, position = {}, 1
   while position <= #text do
     local char = text:sub(position, position)
-    if char ~= "$" or (position > 1 and text:sub(position - 1, position - 1) == "\\") then
+    if char == "$" and position > 1 and text:sub(position - 1, position - 1) == "\\" then
+      -- An escaped dollar becomes a placeholder (see LITERAL_DOLLAR).
+      output[#output] = LITERAL_DOLLAR; position = position + 1
+    elseif char ~= "$" then
       table.insert(output, char); position = position + 1
     else
       local display = text:sub(position, position + 1) == "$$"
@@ -601,7 +611,7 @@ local function processMarkers(text, exerciseId, vars, vecdir, mode)
       else
         local dynamicSpec = parseDynamicMatrixSpec(content)
         if dynamicNames[dynamicSpec.name] then
-          error("math-exercise: duplicate dynamic matrix name " .. dynamicSpec.name)
+          fail("math-exercise: duplicate dynamic matrix name " .. dynamicSpec.name)
         end
         dynamicNames[dynamicSpec.name] = true
         html, ids, labels = buildDynamicMatrix(exerciseId, content, vars, mode)
@@ -618,7 +628,8 @@ local function processMarkers(text, exerciseId, vars, vecdir, mode)
     end
   end
 
-  return table.concat(output), fieldIds, structuralLabels
+  local html = table.concat(output):gsub(LITERAL_DOLLAR, LITERAL_DOLLAR_HTML)
+  return html, fieldIds, structuralLabels
 end
 
 ----
@@ -721,11 +732,11 @@ local function buildExercise(el, state)
   if opts["initial-values"] then
     local ok, values = pcall(quarto.json.decode, opts["initial-values"])
     if not ok or type(values) ~= "table" or not opts["initial-values"]:match("^%s*%[") then
-      error("math-exercise: initial-values must be a JSON array of strings")
+      fail("math-exercise: initial-values must be a JSON array of strings")
     end
     for key, value in pairs(values) do
       if type(key) ~= "number" or type(value) ~= "string" then
-        error("math-exercise: initial-values must be a JSON array of strings")
+        fail("math-exercise: initial-values must be a JSON array of strings")
       end
     end
     initialValues = values
@@ -898,7 +909,6 @@ local function readFeedbackSetting(meta)
   if value == nil then return "auto" end
   value = pandoc.utils.stringify(value)
   if value ~= "auto" and value ~= "true" and value ~= "false" then
-    -- assert: Quarto 1.8 only logs error() raised directly in a top-level filter.
     assert(false, "math-exercise: feedback must be auto, true or false (found " .. value .. ")")
   end
   return value

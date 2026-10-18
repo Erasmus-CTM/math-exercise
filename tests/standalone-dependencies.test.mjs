@@ -7,6 +7,8 @@ import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
 
 const quarto = process.env.QUARTO_BIN || 'quarto';
 const available = !spawnSync(quarto, ['--version']).error;
@@ -91,4 +93,33 @@ test('graphical answers render with the upstream JSXGraph extension in either fi
       assert.match(html, /data-response="jsxgraph:board"/);
     }
   } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('Check grades without ai-feedback on the page (feedback: auto without it, and feedback: false)', { skip }, async () => {
+  const { JSDOM } = require('jsdom');
+  for (const [withFeedback, front] of [[false, ''], [true, 'math-exercise:\n  feedback: false\n']]) {
+    const dir = project({ withFeedback });
+    try {
+      const r = render(dir, 'filters: [math-exercise]\n' + front, plain);
+      assert.equal(r.status, 0, r.stderr);
+      const dom = new JSDOM(readFileSync(join(dir, 'page.html'), 'utf8'), { url: 'https://example.invalid/', runScripts: 'outside-only' });
+      const w = dom.window;
+      assert.equal(w.AIFeedback, undefined);
+      w.__mathExerciseTestMode = true;
+      w.mainPyodide = { loadPackage: async () => {}, globals: { set() {} },
+        runPythonAsync: async code => code.includes('_math_runtime_source') ? undefined : JSON.stringify({ status: 'correct', score: 1 }) };
+      // KaTeX is imported from a CDN as an ES module; jsdom cannot, so the legend gets a stub.
+      w.__katexStub = { default: { render() {}, renderToString: () => '' } };
+      for (const file of ['shared/pyodide-runtime.js', 'matrix-input.js', 'math-exercise.js']) {
+        w.eval(readFileSync(join(extension, file), 'utf8').replace(/import\(KATEX \+ '[^']*'\)/g, 'Promise.resolve(window.__katexStub)'));
+      }
+      const cell = w.document.querySelector('.math-exercise-cell');
+      w.__mathExerciseTestApi.setupCell(cell);
+      cell.querySelector('.math-input').value = '2';
+      cell.querySelector('.math-check-btn').click();
+      for (let i = 0; i < 100 && !cell.querySelector('.math-fb-ok, .math-fb-err'); i++) await new Promise(resolve => setTimeout(resolve, 10));
+      assert.ok(cell.querySelector('.math-fb-ok'), cell.querySelector('.math-feedback-area').innerHTML);
+      dom.window.close();
+    } finally { rmSync(dir, { recursive: true, force: true }); }
+  }
 });
