@@ -528,9 +528,38 @@ end
 -- Exercise bodies are inserted as raw HTML, outside Pandoc's Markdown math
 -- parser. Canonical delimiters keep page-level MathJax from consuming a bare
 -- \\begin{...} environment and leaving literal dollar signs behind.
+-- Same rules as normalizeTaskMathDelimiters in math-exercise.js (which redraws
+-- tasks): an escaped \$ is literal, and $...$ / $$...$$ need a closing
+-- delimiter that is not escaped.
 local function normalizeTaskMathDelimiters(text)
-  text = text:gsub("%$%$(.-)%$%$", "\\[%1\\]")
-  return text:gsub("%$(.-)%$", "\\(%1\\)")
+  local function unescapedAt(needle, start)
+    local found = text:find(needle, start, true)
+    while found do
+      local slashes, i = 0, found - 1
+      while i >= 1 and text:sub(i, i) == "\\" do slashes = slashes + 1; i = i - 1 end
+      if slashes % 2 == 0 then return found end
+      found = text:find(needle, found + #needle, true)
+    end
+    return nil
+  end
+  local output, position = {}, 1
+  while position <= #text do
+    local char = text:sub(position, position)
+    if char ~= "$" or (position > 1 and text:sub(position - 1, position - 1) == "\\") then
+      table.insert(output, char); position = position + 1
+    else
+      local display = text:sub(position, position + 1) == "$$"
+      local delimiter = display and "$$" or "$"
+      local close = unescapedAt(delimiter, position + #delimiter)
+      if not close then
+        table.insert(output, char); position = position + 1
+      else
+        table.insert(output, (display and "\\[" or "\\(") .. text:sub(position + #delimiter, close - 1) .. (display and "\\]" or "\\)"))
+        position = close + #delimiter
+      end
+    end
+  end
+  return table.concat(output)
 end
 
 -- Replace scalar, vector, and matrix markers with HTML input elements.
