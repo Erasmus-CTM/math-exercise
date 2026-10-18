@@ -69,10 +69,13 @@ simplification tasks.
 #| vars: x
 #| mode: equivalent
 #| reject: (x+1)**2
-Simplify (x+1)²: __[x**2 + 2*x + 1]
+Expand (x+1)²: __[x**2 + 2*x + 1]
 ```
 
-`(x+1)^2` and `(1+x)^2` are rejected; `x^2 + 2x + 1` is accepted.
+`(x+1)^2` and `(1+x)^2` are rejected; `x^2 + 2x + 1` is accepted. `reject`
+matches only that one expression after SymPy's normalisation, so other
+unexpanded forms such as `(-x-1)^2` still pass; use `form: expanded` (below)
+when full expansion is required.
 
 ## `mode: numeric` – `tolerance`
 
@@ -83,11 +86,12 @@ Compares numeric values instead of expressions, with an absolute or relative
 #| label: ex-numeric-tol
 #| caption: numeric + tolerance
 #| mode: numeric
-#| tolerance: 0.01
-Approximate π (2 decimal places): _[3.14159]
+#| tolerance: 0.005
+Approximate π (2 decimal places): _[pi]
 ```
 
-`3.14` is accepted; `3.10` is not (deviation > 0.01).
+`3.14` is accepted; `3.15` and `3.10` are not (deviation > 0.005). With a
+tolerance of 0.01, the wrongly rounded `3.15` would also pass.
 
 ## `mode: numeric` – `decplaces`
 
@@ -112,7 +116,7 @@ Rounds both values to N significant figures before comparing.
 #| caption: numeric + sigfigs
 #| mode: numeric
 #| sigfigs: 3
-Measure the length of a segment (3 significant figures): _[1234]
+A segment measures 1234 mm. Give its length to 3 significant figures: _[1234]
 ```
 
 `1230` is accepted (both round to `1.23e3`); `1200` is not.
@@ -893,21 +897,21 @@ picks one of several variants per page load.
 #| label: ex-pool
 #| caption: pool (combined with numeric + tolerance)
 #| mode: numeric
-#| tolerance: 0.01
+#| tolerance: 0.005
 #| pool: true
 
 Compute the area of a circle with r = 3 cm (2 decimal places).
-A = _[3.14159*9] cm²
+A = _[pi*9] cm²
 
 ---
 
 Compute the area of a circle with r = 5 cm (2 decimal places).
-A = _[3.14159*25] cm²
+A = _[pi*25] cm²
 
 ---
 
 Compute the area of a circle with r = 7 cm (2 decimal places).
-A = _[3.14159*49] cm²
+A = _[pi*49] cm²
 ```
 
 ## Bonus: AI feedback context

@@ -9,7 +9,7 @@ const runtime = await readFile(new URL('../../_extensions/math-exercise/shared/p
 const source = await readFile(new URL('../../_extensions/math-exercise/math-exercise.js', import.meta.url), 'utf8');
 const matrixInput = await readFile(new URL('../../_extensions/math-exercise/matrix-input.js', import.meta.url), 'utf8');
 
-export function loadPage(html = '', config = {}) {
+export function loadPage(html = '', config = {}, prepare = () => {}) {
   const dom = new JSDOM(html, { url: 'https://example.invalid/exercises', runScripts: 'outside-only' });
   const w = dom.window;
   // Exercise extraction and the real request builder, without CDN/Pyodide startup.
@@ -26,6 +26,7 @@ export function loadPage(html = '', config = {}) {
       json: async () => ({ choices: [{ finish_reason: 'stop', message: { content: 'Which area carries the shared flux?' } }] }),
     };
   };
+  prepare(w);
   shared.forEach(code => w.eval(code));
   w.AIFeedback.typesetFeedback = async () => {};
   w.eval(runtime);

@@ -37,6 +37,16 @@ class Variants(unittest.TestCase):
     def test_no_code_execution(self):
         for expression in ['__import__("os")','(1).__class__','[1,2][0]','2**1000','sqrt(-1)','1/0']:
             with self.assertRaises(Exception):v.expression(expression,{})
+    def test_rounding_matches_the_checker(self):
+        # Half away from zero on the decimal value, as decplaces/sigfigs grade.
+        self.assertEqual(v.FUNCTIONS['round'](1/8, 2), 0.13)
+        self.assertEqual(v.FUNCTIONS['round'](2.5), 3)
+        self.assertEqual(v.FUNCTIONS['round'](-2.5), -3)
+        self.assertEqual(v.FUNCTIONS['round'](7, 2), 7)
+        self.assertEqual(v.FUNCTIONS['round'](1.05*1.9, 2), 2.0)
+        self.assertEqual(v.FUNCTIONS['sigfig'](0.002725, 3), 0.00273)
+        self.assertEqual(v.substitute('{{a:.2f}} {{b:.3g}} {{c:.1f}}', {'a': 5/8, 'b': 1.2345, 'c': 7}), '0.63 1.23 7.0')
+
     def test_unknown_placeholder(self):
         self.spec['question']='{{missing}}'
         with self.assertRaises(KeyError):v.generate(self.spec)

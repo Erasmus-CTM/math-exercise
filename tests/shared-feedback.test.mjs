@@ -79,8 +79,8 @@ test('Check completing after an edit cannot become feedback evidence', async () 
   const button = p.cell.querySelector('.math-check-btn'); button.click();
   await new Promise(r => setTimeout(r, 0)); edit(p, '41'); resolve('{}');
   await new Promise(r => setTimeout(r, 0));
-  // SymPy bootstrap completes before the actual field check; both are controlled.
-  if (button.disabled) resolve(JSON.stringify({status: 'correct', score: 1}));
+  // SymPy bootstrap (guard and checker module) completes before the actual field check; all are controlled.
+  for (let i = 0; i < 5 && button.disabled; i++) { resolve(JSON.stringify({status: 'correct', score: 1})); await new Promise(r => setTimeout(r, 0)); }
   await settle(button);
   assert.equal(data(await feedback(p)).evidence.length, 0); p.dom.window.close();
 });
@@ -177,4 +177,152 @@ test('Check restarts shared hint progression by default; an override can preserv
  await check(p);await feedback(p);assert.equal(p.cell.querySelector('.ai-feedback-hint').textContent,'Hint 1');
  p.window.__aiFeedbackPolicies={projectPolicy:'preserve',layers:[{policies:{preserve:{'reset-on-run':false}}}]};
  await feedback(p);await check(p);await feedback(p);assert.equal(p.cell.querySelector('.ai-feedback-hint').textContent,'Hint 2');p.dom.window.close();
+});
+
+test('a long check in a worker runtime offers Stop; a stopped check is not repeated', async () => {
+  const p = loadPage('<div id="cell" class="math-exercise-cell" data-label="t" data-context-mode="none" data-mode="equivalent"><div class="math-exercise-question"></div><button class="math-check-btn">Check</button><button class="math-legend-btn">Help</button><div class="math-legend-panel" style="display:none"></div><div class="math-feedback-area"></div></div>',
+    {lang: 'en'}, w => { w.__mathExerciseSlowCheckMs = 30; });
+  const cell = p.document.querySelector('#cell');
+  const rendered = p.api.renderTaskText('Compute: _[2]', 'cell', '', 'col', 'equivalent');
+  p.api.setQuestionContent(cell.querySelector('.math-exercise-question'), rendered);
+  cell.dataset.fields = JSON.stringify(rendered.fieldIds);
+  let checks = 0, restarts = 0, reject;
+  p.window.mainPyodide = {loadPackage: async () => {}, globals: {set: async () => {}},
+    restart() { restarts++; reject(new Error('Python was restarted.')); },
+    runPythonAsync: code => code.includes('_math_check') ? (checks++, new Promise((_, r) => { reject = r; })) : Promise.resolve()};
+  p.api.setupCell(cell);
+  cell.querySelector('.math-input').value = '9**9**9**9';
+  cell.querySelector('.math-check-btn').click();
+  for (let i = 0; i < 100 && !cell.querySelector('.math-stop-btn'); i++) await new Promise(r => setTimeout(r, 5));
+  cell.querySelector('.math-stop-btn').click();
+  for (let i = 0; i < 100 && !cell.querySelector('.math-fb-err'); i++) await new Promise(r => setTimeout(r, 5));
+  assert.match(cell.querySelector('.math-fb-err').textContent, /Stopped\. Python was restarted/);
+  assert.equal(restarts, 1);
+  assert.equal(checks, 1);
+  p.dom.window.close();
+});
+
+test('loading SymPy does not count towards stop-after; the check itself does', async () => {
+  const p = loadPage('<div id="cell" class="math-exercise-cell" data-label="t" data-context-mode="none" data-mode="equivalent"><div class="math-exercise-question"></div><button class="math-check-btn">Check</button><button class="math-legend-btn">Help</button><div class="math-legend-panel" style="display:none"></div><div class="math-feedback-area"></div></div>',
+    {lang: 'en'}, w => { w.__mathExerciseSlowCheckMs = 30; });
+  const cell = p.document.querySelector('#cell');
+  const rendered = p.api.renderTaskText('Compute: _[2]', 'cell', '', 'col', 'equivalent');
+  p.api.setQuestionContent(cell.querySelector('.math-exercise-question'), rendered);
+  cell.dataset.fields = JSON.stringify(rendered.fieldIds);
+  let loaded;
+  const loading = new Promise(r => { loaded = r; });   // a slow network
+  p.window.mainPyodide = {loadPackage: () => loading, globals: {set: async () => {}}, restart() {},
+    runPythonAsync: code => code.includes('_math_check') ? new Promise(() => {}) : Promise.resolve()};
+  p.api.setupCell(cell);
+  cell.querySelector('.math-input').value = '2';
+  cell.querySelector('.math-check-btn').click();
+  await new Promise(r => setTimeout(r, 200));
+  assert.equal(cell.querySelector('.math-stop-btn'), null);
+  loaded();
+  for (let i = 0; i < 100 && !cell.querySelector('.math-stop-btn'); i++) await new Promise(r => setTimeout(r, 5));
+  assert.ok(cell.querySelector('.math-stop-btn'));
+  p.dom.window.close();
+});
+
+test('a SymPy load that never finishes still offers Stop, after the load limit', async () => {
+  const p = loadPage('<div id="cell" class="math-exercise-cell" data-label="t" data-context-mode="none" data-mode="equivalent"><div class="math-exercise-question"></div><button class="math-check-btn">Check</button><button class="math-legend-btn">Help</button><div class="math-legend-panel" style="display:none"></div><div class="math-feedback-area"></div></div>',
+    {lang: 'en'}, w => { w.__mathExerciseSlowCheckMs = 30; w.__qExercisePyodideTimeout = 200; });
+  const cell = p.document.querySelector('#cell');
+  const rendered = p.api.renderTaskText('Compute: _[2]', 'cell', '', 'col', 'equivalent');
+  p.api.setQuestionContent(cell.querySelector('.math-exercise-question'), rendered);
+  cell.dataset.fields = JSON.stringify(rendered.fieldIds);
+  let rejectLoad;
+  p.window.mainPyodide = {loadPackage: () => new Promise((_, reject) => { rejectLoad = reject; }), globals: {set: async () => {}},
+    restart() { rejectLoad(new Error('Python was restarted.')); }, runPythonAsync: () => Promise.resolve()};
+  p.api.setupCell(cell);
+  cell.querySelector('.math-input').value = '2';
+  cell.querySelector('.math-check-btn').click();
+  await new Promise(r => setTimeout(r, 100));
+  assert.equal(cell.querySelector('.math-stop-btn'), null, 'not before the load limit');
+  for (let i = 0; i < 300 && !cell.querySelector('.math-stop-btn'); i++) await new Promise(r => setTimeout(r, 10));
+  cell.querySelector('.math-stop-btn').click();
+  for (let i = 0; i < 100 && !cell.querySelector('.math-fb-err'); i++) await new Promise(r => setTimeout(r, 5));
+  assert.match(cell.querySelector('.math-fb-err').textContent, /Stopped/);
+  assert.equal(cell.querySelector('.math-check-btn').disabled, false);
+  p.dom.window.close();
+});
+
+const STOP_CELL = '<div id="cell" class="math-exercise-cell" data-label="t" data-context-mode="none" data-mode="equivalent"><div class="math-exercise-question"></div><button class="math-check-btn">Check</button><button class="math-legend-btn">Help</button><div class="math-legend-panel" style="display:none"></div><div class="math-feedback-area"></div></div>';
+function stopCell(setup) {
+  const p = loadPage(STOP_CELL, {lang: 'en'}, setup);
+  const cell = p.document.querySelector('#cell');
+  const rendered = p.api.renderTaskText('Compute: _[2]', 'cell', '', 'col', 'equivalent');
+  p.api.setQuestionContent(cell.querySelector('.math-exercise-question'), rendered);
+  cell.dataset.fields = JSON.stringify(rendered.fieldIds);
+  return {p, cell};
+}
+
+test('reloading SymPy after a runtime restart is timed by the load limit, not stop-after', async () => {
+  const {p, cell} = stopCell(w => { w.__mathExerciseSlowCheckMs = 50; w.__qExercisePyodideTimeout = 5000; });
+  let rejectCheck = null, reloaded = null, repeated = 0;
+  const v1 = {loadPackage: async () => {}, globals: {set: async () => {}}, restart() {},
+    runPythonAsync: code => code.includes('_math_check') ? new Promise((_, r) => { rejectCheck = r; }) : Promise.resolve()};
+  const v2 = {loadPackage: () => new Promise(r => { reloaded = r; }), globals: {set: async () => {}}, restart() {},
+    runPythonAsync: code => code.includes('_math_check') ? (repeated++, Promise.resolve(JSON.stringify({status: 'correct', score: 1}))) : Promise.resolve()};
+  p.window.mainPyodide = v1;
+  p.api.setupCell(cell);
+  cell.querySelector('.math-input').value = '2';
+  cell.querySelector('.math-check-btn').click();
+  for (let i = 0; i < 200 && !rejectCheck; i++) await new Promise(r => setTimeout(r, 1));
+  // pyodide-interaktiv restarts its worker (an interactive cell's Stop or restart).
+  p.window.dispatchEvent(new p.window.Event('qpyodide-runtime-restart'));
+  p.window.mainPyodide = v2;
+  rejectCheck(new Error('Python was restarted.'));
+  await new Promise(r => setTimeout(r, 300));
+  assert.equal(cell.querySelector('.math-stop-btn'), null, 'no Stop while SymPy reloads');
+  reloaded();
+  for (let i = 0; i < 200 && cell.querySelector('.math-check-btn').disabled; i++) await new Promise(r => setTimeout(r, 2));
+  assert.equal(repeated, 1);
+  assert.ok(cell.querySelector('.math-fb-ok'));
+  p.dom.window.close();
+});
+
+test('a worker that never finishes starting ends the check with a message after the load limit', async () => {
+  const {p, cell} = stopCell(w => { w.__mathExerciseSlowCheckMs = 30; w.__qExercisePyodideTimeout = 200; w.qpyodideInstance = new Promise(() => {}); });
+  p.api.setupCell(cell);
+  cell.querySelector('.math-input').value = '2';
+  cell.querySelector('.math-check-btn').click();
+  for (let i = 0; i < 300 && !cell.querySelector('.math-fb-err'); i++) await new Promise(r => setTimeout(r, 10));
+  assert.ok(cell.querySelector('.math-fb-err'), 'the check ends');
+  assert.equal(cell.querySelector('.math-check-btn').disabled, false);
+  p.dom.window.close();
+});
+
+const PACKAGE_CELL = '<div id="cell" class="math-exercise-cell" data-label="t" data-context-mode="none" data-mode="equivalent" data-packages=\'["numpy"]\'><div class="math-exercise-question"></div><button class="math-check-btn">Check</button><button class="math-legend-btn">Help</button><div class="math-legend-panel" style="display:none"></div><div class="math-feedback-area"></div></div>';
+
+test('reloading the exercise packages after a runtime restart is timed by the load limit', async () => {
+  const p = loadPage(PACKAGE_CELL, {lang: 'en'}, w => { w.__mathExerciseSlowCheckMs = 50; w.__qExercisePyodideTimeout = 5000; });
+  const cell = p.document.querySelector('#cell');
+  const rendered = p.api.renderTaskText('Compute: _[2]', 'cell', '', 'col', 'equivalent');
+  p.api.setQuestionContent(cell.querySelector('.math-exercise-question'), rendered);
+  cell.dataset.fields = JSON.stringify(rendered.fieldIds);
+  let rejectNumpy = null, numpyV2 = null;
+  const v1 = {loadPackage: name => String(name).includes('numpy') ? new Promise((_, r) => { rejectNumpy = r; }) : Promise.resolve(),
+    globals: {set: async () => {}}, restart() {}, runPythonAsync: async () => JSON.stringify({status: 'correct', score: 1})};
+  const v2 = {loadPackage: name => String(name).includes('numpy') ? new Promise(r => { numpyV2 = r; }) : Promise.resolve(),
+    globals: {set: async () => {}}, restart() {}, runPythonAsync: async () => JSON.stringify({status: 'correct', score: 1})};
+  p.window.mainPyodide = v1;
+  p.api.setupCell(cell);
+  cell.querySelector('.math-input').value = '2';
+  cell.querySelector('.math-check-btn').click();
+  for (let i = 0; i < 200 && !rejectNumpy; i++) await new Promise(r => setTimeout(r, 1));
+  assert.ok(rejectNumpy, 'numpy is loading');
+  // An interactive cell restarts the worker while numpy loads.
+  p.window.dispatchEvent(new p.window.Event('qpyodide-runtime-restart'));
+  p.window.mainPyodide = v2;
+  rejectNumpy(new Error('Python was restarted.'));
+  for (let i = 0; i < 200 && !numpyV2; i++) await new Promise(r => setTimeout(r, 1));
+  assert.ok(numpyV2, 'numpy reloads on the new runtime');
+  await new Promise(r => setTimeout(r, 300));   // numpy still loading, far below the 5 s load limit
+  const note = cell.querySelector('.math-feedback-area').textContent;
+  assert.equal(cell.querySelector('.math-stop-btn'), null, 'no Stop while numpy reloads: ' + note);
+  numpyV2();
+  for (let i = 0; i < 200 && cell.querySelector('.math-check-btn').disabled; i++) await new Promise(r => setTimeout(r, 2));
+  assert.ok(cell.querySelector('.math-fb-ok'), 'the repeated check is graded');
+  p.dom.window.close();
 });

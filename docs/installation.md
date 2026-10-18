@@ -2,34 +2,66 @@
 
 [Start here](../README.md) · [Authoring guide](authoring.md)
 
-## Installation
+## Most courses: the CTM Assessment umbrella
 
-These examples currently use the integration preview. For AI feedback, install
-the shared extension once in the same Quarto project:
+The [CTM Assessment](https://github.com/Erasmus-CTM/ctm-assessment) package
+installs math-exercise together with AI feedback, JSXGraph and the Python
+extensions at versions tested together. Use it unless you only need
+mathematics.
+
+## math-exercise on its own
 
 ```sh
-quarto add Erasmus-CTM/ai-feedback@main
+quarto add Erasmus-CTM/math-exercise
 ```
-
-Then install this extension:
-
-```bash
-quarto add Erasmus-CTM/math-exercise@feature/shared-feedback-integration
-```
-
-Then enable the extension in your document:
 
 ```yaml
 filters:
-  - Erasmus-CTM/math-exercise
+  - math-exercise
 ```
 
-No `{pyodide}` code block needed – Pyodide and SymPy are loaded automatically
-on the first click of **Check**, unless they're already available through
-another Pyodide extension.
+Requirements: Quarto 1.8.27 or later (the earliest version tested) and a browser. Students'
+browsers download Pyodide 0.27.2 and SymPy from jsDelivr: Pyodide starts loading
+in the background when a page with exercises opens and SymPy on the first
+**Check**. No `{pyodide}` block is needed; if a Pyodide extension is on the
+page, math-exercise reuses its runtime.
+
+**Quarto 1.10:** this release sends pages with blocks such as
+`{math-exercise}`, `{py-exercise}` or `{pyodide-python}` to Jupyter (an
+upstream regression, reported). Until it is fixed, add `engine: markdown` to
+the front matter of each such page (in `_quarto.yml` it has no effect), or use
+Quarto 1.8.
+
+Optional dependencies, needed only for some features:
+
+| Feature | Install | If missing |
+|---|---|---|
+| **Feedback** button (AI feedback or a copyable prompt) | `quarto add Erasmus-CTM/ai-feedback` | Exercises render without the button, and each page with exercises prints one message naming this command. Set `math-exercise: {feedback: true}` to make it required, or `false` to silence the message. |
+| Graphical answers, diagram context (`jsxgraph:<id>`) | `quarto add jsxgraph/jsxgraph-quarto` and add `jsxgraph` to `filters` | Not installed, or no block with that `assessment_id`: rendering stops with a message naming the fix. Installed but `jsxgraph` missing from `filters`: a `response:` exercise shows a message on the page; for `context:` the message appears when the learner asks for feedback. |
+| Extra Pyodide packages (`#| packages: networkx`) | nothing to install | Loaded in the browser on first Check. |
+
+Invalid exercise source (for example a malformed `mat[...]` or a diagram
+reference without its block) stops rendering with a message. Before 0.9.0
+these messages were printed but the render continued and published a broken
+exercise.
+
+Optional extensions are never loaded when a page does not use them. A page that
+does use one (`::: {.ai-feedback}` activities, `.jsxgraph` boards) while it is
+not installed stops rendering with the install command, instead of publishing
+those blocks as plain text.
+
+Install each extension once per project. If the CTM Assessment umbrella is
+also installed, its copies sit directly under `_extensions/` and a standalone
+`quarto add Erasmus-CTM/...` goes under `_extensions/Erasmus-CTM/`; the short
+filter name `math-exercise` then selects the umbrella's copy, so use the
+qualified name `Erasmus-CTM/math-exercise` for the standalone one. Each
+extension uses the ai-feedback installed next to it, so the two sets may use
+different ai-feedback versions; only a page that combines filters from both
+sets with different versions stops, with a message naming both. The umbrella
+also provides JSXGraph: do not add `jsxgraph/jsxgraph-quarto` separately in
+that project.
 
 ---
-
 
 ## Feedback setup
 

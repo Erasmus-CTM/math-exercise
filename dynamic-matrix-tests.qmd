@@ -50,7 +50,7 @@ return assess_basis(
     axis="columns",          # or "rows"
     target_dimension=d,
     belongs=lambda vector: all(value.is_number is True and value.is_real is True and value.is_finite is True for value in vector)
-#|               and ...,  # True exactly for vectors in the target space
+        and ...,  # True exactly for vectors in the target space
     name="B",                # the name used in mat{name=B, ...}
     space_name="target space",
 )
@@ -89,7 +89,9 @@ To check a proposed basis:
 #| context: dynamic-basis-method
 #| checker: |
 #|   def check(response, symbols):
-#|       Z = response["inputs"]["Z"]["matrix"]
+#|       # Typed decimals are exact: 0.1 means 1/10, not a binary approximation.
+#|       exact = lambda value: value.xreplace({f: Rational(str(f)) for f in value.atoms(Float)})
+#|       Z = response["inputs"]["Z"]["matrix"].applyfunc(exact)
 #|       C = Matrix([[1, 2, 3], [2, 4, 6]])
 #|       return assess_basis(
 #|           Z,
@@ -119,7 +121,9 @@ $Z=$ mat{name=Z, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}
 #| context: dynamic-basis-method
 #| checker: |
 #|   def check(response, symbols):
-#|       B = response["inputs"]["B"]["matrix"]
+#|       # Typed decimals are exact: 0.1 means 1/10, not a binary approximation.
+#|       exact = lambda value: value.xreplace({f: Rational(str(f)) for f in value.atoms(Float)})
+#|       B = response["inputs"]["B"]["matrix"].applyfunc(exact)
 #|       A = Matrix([[1, 2, 0], [0, 1, 1], [1, 3, 1]])
 #|       return assess_basis(
 #|           B,
@@ -149,7 +153,9 @@ $B=$ mat{name=B, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}
 #| context: dynamic-basis-method
 #| checker: |
 #|   def check(response, symbols):
-#|       R = response["inputs"]["R"]["matrix"]
+#|       # Typed decimals are exact: 0.1 means 1/10, not a binary approximation.
+#|       exact = lambda value: value.xreplace({f: Rational(str(f)) for f in value.atoms(Float)})
+#|       R = response["inputs"]["R"]["matrix"].applyfunc(exact)
 #|       A = Matrix([[1, 0, 1, 2], [0, 1, 1, 1], [1, 1, 2, 3]])
 #|       return assess_basis(
 #|           R,
@@ -179,7 +185,9 @@ $R=$ mat{name=R, rows=auto, cols=4, initial-rows=1, min-rows=0, max-rows=3}
 #| context: dynamic-basis-method
 #| checker: |
 #|   def check(response, symbols):
-#|       E = response["inputs"]["E"]["matrix"]
+#|       # Typed decimals are exact: 0.1 means 1/10, not a binary approximation.
+#|       exact = lambda value: value.xreplace({f: Rational(str(f)) for f in value.atoms(Float)})
+#|       E = response["inputs"]["E"]["matrix"].applyfunc(exact)
 #|       A = Matrix([[2, 1, 1], [0, 2, 0], [0, 0, 2]])
 #|       constraint = A - 2*eye(3)
 #|       return assess_basis(
@@ -210,7 +218,9 @@ $E=$ mat{name=E, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}
 #| context: dynamic-basis-method
 #| checker: |
 #|   def check(response, symbols):
-#|       P = response["inputs"]["Pcoef"]["matrix"]
+#|       # Typed decimals are exact: 0.1 means 1/10, not a binary approximation.
+#|       exact = lambda value: value.xreplace({f: Rational(str(f)) for f in value.atoms(Float)})
+#|       P = response["inputs"]["Pcoef"]["matrix"].applyfunc(exact)
 #|       constraints = Matrix([[1, 1, 1, 1], [0, 1, -2, 3]])
 #|       return assess_basis(
 #|           P,
@@ -346,7 +356,7 @@ $P=$ mat{name=P, rows=auto, cols=2, initial-rows=2, min-rows=2, max-rows=4}
 #|   def check(response, symbols):
 #|       A = response["inputs"]["A"]["matrix"]
 #|       non_square = A.rows != A.cols
-#|       zero = A == zeros(A.rows, A.cols)
+#|       zero = all(simplify(value).is_zero is True for value in A)
 #|       score = (int(non_square) + int(zero)) / 2
 #|       return {
 #|           "score": score,
@@ -360,6 +370,9 @@ $P=$ mat{name=P, rows=auto, cols=2, initial-rows=2, min-rows=2, max-rows=4}
 #|       assert score(zeros(3,2)) == 1
 #|       assert score(zeros(2)) < 1
 #|       assert score(ones(2,3)) < 1
+#|       # Browser input "0.0" is a SymPy Float zero.
+#|       assert score(Matrix(2, 3, [Float("0.0")]*6)) == 1
+#|       assert score(Matrix(2, 3, [0, 0, 0, 0, 0, Float("0.001")])) < 1
 
 Give any non-square zero matrix with at least one row and one column. Both its
 size and its entries are part of the answer:

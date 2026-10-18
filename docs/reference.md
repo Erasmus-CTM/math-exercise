@@ -15,6 +15,27 @@ Question text with an input field: _[correct_answer]
 
 ---
 
+## Formatting the question text
+
+The question text is Markdown-like text, not HTML:
+
+- Math in `$...$`, `$$...$$`, `\(...\)`, `\[...\]` or `\begin{...}...\end{...}`
+  is passed to the math renderer unchanged, so `$a<b<c$` works.
+- Outside math, `***bold italic***`, `**bold**`, `*italic*` and `` `code` `` are
+  formatted, also around math (`**Part $a$:**`); `$` inside a code span is a
+  dollar. `\*` and `` \` `` give a literal `*` and `` ` ``.
+- A line break in the source is a line break on the page; a blank line leaves
+  an empty line. A backslash at the end of a line (Markdown's hard break) is
+  the same as a plain line break.
+- HTML tags and entities (`<strong>`, `&nbsp;`, `<br>`) are shown as text. Use
+  the Markdown above instead: put several answer fields on separate lines
+  rather than spacing them with `&nbsp;`.
+
+Generated variants (`#| parameters:`) are rendered by Pandoc, so their text
+supports Markdown in full.
+
+---
+
 ## Input fields in the question text
 
 | Marker | Width | Element |
@@ -122,7 +143,14 @@ option for ordinary exercises. No page script or MutationObserver is needed.
 ```yaml
 math-exercise:
   lang: de        # UI language (default: en)
+  feedback: auto  # auto (default) | true | false
 ```
+
+`feedback: auto` shows the **Feedback** button when the
+[ai-feedback](https://github.com/Erasmus-CTM/ai-feedback) extension is installed
+and otherwise renders the exercises without it, with one render message saying
+what to install. `true` makes ai-feedback required (rendering fails with the
+install command if it is missing); `false` never loads it.
 
 ---
 
@@ -207,6 +235,9 @@ Accepts **any mathematically equivalent** representation.
 
 Equivalent terms are accepted – **except** the given expression.
 Useful for simplification tasks: the student can't just type the original.
+The comparison uses SymPy's normalised form of that one expression, so other
+unfinished forms (for example `(-x-1)^2` below) are still accepted. Use
+`form: expanded` or `form: factored` when the whole task depends on the form.
 
 ```yaml
 #| mode: equivalent
@@ -254,17 +285,19 @@ applies):
 |--------|---------|
 | `tolerance: 0.5` | absolute tolerance: \|answer − correct\| ≤ 0.5 |
 | `tolerance: 5%` | relative tolerance: 5% of the correct value |
-| `decplaces: 2` | round both values to 2 decimal places, then compare |
-| `sigfigs: 3` | round both values to 3 significant figures, then compare |
+| `decplaces: 2` | round both values to 2 decimal places, then compare (school rounding of the decimal value: 5.395 → 5.40, 0.125 → 0.13) |
+| `sigfigs: 3` | round both values to 3 significant figures, then compare (same school rounding) |
 
 ```yaml
 #| mode: numeric
-#| tolerance: 0.01
-Approximate π: _[3.14159]
+#| tolerance: 0.005
+Approximate π to two decimal places: _[pi]
 ```
 
-→ `3.14`, `3.15` (with tolerance 0.01, only `3.14`) are accepted depending on
-the chosen tolerance.
+→ `3.14` is accepted (|3.14 − π| ≈ 0.0016); `3.15` (≈ 0.0084) and `3.13`
+(≈ 0.0116) are not. With `tolerance: 0.01`, the wrongly rounded `3.15` would
+also be accepted, so choose a tolerance no larger than half a unit in the last
+requested digit.
 
 ### `mode: string` / `mode: string_ci`
 
@@ -443,9 +476,12 @@ they do not replace browser interaction checks or certify Pyodide parity.
 
 ### Arbitrary JSON from JSXGraph
 
-This repository includes a local fork of the MIT-licensed
-[`jsxgraph-quarto`](https://github.com/jsxgraph/jsxgraph-quarto) filter with a
-generic assessment bridge. Enable both filters:
+Graphical answers use the MIT-licensed
+[`jsxgraph-quarto`](https://github.com/jsxgraph/jsxgraph-quarto) extension
+(version 1.1.0 or later, which contains the generic assessment bridge). It is a
+separate dependency: install it with `quarto add jsxgraph/jsxgraph-quarto` (the
+CTM Assessment umbrella already includes it) and enable both filters, in either
+order:
 
 ```yaml
 filters:
@@ -544,9 +580,10 @@ Partial credit is opt-in for built-in modes:
 ```
 
 - Multiple fields are averaged, with empty fields counting as zero.
-- `set` uses `2M / (E + S)`, where `M` is the number of matched elements,
-  `E` the number expected, and `S` the number submitted. Missing elements and
-  extra guesses both reduce the score.
+- `set` uses `max(0, M − (S − M)) / E`, where `M` is the number of matched
+  elements, `E` the number expected, and `S` the number submitted: each extra
+  guess cancels one match. For an expected set of four, `1, 2` scores 0.5 and
+  `1, 2, 5` scores 0.25.
 - A mathematically equivalent answer that fails `mode: exact` or `form`
   receives `form-credit`.
 - Other individual built-in checks remain binary.
@@ -634,7 +671,7 @@ A = _[pi * 49] cm²
 
 ## AI feedback
 
-Every exercise has a **Feedback** button using the shared
+With ai-feedback installed, every exercise has a **Feedback** button using the shared
 [ai-feedback runtime](https://github.com/Erasmus-CTM/ai-feedback). By default it
 builds a copyable prompt without an API account. The cogwheel opens the shared
 settings dialog for copy/API mode, base URL, model, API key and browser storage.
@@ -649,9 +686,8 @@ provided AI summary and optional image are sent for feedback.
 
 Install ai-feedback once with `quarto add Erasmus-CTM/ai-feedback`. The math
 filter loads that shared installation automatically; no runtime is bundled here.
-An explicit ai-feedback filter also works, in either order. Missing shared files
-produce an actionable render error. For this integration preview use
-`ai-feedback@main` (0.8.0).
+An explicit ai-feedback filter also works, in either order. Without it, see
+`feedback` under [Document options](#document-options-yaml-front-matter).
 
 All context collection and teaching instructions now belong to ai-feedback.
 Omitted `context` collects preceding section prose; `context: none` opts out;
@@ -788,12 +824,20 @@ include a solenoid example. To inspect a request, open the browser's Network
 panel, request feedback, and examine the chat-completions request's
 `messages[1].content`, especially `<learning_context>` and `<task>`.
 
-For local regression tests, install Node dependencies with `npm ci` and run
-`npm test`. The existing checker tests also require Python with SymPy and
-NetworkX. Install Quarto (or set `QUARTO_BIN`) to run the two rendered-document
-tests; they are skipped when Quarto is unavailable. CI requires and runs them.
+For local regression tests, install Node dependencies with `npm ci`, install
+the two extension dependencies (`quarto add Erasmus-CTM/ai-feedback` and
+`quarto add jsxgraph/jsxgraph-quarto`; both are git-ignored here) and run
+`npm test` with `AI_FEEDBACK_EXTENSION` set to the installed ai-feedback folder
+(for example `_extensions/Erasmus-CTM/ai-feedback`; the tests read this
+variable). Set `JSXGRAPH_EXTENSION` if JSXGraph is installed outside
+`_extensions/`. The checker tests also
+require Python with SymPy 1.13 or later and NetworkX 3.4 or later (CI uses the
+browser's SymPy 1.13.3). Install Quarto (or set
+`QUARTO_BIN`) to run the rendered-document tests; they are skipped when Quarto
+is unavailable. CI requires and runs them.
 The tests use local renderers and a mocked AI endpoint; no model or credentials
 are needed.
+In VS Code, **Terminal → Run Task…** offers the same commands (`.vscode/tasks.json`): the default test task runs the tests, the default build task renders and then tests.
 
 The AI request contains the selected context, the task, and the student's
 current response as individually labelled fields. A separate private assessment
@@ -860,16 +904,36 @@ The extension works **with and without** a `{pyodide}` code block:
 
 - **With a block:** the Pyodide extension initializes the runtime;
   math-exercise waits for that instance and reuses it.
-- **Without a block:** Pyodide and SymPy are loaded on the first check
-  (the first click takes a few seconds longer).
+- **Without a block:** Pyodide starts loading in the background when the page
+  opens; SymPy is loaded on the first **Check** (that click takes a few seconds
+  longer).
 
-Recommended filter combination with
-[Erasmus-CTM/Pyodide-Feedback](https://github.com/Erasmus-CTM/Pyodide-Feedback):
+The checker helpers run in their own Python module, so learner code in Pyodide
+cells that rebinds names such as `symbols`, `Matrix` or `sqrt` no longer breaks
+checks; if other code removes that module, the next Check installs it again.
+Answers are parsed by SymPy, which evaluates Python: input containing `__`
+is rejected, and interpreter state that an answer or a custom checker changes
+(`builtins`, standard streams, recursion limit, `sys.path`, working directory,
+CTM modules) is restored after each check, so other exercises on the page keep
+working. Grading still runs in the learner's browser and is not tamper-proof.
+
+If the Pyodide extension restarts its runtime, the next Check sets SymPy up
+again, and a check that was running (also during SymPy's setup) is repeated
+once on the new runtime. With a runtime in a worker (pyodide-interaktiv), a
+check that takes longer than 20 s, for example an answer such as `9**9**9**9`,
+offers **Stop** (the time to load SymPy and packages is not counted; a load that has not finished after 180 s offers Stop, or ends with a message while Python is still starting), which restarts Python for the whole page; a stopped check (from
+any component's Stop) is not repeated. Change the time with
+`math-exercise: {stop-after: 30}` (seconds), or for all CTM components of a
+project with `ctm-assessment: {stop-after: 30}`. Python running on the page itself cannot be interrupted; the
+page then has to be reloaded.
+
+Combination with
+[pyodide-interaktiv](https://github.com/Erasmus-CTM/pyodide-interaktiv):
 
 ```yaml
 filters:
-  - Erasmus-CTM/pyodide-feedback
-  - Erasmus-CTM/math-exercise
+  - pyodide-interaktiv
+  - math-exercise
 ```
 
 ## Rendered examples

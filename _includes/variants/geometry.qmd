@@ -13,6 +13,18 @@
 #|       x: '{{radius}}'
 #|       y: 0
 #|   expected: correct
+#| - name: within drawing tolerance
+#|   response:
+#|     point:
+#|       x: '{{radius}}'
+#|       y: 0.04
+#|   expected: correct
+#| - name: visibly off the circle
+#|   response:
+#|     point:
+#|       x: '{{radius}}.1'
+#|       y: 0
+#|   expected: wrong
 #| - response:
 #|     point:
 #|       x: 0
@@ -28,7 +40,8 @@
 #|       import math
 #|       radius = response['variant']['parameters']['radius']
 #|       x,y = float(response['point']['x']), float(response['point']['y'])
-#|       good = math.isfinite(x) and math.isfinite(y) and abs(x*x+y*y-radius*radius) < 0.01
+#|       # 0.05 units is four screen pixels on the 480-pixel board: dragging precision.
+#|       good = math.isfinite(x) and math.isfinite(y) and abs(math.hypot(x, y) - radius) <= 0.05
 #|       return {'correct': good}
 
 Move point $P$ onto the circle $x^2+y^2={{radius}}^2$.

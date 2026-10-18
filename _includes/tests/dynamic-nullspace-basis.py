@@ -11,3 +11,9 @@ def test(check, symbols):
     assert score(zeros(B.rows,B.cols)) == 0
     assert score(I*B) < 1
     assert score(zeros(0,0)) == 0
+    # Typed decimals are exact; a typed 0.0 column is still the zero vector.
+    decimal = Matrix([[Float("-0.3"), -2], [0, 1], [Float("0.1"), 0]])
+    assert score(decimal) == 1
+    zero_column = B.row_join(Matrix([Float("0.0")]*3))
+    result = check({"inputs": {"Z": {"matrix": zero_column}}}, symbols)
+    assert result["assessment"]["Z"]["columns"][-1] == "incorrect"

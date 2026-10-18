@@ -25,7 +25,8 @@ Factor $x^3-4x$: __[x*(x-2)*(x+2)]
 #| label: sympy-rational
 #| vars: x
 #| form: single_fraction
-Write $\frac{1}{x} + \frac{1}{x+1}$ as one fraction:
+Write $\frac{1}{x} + \frac{1}{x+1}$ as one fraction, leaving its denominator
+factored:
 __[(2*x+1)/(x*(x+1))]
 ```
 
@@ -59,6 +60,7 @@ Differentiate $e^{3x}$: __[3*exp(3*x)]
 ```{math-exercise}
 #| label: sympy-trig-identity
 #| vars: x
+#| reject: sin(x)^2+cos(x)^2
 Simplify $\sin^2(x)+\cos^2(x)$: _[1]
 ```
 
@@ -85,13 +87,13 @@ __[2*x*sin(x)+x^2*cos(x)]
 #|       x = symbols["x"]
 #|       constant = simplify(response["expressions"][0] - (x**3 - 4*x))
 #|       valid = not constant.free_symbols and constant.is_real is True and constant.is_finite is True
-#|       return {"correct": valid, "feedback": "Any finite real constant of integration is allowed; the derivative must be 3*x^2 - 4."}
+#|       return {"correct": valid, "feedback": "The derivative must be 3*x^2 - 4. Any real number may be added as the constant of integration (for example 0 or 5); write a number, not a symbol such as C."}
 #| tests: |
 #|   def test(check, symbols):
 #|       x = symbols["x"]
 #|       for f in (x**3-4*x, x**3-4*x+7, x**3-4*x+sqrt(2)):
 #|           assert check({"expressions": [f]}, symbols)["correct"]
-#|       for f in (x**3-4*x**2, x**3-4*x+I):
+#|       for f in (x**3-4*x**2, x**3-4*x+I, x**3-4*x+Symbol("C")):
 #|           assert not check({"expressions": [f]}, symbols)["correct"]
 Give one real antiderivative of $3x^2-4$ (any numerical real constant is allowed): __[]
 ```

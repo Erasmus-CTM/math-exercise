@@ -3,7 +3,7 @@ local M = {}
 local function html(source, markers)
   local fields = {}
   if markers then
-    if source:find('CTMVARIANTFIELD', 1, true) then error('Reserved template marker') end
+    if source:find('CTMVARIANTFIELD', 1, true) then assert(false, 'Reserved template marker') end
     local function protect(marker)
       fields[#fields+1] = marker
       return 'CTMVARIANTFIELD' .. #fields .. 'END'

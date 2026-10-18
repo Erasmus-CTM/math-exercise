@@ -1,0 +1,39 @@
+name: Install Quarto extension dependencies
+description: >
+  Installs the extensions math-exercise depends on into the working tree:
+  ai-feedback (optional at runtime, used by the examples) and the upstream
+  JSXGraph extension (needed for graphical answers). Requires Quarto.
+inputs:
+  ai-feedback-ref:
+    description: ai-feedback branch, tag or commit
+    default: main
+  jsxgraph-ref:
+    description: jsxgraph/jsxgraph-quarto tag, branch or full commit (the tested pin)
+    default: v1.1.0
+runs:
+  using: composite
+  steps:
+    - name: Fetch shared feedback dependency
+      uses: actions/checkout@v4
+      with:
+        repository: Erasmus-CTM/ai-feedback
+        ref: ${{ inputs.ai-feedback-ref }}
+        path: _feedback-source
+    - name: Install ai-feedback and JSXGraph
+      shell: bash
+      run: |
+        # Failures become annotations, readable without the raw log.
+        step() { out=$("$@" 2>&1) || { echo "$out"; printf '::error title=%s failed::%s\n' "$*" "$(echo "$out" | tail -25 | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\n/%0A/g')"; exit 1; }; echo "$out"; }
+        step quarto add ./_feedback-source --no-prompt
+        # git fetch accepts a tag, a branch or any commit GitHub serves for the
+        # repository, including a pull request's commit from a fork (quarto add
+        # owner/repo@ref does not find those).
+        step git init -q _jsxgraph-source
+        step git -C _jsxgraph-source fetch --depth 1 https://github.com/jsxgraph/jsxgraph-quarto.git "${{ inputs.jsxgraph-ref }}"
+        step git -C _jsxgraph-source checkout -q --detach FETCH_HEAD
+        step quarto add ./_jsxgraph-source --no-prompt
+        # GitHub installs go under an owner folder (_extensions/jsxgraph/jsxgraph).
+        lua=$(ls _extensions/jsxgraph/lua/jsxgraph.lua _extensions/*/jsxgraph/lua/jsxgraph.lua 2>/dev/null | head -1 || true)
+        test -n "$lua" || { echo "::error::JSXGraph extension was not installed"; find _extensions -maxdepth 3; exit 1; }
+        echo "AI_FEEDBACK_EXTENSION=$GITHUB_WORKSPACE/_feedback-source/_extensions/ai-feedback" >> "$GITHUB_ENV"
+        echo "JSXGRAPH_EXTENSION=$GITHUB_WORKSPACE/$(dirname "$(dirname "$lua")")" >> "$GITHUB_ENV"

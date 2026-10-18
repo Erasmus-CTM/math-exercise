@@ -109,7 +109,8 @@ mat[(x+1)^2,0;0,(x-1)*(x+1)]
 #| caption: Numeriske celler med absolutt toleranse
 #| mode: numeric
 #| tolerance: 0.01
-Oppgi rotasjonsmatrisen for $90^\circ$ med desimaltall:
+Oppgi rotasjonsmatrisen for $90^\circ$ mot klokka (positiv omløpsretning)
+med desimaltall:
 mat[0,-1;1,0]
 ```
 
@@ -119,8 +120,8 @@ mat[0,-1;1,0]
 #| label: nb-blandede-felt
 #| caption: Alle markørtypene nummereres i riktig rekkefølge
 #| partial-credit: true
-Fyll inn skalaren $s=$ _[2], vektoren $v=$ vec[1,2] og matrisen
-$A=$ mat[1,0;0,1].
+Skriv skalaren $2$, vektoren $(1,2)$ og identitetsmatrisen $I_2$:
+$s=$ _[2], $v=$ vec[1,2] og $A=$ mat[1,0;0,1].
 ```
 
 ### Navngitte koordinater

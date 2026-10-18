@@ -6,9 +6,11 @@ JSXGraph plot and its answer checker are defined.
 ## Click every local maximum
 
 A local maximum is a point whose function value is at least as large as the
-values at all sufficiently nearby points—a visible crest of the graph. One of
+values at all sufficiently nearby points. Here, mark the visible crests: interior
+points where the graph stops rising and starts falling. The ends of the plotted
+interval do not count, even where the graph rises into the right edge. One of
 four sinusoidal functions is selected when the page loads. Click once at every
-visible local maximum; each answer appears as an orange point. Use **Clear
+crest; each answer appears as an orange point. Use **Clear
 clicks** to remove all selected points or **Show another function** to try the
 next variant.
 
@@ -174,7 +176,8 @@ JXG.QuartoAssessment.register({
 #|           assert check({"variant": variant, "clicks": points}, symbols)["score"] == 1
 #|           assert check({"variant": variant, "clicks": points[:-1]}, symbols)["score"] < 1
 
-Click every local maximum visible in the function plot.
+Click every crest (interior local maximum) of the plotted function; the
+endpoints of the plotted interval do not count.
 ```
 
 ## Mark exactly one period

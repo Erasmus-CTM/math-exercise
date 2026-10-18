@@ -9,7 +9,29 @@ import re
 import sys
 
 FUNCTIONS = {name: getattr(math, name) for name in ('sqrt', 'sin', 'cos', 'tan', 'floor', 'ceil', 'exp', 'log')}
-FUNCTIONS.update(abs=abs, min=min, max=max, round=round, sigfig=lambda x, n: 0 if x == 0 else round(x, int(n)-1-int(math.floor(math.log10(abs(x))))))
+
+def round_half_up(x, digits=None):
+    """Rounds as the checker does (decplaces/sigfigs): the decimal value to 15
+    significant digits, half away from zero. round(1/8, 2) is 0.13, not 0.12."""
+    from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
+    if digits is None: return int(round_half_up(x, 0))
+    digits = int(digits)
+    if isinstance(x, int) and not isinstance(x, bool) and digits >= 0: return x
+    try: return float(Decimal(format(float(x), '.15g')).quantize(Decimal(1).scaleb(-digits), rounding=ROUND_HALF_UP))
+    except (InvalidOperation, ValueError, OverflowError): return round(x, digits)
+
+def sigfig(x, n):
+    return 0 if x == 0 else round_half_up(x, int(n) - 1 - int(math.floor(math.log10(abs(x)))))
+
+def formatted(v, spec):
+    # {{name:.Nf}} and {{name:.Ng}} round like the checker before formatting.
+    digits = int(spec[1:-1])
+    if isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v):
+        # Python formats .0g like .1g.
+        v = round_half_up(v, digits) if spec[-1] == 'f' else sigfig(v, max(digits, 1))
+    return format(v, spec)
+
+FUNCTIONS.update(abs=abs, min=min, max=max, round=round_half_up, sigfig=sigfig)
 OPS = {ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul, ast.Div: operator.truediv, ast.Mod: operator.mod, ast.Pow: operator.pow}
 CMP = {ast.Eq: operator.eq, ast.NotEq: operator.ne, ast.Lt: operator.lt, ast.LtE: operator.le, ast.Gt: operator.gt, ast.GtE: operator.ge}
 TOKEN = re.compile(r'\{\{([A-Za-z][A-Za-z0-9_]*)(?::(\.[0-9]{1,2}[fg]))?\}\}')
@@ -56,7 +78,7 @@ def substitute(value, env):
     if not isinstance(value, str): return value
     def replace(match):
         v = env[match[1]]
-        if match[2]: return format(v, match[2])
+        if match[2]: return formatted(v, match[2])
         return str(int(v)) if type(v) in (int, float) and v == int(v) else str(v)
     result = TOKEN.sub(replace, value)
     if '{{' in result: raise ValueError('Unknown or malformed template placeholder: ' + result)

@@ -40,7 +40,7 @@ Compute $5^2$: _[25]
 #| field-labels: Sum, Product, Difference
 #| partial-credit: true
 For the numbers $7$ and $3$, enter their sum _[10], product _[21], and
-difference _[4].
+difference $7-3$: _[4].
 ```
 
 ## Requiring a particular form
@@ -90,3 +90,8 @@ $2^8=$ _[256]
 #| reject: (x+1)^2
 Expand $(x+1)^2$: __[x^2+2*x+1]
 ```
+
+`reject` catches only the stated expression after SymPy's own normalisation:
+`(x+1)^2` and `(1+x)*(1+x)` are reported as unfinished, but other unexpanded
+forms such as `(-x-1)^2` or `x*(x+2)+1` are still accepted. When the task really
+requires full expansion, use `form: expanded` instead.

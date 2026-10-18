@@ -17,3 +17,10 @@ __pycache__/
 # Browser test evidence
 /playwright-report/
 /test-results/
+
+# Locally installed dependencies (quarto add); never vendored here
+/_extensions/ai-feedback/
+/_extensions/jsxgraph/
+/_extensions/*/ai-feedback/
+/_extensions/*/jsxgraph/
+/_feedback-source/

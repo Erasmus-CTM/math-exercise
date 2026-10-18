@@ -1,17 +1,29 @@
 import { sharedTestApi } from './helpers/shared-client.mjs';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import test from 'node:test';
 import vm from 'node:vm';
 
+// The JSXGraph extension is a declared dependency (jsxgraph/jsxgraph-quarto),
+// installed with `quarto add`, not vendored here.
+// `quarto add jsxgraph/jsxgraph-quarto` installs under an owner folder.
+const extensionsDir = fileURLToPath(new URL('../_extensions/', import.meta.url));
+const jsxgraphDir = process.env.JSXGRAPH_EXTENSION || [join(extensionsDir, 'jsxgraph'),
+  ...(existsSync(extensionsDir) ? readdirSync(extensionsDir).map(owner => join(extensionsDir, owner, 'jsxgraph')) : [])]
+  .find(dir => existsSync(join(dir, 'lua/jsxgraph.lua'))) || join(extensionsDir, 'jsxgraph');
+if (!existsSync(jsxgraphDir + '/lua/jsxgraph.lua')) {
+  throw new Error('Install the JSXGraph dependency first: quarto add jsxgraph/jsxgraph-quarto@v1.1.0 (or set JSXGRAPH_EXTENSION)');
+}
 const [source, lua, css, jsxLua, editorSource, examples, docs, quarto, graphics] = await Promise.all([
   readFile(new URL('../_extensions/math-exercise/math-exercise.js', import.meta.url), 'utf8'),
   readFile(new URL('../_extensions/math-exercise/math-exercise.lua', import.meta.url), 'utf8'),
   readFile(new URL('../_extensions/math-exercise/math-exercise.css', import.meta.url), 'utf8'),
-  readFile(new URL('../_extensions/jsxgraph/lua/jsxgraph.lua', import.meta.url), 'utf8'),
-  readFile(new URL('../_extensions/jsxgraph/graph-editor.js', import.meta.url), 'utf8'),
+  readFile(jsxgraphDir + '/lua/jsxgraph.lua', 'utf8'),
+  readFile(jsxgraphDir + '/graph-editor.js', 'utf8'),
   readFile(new URL('../_includes/graph-theory-examples.qmd', import.meta.url), 'utf8'),
   readFile(new URL('../docs/graph-editor.md', import.meta.url), 'utf8'),
   readFile(new URL('../_quarto.yml', import.meta.url), 'utf8'),
@@ -35,13 +47,14 @@ function loadBundle(loadPackage) {
     vm.runInContext(readFileSync(new URL('file://' + process.env.AI_FEEDBACK_EXTENSION + '/' + name), 'utf8'), context);
     context.window.AIFeedback = context.AIFeedback;
   }
+  vm.runInContext(readFileSync(new URL('../_extensions/math-exercise/shared/pyodide-runtime.js', import.meta.url), 'utf8'), context);
   vm.runInContext(readFileSync(new URL('../_extensions/math-exercise/matrix-input.js', import.meta.url), 'utf8'), context);
   vm.runInContext(source, context);
   return {...context.window.__mathExerciseTestApi, ...sharedTestApi(context.AIFeedback, context.window.__mathExerciseConfig.lang, context.localStorage)};
 }
 
 function sympyBootstrap() {
-  const match = source.match(/runPythonAsync\(\[\n([\s\S]*?)\n    \]\.join\('\\n'\)\)/);
+  const match = source.match(/var source = \[\n([\s\S]*?)\n    \]\.join\('\\n'\);/);
   assert.ok(match, 'could not locate the embedded Python bootstrap');
   return vm.runInNewContext(`[${match[1]}]`).join('\n');
 }
@@ -221,7 +234,8 @@ test('graph editor creates vertices, toggles edges, serializes, and registers', 
 
 test('Lua injects the common editor and exercise packages reach the runtime', () => {
   assert.match(jsxLua, /GRAPH_EDITOR_JS = ioRead/);
-  assert.match(jsxLua, /assessment_bridge, GRAPH_EDITOR_JS, jsxgraph/);
+  // Either script order: the bridge before the code (v1.1) or after (deferred start).
+  assert.match(jsxLua, /assessment_bridge, GRAPH_EDITOR_JS, jsxgraph|jsxgraph, GRAPH_EDITOR_JS, assessment_bridge/);
   assert.match(lua, /data-packages=.*jsonArrAttr\(packages\)/);
   assert.match(source, /def graph_from_response\(response, \*, directed=False\):/);
   assert.equal((examples.match(/#\| packages: networkx/g) || []).length, 4);
@@ -263,7 +277,7 @@ test('collapsed JSXGraph assessments request a shared board refresh when opened'
   assert.match(lua, /aria-expanded="false"/);
   assert.match(jsxLua, /if \(message\.type === 'layout'\)/);
   assert.match(jsxLua, /Object\.values\(JXG\.boards \|\| \{\}\)\.forEach/);
-  assert.match(jsxLua, /board\.resizeContainer\(width, height\)/);
+  assert.match(jsxLua, /board\.resizeContainer\(width, height(, true, true)?\)/);
   assert.match(jsxLua, /board\.fullUpdate\(\)/);
   assert.doesNotMatch(lua, /math-exercise-body" style="display:none/);
   assert.match(lua, /math-exercise-body" aria-hidden="true"/);
