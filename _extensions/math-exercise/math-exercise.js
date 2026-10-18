@@ -1682,7 +1682,10 @@
       fbDiv.innerHTML = '<div class="math-fb-checking">' + L.checking + '</div>';
       var cancelSlow = function () {};
       try {
+        await prepareRuntime(checkOpts.packages);
         // A runtime in a worker can be stopped: offer it when a check takes long.
+        // The clock starts once SymPy and the packages are loaded: on a slow
+        // network the first load alone can take longer than stop-after.
         cancelSlow = globalThis.MathExerciseRuntime.whenSlow(SLOW_CHECK_MS, function () {
           var note = document.createElement('div');
           note.className = 'math-fb-checking';
@@ -1697,7 +1700,6 @@
           note.appendChild(stopBtn);
           fbDiv.replaceChildren(note);
         });
-        await prepareRuntime(checkOpts.packages);
         var parts = [];
         var fieldElements = fieldIds.map(function (id) { return document.getElementById(id); });
         if (mode === 'custom') {
