@@ -148,6 +148,8 @@ assert numeric('0.125', '0.13', decplaces='2') == 'correct'
 assert numeric('-2.5', '-3', decplaces='0') == 'correct'
 assert numeric('2.675', '2.68', sigfigs='3') == 'correct'
 assert numeric('1e30', '1e30', decplaces='2') == 'correct'
+assert numeric('2.00', '1.05*1.9', decplaces='2') == 'correct'   # key computed as 1.9949999999999999
+assert numeric('5.085', '1.13*4.5', decplaces='2') == 'correct'
 print('isolated')
 `;
     const r = spawnSync(python, ['-c', script, join(dir, 'case.json')], { encoding: 'utf8', timeout: 120000 });

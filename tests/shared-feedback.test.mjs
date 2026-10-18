@@ -223,3 +223,26 @@ test('loading SymPy does not count towards stop-after; the check itself does', a
   assert.ok(cell.querySelector('.math-stop-btn'));
   p.dom.window.close();
 });
+
+test('a SymPy load that never finishes still offers Stop, after the load limit', async () => {
+  const p = loadPage('<div id="cell" class="math-exercise-cell" data-label="t" data-context-mode="none" data-mode="equivalent"><div class="math-exercise-question"></div><button class="math-check-btn">Check</button><button class="math-legend-btn">Help</button><div class="math-legend-panel" style="display:none"></div><div class="math-feedback-area"></div></div>',
+    {lang: 'en'}, w => { w.__mathExerciseSlowCheckMs = 30; w.__qExercisePyodideTimeout = 200; });
+  const cell = p.document.querySelector('#cell');
+  const rendered = p.api.renderTaskText('Compute: _[2]', 'cell', '', 'col', 'equivalent');
+  p.api.setQuestionContent(cell.querySelector('.math-exercise-question'), rendered);
+  cell.dataset.fields = JSON.stringify(rendered.fieldIds);
+  let rejectLoad;
+  p.window.mainPyodide = {loadPackage: () => new Promise((_, reject) => { rejectLoad = reject; }), globals: {set: async () => {}},
+    restart() { rejectLoad(new Error('Python was restarted.')); }, runPythonAsync: () => Promise.resolve()};
+  p.api.setupCell(cell);
+  cell.querySelector('.math-input').value = '2';
+  cell.querySelector('.math-check-btn').click();
+  await new Promise(r => setTimeout(r, 100));
+  assert.equal(cell.querySelector('.math-stop-btn'), null, 'not before the load limit');
+  for (let i = 0; i < 300 && !cell.querySelector('.math-stop-btn'); i++) await new Promise(r => setTimeout(r, 10));
+  cell.querySelector('.math-stop-btn').click();
+  for (let i = 0; i < 100 && !cell.querySelector('.math-fb-err'); i++) await new Promise(r => setTimeout(r, 5));
+  assert.match(cell.querySelector('.math-fb-err').textContent, /Stopped/);
+  assert.equal(cell.querySelector('.math-check-btn').disabled, false);
+  p.dom.window.close();
+});

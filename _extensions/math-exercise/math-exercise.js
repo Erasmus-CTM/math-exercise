@@ -359,12 +359,13 @@
       '    parts.append(cur)',
       '    return [p.strip() for p in parts if p.strip() != ""]',
       '',
-      '# Rounds as written in decimal, half away from zero (school rounding):',
+      '# Rounds the decimal value (15 significant digits, so binary noise in a',
+      '# computed key such as 1.05*1.9 does not count) half away from zero:',
       '# round(5.395, 2) is 5.39 for the binary float, but 5.40 here.',
       'def _round_places(x, d):',
       '    from decimal import Decimal, ROUND_HALF_UP, InvalidOperation',
       '    try:',
-      '        return float(Decimal(repr(float(x))).quantize(Decimal(1).scaleb(-d), rounding=ROUND_HALF_UP))',
+      '        return float(Decimal(format(float(x), \'.15g\')).quantize(Decimal(1).scaleb(-d), rounding=ROUND_HALF_UP))',
       '    except (InvalidOperation, ValueError, OverflowError):',
       '        return round(x, d)',
       '',
@@ -1752,12 +1753,7 @@
       if (feedbackBtn) feedbackBtn.disabled = true;
       fbDiv.innerHTML = '<div class="math-fb-checking">' + L.checking + '</div>';
       var cancelSlow = function () {};
-      try {
-        await prepareRuntime(checkOpts.packages);
-        // A runtime in a worker can be stopped: offer it when a check takes long.
-        // The clock starts once SymPy and the packages are loaded: on a slow
-        // network the first load alone can take longer than stop-after.
-        cancelSlow = globalThis.MathExerciseRuntime.whenSlow(SLOW_CHECK_MS, function () {
+      var offerStop = function () {
           var note = document.createElement('div');
           note.className = 'math-fb-checking';
           note.textContent = L.slowCheck + ' ';
@@ -1770,7 +1766,13 @@
           });
           note.appendChild(stopBtn);
           fbDiv.replaceChildren(note);
-        });
+      };
+      try {
+        // A load that never finishes can still be stopped, after the load limit.
+        cancelSlow = globalThis.MathExerciseRuntime.whenSlow(globalThis.MathExerciseRuntime.loadTimeout, offerStop);
+        await prepareRuntime(checkOpts.packages);
+        cancelSlow();
+        cancelSlow = globalThis.MathExerciseRuntime.whenSlow(SLOW_CHECK_MS, offerStop);
         var parts = [];
         var fieldElements = fieldIds.map(function (id) { return document.getElementById(id); });
         if (mode === 'custom') {
