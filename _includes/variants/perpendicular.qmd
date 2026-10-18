@@ -25,12 +25,41 @@
 #|   - '{{a}}'
 #|   - '{{b}}'
 #|   expected: wrong
+#| - name: decimal perpendicular
+#|   answers:
+#|   - -0.{{b}}
+#|   - '0.{{a}}'
+#|   expected: correct
+#| - name: decimal zero vector
+#|   answers:
+#|   - '0.0'
+#|   - '0.0'
+#|   expected: wrong
+#| - name: disguised zero vector
+#|   answers:
+#|   - cos(1)^2+sin(1)^2-1
+#|   - 0
+#|   expected: wrong
+#| - name: complex vector
+#|   answers:
+#|   - -{{b}}*I
+#|   - '{{a}}*I'
+#|   expected: wrong
+#| - name: symbolic vector
+#|   answers:
+#|   - -{{b}}*t
+#|   - '{{a}}*t'
+#|   expected: wrong
 #| checker: |
 #|   def check(response, symbols):
 #|       a = response['variant']['parameters']['a']
 #|       b = response['variant']['parameters']['b']
-#|       u, v = response['expressions']
-#|       return {'correct': (u != 0 or v != 0) and simplify(a*u+b*v) == 0}
+#|       # Typed decimals are exact: 0.1 means 1/10.
+#|       exact = lambda value: value.xreplace({f: Rational(str(f)) for f in value.atoms(Float)})
+#|       u, v = map(exact, response['expressions'])
+#|       real = all(w.is_number is True and w.is_real is True and w.is_finite is True for w in (u, v))
+#|       nonzero = real and (simplify(u).is_zero is False or simplify(v).is_zero is False)
+#|       return {'correct': nonzero and simplify(a*u+b*v).is_zero is True}
 
-Give a **nonzero** vector perpendicular to $({{a}},{{b}})$: _[0], _[0].
+Give a **nonzero** real vector perpendicular to $({{a}},{{b}})$: _[0], _[0].
 ```

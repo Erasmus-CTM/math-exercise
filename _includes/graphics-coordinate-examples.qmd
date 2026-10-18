@@ -223,6 +223,8 @@ JXG.QuartoAssessment.register({
 #|       import math
 #|       if len(values) != 4 or not all(math.isfinite(v) for v in values):
 #|           return {"score": 0, "feedback": "The board returned incomplete or non-finite coordinates."}
+#|       # Swapping the min/max sliders draws the same sector, so compare intervals.
+#|       values = sorted(values[:2]) + sorted(values[2:])
 #|       target = [1.5, 3.0, 0.25, 0.75]
 #|       tolerance = [0.13, 0.13, 0.026, 0.026]
 #|       correct = [abs(x-y) <= t for x,y,t in zip(values,target,tolerance)]
@@ -236,6 +238,8 @@ JXG.QuartoAssessment.register({
 #|   def test(check, symbols):
 #|       assert check({'radius': [1.5, 3], 'anglePi': [0.25, 0.75]}, symbols)["score"] == 1
 #|       assert check({'radius': [], 'anglePi': []}, symbols)["score"] == 0
+#|       assert check({'radius': [3, 1.5], 'anglePi': [0.75, 0.25]}, symbols)["score"] == 1
+#|       assert check({'radius': [1.5, 3], 'anglePi': [0.25, 1.75]}, symbols)["score"] < 1
 
 Use the sliders so that the orange outline coincides with the blue polar region.
 ```
@@ -331,6 +335,8 @@ JXG.QuartoAssessment.register({
 #|       import math
 #|       if len(values) != 6 or not all(math.isfinite(v) for v in values):
 #|           return {"score": 0, "feedback": "The board returned incomplete or non-finite coordinates."}
+#|       # Swapping the min/max sliders draws the same region, so compare intervals.
+#|       values = sorted(values[:2]) + sorted(values[2:4]) + sorted(values[4:])
 #|       target = [1,2.5,0.25,0.9,-0.5,1.5]
 #|       tolerance = [0.13,0.13,0.026,0.026,0.13,0.13]
 #|       correct = [abs(x-y)<=t for x,y,t in zip(values,target,tolerance)]
@@ -345,6 +351,8 @@ JXG.QuartoAssessment.register({
 #|   def test(check, symbols):
 #|       assert check({'radius': [1, 2.5], 'anglePi': [0.25, 0.9], 'height': [-0.5, 1.5]}, symbols)["score"] == 1
 #|       assert check({'radius': [], 'anglePi': [], 'height': []}, symbols)["score"] == 0
+#|       assert check({'radius': [2.5, 1], 'anglePi': [0.9, 0.25], 'height': [1.5, -0.5]}, symbols)["score"] == 1
+#|       assert check({'radius': [1, 2.5], 'anglePi': [0.25, 0.9], 'height': [-0.5, 1]}, symbols)["score"] < 1
 
 Use the six sliders so that the orange wireframe coincides with the green
 cylindrical-coordinate region.

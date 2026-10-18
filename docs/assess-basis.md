@@ -65,7 +65,9 @@ definite truth value, not an unresolved symbolic relation.
 #| mode: custom
 #| checker: |
 #|   def check(response, symbols):
-#|       Z = response["inputs"]["Z"]["matrix"]
+#|       # Typed decimals are exact: 0.1 means 1/10, not a binary approximation.
+#|       exact = lambda value: value.xreplace({f: Rational(str(f)) for f in value.atoms(Float)})
+#|       Z = response["inputs"]["Z"]["matrix"].applyfunc(exact)
 #|       C = Matrix([[1, 2, 3], [2, 4, 6]])
 #|       return assess_basis(
 #|           Z,
@@ -89,6 +91,7 @@ definite truth value, not an unresolved symbolic relation.
 #|       assert score(B.row_join(B[:, :1])) < 1
 #|       assert score(I*B) < 1
 #|       assert score(zeros(0,0)) == 0
+#|       assert score(Matrix([[Float("-0.3"), -2], [0, 1], [Float("0.1"), 0]])) == 1
 
 Give a real basis for the null space of C:
 Z = mat{name=Z, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}
@@ -114,6 +117,7 @@ def check(response, symbols):
         target_dimension=A.rank(),
         belongs=lambda vector: (
             R.cols == A.cols
+            and all(v.is_real is True and v.is_finite is True for v in vector)
             and A.col_join(vector).rank() == A.rank()
         ),
         name="R",

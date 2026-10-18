@@ -6,6 +6,9 @@ def test(check, symbols):
     assert score(4,good) == 1
     assert score(4,list(reversed(good))) == 1
     assert score(4,[[0, 1], [1, 2], [2, 0], [2, 3]]) < 1
-    assert score(5,good) < 1
+    # The four-cycle plus an isolated vertex still has a closed trail through every edge.
+    assert score(5,good) == 1
+    # Two disjoint triangles have even degrees, but no single closed trail uses both.
+    assert score(6,[[0,1],[1,2],[2,0],[3,4],[4,5],[5,3]]) < 1
     assert score(0,[]) == 0
     assert score(4,good+[[0,99]]) == 0

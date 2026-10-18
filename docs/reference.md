@@ -122,7 +122,14 @@ option for ordinary exercises. No page script or MutationObserver is needed.
 ```yaml
 math-exercise:
   lang: de        # UI language (default: en)
+  feedback: auto  # auto (default) | true | false
 ```
+
+`feedback: auto` shows the **Feedback** button when the
+[ai-feedback](https://github.com/Erasmus-CTM/ai-feedback) extension is installed
+and otherwise renders the exercises without it, with one render message saying
+what to install. `true` makes ai-feedback required (rendering fails with the
+install command if it is missing); `false` never loads it.
 
 ---
 
@@ -207,6 +214,9 @@ Accepts **any mathematically equivalent** representation.
 
 Equivalent terms are accepted – **except** the given expression.
 Useful for simplification tasks: the student can't just type the original.
+The comparison uses SymPy's normalised form of that one expression, so other
+unfinished forms (for example `(-x-1)^2` below) are still accepted. Use
+`form: expanded` or `form: factored` when the whole task depends on the form.
 
 ```yaml
 #| mode: equivalent
@@ -259,12 +269,14 @@ applies):
 
 ```yaml
 #| mode: numeric
-#| tolerance: 0.01
-Approximate π: _[3.14159]
+#| tolerance: 0.005
+Approximate π to two decimal places: _[pi]
 ```
 
-→ `3.14`, `3.15` (with tolerance 0.01, only `3.14`) are accepted depending on
-the chosen tolerance.
+→ `3.14` is accepted (|3.14 − π| ≈ 0.0016); `3.15` (≈ 0.0084) and `3.13`
+(≈ 0.0116) are not. With `tolerance: 0.01`, the wrongly rounded `3.15` would
+also be accepted, so choose a tolerance no larger than half a unit in the last
+requested digit.
 
 ### `mode: string` / `mode: string_ci`
 
@@ -443,9 +455,12 @@ they do not replace browser interaction checks or certify Pyodide parity.
 
 ### Arbitrary JSON from JSXGraph
 
-This repository includes a local fork of the MIT-licensed
-[`jsxgraph-quarto`](https://github.com/jsxgraph/jsxgraph-quarto) filter with a
-generic assessment bridge. Enable both filters:
+Graphical answers use the MIT-licensed
+[`jsxgraph-quarto`](https://github.com/jsxgraph/jsxgraph-quarto) extension
+(version 1.1.0 or later, which contains the generic assessment bridge). It is a
+separate dependency: install it with `quarto add jsxgraph/jsxgraph-quarto` (the
+CTM Assessment umbrella already includes it) and enable both filters, in either
+order:
 
 ```yaml
 filters:
@@ -544,9 +559,10 @@ Partial credit is opt-in for built-in modes:
 ```
 
 - Multiple fields are averaged, with empty fields counting as zero.
-- `set` uses `2M / (E + S)`, where `M` is the number of matched elements,
-  `E` the number expected, and `S` the number submitted. Missing elements and
-  extra guesses both reduce the score.
+- `set` uses `max(0, M − (S − M)) / E`, where `M` is the number of matched
+  elements, `E` the number expected, and `S` the number submitted: each extra
+  guess cancels one match. For an expected set of four, `1, 2` scores 0.5 and
+  `1, 2, 5` scores 0.25.
 - A mathematically equivalent answer that fails `mode: exact` or `form`
   receives `form-credit`.
 - Other individual built-in checks remain binary.
@@ -634,7 +650,7 @@ A = _[pi * 49] cm²
 
 ## AI feedback
 
-Every exercise has a **Feedback** button using the shared
+With ai-feedback installed, every exercise has a **Feedback** button using the shared
 [ai-feedback runtime](https://github.com/Erasmus-CTM/ai-feedback). By default it
 builds a copyable prompt without an API account. The cogwheel opens the shared
 settings dialog for copy/API mode, base URL, model, API key and browser storage.
@@ -649,9 +665,8 @@ provided AI summary and optional image are sent for feedback.
 
 Install ai-feedback once with `quarto add Erasmus-CTM/ai-feedback`. The math
 filter loads that shared installation automatically; no runtime is bundled here.
-An explicit ai-feedback filter also works, in either order. Missing shared files
-produce an actionable render error. For this integration preview use
-`ai-feedback@main` (0.8.0).
+An explicit ai-feedback filter also works, in either order. Without it, see
+`feedback` under [Document options](#document-options-yaml-front-matter).
 
 All context collection and teaching instructions now belong to ai-feedback.
 Omitted `context` collects preceding section prose; `context: none` opts out;
@@ -860,16 +875,21 @@ The extension works **with and without** a `{pyodide}` code block:
 
 - **With a block:** the Pyodide extension initializes the runtime;
   math-exercise waits for that instance and reuses it.
-- **Without a block:** Pyodide and SymPy are loaded on the first check
-  (the first click takes a few seconds longer).
+- **Without a block:** Pyodide starts loading in the background when the page
+  opens; SymPy is loaded on the first **Check** (that click takes a few seconds
+  longer).
 
-Recommended filter combination with
-[Erasmus-CTM/Pyodide-Feedback](https://github.com/Erasmus-CTM/Pyodide-Feedback):
+The checker helpers run in their own Python module, so learner code in Pyodide
+cells on the same page cannot change grading. If the Pyodide extension restarts
+its runtime (Stop), the next Check sets SymPy up again.
+
+Combination with
+[pyodide-interaktiv](https://github.com/Erasmus-CTM/pyodide-interaktiv):
 
 ```yaml
 filters:
-  - Erasmus-CTM/pyodide-feedback
-  - Erasmus-CTM/math-exercise
+  - pyodide-interaktiv
+  - math-exercise
 ```
 
 ## Rendered examples

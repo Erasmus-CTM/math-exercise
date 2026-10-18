@@ -68,7 +68,9 @@ entries are ordered as $a<b<c$.
 #| field-labels: a, b, c
 #| checker: |
 #|   def check(response, symbols):
-#|       a, b, c = response["expressions"]
+#|       # A typed decimal is the exact number it denotes: 3.0 is the integer 3.
+#|       exact = lambda value: value.xreplace({f: Rational(str(f)) for f in value.atoms(Float)})
+#|       a, b, c = map(exact, response["expressions"])
 #|       integers = all(v.is_integer is True and v.is_positive is True for v in (a, b, c))
 #|       real = all(v.is_real is True and v.is_finite is True for v in (a, b, c))
 #|       ordered = real and (a < b) is S.true and (b < c) is S.true
@@ -82,6 +84,9 @@ entries are ordered as $a<b<c$.
 #|           assert check({"expressions": list(map(sympify, values))}, symbols)["score"] == 1
 #|       for values in ((0,0,0), (4,3,5), (I,2,3), (3,4,6)):
 #|           assert check({"expressions": list(map(sympify, values))}, symbols)["score"] < 1
+#|       # Browser input "3.0" is parsed as a SymPy Float.
+#|       assert check({"expressions": [Float("3.0"), Float("4.0"), Integer(5)]}, symbols)["score"] == 1
+#|       assert check({"expressions": [Float("3.5"), Integer(4), Integer(5)]}, symbols)["score"] < 1
 
 Enter positive integers $a<b<c$ satisfying $a^2+b^2=c^2$:
 $a=$ _[], $b=$ _[], $c=$ _[]
@@ -101,7 +106,9 @@ $p(x)=(x-r_1)(x-r_2)$ with $r_1\ne r_2$.
 #| field-labels: Polynomial, First root, Second root
 #| checker: |
 #|   def check(response, symbols):
-#|       p, r1, r2 = response["expressions"]
+#|       # Compare typed decimals exactly: 2.0 is 2 and 0.5 is 1/2.
+#|       exact = lambda value: value.xreplace({f: Rational(str(f)) for f in value.atoms(Float)})
+#|       p, r1, r2 = map(exact, response["expressions"])
 #|       x = symbols["x"]
 #|       try:
 #|           polynomial = Poly(p, x)
@@ -122,6 +129,10 @@ $p(x)=(x-r_1)(x-r_2)$ with $r_1\ne r_2$.
 #|           assert check({"expressions": list(map(sympify, values))}, symbols)["score"] == 1
 #|       for values in ((x**2,-x,x/2), (x**2,0,0), (2*x**2-6*x+4,1,2)):
 #|           assert check({"expressions": list(map(sympify, values))}, symbols)["score"] < 1
+#|       # Decimal coefficients and roots typed by students are SymPy Floats.
+#|       assert check({"expressions": [x**2-3*x+Float("2.0"), Integer(1), Integer(2)]}, symbols)["score"] == 1
+#|       assert check({"expressions": [x**2-Float("0.25"), Float("0.5"), Float("-0.5")]}, symbols)["score"] == 1
+#|       assert check({"expressions": [x**2-Float("0.25"), Float("0.5"), Float("-0.6")]}, symbols)["score"] < 1
 
 Give a monic quadratic $p(x)$ and two distinct roots:
 $p(x)=$ __[], $r_1=$ _[], $r_2=$ _[]
@@ -146,24 +157,37 @@ formula twice. For example, you may begin with $x_0=1$.
 #| field-labels: x₀, x₁, x₂
 #| checker: |
 #|   def check(response, symbols):
-#|       x0, x1, x2 = response["expressions"]
+#|       # A typed decimal is the exact number it denotes: 1.5 is 3/2.
+#|       exact = lambda value: value.xreplace({f: Rational(str(f)) for f in value.atoms(Float)})
+#|       x0, x1, x2 = map(exact, response["expressions"])
 #|       if not all(v.is_number is True and v.is_real is True and v.is_finite is True for v in (x0, x1, x2)):
 #|           return {"score": 0, "feedback": "Enter finite real numbers for all three iterates."}
 #|       step = lambda value: (value + 2/value) / 2
+#|       def agrees(value, target):
+#|           # Exact values, or decimals correct to about ten significant digits.
+#|           difference = simplify(value - target)
+#|           return difference == 0 or abs(float(difference)) <= 1e-9 * max(1.0, abs(float(target)))
 #|       start_ok = x0.is_positive is True and simplify(x0**2 - 2).is_zero is False
-#|       first_ok = x0 != 0 and simplify(x1 - step(x0)) == 0
-#|       second_ok = x1 != 0 and simplify(x2 - step(x1)) == 0
+#|       first_ok = simplify(x0).is_zero is False and agrees(x1, step(x0))
+#|       second_ok = simplify(x1).is_zero is False and agrees(x2, step(x1))
 #|       score = (int(start_ok) + int(first_ok) + int(second_ok)) / 3
 #|       return {"score": score,
-#|               "feedback": "Start with a positive number other than sqrt(2); each new value must equal (x + 2/x)/2 for the preceding value."}
+#|               "feedback": "Start with a positive number other than sqrt(2); each new value must equal (x + 2/x)/2 for the preceding value. Give exact values or decimals with at least ten significant digits."}
 #| tests: |
 #|   def test(check, symbols):
 #|       assert check({"expressions": [S.One,Rational(3,2),Rational(17,12)]}, symbols)["score"] == 1
 #|       for values in ((0,0,0), (sqrt(2),sqrt(2),sqrt(2)), (-1,Rational(-3,2),Rational(-17,12)), (1,2,3)):
 #|           assert check({"expressions": list(map(sympify, values))}, symbols)["score"] < 1
+#|       # Browser input "1.5" is a SymPy Float; exact and ten-digit decimals are consistent.
+#|       for values in ((1, Float("1.5"), Rational(17,12)), (Float("1.0"), Float("1.5"), Float("1.41666666667")),
+#|                      (2, Rational(3,2), Float("1.416666666666667"))):
+#|           assert check({"expressions": list(map(sympify, values))}, symbols)["score"] == 1
+#|       assert check({"expressions": [S.One, Float("1.5"), Float("1.4167")]}, symbols)["score"] < 1
+#|       assert check({"expressions": [Float("0.0"), S.One, S.One]}, symbols)["score"] == 0
 
 Choose a positive $x_0\ne\sqrt2$ and apply
-$x_{n+1}=(x_n+2/x_n)/2$ twice:
+$x_{n+1}=(x_n+2/x_n)/2$ twice. Give exact values, such as fractions, or decimals
+with at least ten significant digits:
 $x_0=$ _[], $x_1=$ _[], $x_2=$ _[]
 ```
 
@@ -179,7 +203,9 @@ matrix $I_2=\begin{pmatrix}1&0\\0&1\end{pmatrix}$.
 #| mode: custom
 #| checker: |
 #|   def check(response, symbols):
-#|       values = response["expressions"]
+#|       # A typed decimal is the exact number it denotes: 1.0 is the integer 1.
+#|       exact = lambda value: value.xreplace({f: Rational(str(f)) for f in value.atoms(Float)})
+#|       values = list(map(exact, response["expressions"]))
 #|       A = Matrix(2, 2, values)
 #|       integer_entries = all(value.is_integer is True for value in values)
 #|       determinant_one = simplify(A.det() - 1) == 0
@@ -194,6 +220,8 @@ matrix $I_2=\begin{pmatrix}1&0\\0&1\end{pmatrix}$.
 #|       assert check({"expressions": list(map(sympify, [1,1,0,1]))}, symbols)["score"] == 1
 #|       for values in ([1,0,0,1], [Rational(1,2),1,0,2]):
 #|           assert check({"expressions": list(map(sympify, values))}, symbols)["score"] < 1
+#|       assert check({"expressions": [Float("2.0"), Integer(1), Integer(1), Integer(1)]}, symbols)["score"] == 1
+#|       assert check({"expressions": [Float("1.0"), Integer(0), Integer(0), Float("1.0")]}, symbols)["score"] < 1
 
 Enter an integer matrix $A\ne I_2$ with $\det(A)=1$:
 $A=$ mat[,;,]

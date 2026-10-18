@@ -94,11 +94,12 @@ editor.register({
 #|           return {"score": 0, "feedback": "Use at least four vertices."}
 #|       if m < 4:
 #|           return {"score": 0, "feedback": "Use at least four edges."}
-#|       connected = nx.is_connected(graph)
-#|       if nx.is_eulerian(graph):
+#|       # Isolated vertices do not affect a trail that uses every edge.
+#|       edges = graph.subgraph([v for v, degree in graph.degree() if degree > 0])
+#|       if nx.is_eulerian(edges):
 #|           return {"score": 1, "feedback": "This graph has an Euler circuit."}
-#|       if not connected:
-#|           feedback = "Join all vertices into one connected graph."
+#|       if not nx.is_connected(edges):
+#|           feedback = "A closed trail cannot reach every edge: join the separate pieces that contain edges."
 #|       else:
 #|           feedback = "An Euler circuit requires every vertex to have even degree."
 #|       return {"score": 0.5, "feedback": feedback}
