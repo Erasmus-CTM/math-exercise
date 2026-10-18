@@ -210,7 +210,7 @@
   var katexReady = false;
   var katexLib = null;
   var renderMathInElementFn = null;
-  var KATEX = 'https://cdn.jsdelivr.net/npm/katex@0.16.11/';
+  var KATEX = 'https://cdn.jsdelivr.net/npm/katex@0.16/';
 
   async function ensureKatex() {
     if (katexReady) return;

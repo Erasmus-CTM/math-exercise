@@ -810,11 +810,13 @@ the two extension dependencies (`quarto add Erasmus-CTM/ai-feedback` and
 (for example `_extensions/Erasmus-CTM/ai-feedback`; the tests read this
 variable). Set `JSXGRAPH_EXTENSION` if JSXGraph is installed outside
 `_extensions/`. The checker tests also
-require Python with SymPy 1.13.3 and NetworkX 3.4.2. Install Quarto (or set
+require Python with SymPy 1.13 or later and NetworkX 3.4 or later (CI uses the
+browser's SymPy 1.13.3). Install Quarto (or set
 `QUARTO_BIN`) to run the rendered-document tests; they are skipped when Quarto
 is unavailable. CI requires and runs them.
 The tests use local renderers and a mocked AI endpoint; no model or credentials
 are needed.
+In VS Code, **Terminal → Run Task…** offers the same commands (`.vscode/tasks.json`): the default test task runs the tests, the default build task renders and then tests.
 
 The AI request contains the selected context, the task, and the student's
 current response as individually labelled fields. A separate private assessment

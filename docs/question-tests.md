@@ -80,7 +80,7 @@ packages imported by your checker, such as NetworkX. The browser still loads
 its own Pyodide packages as before.
 
 ```bash
-python -m pip install sympy==1.13.3 networkx==3.4.2
+python -m pip install 'sympy>=1.13' 'networkx>=3.4'
 python _extensions/math-exercise/question-tests.py exercises/tree.qmd
 quarto render
 ```
@@ -125,7 +125,8 @@ For controls and pointer gestures, see the separate [browser-test guide](browser
 
 ## Python versions for native tests
 
-Install the packages the browser uses: Pyodide 0.27.2 ships SymPy 1.13.3 and
-NetworkX 3.4.2 (`python -m pip install sympy==1.13.3 networkx==3.4.2 PyYAML`).
-Native tests with another SymPy version can pass while the browser grades
-differently.
+Native tests need SymPy 1.13 or later (1.13 changed how floats compare) and,
+for graph checkers, NetworkX 3.4 or later. The browser grades with the
+versions its Pyodide ships (Pyodide 0.27.2: SymPy 1.13.3, NetworkX 3.4.2);
+a newer SymPy on the build machine can occasionally grade an edge case
+differently, so CI runs the native tests with the browser's versions.

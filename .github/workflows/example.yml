@@ -23,7 +23,7 @@ jobs:
           ai-feedback-ref: ${{ steps.review.outputs['ai-feedback'] || 'main' }}
           jsxgraph-ref: ${{ steps.review.outputs['jsxgraph'] || 'v1.1.0' }}
       - name: Install variant build dependency
-        run: python3 -m pip install PyYAML==6.0.2
+        run: python3 -m pip install 'PyYAML>=6'
       - name: Render standalone example
         run: |
           quarto render example.qmd

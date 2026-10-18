@@ -20,11 +20,17 @@ filters:
   - math-exercise
 ```
 
-Requirements: Quarto 1.8.27 (the tested version) and a browser. Students'
+Requirements: Quarto 1.8.27 or later (the earliest version tested) and a browser. Students'
 browsers download Pyodide 0.27.2 and SymPy from jsDelivr: Pyodide starts loading
 in the background when a page with exercises opens and SymPy on the first
 **Check**. No `{pyodide}` block is needed; if a Pyodide extension is on the
 page, math-exercise reuses its runtime.
+
+**Quarto 1.10:** this release sends pages with blocks such as
+`{math-exercise}`, `{py-exercise}` or `{pyodide-python}` to Jupyter (an
+upstream regression, reported). Until it is fixed, add `engine: markdown` to
+the front matter of each such page (in `_quarto.yml` it has no effect), or use
+Quarto 1.8.
 
 Optional dependencies, needed only for some features:
 

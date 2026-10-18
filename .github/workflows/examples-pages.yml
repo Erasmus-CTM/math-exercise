@@ -38,7 +38,7 @@ jobs:
           jsxgraph-ref: ${{ steps.review.outputs['jsxgraph'] || 'v1.1.0' }}
 
       - name: Install variant build dependency
-        run: python3 -m pip install PyYAML==6.0.2 sympy==1.13.3 networkx==3.4.2
+        run: python3 -m pip install 'PyYAML>=6' sympy==1.13.3 'networkx>=3.4'  # SymPy: the version Pyodide 0.27.2 ships
       - name: Render examples
         run: |
           quarto render
