@@ -1428,7 +1428,7 @@
   // Checks in progress, told when Python reloads during a retry: loading is
   // timed by the load limit, not by stop-after.
   var reloadHooks = new Set();
-  async function runOnCurrentRuntime(run) {
+  async function runOnCurrentRuntime(run, packages) {
     var epoch = globalThis.MathExerciseRuntime.stopCount();
     var attempted = await ensurePyodide(), ready = null;
     try {
@@ -1444,15 +1444,18 @@
       }
       reloadHooks.forEach(function (hook) { hook(true); });
       var current;
-      try { current = await ensureSympy(); }
-      finally { reloadHooks.forEach(function (hook) { hook(false); }); }
+      try {
+        current = await ensureSympy();
+        // The exercise's packages reload within the same loading window.
+        if (packages) await ensurePackages(packages);
+      } finally { reloadHooks.forEach(function (hook) { hook(false); }); }
       if (current === (ready || attempted) && !missing) throw error;
       return run(current);
     }
   }
   // Prepares SymPy and the exercise's packages, with the same retry.
   function prepareRuntime(packages) {
-    return runOnCurrentRuntime(function () { return ensurePackages(packages); });
+    return runOnCurrentRuntime(function () { return ensurePackages(packages); }, packages);
   }
 
   async function checkCustomNow(response, opts) {
@@ -1468,7 +1471,7 @@
         py.globals.set('_math_checker', opts.checker || ''),
       ]);
       return JSON.parse(await py.runPythonAsync(CHECK_CUSTOM_PY));
-    });
+    }, opts.packages);
   }
 
   // Domain extraction delegates shared context and math-safe serialization.
@@ -1809,10 +1812,14 @@
           loading ? globalThis.MathExerciseRuntime.loadTimeout : SLOW_CHECK_MS,
           function () { offerStop(loading); });
       };
-      reloadHooks.add(timePhase);
+      // A reload during another check's retry ends with that check's own phase.
+      var stillLoading = true;
+      var onReload = function (reloading) { timePhase(reloading || stillLoading); };
+      reloadHooks.add(onReload);
       try {
         timePhase(true);
         await prepareRuntime(checkOpts.packages);
+        stillLoading = false;
         timePhase(false);
         var parts = [];
         var fieldElements = fieldIds.map(function (id) { return document.getElementById(id); });
@@ -1867,7 +1874,7 @@
       } catch (err) {
         fbDiv.innerHTML = '<div class="math-fb-err">&#9888;&nbsp;' + friendlyError(String(err)) + '</div>';
       } finally {
-        reloadHooks.delete(timePhase);
+        reloadHooks.delete(onReload);
         cancelSlow();
         checkBtn.disabled = false;
         if (feedbackBtn) feedbackBtn.disabled = !feedbackHandle;

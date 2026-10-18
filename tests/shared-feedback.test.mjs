@@ -292,3 +292,37 @@ test('a worker that never finishes starting ends the check with a message after 
   assert.equal(cell.querySelector('.math-check-btn').disabled, false);
   p.dom.window.close();
 });
+
+const PACKAGE_CELL = '<div id="cell" class="math-exercise-cell" data-label="t" data-context-mode="none" data-mode="equivalent" data-packages=\'["numpy"]\'><div class="math-exercise-question"></div><button class="math-check-btn">Check</button><button class="math-legend-btn">Help</button><div class="math-legend-panel" style="display:none"></div><div class="math-feedback-area"></div></div>';
+
+test('reloading the exercise packages after a runtime restart is timed by the load limit', async () => {
+  const p = loadPage(PACKAGE_CELL, {lang: 'en'}, w => { w.__mathExerciseSlowCheckMs = 50; w.__qExercisePyodideTimeout = 5000; });
+  const cell = p.document.querySelector('#cell');
+  const rendered = p.api.renderTaskText('Compute: _[2]', 'cell', '', 'col', 'equivalent');
+  p.api.setQuestionContent(cell.querySelector('.math-exercise-question'), rendered);
+  cell.dataset.fields = JSON.stringify(rendered.fieldIds);
+  let rejectNumpy = null, numpyV2 = null;
+  const v1 = {loadPackage: name => String(name).includes('numpy') ? new Promise((_, r) => { rejectNumpy = r; }) : Promise.resolve(),
+    globals: {set: async () => {}}, restart() {}, runPythonAsync: async () => JSON.stringify({status: 'correct', score: 1})};
+  const v2 = {loadPackage: name => String(name).includes('numpy') ? new Promise(r => { numpyV2 = r; }) : Promise.resolve(),
+    globals: {set: async () => {}}, restart() {}, runPythonAsync: async () => JSON.stringify({status: 'correct', score: 1})};
+  p.window.mainPyodide = v1;
+  p.api.setupCell(cell);
+  cell.querySelector('.math-input').value = '2';
+  cell.querySelector('.math-check-btn').click();
+  for (let i = 0; i < 200 && !rejectNumpy; i++) await new Promise(r => setTimeout(r, 1));
+  assert.ok(rejectNumpy, 'numpy is loading');
+  // An interactive cell restarts the worker while numpy loads.
+  p.window.dispatchEvent(new p.window.Event('qpyodide-runtime-restart'));
+  p.window.mainPyodide = v2;
+  rejectNumpy(new Error('Python was restarted.'));
+  for (let i = 0; i < 200 && !numpyV2; i++) await new Promise(r => setTimeout(r, 1));
+  assert.ok(numpyV2, 'numpy reloads on the new runtime');
+  await new Promise(r => setTimeout(r, 300));   // numpy still loading, far below the 5 s load limit
+  const note = cell.querySelector('.math-feedback-area').textContent;
+  assert.equal(cell.querySelector('.math-stop-btn'), null, 'no Stop while numpy reloads: ' + note);
+  numpyV2();
+  for (let i = 0; i < 200 && cell.querySelector('.math-check-btn').disabled; i++) await new Promise(r => setTimeout(r, 2));
+  assert.ok(cell.querySelector('.math-fb-ok'), 'the repeated check is graded');
+  p.dom.window.close();
+});
