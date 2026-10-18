@@ -1444,10 +1444,10 @@
         globalThis.MathExerciseRuntime.forgetModules(ready || attempted);
         sympyRuntime = null; sympyLoading = null;
       }
-      activeReloads++;
-      reloadHooks.forEach(function (hook) { hook(); });
       var current;
+      activeReloads++;
       try {
+        reloadHooks.forEach(function (hook) { hook(); });
         current = await ensureSympy();
         // The exercise's packages reload within the same loading window.
         if (packages) await ensurePackages(packages);
@@ -1893,6 +1893,8 @@
       } finally {
         reloadHooks.delete(onReload);
         cancelSlow();
+        // A check abandoned after an edit returns early: its Stop note goes too.
+        if (stopNote && stopNote.isConnected) stopNote.remove();
         checkBtn.disabled = false;
         if (feedbackBtn) feedbackBtn.disabled = !feedbackHandle;
       }

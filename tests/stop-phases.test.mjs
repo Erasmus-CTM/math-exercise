@@ -93,3 +93,22 @@ test('the loading Stop note is taken back when the check itself starts', async (
   assert.doesNotMatch(area(cell), /still loading/, 'shows the loading phase while checking');
   p.dom.window.close();
 });
+
+test('a Stop note offered after an edit during the check goes with the abandoned check', async () => {
+  const p = loadPage(CELL('cell', 'equivalent', []), {lang: 'en'}, w => { w.__mathExerciseSlowCheckMs = 60; w.__qExercisePyodideTimeout = 5000; });
+  const cell = prep(p, 'cell', 'equivalent');
+  let restarts = 0;
+  p.window.mainPyodide = {loadPackage: async () => {}, globals: {set: async () => {}}, restart() { restarts++; },
+    runPythonAsync: code => code.includes('_math_check') ? new Promise(r => setTimeout(() => r(JSON.stringify({status: 'correct', score: 1})), 300)) : Promise.resolve()};
+  p.api.setupCell(cell);
+  const input = cell.querySelector('.math-input');
+  input.value = '2';
+  cell.querySelector('.math-check-btn').click();
+  await tick(20);
+  input.value = '3'; input.dispatchEvent(new p.window.Event('input', {bubbles: true}));
+  await until(() => !cell.querySelector('.math-check-btn').disabled, 400, 5);
+  await tick(20);
+  assert.equal(cell.querySelector('.math-stop-btn'), null, 'no Stop left for a check that has ended');
+  assert.equal(restarts, 0);
+  p.dom.window.close();
+});
