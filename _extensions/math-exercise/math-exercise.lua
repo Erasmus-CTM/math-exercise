@@ -14,42 +14,25 @@ local noFeedback = {
   context = function() return { mode = "none", refs = "", text = "" } end,
 }
 
+-- Shared locator for ai-feedback and JSXGraph (feedback-loader.lua).
+local dependencies = nil
+local function deps()
+  dependencies = dependencies or dofile(quarto.utils.resolve_path("feedback-loader.lua"))
+  return dependencies
+end
+
 local function loadFeedback()
   if feedback then return feedback end
   if feedbackSetting == "false" then feedback = noFeedback; return feedback end
-  local ok, shared = pcall(dofile(quarto.utils.resolve_path("feedback-loader.lua")))
-  if ok then feedback = shared; return feedback end
-  if feedbackSetting == "auto" and tostring(shared):match("requires the shared extension") then
+  if feedbackSetting == "auto" and not deps().installed("ai-feedback") then
     feedbackMissing = true -- reported once the page has an exercise (controlsHtml)
     feedback = noFeedback
     return feedback
   end
-  assert(false, shared)
+  feedback = deps().feedback()
+  return feedback
 end
 
--- Graphical answers and diagram context need the JSXGraph Quarto extension.
-local function jsxgraphInstalled()
-  local base = quarto.project.directory or pandoc.path.directory(quarto.doc.input_file)
-  while base and base ~= "" do
-    local extensions = pandoc.path.join({base, "_extensions"})
-    local candidates = {pandoc.path.join({extensions, "jsxgraph", "_extension.yml"})}
-    local ok, entries = pcall(pandoc.system.list_directory, extensions)
-    if ok then
-      for _, owner in ipairs(entries) do
-        table.insert(candidates, pandoc.path.join({extensions, owner, "jsxgraph", "_extension.yml"}))
-      end
-    end
-    for _, path in ipairs(candidates) do
-      local file = io.open(path, "r")
-      if file then file:close(); return true end
-    end
-    if quarto.project.directory then break end
-    local parent = pandoc.path.directory(base)
-    if parent == base then break end
-    base = parent
-  end
-  return false
-end
 ----
 -- math-exercise.lua
 --
@@ -929,23 +912,20 @@ local function checkDiagramReferences(doc, refs)
       for id in b.text:gmatch('<iframe[^>]-%sid="([^"]+)"') do present[id] = "html" end
     end,
   })
-  local needsExtension = false
   for _, item in ipairs(refs) do
     if not present[item.ref] then
       assert(false, "math-exercise: exercise " .. item.label .. " refers to jsxgraph:" .. item.ref
         .. ", but this page has no JSXGraph block with assessment_id=\"" .. item.ref .. "\".")
     end
-    if present[item.ref] == "code" then needsExtension = true end
   end
-  if needsExtension and not jsxgraphInstalled() then
-    assert(false, "math-exercise: graphical answers and diagram context need the JSXGraph extension. "
-      .. "Run `quarto add jsxgraph/jsxgraph-quarto` and add `jsxgraph` to this page's filters.")
-  end
+  -- A board whose extension is not installed has already stopped the render
+  -- (feedback-loader.lua requireUsed).
 end
 
 local function Pandoc(doc)
   feedbackSetting = readFeedbackSetting(doc.meta)
   if quarto.doc.is_format("html") then
+    deps().requireUsed(doc, "math-exercise")
     doc = loadFeedback().prepare and feedback.prepare(doc) or doc
   end
   doc.meta = Meta(doc.meta)

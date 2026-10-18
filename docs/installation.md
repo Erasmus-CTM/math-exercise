@@ -39,6 +39,11 @@ reference without its block) stops rendering with a message. Before 0.9.0
 these messages were printed but the render continued and published a broken
 exercise.
 
+Optional extensions are never loaded when a page does not use them. A page that
+does use one (`::: {.ai-feedback}` activities, `.jsxgraph` boards) while it is
+not installed stops rendering with the install command, instead of publishing
+those blocks as plain text.
+
 Install each extension once per project. If the CTM Assessment umbrella is
 also installed, its copies sit directly under `_extensions/` and a standalone
 `quarto add Erasmus-CTM/...` goes under `_extensions/Erasmus-CTM/`; the short

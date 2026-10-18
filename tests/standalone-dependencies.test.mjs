@@ -79,8 +79,14 @@ test('graphical answers name the missing JSXGraph extension or diagram', { skip 
   try {
     let r = render(dir, 'filters: [math-exercise]\n', graphical('board'));
     assert.notEqual(r.status, 0);
-    assert.match(r.stderr, /need the JSXGraph extension\. Run `quarto add jsxgraph\/jsxgraph-quarto`/);
-    r = render(dir, 'filters: [math-exercise]\n', graphical('elsewhere'));
+    assert.match(r.stderr, /uses JSXGraph boards \(`\.jsxgraph` blocks\), but the jsxgraph extension is not installed\. Run: quarto add jsxgraph\/jsxgraph-quarto/);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('a reference to a board that is not on the page names the missing assessment_id', { skip: skip || (!existsSync(jsxgraph) && 'JSXGraph not installed') }, () => {
+  const dir = project({ withJsxgraph: true });
+  try {
+    const r = render(dir, 'filters: [jsxgraph, math-exercise]\nmath-exercise:\n  feedback: false\n', graphical('elsewhere'));
     assert.notEqual(r.status, 0);
     assert.match(r.stderr, /exercise graph refers to jsxgraph:elsewhere, but this page has no JSXGraph block with assessment_id="elsewhere"/);
   } finally { rmSync(dir, { recursive: true, force: true }); }
@@ -126,4 +132,19 @@ test('Check grades without ai-feedback on the page (feedback: auto without it, a
       dom.window.close();
     } finally { rmSync(dir, { recursive: true, force: true }); }
   }
+});
+
+test('a page that uses a missing extension stops, also without exercises; unused ones are never loaded', { skip }, () => {
+  const dir = project();
+  try {
+    let r = render(dir, 'filters: [math-exercise]\n', '::: {.ai-feedback}\nExplain.\n:::');
+    assert.notEqual(r.status, 0);
+    assert.match(r.stderr, /uses AI feedback activities \(`\.ai-feedback` blocks\), but the ai-feedback extension is not installed\. Run: quarto add Erasmus-CTM\/ai-feedback/);
+    r = render(dir, 'filters: [math-exercise]\n', '```{.jsxgraph}\nvar board = JXG.JSXGraph.initBoard(BOARDID, {});\n```');
+    assert.notEqual(r.status, 0);
+    assert.match(r.stderr, /Run: quarto add jsxgraph\/jsxgraph-quarto/);
+    r = render(dir, 'filters: [math-exercise]\nmath-exercise:\n  feedback: false\n', plain);
+    assert.equal(r.status, 0, r.stderr);
+    assert.doesNotMatch(readFileSync(join(dir, 'page.html'), 'utf8'), /feedback-core\.js|jsxgraphcore/);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
 });
