@@ -79,8 +79,8 @@ test('Check completing after an edit cannot become feedback evidence', async () 
   const button = p.cell.querySelector('.math-check-btn'); button.click();
   await new Promise(r => setTimeout(r, 0)); edit(p, '41'); resolve('{}');
   await new Promise(r => setTimeout(r, 0));
-  // SymPy bootstrap completes before the actual field check; both are controlled.
-  if (button.disabled) resolve(JSON.stringify({status: 'correct', score: 1}));
+  // SymPy bootstrap (guard and checker module) completes before the actual field check; all are controlled.
+  for (let i = 0; i < 5 && button.disabled; i++) { resolve(JSON.stringify({status: 'correct', score: 1})); await new Promise(r => setTimeout(r, 0)); }
   await settle(button);
   assert.equal(data(await feedback(p)).evidence.length, 0); p.dom.window.close();
 });
@@ -177,4 +177,27 @@ test('Check restarts shared hint progression by default; an override can preserv
  await check(p);await feedback(p);assert.equal(p.cell.querySelector('.ai-feedback-hint').textContent,'Hint 1');
  p.window.__aiFeedbackPolicies={projectPolicy:'preserve',layers:[{policies:{preserve:{'reset-on-run':false}}}]};
  await feedback(p);await check(p);await feedback(p);assert.equal(p.cell.querySelector('.ai-feedback-hint').textContent,'Hint 2');p.dom.window.close();
+});
+
+test('a long check in a worker runtime offers Stop; a stopped check is not repeated', async () => {
+  const p = loadPage('<div id="cell" class="math-exercise-cell" data-label="t" data-context-mode="none" data-mode="equivalent"><div class="math-exercise-question"></div><button class="math-check-btn">Check</button><button class="math-legend-btn">Help</button><div class="math-legend-panel" style="display:none"></div><div class="math-feedback-area"></div></div>',
+    {lang: 'en'}, w => { w.__mathExerciseSlowCheckMs = 30; });
+  const cell = p.document.querySelector('#cell');
+  const rendered = p.api.renderTaskText('Compute: _[2]', 'cell', '', 'col', 'equivalent');
+  p.api.setQuestionContent(cell.querySelector('.math-exercise-question'), rendered);
+  cell.dataset.fields = JSON.stringify(rendered.fieldIds);
+  let checks = 0, restarts = 0, reject;
+  p.window.mainPyodide = {loadPackage: async () => {}, globals: {set: async () => {}},
+    restart() { restarts++; reject(new Error('Python was restarted.')); },
+    runPythonAsync: code => code.includes('_math_check') ? (checks++, new Promise((_, r) => { reject = r; })) : Promise.resolve()};
+  p.api.setupCell(cell);
+  cell.querySelector('.math-input').value = '9**9**9**9';
+  cell.querySelector('.math-check-btn').click();
+  for (let i = 0; i < 100 && !cell.querySelector('.math-stop-btn'); i++) await new Promise(r => setTimeout(r, 5));
+  cell.querySelector('.math-stop-btn').click();
+  for (let i = 0; i < 100 && !cell.querySelector('.math-fb-err'); i++) await new Promise(r => setTimeout(r, 5));
+  assert.match(cell.querySelector('.math-fb-err').textContent, /Stopped\. Python was restarted/);
+  assert.equal(restarts, 1);
+  assert.equal(checks, 1);
+  p.dom.window.close();
 });

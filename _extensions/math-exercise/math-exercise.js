@@ -43,6 +43,9 @@
       },
       loadingHelp: "&#9203; Loading help&hellip;",
       checking: "&#9203; Checking&hellip;",
+      slowCheck: "Still checking – the answer may be too large to evaluate.",
+      stop: "Stop",
+      errStopped: "Stopped. Python was restarted (interactive cells on this page lost their variables).",
       needAnswerFirst: "Please enter an answer first, then request feedback.",
       outputLanguageCode: "en",
       feedbackFieldSingle: "Answer",
@@ -91,6 +94,9 @@
       },
       loadingHelp: "&#9203; Lade Hilfe&hellip;",
       checking: "&#9203; Überprüfe&hellip;",
+      slowCheck: "Die Prüfung dauert noch – die Antwort ist vielleicht zu groß zum Auswerten.",
+      stop: "Abbrechen",
+      errStopped: "Abgebrochen. Python wurde neu gestartet (interaktive Zellen auf dieser Seite haben ihre Variablen verloren).",
       needAnswerFirst: "Bitte zuerst eine Antwort eingeben, dann Feedback anfordern.",
       outputLanguageCode: "de",
       feedbackFieldSingle: "Antwort",
@@ -139,6 +145,9 @@
     },
       loadingHelp: "&#9203; Laster hjelp&hellip;",
       checking: "&#9203; Sjekker&hellip;",
+      slowCheck: "Sjekken pågår fortsatt – svaret er kanskje for stort til å regnes ut.",
+      stop: "Avbryt",
+      errStopped: "Avbrutt. Python ble startet på nytt (interaktive celler på denne siden mistet variablene sine).",
       needAnswerFirst: "Skriv inn et svar før du ber om tilbakemelding.",
       outputLanguageCode: "nb",
       feedbackFieldSingle: "Svar",
@@ -304,13 +313,6 @@
   // pyodide-interaktiv) shares that namespace and may rebind names such as
   // `symbols`, `Matrix` or `sqrt`.
   var MATH_MODULE = '_ctm_math_exercise';
-  var INSTALL_PY = [
-    'import sys as _ctm_sys, types as _ctm_types',
-    '_ctm_module = _ctm_types.ModuleType("' + MATH_MODULE + '")',
-    'exec(_math_runtime_source, _ctm_module.__dict__)',
-    '_ctm_sys.modules["' + MATH_MODULE + '"] = _ctm_module',
-    'del _ctm_sys, _ctm_types, _ctm_module, _math_runtime_source',
-  ].join('\n');
   function runtimeCall(name) {
     return '__import__("' + MATH_MODULE + '")._math_run("' + name + '", globals())';
   }
@@ -657,15 +659,31 @@
       '                "_math_tolerance", "_math_decplaces", "_math_sigfigs", "_math_form",',
       '                "_math_partial_credit", "_math_form_credit", "_math_response_json", "_math_checker")',
       '',
+      'try:',
+      '    import _ctm_guard',
+      'except ImportError:  # native test runners (question-tests.py) have no page to protect',
+      '    _ctm_guard = None',
+      '',
       'def _math_run(name, caller):',
       '    # Move this request\'s inputs out of the shared namespace into the module.',
       '    for key in _MATH_INPUTS:',
       '        if key in caller:',
       '            globals()[key] = caller.pop(key)',
-      '    return _mj.dumps(globals()[name]())',
+      '    # Answers are parsed by SymPy (which evaluates Python): no dunder access.',
+      '    for key in ("_math_student", "_math_response_json"):',
+      '        if "__" in str(globals().get(key) or ""):',
+      '            raise ValueError("SyntaxError: unsupported input")',
+      '    # Whatever the parsed answer or checker does, other components on the',
+      '    # page keep their interpreter state.',
+      '    state = _ctm_guard.snapshot() if _ctm_guard else None',
+      '    try:',
+      '        return _mj.dumps(globals()[name]())',
+      '    finally:',
+      '        if state is not None:',
+      '            _ctm_guard.restore(state)',
     ].join('\n');
-    py.globals.set('_math_runtime_source', source);
-    await py.runPythonAsync(INSTALL_PY);
+    await globalThis.MathExerciseRuntime.ensureGuard(py);
+    await globalThis.MathExerciseRuntime.installModule(py, MATH_MODULE, source);
   }
 
   // ---------------------------------------------------------------------------
@@ -705,6 +723,8 @@
     var msg = String(raw || '');
     if (/did not finish loading|Failed to load: https?:/.test(msg))
       return L.errRuntime;
+    if (/stopped by the learner/.test(msg))
+      return L.errStopped;
     if (/SyntaxError/i.test(msg))
       return L.errSyntax;
     var nm = msg.match(/name ['"]([\w]+)['"] is not defined/);
@@ -1288,14 +1308,25 @@
   // repeated once on the new runtime instead of reporting a spurious error.
   // The first check also covers SymPy's multi-second setup, so a restart
   // during setup is retried as well.
+  // Incremented when the learner stops a check: that check is not repeated.
+  var stopEpoch = 0;
+  var SLOW_CHECK_MS = (typeof window !== 'undefined' && window.__mathExerciseSlowCheckMs) || 10000;
   async function runOnCurrentRuntime(run) {
+    var epoch = stopEpoch;
     var attempted = await ensurePyodide(), ready = null;
     try {
       ready = await ensureSympy();
       return await run(ready);
     } catch (error) {
+      if (epoch !== stopEpoch) throw new Error('math-exercise: stopped by the learner');
+      // Learner code elsewhere on the page removed the checker module: install again.
+      var missing = /No module named '_ctm_|has no attribute '_math_run'/.test(String(error));
+      if (missing) {
+        globalThis.MathExerciseRuntime.forgetModules(ready || attempted);
+        sympyRuntime = null; sympyLoading = null;
+      }
       var current = await ensureSympy();
-      if (current === (ready || attempted)) throw error;
+      if (current === (ready || attempted) && !missing) throw error;
       return run(current);
     }
   }
@@ -1635,6 +1666,23 @@
       checkBtn.disabled = true;
       if (feedbackBtn) feedbackBtn.disabled = true;
       fbDiv.innerHTML = '<div class="math-fb-checking">' + L.checking + '</div>';
+      // A runtime in a worker can be stopped: offer it when a check takes long.
+      var slowTimer = setTimeout(function () {
+        if (!globalThis.MathExerciseRuntime.canStop()) return;
+        var note = document.createElement('div');
+        note.className = 'math-fb-checking';
+        note.textContent = L.slowCheck + ' ';
+        var stopBtn = document.createElement('button');
+        stopBtn.type = 'button';
+        stopBtn.className = 'btn btn-sm btn-outline-danger math-stop-btn';
+        stopBtn.textContent = L.stop;
+        stopBtn.addEventListener('click', function () {
+          stopEpoch++;
+          globalThis.MathExerciseRuntime.stop('Stopped by the learner');
+        });
+        note.appendChild(stopBtn);
+        fbDiv.replaceChildren(note);
+      }, SLOW_CHECK_MS);
       try {
         await prepareRuntime(checkOpts.packages);
         var parts = [];
@@ -1690,6 +1738,7 @@
       } catch (err) {
         fbDiv.innerHTML = '<div class="math-fb-err">&#9888;&nbsp;' + friendlyError(String(err)) + '</div>';
       } finally {
+        clearTimeout(slowTimer);
         checkBtn.disabled = false;
         if (feedbackBtn) feedbackBtn.disabled = !feedbackHandle;
       }
@@ -1858,7 +1907,6 @@
       ensurePackages: ensurePackages,
       ensureSympy: ensureSympy,
       checkField: checkField,
-      installPython: INSTALL_PY,
       runtimeCall: runtimeCall,
       notifyExternalLayout: notifyExternalLayout,
       scheduleExternalLayout: scheduleExternalLayout,

@@ -887,9 +887,20 @@ The extension works **with and without** a `{pyodide}` code block:
 
 The checker helpers run in their own Python module, so learner code in Pyodide
 cells that rebinds names such as `symbols`, `Matrix` or `sqrt` no longer breaks
-checks. Grading still runs in the learner's browser and is not tamper-proof. If
-the Pyodide extension restarts its runtime (Stop), the next Check sets SymPy up
-again, and a check that was running is repeated once on the new runtime.
+checks; if other code removes that module, the next Check installs it again.
+Answers are parsed by SymPy, which evaluates Python: input containing `__`
+is rejected, and interpreter state that an answer or a custom checker changes
+(`builtins`, standard streams, recursion limit, `sys.path`, working directory,
+CTM modules) is restored after each check, so other exercises on the page keep
+working. Grading still runs in the learner's browser and is not tamper-proof.
+
+If the Pyodide extension restarts its runtime, the next Check sets SymPy up
+again, and a check that was running (also during SymPy's setup) is repeated
+once on the new runtime. With a runtime in a worker (pyodide-interaktiv), a
+check that takes longer than 10 s, for example an answer such as `9**9**9**9`,
+offers **Stop**, which restarts Python for the whole page; a stopped check is
+not repeated. Python running on the page itself cannot be interrupted; the
+page then has to be reloaded.
 
 Combination with
 [pyodide-interaktiv](https://github.com/Erasmus-CTM/pyodide-interaktiv):

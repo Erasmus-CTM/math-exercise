@@ -31,7 +31,7 @@ function fakeRuntime(name, log, { failOnce } = {}) {
     loadPackage: async pkg => { log.push(name + ':load:' + pkg); },
     globals: { set: async () => {} },
     runPythonAsync: async code => {
-      if (code.includes('_math_runtime_source')) { log.push(name + ':install'); return undefined; }
+      if (code.includes('_ctm_module_source')) { if (!code.includes('_ctm_guard')) log.push(name + ':install'); return undefined; }
       if (failOnce && !failed) { failed = true; await failOnce(); throw new Error('Python was restarted.'); }
       log.push(name + ':check');
       return JSON.stringify({ status: 'correct', score: 1 });
@@ -85,28 +85,41 @@ test('a restart during the first SymPy setup is retried on the new runtime', asy
   assert.deepEqual(log, ['a:load:sympy', 'b:load:sympy', 'b:install', 'b:check']);
 });
 
-test('learner rebinding of SymPy names does not reach the checker module (CPython)', { skip: spawnSync(python, ['-c', 'import sympy']).status ? 'SymPy required' : false }, () => {
-  const { api } = load();
-  const match = exerciseSource.match(/var source = \[\n([\s\S]*?)\n    \]\.join\('\\n'\);/);
-  const source = vm.runInNewContext('[' + match[1] + ']').join('\n');
+test('learner rebinding of SymPy names does not reach the checker module (CPython)', { skip: spawnSync(python, ['-c', 'import sympy']).status ? 'SymPy required' : false }, async () => {
+  // Record exactly what the browser setup sends to Pyodide, then replay it in CPython.
+  const ops = [];
+  const recorder = { loadPackage: async () => {}, globals: { set: async (name, value) => { ops.push(['set', name, value]); } },
+    runPythonAsync: async code => { ops.push(['run', code]); } };
+  const { api } = load({ qpyodideInstance: Promise.resolve(recorder) });
+  await api.ensureSympy();
   const dir = mkdtempSync(join(tmpdir(), 'math-isolation-'));
   try {
-    writeFileSync(join(dir, 'case.json'), JSON.stringify({ source, install: api.installPython, call: api.runtimeCall('_math_check') }));
+    writeFileSync(join(dir, 'case.json'), JSON.stringify({ ops, call: api.runtimeCall('_math_check') }));
     const script = String.raw`
-import json, sys
+import builtins, json, sys
 case = json.load(open(sys.argv[1]))
 main = {'__name__': '__main__'}
-main['_math_runtime_source'] = case['source']
-exec(case['install'], main)
-assert '_math_runtime_source' not in main
+for op in case['ops']:
+    if op[0] == 'set':
+        main[op[1]] = op[2]
+    else:
+        exec(op[1], main)
+assert not [k for k in main if k.startswith('_ctm_')], 'setup left names in the shared namespace'
 exec('symbols = None\nSymbol = None\nsympify = None\nMatrix = None\nsqrt = None\nsimplify = None\nparse_expr = None\n_mj = None', main)
-main.update({'_math_student': '6*sqrt(2)', '_math_correct': 'sqrt(72)', '_math_vars': '', '_math_mode': 'equivalent',
-  '_math_reject': '', '_math_tolerance': '', '_math_decplaces': '', '_math_sigfigs': '', '_math_form': '',
-  '_math_partial_credit': False, '_math_form_credit': 0.5})
-result = json.loads(eval(case['call'], main))
-assert result['status'] == 'correct', result
-left = [k for k in main if k.startswith('_math_')]
-assert not left, left
+def ask(answer):
+    main.update({'_math_student': answer, '_math_correct': 'sqrt(72)', '_math_vars': '', '_math_mode': 'equivalent',
+      '_math_reject': '', '_math_tolerance': '', '_math_decplaces': '', '_math_sigfigs': '', '_math_form': '',
+      '_math_partial_credit': False, '_math_form_credit': 0.5})
+    return json.loads(eval(case['call'], main))
+assert ask('6*sqrt(2)')['status'] == 'correct'
+assert not [k for k in main if k.startswith('_math_')]
+# Answers are evaluated by SymPy's parser: no access to Python internals.
+try:
+    ask("__import__('builtins').__dict__.clear()")
+    raise SystemExit('dunder answer was evaluated')
+except ValueError as error:
+    assert 'unsupported input' in str(error)
+assert builtins.len is len and ask('6*sqrt(2)')['status'] == 'correct'
 print('isolated')
 `;
     const r = spawnSync(python, ['-c', script, join(dir, 'case.json')], { encoding: 'utf8', timeout: 120000 });
