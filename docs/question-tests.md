@@ -80,7 +80,7 @@ packages imported by your checker, such as NetworkX. The browser still loads
 its own Pyodide packages as before.
 
 ```bash
-python -m pip install sympy networkx
+python -m pip install sympy==1.13.3 networkx==3.4.2
 python _extensions/math-exercise/question-tests.py exercises/tree.qmd
 quarto render
 ```
