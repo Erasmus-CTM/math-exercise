@@ -27,7 +27,8 @@ def formatted(v, spec):
     # {{name:.Nf}} and {{name:.Ng}} round like the checker before formatting.
     digits = int(spec[1:-1])
     if isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v):
-        v = round_half_up(v, digits) if spec[-1] == 'f' else (sigfig(v, digits) if digits > 0 else v)
+        # Python formats .0g like .1g.
+        v = round_half_up(v, digits) if spec[-1] == 'f' else sigfig(v, max(digits, 1))
     return format(v, spec)
 
 FUNCTIONS.update(abs=abs, min=min, max=max, round=round_half_up, sigfig=sigfig)

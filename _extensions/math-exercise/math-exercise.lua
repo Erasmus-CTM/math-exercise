@@ -512,6 +512,16 @@ local function atWordBoundary(text, position)
   return not text:sub(position - 1, position - 1):match("[%w_]")
 end
 
+-- A code span: the next backtick on the same line, with something between.
+local function codeSpanEnd(s, i)
+  if i > 1 and s:sub(i - 1, i - 1) == "\\" then return nil end   -- \` is a literal backtick
+  local k = s:find("`", i + 1, true)
+  if not k or k == i + 1 then return nil end
+  local newline = s:find("\n", i + 1, true)
+  if newline and newline < k then return nil end
+  return k
+end
+
 -- Exercise bodies are inserted as raw HTML, outside Pandoc's Markdown math
 -- parser. Canonical delimiters keep page-level MathJax from consuming a bare
 -- \\begin{...} environment and leaving literal dollar signs behind.
@@ -536,7 +546,11 @@ local function normalizeTaskMathDelimiters(text)
   local output, position = {}, 1
   while position <= #text do
     local char = text:sub(position, position)
-    if char == "$" and position > 1 and text:sub(position - 1, position - 1) == "\\" then
+    local codeEnd = char == "`" and codeSpanEnd(text, position)
+    if codeEnd then
+      -- A dollar inside a code span is literal.
+      table.insert(output, text:sub(position, codeEnd)); position = codeEnd + 1
+    elseif char == "$" and position > 1 and text:sub(position - 1, position - 1) == "\\" then
       -- An escaped dollar becomes a placeholder (see LITERAL_DOLLAR).
       output[#output] = LITERAL_DOLLAR; position = position + 1
     elseif char ~= "$" then
@@ -563,43 +577,54 @@ end
 ----
 -- Exercise text is Markdown-like plain text: HTML is shown as text (so a<b<c
 -- in TeX stays intact), and outside math a small inline Markdown subset is
--- formatted: **bold**, *italic*, `code`; \* and \` are literal. The same rules
--- are in proseHtml() in math-exercise.js (parity test).
+-- formatted: ***both***, **bold**, *italic*, `code`; \* and \` are literal; a
+-- trailing backslash is a line break. Emphasis may contain math. The same
+-- rules are in inlineMarkdown()/proseHtml() in math-exercise.js (parity test).
+local MATH_SLOT = "\u{E030}"   -- stands for one math span while formatting
+
 local function inlineMarkdown(s)
   local out, i, n = {}, 1, #s
+  -- Closing delimiter for emphasis opened just before `from`: on the same
+  -- line, not escaped, not after whitespace, not followed by another "*"
+  -- (or, for "*", by a letter or digit). Linear in the line length.
   local function closing(delim, from)
-    local j = from
+    local first = s:sub(from, from)
+    if first == "" or first:match("%s") then return nil end
+    local newline = s:find("\n", from, true) or (n + 1)
+    local j = from + 1
     while true do
       local k = s:find(delim, j, true)
-      if not k then return nil end
-      local inner = s:sub(from, k - 1)
-      if inner:find("\n", 1, true) then return nil end
+      if not k or k >= newline then return nil end
       local nextChar = s:sub(k + #delim, k + #delim)
-      if delim == "*" and nextChar == "*" then j = k + 2
-      elseif inner ~= "" and not inner:match("^%s") and not inner:match("%s$")
-          and not (delim == "*" and nextChar:match("[%w]")) then return k
-      else j = k + 1 end
+      local before = s:sub(k - 1, k - 1)
+      if nextChar == "*" or before == "\\" or before:match("%s")
+          or (delim == "*" and nextChar:match("[%w]")) then
+        j = k + 1
+      else
+        return k
+      end
     end
   end
   while i <= n do
     local c = s:sub(i, i)
     local nextChar = s:sub(i + 1, i + 1)
+    local k
     if c == "\\" and (nextChar == "*" or nextChar == "`") then
       table.insert(out, nextChar); i = i + 2
     elseif c == "\\" and nextChar == "\n" then
       i = i + 1   -- Markdown hard line break: the newline already breaks the line
-    elseif c == "`" then
-      local k = s:find("`", i + 1, true)
-      local inner = k and s:sub(i + 1, k - 1)
-      if inner and inner ~= "" and not inner:find("\n", 1, true) then
-        table.insert(out, "<code>" .. inner .. "</code>"); i = k + 1
-      else table.insert(out, c); i = i + 1 end
+    elseif c == "`" and codeSpanEnd(s, i) then
+      k = codeSpanEnd(s, i)
+      table.insert(out, "<code>" .. s:sub(i + 1, k - 1) .. "</code>"); i = k + 1
+    elseif s:sub(i, i + 2) == "***" and closing("***", i + 3) then
+      k = closing("***", i + 3)
+      table.insert(out, "<em><strong>" .. inlineMarkdown(s:sub(i + 3, k - 1)) .. "</strong></em>"); i = k + 3
     elseif c == "*" and nextChar == "*" then
-      local k = closing("**", i + 2)
+      k = closing("**", i + 2)
       if k then table.insert(out, "<strong>" .. inlineMarkdown(s:sub(i + 2, k - 1)) .. "</strong>"); i = k + 2
       else table.insert(out, "**"); i = i + 2 end
     elseif c == "*" and not (i > 1 and s:sub(i - 1, i - 1):match("[%w]")) then
-      local k = closing("*", i + 1)
+      k = closing("*", i + 1)
       if k then table.insert(out, "<em>" .. inlineMarkdown(s:sub(i + 1, k - 1)) .. "</em>"); i = k + 1
       else table.insert(out, c); i = i + 1 end
     else
@@ -609,29 +634,36 @@ local function inlineMarkdown(s)
   return table.concat(out)
 end
 
--- Escapes a run of exercise text; formats inline Markdown outside math
--- (\( \), \[ \], \begin{..} \end{..} after normalizeTaskMathDelimiters).
+-- Escapes a run of exercise text and formats inline Markdown outside math
+-- (\( \), \[ \], \begin{..} \end{..} after normalizeTaskMathDelimiters) and
+-- outside code spans. Each math span is a slot while formatting, so emphasis
+-- may contain math.
 local function proseHtml(text)
-  local out, position = {}, 1
+  local plain, maths, position = {}, {}, 1
   while position <= #text do
-    local open, closer
-    local a = text:find("\\[%(%[]", position)
-    local b, _, env = text:find("\\begin{([^}]*)}", position)
-    if a and (not b or a <= b) then
-      open, closer = a, (text:sub(a + 1, a + 1) == "(" and "\\)" or "\\]")
-    elseif b then
-      open, closer = b, "\\end{" .. env .. "}"
+    local c = text:sub(position, position)
+    local codeEnd = c == "`" and codeSpanEnd(text, position)
+    local env = text:match("^\\begin{([^}]*)}", position)
+    local closer = (text:sub(position, position + 1) == "\\(" and "\\)")
+      or (text:sub(position, position + 1) == "\\[" and "\\]")
+      or (env and ("\\end{" .. env .. "}"))
+    if codeEnd then
+      table.insert(plain, text:sub(position, codeEnd)); position = codeEnd + 1
+    elseif closer then
+      local close = text:find(closer, position + 2, true)
+      local stop = close and (close + #closer - 1) or #text
+      table.insert(maths, (attrEsc(text:sub(position, stop))))
+      table.insert(plain, MATH_SLOT)
+      position = stop + 1
+    else
+      table.insert(plain, c); position = position + 1
     end
-    if not open then
-      table.insert(out, inlineMarkdown(attrEsc(text:sub(position)))); break
-    end
-    table.insert(out, inlineMarkdown(attrEsc(text:sub(position, open - 1))))
-    local close = text:find(closer, open + 2, true)
-    local stop = close and (close + #closer - 1) or #text
-    table.insert(out, (attrEsc(text:sub(open, stop))))
-    position = stop + 1
   end
-  return table.concat(out)
+  local index = 0
+  return (inlineMarkdown(attrEsc(table.concat(plain))):gsub(MATH_SLOT, function()
+    index = index + 1
+    return maths[index]
+  end))
 end
 
 local function processMarkers(text, exerciseId, vars, vecdir, mode)
@@ -690,6 +722,8 @@ local function processMarkers(text, exerciseId, vars, vecdir, mode)
   flush()
 
   local html = table.concat(output):gsub(LITERAL_DOLLAR, LITERAL_DOLLAR_HTML)
+  -- "{{" before markup would start a Quarto shortcode and swallow the rest.
+  html = html:gsub("{{<", "{&#123;<")
   return html, fieldIds, structuralLabels
 end
 
@@ -861,7 +895,7 @@ local function buildExercise(el, state)
                 .. '<div class="math-exercise-question"></div>'
   else
     local body, fieldIds, structuralLabels = processMarkers(questionText, eid, vars, vecdir, mode)
-    body         = body:gsub("\n", "<br>\n")
+    body         = body:gsub("\n", "<br>\n"):gsub("{{<", "{&#123;<")   -- not a shortcode
     attrs        = attrs .. ' data-fields="' .. jsonArrAttr(fieldIds) .. '"'
                          .. ' data-structural-field-labels="' .. jsonArrAttr(structuralLabels) .. '"'
     -- Retain the pre-typesetting HTML, but never copy answer keys into the

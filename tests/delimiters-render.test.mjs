@@ -76,6 +76,11 @@ const markdownCases = [
   [String.raw`$a*b*c$ og $$x**2$$, 2*3*4 og x * y, **fet *kursiv* inni**: _[1]`,
    String.raw`\(a*b*c\) og \[x**2\], 2*3*4 og x * y, <strong>fet <em>kursiv</em> inni</strong>: `],
   ['Linje\\\nny linje: _[1]', 'Linje<br>\nny linje: '],
+  [String.raw`*Hint: skriv 2 \* x* _[1]`, String.raw`<em>Hint: skriv 2 * x</em> `],
+  [String.raw`**Del $a$:** finn x og *La $x>0$.* _[1]`, String.raw`<strong>Del \(a\):</strong> finn x og <em>La \(x&gt;0\).</em> `],
+  ['Kjør `echo $HOME` og `echo $PATH`: _[1]', 'Kjør <code>echo $HOME</code> og <code>echo $PATH</code>: '],
+  ['***viktig*** nå: _[1]', '<em><strong>viktig</strong></em> nå: '],
+  ['* '.repeat(4000) + '_[1]', '* '.repeat(4000)],
   [String.raw`** ikke fet** og *ikke kursiv * og ` + '``' + String.raw` tom: _[1]`,
    String.raw`** ikke fet** og *ikke kursiv * og ` + '``' + String.raw` tom: `],
 ];
@@ -93,5 +98,20 @@ test('Lua and JS format inline Markdown in exercise text the same way', { skip: 
       assert.ok(lua.includes('>' + expected + '<input'), 'Lua: ' + expected);
       assert.ok(api().renderTaskText(task, 'x', '', 'col', 'equivalent', false).html.startsWith(expected), 'JS: ' + expected);
     }
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('"{{" before formatted text does not start a Quarto shortcode', { skip: available ? false : 'Quarto required' }, () => {
+  const dir = mkdtempSync(join(tmpdir(), 'math-shortcode-'));
+  try {
+    cpSync(fileURLToPath(new URL('../_extensions/math-exercise', import.meta.url)), join(dir, '_extensions/math-exercise'), { recursive: true });
+    // "{{" before markup or at a line end; the second exercise must survive too.
+    writeFileSync(join(dir, 'page.qmd'), '---\nformat: html\nfilters: [math-exercise]\nmath-exercise: {feedback: false}\n---\n\n```{math-exercise}\n#| label: s\na {{*x* b _[1]\n```\n\n```{math-exercise}\n#| label: t\nc {{\nd _[2]\n```\n\n```{math-exercise}\n#| label: u\nlast _[3]\n```\n');
+    const r = spawnSync(quarto, ['render', 'page.qmd'], { cwd: dir, encoding: 'utf8', timeout: 120000 });
+    assert.equal(r.status, 0, r.stderr);
+    const html = readFileSync(join(dir, 'page.html'), 'utf8');
+    assert.ok(html.includes('>a {{<em>x</em> b <input'), 'the field after "{{" survives');
+    assert.equal((html.match(/class="math-exercise-cell/g) || []).length, 3, 'no exercise swallowed');
+    assert.equal((html.match(/math-check-btn"/g) || []).length, 3);
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });

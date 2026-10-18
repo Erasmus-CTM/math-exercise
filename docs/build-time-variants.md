@@ -42,7 +42,9 @@ Derived numbers are floating-point; **keep exact checker answers symbolic**:
 `_[{{bc}}/sqrt({{ab}}^2+{{bc}}^2)]`, rather than a decimal approximation.
 
 Use `{{name}}` in the question, `solution`, `variant-context`, checker or tests.
-For displayed rounding, use `{{value:.3f}}` or `{{value:.3g}}`. A `solution: |`
+For displayed rounding, use `{{value:.3f}}` or `{{value:.3g}}`. `round`, `sigfig` and these placeholders round the decimal value half away
+from zero, as `decplaces` and `sigfigs` grade (`round(2.5)` is 3, `{{x:.2f}}` of
+0.125 is 0.13), unlike Python's `round`. A `solution: |`
 block contains normal Markdown and LaTeX, rendered during the build. It appears
 in a collapsed solution block, or in an existing element named by
 `solution-target`. No HTML is needed in the QMD. `variant-context` adds explicit

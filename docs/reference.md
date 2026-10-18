@@ -21,8 +21,9 @@ The question text is Markdown-like text, not HTML:
 
 - Math in `$...$`, `$$...$$`, `\(...\)`, `\[...\]` or `\begin{...}...\end{...}`
   is passed to the math renderer unchanged, so `$a<b<c$` works.
-- Outside math, `**bold**`, `*italic*` and `` `code` `` are formatted. `\*` and
-  `` \` `` give a literal `*` and `` ` ``.
+- Outside math, `***bold italic***`, `**bold**`, `*italic*` and `` `code` `` are
+  formatted, also around math (`**Part $a$:**`); `$` inside a code span is a
+  dollar. `\*` and `` \` `` give a literal `*` and `` ` ``.
 - A line break in the source is a line break on the page; a blank line leaves
   an empty line. A backslash at the end of a line (Markdown's hard break) is
   the same as a plain line break.
@@ -30,7 +31,7 @@ The question text is Markdown-like text, not HTML:
   the Markdown above instead: put several answer fields on separate lines
   rather than spacing them with `&nbsp;`.
 
-Generated variants (`#| variants:`) are rendered by Pandoc, so their text
+Generated variants (`#| parameters:`) are rendered by Pandoc, so their text
 supports Markdown in full.
 
 ---
@@ -920,7 +921,7 @@ If the Pyodide extension restarts its runtime, the next Check sets SymPy up
 again, and a check that was running (also during SymPy's setup) is repeated
 once on the new runtime. With a runtime in a worker (pyodide-interaktiv), a
 check that takes longer than 20 s, for example an answer such as `9**9**9**9`,
-offers **Stop** (the time to load SymPy and packages is not counted; a load that has not finished after 180 s also offers Stop), which restarts Python for the whole page; a stopped check (from
+offers **Stop** (the time to load SymPy and packages is not counted; a load that has not finished after 180 s offers Stop, or ends with a message while Python is still starting), which restarts Python for the whole page; a stopped check (from
 any component's Stop) is not repeated. Change the time with
 `math-exercise: {stop-after: 30}` (seconds), or for all CTM components of a
 project with `ctm-assessment: {stop-after: 30}`. Python running on the page itself cannot be interrupted; the

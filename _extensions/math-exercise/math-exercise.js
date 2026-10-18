@@ -44,6 +44,7 @@
       loadingHelp: "&#9203; Loading help&hellip;",
       checking: "&#9203; Checking&hellip;",
       slowCheck: "Still checking – the answer may be too large to evaluate.",
+      slowLoad: "Python is still loading.",
       stop: "Stop",
       errStopped: "Stopped. Python was restarted (interactive cells on this page lost their variables).",
       needAnswerFirst: "Please enter an answer first, then request feedback.",
@@ -95,6 +96,7 @@
       loadingHelp: "&#9203; Lade Hilfe&hellip;",
       checking: "&#9203; Überprüfe&hellip;",
       slowCheck: "Die Prüfung dauert noch – die Antwort ist vielleicht zu groß zum Auswerten.",
+      slowLoad: "Python wird noch geladen.",
       stop: "Abbrechen",
       errStopped: "Abgebrochen. Python wurde neu gestartet (interaktive Zellen auf dieser Seite haben ihre Variablen verloren).",
       needAnswerFirst: "Bitte zuerst eine Antwort eingeben, dann Feedback anfordern.",
@@ -146,6 +148,7 @@
       loadingHelp: "&#9203; Laster hjelp&hellip;",
       checking: "&#9203; Sjekker&hellip;",
       slowCheck: "Sjekken pågår fortsatt – svaret er kanskje for stort til å regnes ut.",
+      slowLoad: "Python lastes fortsatt inn.",
       stop: "Avbryt",
       errStopped: "Avbrutt. Python ble startet på nytt (interaktive celler på denne siden mistet variablene sine).",
       needAnswerFirst: "Skriv inn et svar før du ber om tilbakemelding.",
@@ -911,6 +914,16 @@
   // element, so neither KaTeX auto-render nor MathJax treats it as a delimiter.
   var LITERAL_DOLLAR = '\uE024';
   var LITERAL_DOLLAR_HTML = '<span class="math-literal-dollar">$</span>';
+  // A code span: the next backtick on the same line, with something between;
+  // \` is a literal backtick. Returns the closing index or -1.
+  function codeSpanEnd(s, i) {
+    if (i > 0 && s.charAt(i - 1) === '\\') return -1;
+    var k = s.indexOf('`', i + 1);
+    if (k < 0 || k === i + 1) return -1;
+    var newline = s.indexOf('\n', i + 1);
+    return newline >= 0 && newline < k ? -1 : k;
+  }
+
   function normalizeTaskMathDelimiters(text) {
     var output = '', position = 0;
     function unescapedAt(needle, start) {
@@ -924,6 +937,12 @@
       return -1;
     }
     while (position < text.length) {
+      var codeEnd = text.charAt(position) === '`' ? codeSpanEnd(text, position) : -1;
+      if (codeEnd >= 0) {
+        // A dollar inside a code span is literal.
+        output += text.slice(position, codeEnd + 1); position = codeEnd + 1;
+        continue;
+      }
       if (text.charAt(position) === '$' && position > 0 && text.charAt(position - 1) === '\\') {
         // Escaped dollar: placeholder, turned into its own element after escaping.
         output = output.slice(0, -1) + LITERAL_DOLLAR; position++;
@@ -946,36 +965,41 @@
 
   // Exercise text is Markdown-like plain text: HTML is shown as text (so a<b<c
   // in TeX stays intact), and outside math a small inline Markdown subset is
-  // formatted: **bold**, *italic*, `code`; \* and \` are literal. Same rules as
-  // proseHtml() in math-exercise.lua (parity test).
+  // formatted: ***both***, **bold**, *italic*, `code`; \* and \` are literal; a
+  // trailing backslash is a line break. Emphasis may contain math. Same rules
+  // as inlineMarkdown()/proseHtml() in math-exercise.lua (parity test).
+  var MATH_SLOT = '';   // stands for one math span while formatting
+  var SPACE = /[ \t\r\n\f\v]/, WORD = /[A-Za-z0-9]/;
+
   function inlineMarkdown(s) {
     var out = '', i = 0, n = s.length;
+    // Closing delimiter for emphasis opened just before `from`: on the same
+    // line, not escaped, not after whitespace, not followed by another "*"
+    // (or, for "*", by a letter or digit). Linear in the line length.
     function closing(delim, from) {
-      var j = from;
+      if (from >= n || SPACE.test(s.charAt(from))) return -1;
+      var newline = s.indexOf('\n', from); if (newline < 0) newline = n;
+      var j = from + 1;
       for (;;) {
         var k = s.indexOf(delim, j);
-        if (k < 0) return -1;
-        var inner = s.slice(from, k), next = s.charAt(k + delim.length);
-        if (inner.indexOf('\n') >= 0) return -1;
-        if (delim === '*' && next === '*') j = k + 2;
-        else if (inner !== '' && !/^[ \t\r\n\f\v]/.test(inner) && !/[ \t\r\n\f\v]$/.test(inner) && !(delim === '*' && /[A-Za-z0-9]/.test(next))) return k;
-        else j = k + 1;
+        if (k < 0 || k >= newline) return -1;
+        var next = s.charAt(k + delim.length), before = s.charAt(k - 1);
+        if (next === '*' || before === '\\' || SPACE.test(before) || (delim === '*' && WORD.test(next))) j = k + 1;
+        else return k;
       }
     }
     while (i < n) {
       var c = s.charAt(i), next = s.charAt(i + 1), k;
       if (c === '\\' && (next === '*' || next === '`')) { out += next; i += 2; }
       else if (c === '\\' && next === '\n') i++;   // Markdown hard line break: the newline already breaks the line
-      else if (c === '`') {
-        k = s.indexOf('`', i + 1);
-        var inner = k >= 0 ? s.slice(i + 1, k) : '';
-        if (k >= 0 && inner !== '' && inner.indexOf('\n') < 0) { out += '<code>' + inner + '</code>'; i = k + 1; }
-        else { out += c; i++; }
+      else if (c === '`' && (k = codeSpanEnd(s, i)) >= 0) { out += '<code>' + s.slice(i + 1, k) + '</code>'; i = k + 1; }
+      else if (s.slice(i, i + 3) === '***' && (k = closing('***', i + 3)) >= 0) {
+        out += '<em><strong>' + inlineMarkdown(s.slice(i + 3, k)) + '</strong></em>'; i = k + 3;
       } else if (c === '*' && next === '*') {
         k = closing('**', i + 2);
         if (k >= 0) { out += '<strong>' + inlineMarkdown(s.slice(i + 2, k)) + '</strong>'; i = k + 2; }
         else { out += '**'; i += 2; }
-      } else if (c === '*' && !(i > 0 && /[A-Za-z0-9]/.test(s.charAt(i - 1)))) {
+      } else if (c === '*' && !(i > 0 && WORD.test(s.charAt(i - 1)))) {
         k = closing('*', i + 1);
         if (k >= 0) { out += '<em>' + inlineMarkdown(s.slice(i + 1, k)) + '</em>'; i = k + 1; }
         else { out += c; i++; }
@@ -984,24 +1008,28 @@
     return out;
   }
 
-  // Escapes a run of exercise text; formats inline Markdown outside math
-  // (\( \), \[ \], \begin{..} \end{..} after normalizeTaskMathDelimiters).
+  // Escapes a run of exercise text and formats inline Markdown outside math
+  // (\( \), \[ \], \begin{..} \end{..} after normalizeTaskMathDelimiters) and
+  // outside code spans. Each math span is a slot while formatting, so emphasis
+  // may contain math.
   function proseHtml(text) {
-    var out = '', position = 0;
+    var plain = '', maths = [], position = 0;
     while (position < text.length) {
-      var rest = text.slice(position);
-      var a = rest.search(/\\[([]/), env = /\\begin\{([^}]*)\}/.exec(rest);
-      var b = env ? env.index : -1, open = -1, closer = '';
-      if (a >= 0 && (b < 0 || a <= b)) { open = a; closer = rest.charAt(a + 1) === '(' ? '\\)' : '\\]'; }
-      else if (b >= 0) { open = b; closer = '\\end{' + env[1] + '}'; }
-      if (open < 0) { out += inlineMarkdown(escHtml(rest)); break; }
-      out += inlineMarkdown(escHtml(rest.slice(0, open)));
-      var close = rest.indexOf(closer, open + 2);
-      var stop = close >= 0 ? close + closer.length : rest.length;
-      out += escHtml(rest.slice(open, stop));
-      position += stop;
+      var c = text.charAt(position), codeEnd = c === '`' ? codeSpanEnd(text, position) : -1;
+      var two = text.slice(position, position + 2);
+      var env = /^\\begin\{([^}]*)\}/.exec(text.slice(position, position + 200));
+      var closer = two === '\\(' ? '\\)' : two === '\\[' ? '\\]' : env ? '\\end{' + env[1] + '}' : null;
+      if (codeEnd >= 0) { plain += text.slice(position, codeEnd + 1); position = codeEnd + 1; }
+      else if (closer) {
+        var close = text.indexOf(closer, position + 2);
+        var stop = close >= 0 ? close + closer.length : text.length;
+        maths.push(escHtml(text.slice(position, stop)));
+        plain += MATH_SLOT;
+        position = stop;
+      } else { plain += c; position++; }
     }
-    return out;
+    var index = 0;
+    return inlineMarkdown(escHtml(plain)).replace(//g, function () { return maths[index++]; });
   }
 
   function renderTaskText(text, exerciseId, vars, vecdir, mode, questionIsHtml) {
@@ -1397,6 +1425,9 @@
   // `math-exercise: stop-after:` / `ctm-assessment: stop-after:` (seconds, default 20).
   var SLOW_CHECK_MS = (typeof window !== 'undefined' && window.__mathExerciseSlowCheckMs) ||
     (Number(ME_CFG.stopAfter) > 0 ? Number(ME_CFG.stopAfter) * 1000 : 20000);
+  // Checks in progress, told when Python reloads during a retry: loading is
+  // timed by the load limit, not by stop-after.
+  var reloadHooks = new Set();
   async function runOnCurrentRuntime(run) {
     var epoch = globalThis.MathExerciseRuntime.stopCount();
     var attempted = await ensurePyodide(), ready = null;
@@ -1411,7 +1442,10 @@
         globalThis.MathExerciseRuntime.forgetModules(ready || attempted);
         sympyRuntime = null; sympyLoading = null;
       }
-      var current = await ensureSympy();
+      reloadHooks.forEach(function (hook) { hook(true); });
+      var current;
+      try { current = await ensureSympy(); }
+      finally { reloadHooks.forEach(function (hook) { hook(false); }); }
       if (current === (ready || attempted) && !missing) throw error;
       return run(current);
     }
@@ -1753,10 +1787,10 @@
       if (feedbackBtn) feedbackBtn.disabled = true;
       fbDiv.innerHTML = '<div class="math-fb-checking">' + L.checking + '</div>';
       var cancelSlow = function () {};
-      var offerStop = function () {
+      var offerStop = function (loading) {
           var note = document.createElement('div');
           note.className = 'math-fb-checking';
-          note.textContent = L.slowCheck + ' ';
+          note.textContent = (loading ? L.slowLoad : L.slowCheck) + ' ';
           var stopBtn = document.createElement('button');
           stopBtn.type = 'button';
           stopBtn.className = 'btn btn-sm btn-outline-danger math-stop-btn';
@@ -1767,12 +1801,19 @@
           note.appendChild(stopBtn);
           fbDiv.replaceChildren(note);
       };
-      try {
-        // A load that never finishes can still be stopped, after the load limit.
-        cancelSlow = globalThis.MathExerciseRuntime.whenSlow(globalThis.MathExerciseRuntime.loadTimeout, offerStop);
-        await prepareRuntime(checkOpts.packages);
+      // Loading is timed by the load limit (a load that never finishes can
+      // still be stopped), the check itself by stop-after.
+      var timePhase = function (loading) {
         cancelSlow();
-        cancelSlow = globalThis.MathExerciseRuntime.whenSlow(SLOW_CHECK_MS, offerStop);
+        cancelSlow = globalThis.MathExerciseRuntime.whenSlow(
+          loading ? globalThis.MathExerciseRuntime.loadTimeout : SLOW_CHECK_MS,
+          function () { offerStop(loading); });
+      };
+      reloadHooks.add(timePhase);
+      try {
+        timePhase(true);
+        await prepareRuntime(checkOpts.packages);
+        timePhase(false);
         var parts = [];
         var fieldElements = fieldIds.map(function (id) { return document.getElementById(id); });
         if (mode === 'custom') {
@@ -1826,6 +1867,7 @@
       } catch (err) {
         fbDiv.innerHTML = '<div class="math-fb-err">&#9888;&nbsp;' + friendlyError(String(err)) + '</div>';
       } finally {
+        reloadHooks.delete(timePhase);
         cancelSlow();
         checkBtn.disabled = false;
         if (feedbackBtn) feedbackBtn.disabled = !feedbackHandle;
