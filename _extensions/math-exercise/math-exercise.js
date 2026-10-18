@@ -664,10 +664,12 @@
       'except ImportError:  # native test runners (question-tests.py) have no page to protect',
       '    _ctm_guard = None',
       '',
-      'def _learner_strings():',
-      '    yield globals().get("_math_student") or ""',
+      'def _learner_strings(request):',
+      '    # Only what this request brought: earlier requests leave other inputs behind.',
+      '    if "_math_student" in request and request.get("_math_mode") not in ("string", "string_ci"):',
+      '        yield request["_math_student"] or ""  # string answers are never evaluated',
       '    try:',
-      '        response = _mj.loads(globals().get("_math_response_json") or "null")',
+      '        response = _mj.loads(request.get("_math_response_json") or "null")',
       '    except ValueError:',
       '        return',
       '    if isinstance(response, dict):',
@@ -678,12 +680,11 @@
       '',
       'def _math_run(name, caller):',
       '    # Move this request\'s inputs out of the shared namespace into the module.',
-      '    for key in _MATH_INPUTS:',
-      '        if key in caller:',
-      '            globals()[key] = caller.pop(key)',
+      '    request = {key: caller.pop(key) for key in _MATH_INPUTS if key in caller}',
+      '    globals().update(request)',
       '    # Learner answers are parsed by SymPy (which evaluates Python): no dunder',
       '    # access. Author data (variants, checkers) is not restricted.',
-      '    if any("__" in str(text) for text in _learner_strings()):',
+      '    if any("__" in str(text) for text in _learner_strings(request)):',
       '        raise ValueError("SyntaxError: unsupported input")',
       '    # Whatever the parsed answer or checker does, other components on the',
       '    # page keep their interpreter state.',
@@ -1679,22 +1680,23 @@
       checkBtn.disabled = true;
       if (feedbackBtn) feedbackBtn.disabled = true;
       fbDiv.innerHTML = '<div class="math-fb-checking">' + L.checking + '</div>';
-      // A runtime in a worker can be stopped: offer it when a check takes long.
-      var cancelSlow = globalThis.MathExerciseRuntime.whenSlow(SLOW_CHECK_MS, function () {
-        var note = document.createElement('div');
-        note.className = 'math-fb-checking';
-        note.textContent = L.slowCheck + ' ';
-        var stopBtn = document.createElement('button');
-        stopBtn.type = 'button';
-        stopBtn.className = 'btn btn-sm btn-outline-danger math-stop-btn';
-        stopBtn.textContent = L.stop;
-        stopBtn.addEventListener('click', function () {
-          globalThis.MathExerciseRuntime.stop('Stopped by the learner');
-        });
-        note.appendChild(stopBtn);
-        fbDiv.replaceChildren(note);
-      });
+      var cancelSlow = function () {};
       try {
+        // A runtime in a worker can be stopped: offer it when a check takes long.
+        cancelSlow = globalThis.MathExerciseRuntime.whenSlow(SLOW_CHECK_MS, function () {
+          var note = document.createElement('div');
+          note.className = 'math-fb-checking';
+          note.textContent = L.slowCheck + ' ';
+          var stopBtn = document.createElement('button');
+          stopBtn.type = 'button';
+          stopBtn.className = 'btn btn-sm btn-outline-danger math-stop-btn';
+          stopBtn.textContent = L.stop;
+          stopBtn.addEventListener('click', function () {
+            globalThis.MathExerciseRuntime.stop('Stopped by the learner');
+          });
+          note.appendChild(stopBtn);
+          fbDiv.replaceChildren(note);
+        });
         await prepareRuntime(checkOpts.packages);
         var parts = [];
         var fieldElements = fieldIds.map(function (id) { return document.getElementById(id); });

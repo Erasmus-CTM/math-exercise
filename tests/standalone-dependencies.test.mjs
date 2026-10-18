@@ -180,3 +180,13 @@ test('stop-after is read per component or for all components, and validated', { 
     assert.match(r.stderr, /stop-after must be a number of seconds/);
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
+
+test('non-HTML output carries no script configuration', { skip }, () => {
+  const dir = project();
+  try {
+    writeFileSync(join(dir, 'page.qmd'), '---\nformat: gfm\nfilters: [math-exercise]\nmath-exercise: {feedback: false}\n---\n\n' + plain + '\n');
+    const r = spawnSync(quarto, ['render', 'page.qmd'], { cwd: dir, encoding: 'utf8', timeout: 120000 });
+    assert.equal(r.status, 0, r.stderr);
+    assert.doesNotMatch(readFileSync(join(dir, 'page.md'), 'utf8'), /__mathExerciseConfig|<script/);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});

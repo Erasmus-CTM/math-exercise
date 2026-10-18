@@ -120,12 +120,21 @@ try:
 except ValueError as error:
     assert 'unsupported input' in str(error)
 assert builtins.len is len and ask('6*sqrt(2)')['status'] == 'correct'
-# Author data in a custom response (variant context) is not restricted.
+# Only this request's learner strings count: author data (variant context) is
+# free, inputs left by an earlier request of another kind are not re-checked,
+# and string answers are never evaluated.
 module = sys.modules['_ctm_math_exercise']
-module._math_student = ''
-module._math_response_json = json.dumps({'kind': 'expressions', 'raw': ['x + 1'], 'inputs': {'m': {'type': 'matrix', 'raw': ['__a']}},
-                                         'variant': {'context': 'The value is __important__'}})
-assert list(module._learner_strings()) == ['', 'x + 1', '__a']
+custom = json.dumps({'kind': 'expressions', 'raw': ['x + 1'], 'inputs': {'m': {'type': 'matrix', 'raw': ['__a']}},
+                     'variant': {'context': 'The value is __important__'}})
+assert list(module._learner_strings({'_math_response_json': custom})) == ['x + 1', '__a']
+assert list(module._learner_strings({'_math_student': 'x__1', '_math_mode': 'equivalent'})) == ['x__1']
+assert list(module._learner_strings({'_math_student': '__init__', '_math_mode': 'string'})) == []
+try:
+    ask('x__1')
+    raise SystemExit('dunder answer accepted')
+except ValueError:
+    pass
+assert ask('6*sqrt(2)')['status'] == 'correct', 'a rejected answer must not block later checks'
 print('isolated')
 `;
     const r = spawnSync(python, ['-c', script, join(dir, 'case.json')], { encoding: 'utf8', timeout: 120000 });
