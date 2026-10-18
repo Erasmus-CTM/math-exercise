@@ -76,10 +76,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="site_libs/bootstrap/bootstrap-f53186b9ac0866246e638800b9d808a6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
-<script src="site_libs/quarto-contrib/ai-feedback-0.7.0/feedback-core.js"></script>
-<script src="site_libs/quarto-contrib/ai-feedback-0.7.0/feedback-dom.js"></script>
-<script src="site_libs/quarto-contrib/ai-feedback-0.7.0/ai-feedback.js"></script>
-<link href="site_libs/quarto-contrib/ai-feedback-0.7.0/ai-feedback.css" rel="stylesheet">
+<script src="site_libs/quarto-contrib/ai-feedback-0.8.1/feedback-core.js"></script>
+<script src="site_libs/quarto-contrib/ai-feedback-0.8.1/feedback-dom.js"></script>
+<script src="site_libs/quarto-contrib/ai-feedback-0.8.1/ai-feedback.js"></script>
+<link href="site_libs/quarto-contrib/ai-feedback-0.8.1/ai-feedback.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -552,12 +552,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   margin: 0;
 }
 
-/* Shared settings must not stretch the existing Bootstrap controls. */
+/* Common CTM button size, shared by all CTM components (math-exercise,
+   py-exercise, pyodide-interaktiv, ai-feedback). Set the --ctm-button-*
+   variables in your CSS or theme to change all of them together. */
+.math-exercise-controls button,
+.math-exercise-controls .ai-feedback-gear {
+  font-size: var(--ctm-button-font-size, .875rem);
+  padding: var(--ctm-button-padding-y, .375rem) var(--ctm-button-padding-x, .75rem);
+  line-height: var(--ctm-button-line-height, 1.5);
+  border-radius: var(--ctm-button-radius, var(--bs-border-radius, .375rem));
+}
 .math-exercise-controls .ai-feedback-gear {
   margin: 0;
-  padding: .375rem .75rem;
-  font-size: inherit;
-  line-height: 1.5;
 }
 
 </style>
@@ -704,8 +710,8 @@ window.Quarto = {
 <!-- main -->
 <main class="content" id="quarto-document-content">
 <script>window.__aiFeedbackPolicies = {"layers":[],"pageLayers":[]};</script>
-<script>window.__aiFeedbackConfig = {"baseUrl":"","mode":"copy","model":"","storage":"local"};</script>
-<script>window.__mathExerciseConfig = {"lang":"en"};</script>
+<script>window.__aiFeedbackConfig = {"baseUrl":"","mode":"copy","model":""};</script>
+<script>window.__mathExerciseConfig = {"lang":"en","stopAfter":20};</script>
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
@@ -776,7 +782,7 @@ For basis problems, prefer the shared assess_basis(...) helper. The checker only
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    axis<span class="op">=</span><span class="st">"columns"</span>,          <span class="co"># or "rows"</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    target_dimension<span class="op">=</span>d,</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    belongs<span class="op">=</span><span class="kw">lambda</span> vector: <span class="bu">all</span>(value.is_number <span class="kw">is</span> <span class="va">True</span> <span class="kw">and</span> value.is_real <span class="kw">is</span> <span class="va">True</span> <span class="kw">and</span> value.is_finite <span class="kw">is</span> <span class="va">True</span> <span class="cf">for</span> value <span class="kw">in</span> vector)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#|               and ...,  # True exactly for vectors in the target space</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">and</span> ...,  <span class="co"># True exactly for vectors in the target space</span></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">"B"</span>,                <span class="co"># the name used in mat{name=B, ...}</span></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    space_name<span class="op">=</span><span class="st">"target space"</span>,</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -796,7 +802,7 @@ For basis problems, prefer the shared assess_basis(...) helper. The checker only
 </div>
 <section id="null-space-basis" class="level3">
 <h3 class="anchored" data-anchor-id="null-space-basis">Null-space basis</h3>
-<div class="math-exercise-cell" id="math-exercise-1" data-label="dynamic-nullspace-basis" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    Z = response[\&quot;inputs\&quot;][\&quot;Z\&quot;][\&quot;matrix\&quot;]\n    C = Matrix([[1, 2, 3], [2, 4, 6]])\n    return assess_basis(\n        Z,\n        axis=\&quot;columns\&quot;,\n        target_dimension=C.cols - C.rank(),\n        belongs=lambda vector: all(value.is_number is True and value.is_real is True and value.is_finite is True for value in vector)\n            and Z.rows == C.cols and C * vector == zeros(C.rows, 1),\n        name=\&quot;Z\&quot;,\n        space_name=\&quot;null space\&quot;,\n    )&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;dynamic-nullspace-basis&quot;,&quot;name&quot;:&quot;&quot;}" data-context-mode="explicit" data-context-refs="dynamic-basis-method" data-context="&quot;Null-space basis&quot;" data-fields="[&quot;math-exercise-1-dm-Z-1-1&quot;,&quot;math-exercise-1-dm-Z-2-1&quot;,&quot;math-exercise-1-dm-Z-3-1&quot;]" data-structural-field-labels="[&quot;dm:Z:1,1&quot;,&quot;dm:Z:2,1&quot;,&quot;dm:Z:3,1&quot;]">
+<div class="math-exercise-cell" id="math-exercise-1" data-label="dynamic-nullspace-basis" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    # Typed decimals are exact: 0.1 means 1/10, not a binary approximation.\n    exact = lambda value: value.xreplace({f: Rational(str(f)) for f in value.atoms(Float)})\n    Z = response[\&quot;inputs\&quot;][\&quot;Z\&quot;][\&quot;matrix\&quot;].applyfunc(exact)\n    C = Matrix([[1, 2, 3], [2, 4, 6]])\n    return assess_basis(\n        Z,\n        axis=\&quot;columns\&quot;,\n        target_dimension=C.cols - C.rank(),\n        belongs=lambda vector: all(value.is_number is True and value.is_real is True and value.is_finite is True for value in vector)\n            and Z.rows == C.cols and C * vector == zeros(C.rows, 1),\n        name=\&quot;Z\&quot;,\n        space_name=\&quot;null space\&quot;,\n    )&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;dynamic-nullspace-basis&quot;,&quot;name&quot;:&quot;&quot;}" data-context-mode="explicit" data-context-refs="dynamic-basis-method" data-context="&quot;Null-space basis&quot;" data-fields="[&quot;math-exercise-1-dm-Z-1-1&quot;,&quot;math-exercise-1-dm-Z-2-1&quot;,&quot;math-exercise-1-dm-Z-3-1&quot;]" data-structural-field-labels="[&quot;dm:Z:1,1&quot;,&quot;dm:Z:2,1&quot;,&quot;dm:Z:3,1&quot;]">
 <div class="math-exercise-caption math-exercise-toggle" data-math-exercise-source="A basis without announcing nullity" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>A basis without announcing nullity</div>
 
 <div class="math-exercise-body" aria-hidden="true">
@@ -831,7 +837,9 @@ many vectors are needed:<br>
 #| context: dynamic-basis-method
 #| checker: |
 #|   def check(response, symbols):
-#|       Z = response["inputs"]["Z"]["matrix"]
+#|       # Typed decimals are exact: 0.1 means 1/10, not a binary approximation.
+#|       exact = lambda value: value.xreplace({f: Rational(str(f)) for f in value.atoms(Float)})
+#|       Z = response["inputs"]["Z"]["matrix"].applyfunc(exact)
 #|       C = Matrix([[1, 2, 3], [2, 4, 6]])
 #|       return assess_basis(
 #|           Z,
@@ -864,6 +872,12 @@ $Z=$ mat{name=Z, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}
     assert score(zeros(B.rows,B.cols)) == 0
     assert score(I*B) &lt; 1
     assert score(zeros(0,0)) == 0
+    # Typed decimals are exact; a typed 0.0 column is still the zero vector.
+    decimal = Matrix([[Float("-0.3"), -2], [0, 1], [Float("0.1"), 0]])
+    assert score(decimal) == 1
+    zero_column = B.row_join(Matrix([Float("0.0")]*3))
+    result = check({"inputs": {"Z": {"matrix": zero_column}}}, symbols)
+    assert result["assessment"]["Z"]["columns"][-1] == "incorrect"
 </code></pre></details>
 </details>
 <details class="math-example-policy" data-source-kind="policy"><summary>Show policy YAML</summary><div class="ai-feedback-policy-summary" data-max-issues="" data-integration="math-exercise" data-exercise="dynamic-nullspace-basis" data-policy=""></div>
@@ -931,7 +945,7 @@ $Z=$ mat{name=Z, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}
 </section>
 <section id="column-space-basis" class="level3">
 <h3 class="anchored" data-anchor-id="column-space-basis">Column-space basis</h3>
-<div class="math-exercise-cell" id="math-exercise-2" data-label="dynamic-column-space-basis" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    B = response[\&quot;inputs\&quot;][\&quot;B\&quot;][\&quot;matrix\&quot;]\n    A = Matrix([[1, 2, 0], [0, 1, 1], [1, 3, 1]])\n    return assess_basis(\n        B,\n        axis=\&quot;columns\&quot;,\n        target_dimension=A.rank(),\n        belongs=lambda vector: all(value.is_number is True and value.is_real is True and value.is_finite is True for value in vector)\n            and B.rows == A.rows and A.row_join(vector).rank() == A.rank(),\n        name=\&quot;B\&quot;,\n        space_name=\&quot;column space\&quot;,\n    )&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;dynamic-column-space-basis&quot;,&quot;name&quot;:&quot;&quot;}" data-context-mode="explicit" data-context-refs="dynamic-basis-method" data-context="&quot;Column-space basis&quot;" data-fields="[&quot;math-exercise-2-dm-B-1-1&quot;,&quot;math-exercise-2-dm-B-2-1&quot;,&quot;math-exercise-2-dm-B-3-1&quot;]" data-structural-field-labels="[&quot;dm:B:1,1&quot;,&quot;dm:B:2,1&quot;,&quot;dm:B:3,1&quot;]">
+<div class="math-exercise-cell" id="math-exercise-2" data-label="dynamic-column-space-basis" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    # Typed decimals are exact: 0.1 means 1/10, not a binary approximation.\n    exact = lambda value: value.xreplace({f: Rational(str(f)) for f in value.atoms(Float)})\n    B = response[\&quot;inputs\&quot;][\&quot;B\&quot;][\&quot;matrix\&quot;].applyfunc(exact)\n    A = Matrix([[1, 2, 0], [0, 1, 1], [1, 3, 1]])\n    return assess_basis(\n        B,\n        axis=\&quot;columns\&quot;,\n        target_dimension=A.rank(),\n        belongs=lambda vector: all(value.is_number is True and value.is_real is True and value.is_finite is True for value in vector)\n            and B.rows == A.rows and A.row_join(vector).rank() == A.rank(),\n        name=\&quot;B\&quot;,\n        space_name=\&quot;column space\&quot;,\n    )&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;dynamic-column-space-basis&quot;,&quot;name&quot;:&quot;&quot;}" data-context-mode="explicit" data-context-refs="dynamic-basis-method" data-context="&quot;Column-space basis&quot;" data-fields="[&quot;math-exercise-2-dm-B-1-1&quot;,&quot;math-exercise-2-dm-B-2-1&quot;,&quot;math-exercise-2-dm-B-3-1&quot;]" data-structural-field-labels="[&quot;dm:B:1,1&quot;,&quot;dm:B:2,1&quot;,&quot;dm:B:3,1&quot;]">
 <div class="math-exercise-caption math-exercise-toggle" data-math-exercise-source="Compute a basis for a column space" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>Compute a basis for a column space</div>
 
 <div class="math-exercise-body" aria-hidden="true">
@@ -966,7 +980,9 @@ Enter one basis vector per column of \(B\):<br>
 #| context: dynamic-basis-method
 #| checker: |
 #|   def check(response, symbols):
-#|       B = response["inputs"]["B"]["matrix"]
+#|       # Typed decimals are exact: 0.1 means 1/10, not a binary approximation.
+#|       exact = lambda value: value.xreplace({f: Rational(str(f)) for f in value.atoms(Float)})
+#|       B = response["inputs"]["B"]["matrix"].applyfunc(exact)
 #|       A = Matrix([[1, 2, 0], [0, 1, 1], [1, 3, 1]])
 #|       return assess_basis(
 #|           B,
@@ -999,6 +1015,8 @@ $B=$ mat{name=B, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}
     assert score(zeros(B.rows,B.cols)) == 0
     assert score(I*B) &lt; 1
     assert score(zeros(0,0)) == 0
+    # Typed decimals are exact.
+    assert score(Matrix([[Float("0.1"), 0], [0, Float("0.3")], [Float("0.1"), Float("0.3")]])) == 1
 </code></pre></details>
 </details>
 <details class="math-example-policy" data-source-kind="policy"><summary>Show policy YAML</summary><div class="ai-feedback-policy-summary" data-max-issues="" data-integration="math-exercise" data-exercise="dynamic-column-space-basis" data-policy=""></div>
@@ -1066,7 +1084,7 @@ $B=$ mat{name=B, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}
 </section>
 <section id="row-space-basis" class="level3">
 <h3 class="anchored" data-anchor-id="row-space-basis">Row-space basis</h3>
-<div class="math-exercise-cell" id="math-exercise-3" data-label="dynamic-row-space-basis" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    R = response[\&quot;inputs\&quot;][\&quot;R\&quot;][\&quot;matrix\&quot;]\n    A = Matrix([[1, 0, 1, 2], [0, 1, 1, 1], [1, 1, 2, 3]])\n    return assess_basis(\n        R,\n        axis=\&quot;rows\&quot;,\n        target_dimension=A.rank(),\n        belongs=lambda vector: all(value.is_number is True and value.is_real is True and value.is_finite is True for value in vector)\n            and R.cols == A.cols and A.col_join(vector).rank() == A.rank(),\n        name=\&quot;R\&quot;,\n        space_name=\&quot;row space\&quot;,\n    )&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;dynamic-row-space-basis&quot;,&quot;name&quot;:&quot;&quot;}" data-context-mode="explicit" data-context-refs="dynamic-basis-method" data-context="&quot;Row-space basis&quot;" data-fields="[&quot;math-exercise-3-dm-R-1-1&quot;,&quot;math-exercise-3-dm-R-1-2&quot;,&quot;math-exercise-3-dm-R-1-3&quot;,&quot;math-exercise-3-dm-R-1-4&quot;]" data-structural-field-labels="[&quot;dm:R:1,1&quot;,&quot;dm:R:1,2&quot;,&quot;dm:R:1,3&quot;,&quot;dm:R:1,4&quot;]">
+<div class="math-exercise-cell" id="math-exercise-3" data-label="dynamic-row-space-basis" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    # Typed decimals are exact: 0.1 means 1/10, not a binary approximation.\n    exact = lambda value: value.xreplace({f: Rational(str(f)) for f in value.atoms(Float)})\n    R = response[\&quot;inputs\&quot;][\&quot;R\&quot;][\&quot;matrix\&quot;].applyfunc(exact)\n    A = Matrix([[1, 0, 1, 2], [0, 1, 1, 1], [1, 1, 2, 3]])\n    return assess_basis(\n        R,\n        axis=\&quot;rows\&quot;,\n        target_dimension=A.rank(),\n        belongs=lambda vector: all(value.is_number is True and value.is_real is True and value.is_finite is True for value in vector)\n            and R.cols == A.cols and A.col_join(vector).rank() == A.rank(),\n        name=\&quot;R\&quot;,\n        space_name=\&quot;row space\&quot;,\n    )&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;dynamic-row-space-basis&quot;,&quot;name&quot;:&quot;&quot;}" data-context-mode="explicit" data-context-refs="dynamic-basis-method" data-context="&quot;Row-space basis&quot;" data-fields="[&quot;math-exercise-3-dm-R-1-1&quot;,&quot;math-exercise-3-dm-R-1-2&quot;,&quot;math-exercise-3-dm-R-1-3&quot;,&quot;math-exercise-3-dm-R-1-4&quot;]" data-structural-field-labels="[&quot;dm:R:1,1&quot;,&quot;dm:R:1,2&quot;,&quot;dm:R:1,3&quot;,&quot;dm:R:1,4&quot;]">
 <div class="math-exercise-caption math-exercise-toggle" data-math-exercise-source="Compute a basis using row vectors" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>Compute a basis using row vectors</div>
 
 <div class="math-exercise-body" aria-hidden="true">
@@ -1101,7 +1119,9 @@ many vectors are needed:<br>
 #| context: dynamic-basis-method
 #| checker: |
 #|   def check(response, symbols):
-#|       R = response["inputs"]["R"]["matrix"]
+#|       # Typed decimals are exact: 0.1 means 1/10, not a binary approximation.
+#|       exact = lambda value: value.xreplace({f: Rational(str(f)) for f in value.atoms(Float)})
+#|       R = response["inputs"]["R"]["matrix"].applyfunc(exact)
 #|       A = Matrix([[1, 0, 1, 2], [0, 1, 1, 1], [1, 1, 2, 3]])
 #|       return assess_basis(
 #|           R,
@@ -1134,6 +1154,8 @@ $R=$ mat{name=R, rows=auto, cols=4, initial-rows=1, min-rows=0, max-rows=3}
     assert score(zeros(B.rows,B.cols)) == 0
     assert score(I*B) &lt; 1
     assert score(zeros(0,0)) == 0
+    # Typed decimals are exact.
+    assert score(Matrix([[Float("0.1"), 0, Float("0.1"), Float("0.2")], [0, 1, 1, 1]])) == 1
 </code></pre></details>
 </details>
 <details class="math-example-policy" data-source-kind="policy"><summary>Show policy YAML</summary><div class="ai-feedback-policy-summary" data-max-issues="" data-integration="math-exercise" data-exercise="dynamic-row-space-basis" data-policy=""></div>
@@ -1201,7 +1223,7 @@ $R=$ mat{name=R, rows=auto, cols=4, initial-rows=1, min-rows=0, max-rows=3}
 </section>
 <section id="eigenspace-basis" class="level3">
 <h3 class="anchored" data-anchor-id="eigenspace-basis">Eigenspace basis</h3>
-<div class="math-exercise-cell" id="math-exercise-4" data-label="dynamic-eigenspace-basis" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    E = response[\&quot;inputs\&quot;][\&quot;E\&quot;][\&quot;matrix\&quot;]\n    A = Matrix([[2, 1, 1], [0, 2, 0], [0, 0, 2]])\n    constraint = A - 2*eye(3)\n    return assess_basis(\n        E,\n        axis=\&quot;columns\&quot;,\n        target_dimension=constraint.cols - constraint.rank(),\n        belongs=lambda vector: all(value.is_number is True and value.is_real is True and value.is_finite is True for value in vector)\n            and E.rows == A.rows and constraint * vector == zeros(A.rows, 1),\n        name=\&quot;E\&quot;,\n        space_name=\&quot;eigenspace\&quot;,\n    )&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;dynamic-eigenspace-basis&quot;,&quot;name&quot;:&quot;&quot;}" data-context-mode="explicit" data-context-refs="dynamic-basis-method" data-context="&quot;Eigenspace basis&quot;" data-fields="[&quot;math-exercise-4-dm-E-1-1&quot;,&quot;math-exercise-4-dm-E-2-1&quot;,&quot;math-exercise-4-dm-E-3-1&quot;]" data-structural-field-labels="[&quot;dm:E:1,1&quot;,&quot;dm:E:2,1&quot;,&quot;dm:E:3,1&quot;]">
+<div class="math-exercise-cell" id="math-exercise-4" data-label="dynamic-eigenspace-basis" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    # Typed decimals are exact: 0.1 means 1/10, not a binary approximation.\n    exact = lambda value: value.xreplace({f: Rational(str(f)) for f in value.atoms(Float)})\n    E = response[\&quot;inputs\&quot;][\&quot;E\&quot;][\&quot;matrix\&quot;].applyfunc(exact)\n    A = Matrix([[2, 1, 1], [0, 2, 0], [0, 0, 2]])\n    constraint = A - 2*eye(3)\n    return assess_basis(\n        E,\n        axis=\&quot;columns\&quot;,\n        target_dimension=constraint.cols - constraint.rank(),\n        belongs=lambda vector: all(value.is_number is True and value.is_real is True and value.is_finite is True for value in vector)\n            and E.rows == A.rows and constraint * vector == zeros(A.rows, 1),\n        name=\&quot;E\&quot;,\n        space_name=\&quot;eigenspace\&quot;,\n    )&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;dynamic-eigenspace-basis&quot;,&quot;name&quot;:&quot;&quot;}" data-context-mode="explicit" data-context-refs="dynamic-basis-method" data-context="&quot;Eigenspace basis&quot;" data-fields="[&quot;math-exercise-4-dm-E-1-1&quot;,&quot;math-exercise-4-dm-E-2-1&quot;,&quot;math-exercise-4-dm-E-3-1&quot;]" data-structural-field-labels="[&quot;dm:E:1,1&quot;,&quot;dm:E:2,1&quot;,&quot;dm:E:3,1&quot;]">
 <div class="math-exercise-caption math-exercise-toggle" data-math-exercise-source="Find a basis for an eigenspace" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>Find a basis for an eigenspace</div>
 
 <div class="math-exercise-body" aria-hidden="true">
@@ -1236,7 +1258,9 @@ the number of columns is part of your answer:<br>
 #| context: dynamic-basis-method
 #| checker: |
 #|   def check(response, symbols):
-#|       E = response["inputs"]["E"]["matrix"]
+#|       # Typed decimals are exact: 0.1 means 1/10, not a binary approximation.
+#|       exact = lambda value: value.xreplace({f: Rational(str(f)) for f in value.atoms(Float)})
+#|       E = response["inputs"]["E"]["matrix"].applyfunc(exact)
 #|       A = Matrix([[2, 1, 1], [0, 2, 0], [0, 0, 2]])
 #|       constraint = A - 2*eye(3)
 #|       return assess_basis(
@@ -1270,6 +1294,8 @@ $E=$ mat{name=E, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}
     assert score(zeros(B.rows,B.cols)) == 0
     assert score(I*B) &lt; 1
     assert score(zeros(0,0)) == 0
+    # Typed decimals are exact.
+    assert score(Matrix([[Float("0.1"), 0], [0, Float("0.7")], [0, Float("-0.7")]])) == 1
 </code></pre></details>
 </details>
 <details class="math-example-policy" data-source-kind="policy"><summary>Show policy YAML</summary><div class="ai-feedback-policy-summary" data-max-issues="" data-integration="math-exercise" data-exercise="dynamic-eigenspace-basis" data-policy=""></div>
@@ -1337,7 +1363,7 @@ $E=$ mat{name=E, rows=3, cols=auto, initial-cols=1, min-cols=0, max-cols=3}
 </section>
 <section id="basis-of-a-polynomial-subspace" class="level3">
 <h3 class="anchored" data-anchor-id="basis-of-a-polynomial-subspace">Basis of a polynomial subspace</h3>
-<div class="math-exercise-cell" id="math-exercise-5" data-label="dynamic-polynomial-basis" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    P = response[\&quot;inputs\&quot;][\&quot;Pcoef\&quot;][\&quot;matrix\&quot;]\n    constraints = Matrix([[1, 1, 1, 1], [0, 1, -2, 3]])\n    return assess_basis(\n        P,\n        axis=\&quot;columns\&quot;,\n        target_dimension=constraints.cols - constraints.rank(),\n        belongs=lambda vector: all(value.is_number is True and value.is_real is True and value.is_finite is True for value in vector)\n            and P.rows == constraints.cols and constraints * vector == zeros(constraints.rows, 1),\n        name=\&quot;Pcoef\&quot;,\n        space_name=\&quot;polynomial subspace\&quot;,\n    )&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;dynamic-polynomial-basis&quot;,&quot;name&quot;:&quot;&quot;}" data-context-mode="explicit" data-context-refs="dynamic-basis-method" data-context="&quot;Basis of a polynomial subspace&quot;" data-fields="[&quot;math-exercise-5-dm-Pcoef-1-1&quot;,&quot;math-exercise-5-dm-Pcoef-2-1&quot;,&quot;math-exercise-5-dm-Pcoef-3-1&quot;,&quot;math-exercise-5-dm-Pcoef-4-1&quot;]" data-structural-field-labels="[&quot;dm:Pcoef:1,1&quot;,&quot;dm:Pcoef:2,1&quot;,&quot;dm:Pcoef:3,1&quot;,&quot;dm:Pcoef:4,1&quot;]">
+<div class="math-exercise-cell" id="math-exercise-5" data-label="dynamic-polynomial-basis" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    # Typed decimals are exact: 0.1 means 1/10, not a binary approximation.\n    exact = lambda value: value.xreplace({f: Rational(str(f)) for f in value.atoms(Float)})\n    P = response[\&quot;inputs\&quot;][\&quot;Pcoef\&quot;][\&quot;matrix\&quot;].applyfunc(exact)\n    constraints = Matrix([[1, 1, 1, 1], [0, 1, -2, 3]])\n    return assess_basis(\n        P,\n        axis=\&quot;columns\&quot;,\n        target_dimension=constraints.cols - constraints.rank(),\n        belongs=lambda vector: all(value.is_number is True and value.is_real is True and value.is_finite is True for value in vector)\n            and P.rows == constraints.cols and constraints * vector == zeros(constraints.rows, 1),\n        name=\&quot;Pcoef\&quot;,\n        space_name=\&quot;polynomial subspace\&quot;,\n    )&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;dynamic-polynomial-basis&quot;,&quot;name&quot;:&quot;&quot;}" data-context-mode="explicit" data-context-refs="dynamic-basis-method" data-context="&quot;Basis of a polynomial subspace&quot;" data-fields="[&quot;math-exercise-5-dm-Pcoef-1-1&quot;,&quot;math-exercise-5-dm-Pcoef-2-1&quot;,&quot;math-exercise-5-dm-Pcoef-3-1&quot;,&quot;math-exercise-5-dm-Pcoef-4-1&quot;]" data-structural-field-labels="[&quot;dm:Pcoef:1,1&quot;,&quot;dm:Pcoef:2,1&quot;,&quot;dm:Pcoef:3,1&quot;,&quot;dm:Pcoef:4,1&quot;]">
 <div class="math-exercise-caption math-exercise-toggle" data-math-exercise-source="Encode polynomials as coefficient vectors" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>Encode polynomials as coefficient vectors</div>
 
 <div class="math-exercise-body" aria-hidden="true">
@@ -1374,7 +1400,9 @@ per column of \(P\):<br>
 #| context: dynamic-basis-method
 #| checker: |
 #|   def check(response, symbols):
-#|       P = response["inputs"]["Pcoef"]["matrix"]
+#|       # Typed decimals are exact: 0.1 means 1/10, not a binary approximation.
+#|       exact = lambda value: value.xreplace({f: Rational(str(f)) for f in value.atoms(Float)})
+#|       P = response["inputs"]["Pcoef"]["matrix"].applyfunc(exact)
 #|       constraints = Matrix([[1, 1, 1, 1], [0, 1, -2, 3]])
 #|       return assess_basis(
 #|           P,
@@ -1408,6 +1436,8 @@ $P=$ mat{name=Pcoef, rows=4, cols=auto, initial-cols=1, min-cols=0, max-cols=4}
     assert score(zeros(B.rows,B.cols)) == 0
     assert score(I*B) &lt; 1
     assert score(zeros(0,0)) == 0
+    # Typed decimals are exact: 0.1 + 0.2 - 0.3 is exactly zero.
+    assert score(Matrix([[Float("-0.3"), 2], [Float("0.2"), -3], [Float("0.1"), 0], [0, 1]])) == 1
 </code></pre></details>
 </details>
 <details class="math-example-policy" data-source-kind="policy"><summary>Show policy YAML</summary><div class="ai-feedback-policy-summary" data-max-issues="" data-integration="math-exercise" data-exercise="dynamic-polynomial-basis" data-policy=""></div>
@@ -1864,7 +1894,7 @@ $P=$ mat{name=P, rows=auto, cols=2, initial-rows=2, min-rows=2, max-rows=4}
 </section>
 <section id="a-non-square-zero-matrix" class="level3">
 <h3 class="anchored" data-anchor-id="a-non-square-zero-matrix">A non-square zero matrix</h3>
-<div class="math-exercise-cell" id="math-exercise-9" data-label="dynamic-both-dimensions" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    A = response[\&quot;inputs\&quot;][\&quot;A\&quot;][\&quot;matrix\&quot;]\n    non_square = A.rows != A.cols\n    zero = A == zeros(A.rows, A.cols)\n    score = (int(non_square) + int(zero)) / 2\n    return {\n        \&quot;score\&quot;: score,\n        \&quot;feedback\&quot;: \&quot;\&quot; if score == 1 else \&quot;The matrix must have different numbers of rows and columns, and every entry must be zero.\&quot;\n    }&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;dynamic-both-dimensions&quot;,&quot;name&quot;:&quot;&quot;}" data-context-mode="auto" data-context-refs="auto" data-context="&quot;A non-square zero matrix&quot;" data-fields="[&quot;math-exercise-9-dm-A-1-1&quot;,&quot;math-exercise-9-dm-A-2-1&quot;]" data-structural-field-labels="[&quot;dm:A:1,1&quot;,&quot;dm:A:2,1&quot;]">
+<div class="math-exercise-cell" id="math-exercise-9" data-label="dynamic-both-dimensions" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    A = response[\&quot;inputs\&quot;][\&quot;A\&quot;][\&quot;matrix\&quot;]\n    non_square = A.rows != A.cols\n    zero = all(simplify(value).is_zero is True for value in A)\n    score = (int(non_square) + int(zero)) / 2\n    return {\n        \&quot;score\&quot;: score,\n        \&quot;feedback\&quot;: \&quot;\&quot; if score == 1 else \&quot;The matrix must have different numbers of rows and columns, and every entry must be zero.\&quot;\n    }&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;dynamic-both-dimensions&quot;,&quot;name&quot;:&quot;&quot;}" data-context-mode="auto" data-context-refs="auto" data-context="&quot;A non-square zero matrix&quot;" data-fields="[&quot;math-exercise-9-dm-A-1-1&quot;,&quot;math-exercise-9-dm-A-2-1&quot;]" data-structural-field-labels="[&quot;dm:A:1,1&quot;,&quot;dm:A:2,1&quot;]">
 <div class="math-exercise-caption math-exercise-toggle" data-math-exercise-source="Choose both dimensions" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>Choose both dimensions</div>
 
 <div class="math-exercise-body" aria-hidden="true">
@@ -1896,7 +1926,7 @@ size and its entries are part of the answer:<br>
 #|   def check(response, symbols):
 #|       A = response["inputs"]["A"]["matrix"]
 #|       non_square = A.rows != A.cols
-#|       zero = A == zeros(A.rows, A.cols)
+#|       zero = all(simplify(value).is_zero is True for value in A)
 #|       score = (int(non_square) + int(zero)) / 2
 #|       return {
 #|           "score": score,
@@ -1910,6 +1940,9 @@ size and its entries are part of the answer:<br>
 #|       assert score(zeros(3,2)) == 1
 #|       assert score(zeros(2)) &lt; 1
 #|       assert score(ones(2,3)) &lt; 1
+#|       # Browser input "0.0" is a SymPy Float zero.
+#|       assert score(Matrix(2, 3, [Float("0.0")]*6)) == 1
+#|       assert score(Matrix(2, 3, [0, 0, 0, 0, 0, Float("0.001")])) &lt; 1
 
 Give any non-square zero matrix with at least one row and one column. Both its
 size and its entries are part of the answer:
@@ -2615,14 +2648,18 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
   </script>
 </div> <!-- /content -->
 <script type="text/javascript">
-// Shared classic-script bootstrap for math-exercise and stack-sympy.
-// Keep the vendored copy in stack-sympy byte-identical to this file.
+// Shared classic-script bootstrap for math-exercise, py-exercise and stack-sympy.
+// py-exercise ships a byte-identical copy (checked in CI); stack-sympy vendors
+// a pinned revision (see its vendor/provenance.json).
 (function (root) {
   'use strict';
 
-  if (root.MathExerciseRuntime) return;
+  // An older copy (another component's release) may have loaded first; a
+  // copy with the current interface replaces it (shared state lives on root).
+  if (root.MathExerciseRuntime && typeof root.MathExerciseRuntime.whenSlow === 'function') return;
 
   var indexURL = 'https://cdn.jsdelivr.net/pyodide/v0.27.2/full/';
+  var LOAD_TIMEOUT = root.__qExercisePyodideTimeout || 180000; // override for tests
 
   function loadScript(src) {
     if (src === indexURL + 'pyodide.js' && typeof root.loadPyodide === 'function') {
@@ -2669,19 +2706,35 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
     });
   }
 
+  // Waits for Python at most LOAD_TIMEOUT: a load that never finishes ends
+  // with an error a later attempt can retry, instead of waiting forever.
+  function withLoadLimit(promise) {
+    if (typeof setTimeout !== 'function') return Promise.resolve(promise);
+    var timer;
+    var timeout = new Promise(function (resolve, reject) {
+      timer = setTimeout(function () {
+        var error = new Error('Python did not finish loading within ' + LOAD_TIMEOUT / 1000 + ' s');
+        error.code = 'pyodide-timeout';
+        reject(error);
+      }, LOAD_TIMEOUT);
+    });
+    return Promise.race([Promise.resolve(promise), timeout]).finally(function () { clearTimeout(timer); });
+  }
+
   async function ensurePyodide() {
     // Some Quarto integrations declare these with top-level `let`, which is
     // visible to classic scripts but is not a property of globalThis.
     var coatless = typeof qpyodideInstance !== 'undefined'
       ? qpyodideInstance : root.qpyodideInstance;
     if (typeof coatless !== 'undefined') {
-      root.mainPyodide = await coatless;
+      // pyodide-interaktiv's worker may still be starting.
+      root.mainPyodide = await withLoadLimit(coatless);
       return root.mainPyodide;
     }
     var existing = typeof mainPyodide !== 'undefined'
       ? mainPyodide : root.mainPyodide;
     if (typeof existing !== 'undefined') {
-      root.mainPyodide = await existing;
+      root.mainPyodide = await withLoadLimit(existing);
       return root.mainPyodide;
     }
 
@@ -2690,7 +2743,9 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
     if (!root.__qExercisePyodide) {
       root.__qExercisePyodide = (async function () {
         await loadScript(indexURL + 'pyodide.js');
-        return root.loadPyodide({ indexURL: indexURL });
+        // A failed WebAssembly download leaves loadPyodide() pending forever;
+        // give up after LOAD_TIMEOUT so that a later attempt can start again.
+        return withLoadLimit(root.loadPyodide({ indexURL: indexURL }));
       })();
     }
     var pending = root.__qExercisePyodide;
@@ -2703,10 +2758,121 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
     }
   }
 
+  // Interpreter state that code run by one component on the page must not
+  // change for the others (learner code in py-exercise, answers parsed by
+  // math-exercise): `snapshot()` before, `restore(state)` after.
+  var GUARD_PY = [
+    'import builtins as _builtins, os as _os, sys as _sys',
+    '_MISSING = object()',
+    '',
+    'def snapshot():',
+    '    return {',
+    '        "builtins": dict(_builtins.__dict__),',
+    '        "streams": (_sys.stdin, _sys.stdout, _sys.stderr),',
+    '        "hooks": (_sys.displayhook, _sys.excepthook),',
+    '        "recursion": _sys.getrecursionlimit(),',
+    '        "path": list(_sys.path),',
+    '        "path_list": _sys.path,',
+    '        "cwd": _os.getcwd(),',
+    '        "modules": {k: v for k, v in _sys.modules.items() if k.startswith("_ctm_")},',
+    '    }',
+    '',
+    'def restore(state):',
+    '    # Each item on its own: one that fails must not leave the others changed.',
+    '    def builtins_():',
+    '        current = _builtins.__dict__',
+    '        for key in [k for k in current if k not in state["builtins"]]:',
+    '            del current[key]',
+    '        for key, value in state["builtins"].items():',
+    '            if current.get(key, _MISSING) is not value:',
+    '                current[key] = value',
+    '    def streams():',
+    '        _sys.stdin, _sys.stdout, _sys.stderr = state["streams"]',
+    '        _sys.displayhook, _sys.excepthook = state["hooks"]',
+    '    def path():',
+    '        _sys.path = state["path_list"]',
+    '        _sys.path[:] = state["path"]',
+    '    for step in (builtins_, streams, lambda: _sys.setrecursionlimit(state["recursion"]), path,',
+    '                 lambda: _os.chdir(state["cwd"]), lambda: _sys.modules.update(state["modules"])):',
+    '        try:',
+    '            step()',
+    '        except Exception:',
+    '            pass',
+  ].join('\n');
+
+  // Installs a Python source as a private module (not in the interpreter's
+  // global namespace, which learner code shares), once per runtime. Calls for
+  // the same module share one install; each module passes its source under
+  // its own name, so concurrent installs of different modules cannot mix.
+  var installed = typeof WeakMap === 'function' ? new WeakMap() : null;
+  function installModule(py, name, source) {
+    var done = installed && installed.get(py);
+    if (done && done[name]) return done[name];
+    var variable = '_ctm_source_' + name.replace(/[^A-Za-z0-9_]/g, '_');
+    var install = (async function () {
+      await py.globals.set(variable, source);
+      await py.runPythonAsync([
+        'import sys as _ctm_sys, types as _ctm_types',
+        '_ctm_module = _ctm_types.ModuleType("' + name + '")',
+        'exec(' + variable + ', _ctm_module.__dict__)',
+        '_ctm_sys.modules["' + name + '"] = _ctm_module',
+        'del _ctm_sys, _ctm_types, _ctm_module, ' + variable,
+      ].join('\n'));
+    })();
+    if (installed) {
+      if (!done) { done = {}; installed.set(py, done); }
+      done[name] = install;
+      install.catch(function () { if (done[name] === install) delete done[name]; });
+    }
+    return install;
+  }
+  // Forget installed modules of a runtime (for example after learner code in
+  // another cell removed them); the next install runs again.
+  function forgetModules(py) { if (installed) installed.delete(py); }
+  function ensureGuard(py) { return installModule(py, '_ctm_guard', GUARD_PY); }
+
+  // A runtime that can be stopped while it runs (pyodide-interaktiv's worker):
+  // Python on the page itself cannot be interrupted, only reloaded.
+  function canStop() {
+    var py = root.mainPyodide;
+    return !!(py && typeof py.restart === 'function');
+  }
+  // Stops are page-wide: every component compares `stops` before and after a
+  // run, so a check stopped from any button is neither repeated nor shown as
+  // an unexpected error.
+  var stops = 0;
+  function stop(reason) {
+    if (!canStop()) return;
+    stops++;
+    root.mainPyodide.restart(reason || 'Stopped by the learner');
+  }
+  function stopCount() { return stops; }
+  // Calls onSlow once when a run has taken `ms` and the runtime can be
+  // stopped (a worker that is still starting becomes stoppable later).
+  // Returns a function that cancels it.
+  function whenSlow(ms, onSlow) {
+    var timer = null, cancelled = false;
+    function check() {
+      if (cancelled) return;
+      if (canStop()) { onSlow(); return; }
+      timer = setTimeout(check, 1000);
+    }
+    timer = setTimeout(check, Math.min(ms, 2147483647));  // larger delays overflow to 0
+    return function () { cancelled = true; clearTimeout(timer); };
+  }
+
   root.MathExerciseRuntime = {
     indexURL: indexURL,
+    loadTimeout: LOAD_TIMEOUT,
     loadScript: loadScript,
-    ensurePyodide: ensurePyodide
+    ensurePyodide: ensurePyodide,
+    installModule: installModule,
+    forgetModules: forgetModules,
+    ensureGuard: ensureGuard,
+    canStop: canStop,
+    stop: stop,
+    stopCount: stopCount,
+    whenSlow: whenSlow
   };
 })(globalThis);
 
@@ -2959,6 +3125,7 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
       errDivZero: "Division by zero: the expression is undefined at this point.",
       errType: "Type error: make sure numbers and variables are combined correctly.",
       errGeneric: "The input could not be processed – use the input help for the correct spelling.",
+      errRuntime: "Python could not be loaded. Check the internet connection and press Check again.",
       vecComponent: function (n) { return 'Component ' + n; },
       matCell: function (row, column) { return 'Row ' + row + ', column ' + column; },
       dynamicMatCell: function (name, row, column) { return name + ', row ' + row + ', column ' + column; },
@@ -2985,6 +3152,10 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
       },
       loadingHelp: "&#9203; Loading help&hellip;",
       checking: "&#9203; Checking&hellip;",
+      slowCheck: "Still checking – the answer may be too large to evaluate.",
+      slowLoad: "Python is still loading.",
+      stop: "Stop",
+      errStopped: "Stopped. Python was restarted (interactive cells on this page lost their variables).",
       needAnswerFirst: "Please enter an answer first, then request feedback.",
       outputLanguageCode: "en",
       feedbackFieldSingle: "Answer",
@@ -3006,6 +3177,7 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
       errDivZero: "Division durch Null: der Ausdruck ist an dieser Stelle nicht definiert.",
       errType: "Typ-Fehler: Stelle sicher, dass Zahlen und Variablen korrekt kombiniert sind.",
       errGeneric: "Die Eingabe konnte nicht verarbeitet werden – nutze die Eingabe-Hilfe für korrekte Schreibweisen.",
+      errRuntime: "Python konnte nicht geladen werden. Prüfe die Internetverbindung und drücke erneut auf Überprüfen.",
       vecComponent: function (n) { return 'Komponente ' + n; },
       matCell: function (row, column) { return 'Zeile ' + row + ', Spalte ' + column; },
       dynamicMatCell: function (name, row, column) { return name + ', Zeile ' + row + ', Spalte ' + column; },
@@ -3032,6 +3204,10 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
       },
       loadingHelp: "&#9203; Lade Hilfe&hellip;",
       checking: "&#9203; Überprüfe&hellip;",
+      slowCheck: "Die Prüfung dauert noch – die Antwort ist vielleicht zu groß zum Auswerten.",
+      slowLoad: "Python wird noch geladen.",
+      stop: "Abbrechen",
+      errStopped: "Abgebrochen. Python wurde neu gestartet (interaktive Zellen auf dieser Seite haben ihre Variablen verloren).",
       needAnswerFirst: "Bitte zuerst eine Antwort eingeben, dann Feedback anfordern.",
       outputLanguageCode: "de",
       feedbackFieldSingle: "Antwort",
@@ -3053,6 +3229,7 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
       errDivZero: "Divisjon med null: Uttrykket er ikke definert i dette punktet.",
       errType: "Typefeil: Sjekk at tall og variabler er kombinert riktig.",
       errGeneric: "Inntastingen kunne ikke behandles – bruk inntastingshjelpen for å finne riktig skrivemåte.",
+      errRuntime: "Python kunne ikke lastes inn. Kontroller internettforbindelsen og trykk Sjekk igjen.",
       vecComponent: function (n) { return 'Komponent ' + n; },
       matCell: function (row, column) { return 'Rad ' + row + ', kolonne ' + column; },
       dynamicMatCell: function (name, row, column) { return name + ', rad ' + row + ', kolonne ' + column; },
@@ -3079,6 +3256,10 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
     },
       loadingHelp: "&#9203; Laster hjelp&hellip;",
       checking: "&#9203; Sjekker&hellip;",
+      slowCheck: "Sjekken pågår fortsatt – svaret er kanskje for stort til å regnes ut.",
+      slowLoad: "Python lastes fortsatt inn.",
+      stop: "Avbryt",
+      errStopped: "Avbrutt. Python ble startet på nytt (interaktive celler på denne siden mistet variablene sine).",
       needAnswerFirst: "Skriv inn et svar før du ber om tilbakemelding.",
       outputLanguageCode: "nb",
       feedbackFieldSingle: "Svar",
@@ -3126,25 +3307,6 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
 
   function simpleMarkdown(text) { return window.AIFeedback.renderMarkdown(text); }
 
-  function loadScript(src) {
-    return new Promise(function (resolve, reject) {
-      var existing = document.querySelector('script[src="' + src + '"]');
-      if (existing) {
-        if (existing.dataset.qLoaded === '1') { resolve(); return; }
-        existing.addEventListener('load', function () { resolve(); });
-        existing.addEventListener('error', function () {
-          reject(new Error('Failed to load: ' + src));
-        });
-        return;
-      }
-      var s = document.createElement('script');
-      s.src = src;
-      s.onload = function () { s.dataset.qLoaded = '1'; resolve(); };
-      s.onerror = function () { reject(new Error('Failed to load: ' + src)); };
-      document.head.appendChild(s);
-    });
-  }
-
   // ---------------------------------------------------------------------------
   // Pyodide bootstrap  (reuse coatless instance if present)
   // ---------------------------------------------------------------------------
@@ -3160,7 +3322,7 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
   var katexReady = false;
   var katexLib = null;
   var renderMathInElementFn = null;
-  var KATEX = 'https://cdn.jsdelivr.net/npm/katex@0.16.11/';
+  var KATEX = 'https://cdn.jsdelivr.net/npm/katex@0.16/';
 
   async function ensureKatex() {
     if (katexReady) return;
@@ -3200,8 +3362,16 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
   // SymPy  (lazy – first Check click)
   // ---------------------------------------------------------------------------
 
-  var sympyReady = false;
-  var packageLoads = Object.create(null);
+  // A Pyodide runtime can be replaced on the page (pyodide-interaktiv's Stop or
+  // restart terminates its worker). SymPy setup and package loads therefore
+  // belong to one runtime object and are repeated for a new one.
+  var sympyRuntime = null;
+  var packageLoads = new WeakMap();
+  if (typeof window !== 'undefined' && window.addEventListener) {
+    window.addEventListener('qpyodide-runtime-restart', function () {
+      sympyRuntime = null; sympyLoading = null;
+    });
+  }
 
   function parsePackageList(value) {
     var packages = Array.isArray(value) ? value : [];
@@ -3221,28 +3391,46 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
 
   async function ensurePackages(packages) {
     var requested = parsePackageList(packages);
+    if (!requested.length) return;
+    var py = await ensurePyodide();
+    var loads = packageLoads.get(py);
+    if (!loads) { loads = Object.create(null); packageLoads.set(py, loads); }
     await Promise.all(requested.map(function (name) {
       var key = name.toLowerCase();
-      if (!packageLoads[key]) {
-        packageLoads[key] = mainPyodide.loadPackage(name).catch(function (error) {
-          delete packageLoads[key];
+      if (!loads[key]) {
+        loads[key] = py.loadPackage(name).catch(function (error) {
+          delete loads[key];
           throw error;
         });
       }
-      return packageLoads[key];
+      return loads[key];
     }));
   }
 
   var sympyLoading = null;
-  function ensureSympy() {
-    if (!sympyLoading) sympyLoading = initializeSympy().catch(function(error){sympyLoading=null;throw error;});
+  // Resolves to the runtime on which SymPy and the checker helpers are ready.
+  async function ensureSympy() {
+    var py = await ensurePyodide();
+    if (sympyRuntime === py) return py;
+    if (!sympyLoading || sympyLoading.runtime !== py) {
+      var loading = initializeSympy(py).then(function () { sympyRuntime = py; return py; },
+        function (error) { if (sympyLoading === loading) sympyLoading = null; throw error; });
+      loading.runtime = py;
+      sympyLoading = loading;
+    }
     return sympyLoading;
   }
-  async function initializeSympy() {
-    if (sympyReady) return;
-    await ensurePyodide();
-    await mainPyodide.loadPackage('sympy');
-    await mainPyodide.runPythonAsync([
+  // The checker runtime lives in its own module, not in the interpreter's
+  // global namespace: learner code in other cells on the page (for example
+  // pyodide-interaktiv) shares that namespace and may rebind names such as
+  // `symbols`, `Matrix` or `sqrt`.
+  var MATH_MODULE = '_ctm_math_exercise';
+  function runtimeCall(name) {
+    return '__import__("' + MATH_MODULE + '")._math_run("' + name + '", globals())';
+  }
+  async function initializeSympy(py) {
+    await py.loadPackage('sympy');
+    var source = [
       'from sympy import *',
       'from sympy.parsing.sympy_parser import (',
       '    parse_expr, standard_transformations,',
@@ -3283,10 +3471,20 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
       '    parts.append(cur)',
       '    return [p.strip() for p in parts if p.strip() != ""]',
       '',
+      '# Rounds the decimal value (15 significant digits, so binary noise in a',
+      '# computed key such as 1.05*1.9 does not count) half away from zero:',
+      '# round(5.395, 2) is 5.39 for the binary float, but 5.40 here.',
+      'def _round_places(x, d):',
+      '    from decimal import Decimal, ROUND_HALF_UP, InvalidOperation',
+      '    try:',
+      '        return float(Decimal(format(float(x), \'.15g\')).quantize(Decimal(1).scaleb(-d), rounding=ROUND_HALF_UP))',
+      '    except (InvalidOperation, ValueError, OverflowError):',
+      '        return round(x, d)',
+      '',
       'def _sigfigs_round(x, n):',
       '    if x == 0: return 0.0',
       '    d = n - int(floor(log10(abs(x)))) - 1',
-      '    return round(x, d)',
+      '    return _round_places(x, d)',
       '',
       'def _parse_tol(spec, ref):',
       '    spec = spec.strip()',
@@ -3304,7 +3502,7 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
       'def _num_equal(sv, cv):',
       '    if _math_decplaces.strip():',
       '        n = int(_math_decplaces)',
-      '        return round(sv, n) == round(cv, n)',
+      '        return _round_places(sv, n) == _round_places(cv, n)',
       '    if _math_sigfigs.strip():',
       '        n = int(_math_sigfigs)',
       '        return _sigfigs_round(sv, n) == _sigfigs_round(cv, n)',
@@ -3578,8 +3776,49 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
       '        return _normalize_custom_result(checker(response, checker_symbols))',
       '    except Exception as _me:',
       '        return {"status": "error", "message": str(_me)}',
-    ].join('\n'));
-    sympyReady = true;
+      '',
+      '_MATH_INPUTS = ("_math_student", "_math_correct", "_math_vars", "_math_mode", "_math_reject",',
+      '                "_math_tolerance", "_math_decplaces", "_math_sigfigs", "_math_form",',
+      '                "_math_partial_credit", "_math_form_credit", "_math_response_json", "_math_checker")',
+      '',
+      'try:',
+      '    import _ctm_guard',
+      'except ImportError:  # native test runners (question-tests.py) have no page to protect',
+      '    _ctm_guard = None',
+      '',
+      'def _learner_strings(request):',
+      '    # Only what this request brought: earlier requests leave other inputs behind.',
+      '    if "_math_student" in request and request.get("_math_mode") not in ("string", "string_ci"):',
+      '        yield request["_math_student"] or ""  # string answers are never evaluated',
+      '    try:',
+      '        response = _mj.loads(request.get("_math_response_json") or "null")',
+      '    except ValueError:',
+      '        return',
+      '    if isinstance(response, dict):',
+      '        yield from response.get("raw", []) or []',
+      '        for item in (response.get("inputs") or {}).values():',
+      '            if isinstance(item, dict):',
+      '                yield from item.get("raw", []) or []',
+      '',
+      'def _math_run(name, caller):',
+      '    # Move this request\'s inputs out of the shared namespace into the module.',
+      '    request = {key: caller.pop(key) for key in _MATH_INPUTS if key in caller}',
+      '    globals().update(request)',
+      '    # Learner answers are parsed by SymPy (which evaluates Python): no dunder',
+      '    # access. Author data (variants, checkers) is not restricted.',
+      '    if any("__" in str(text) for text in _learner_strings(request)):',
+      '        raise ValueError("SyntaxError: unsupported input")',
+      '    # Whatever the parsed answer or checker does, other components on the',
+      '    # page keep their interpreter state.',
+      '    state = _ctm_guard.snapshot() if _ctm_guard else None',
+      '    try:',
+      '        return _mj.dumps(globals()[name]())',
+      '    finally:',
+      '        if state is not None:',
+      '            _ctm_guard.restore(state)',
+    ].join('\n');
+    await globalThis.MathExerciseRuntime.ensureGuard(py);
+    await globalThis.MathExerciseRuntime.installModule(py, MATH_MODULE, source);
   }
 
   // ---------------------------------------------------------------------------
@@ -3617,6 +3856,10 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
 
   function friendlyError(raw) {
     var msg = String(raw || '');
+    if (/did not finish loading|Failed to load: https?:/.test(msg))
+      return L.errRuntime;
+    if (/stopped by the learner/i.test(msg))
+      return L.errStopped;
     if (/SyntaxError/i.test(msg))
       return L.errSyntax;
     var nm = msg.match(/name ['"]([\w]+)['"] is not defined/);
@@ -3776,6 +4019,20 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
   // Raw exercise bodies bypass Pandoc's Markdown math handling. Normalize
   // paired dollar delimiters before inserting HTML so a page-level MathJax
   // pass cannot claim a bare \\begin{...} environment and strand the dollars.
+  // Same placeholder as math-exercise.lua: a literal dollar becomes its own
+  // element, so neither KaTeX auto-render nor MathJax treats it as a delimiter.
+  var LITERAL_DOLLAR = '\uE024';
+  var LITERAL_DOLLAR_HTML = '<span class="math-literal-dollar">$</span>';
+  // A code span: the next backtick on the same line, with something between;
+  // \` is a literal backtick. Returns the closing index or -1.
+  function codeSpanEnd(s, i) {
+    if (i > 0 && s.charAt(i - 1) === '\\') return -1;
+    var k = s.indexOf('`', i + 1);
+    if (k < 0 || k === i + 1) return -1;
+    var newline = s.indexOf('\n', i + 1);
+    return newline >= 0 && newline < k ? -1 : k;
+  }
+
   function normalizeTaskMathDelimiters(text) {
     var output = '', position = 0;
     function unescapedAt(needle, start) {
@@ -3789,7 +4046,18 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
       return -1;
     }
     while (position < text.length) {
-      if (text.charAt(position) !== '$' || (position > 0 && text.charAt(position - 1) === '\\')) {
+      var codeEnd = text.charAt(position) === '`' ? codeSpanEnd(text, position) : -1;
+      if (codeEnd >= 0) {
+        // A dollar inside a code span is literal.
+        output += text.slice(position, codeEnd + 1); position = codeEnd + 1;
+        continue;
+      }
+      if (text.charAt(position) === '$' && position > 0 && text.charAt(position - 1) === '\\') {
+        // Escaped dollar: placeholder, turned into its own element after escaping.
+        output = output.slice(0, -1) + LITERAL_DOLLAR; position++;
+        continue;
+      }
+      if (text.charAt(position) !== '$') {
         output += text.charAt(position++);
         continue;
       }
@@ -3804,13 +4072,85 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
     return output;
   }
 
+  // Exercise text is Markdown-like plain text: HTML is shown as text (so a<b<c
+  // in TeX stays intact), and outside math a small inline Markdown subset is
+  // formatted: ***both***, **bold**, *italic*, `code`; \* and \` are literal; a
+  // trailing backslash is a line break. Emphasis may contain math. Same rules
+  // as inlineMarkdown()/proseHtml() in math-exercise.lua (parity test).
+  var MATH_SLOT = '';   // stands for one math span while formatting
+  var SPACE = /[ \t\r\n\f\v]/, WORD = /[A-Za-z0-9]/;
+
+  function inlineMarkdown(s) {
+    var out = '', i = 0, n = s.length;
+    // Closing delimiter for emphasis opened just before `from`: on the same
+    // line, not escaped, not after whitespace, not followed by another "*"
+    // (or, for "*", by a letter or digit). Linear in the line length.
+    function closing(delim, from) {
+      if (from >= n || SPACE.test(s.charAt(from))) return -1;
+      var newline = s.indexOf('\n', from); if (newline < 0) newline = n;
+      var j = from + 1;
+      for (;;) {
+        var k = s.indexOf(delim, j);
+        if (k < 0 || k >= newline) return -1;
+        var next = s.charAt(k + delim.length), before = s.charAt(k - 1);
+        if (next === '*' || before === '\\' || SPACE.test(before) || (delim === '*' && WORD.test(next))) j = k + 1;
+        else return k;
+      }
+    }
+    while (i < n) {
+      var c = s.charAt(i), next = s.charAt(i + 1), k;
+      if (c === '\\' && (next === '*' || next === '`')) { out += next; i += 2; }
+      else if (c === '\\' && next === '\n') i++;   // Markdown hard line break: the newline already breaks the line
+      else if (c === '`' && (k = codeSpanEnd(s, i)) >= 0) { out += '<code>' + s.slice(i + 1, k) + '</code>'; i = k + 1; }
+      else if (s.slice(i, i + 3) === '***' && (k = closing('***', i + 3)) >= 0) {
+        out += '<em><strong>' + inlineMarkdown(s.slice(i + 3, k)) + '</strong></em>'; i = k + 3;
+      } else if (c === '*' && next === '*') {
+        k = closing('**', i + 2);
+        if (k >= 0) { out += '<strong>' + inlineMarkdown(s.slice(i + 2, k)) + '</strong>'; i = k + 2; }
+        else { out += '**'; i += 2; }
+      } else if (c === '*' && !(i > 0 && WORD.test(s.charAt(i - 1)))) {
+        k = closing('*', i + 1);
+        if (k >= 0) { out += '<em>' + inlineMarkdown(s.slice(i + 1, k)) + '</em>'; i = k + 1; }
+        else { out += c; i++; }
+      } else { out += c; i++; }
+    }
+    return out;
+  }
+
+  // Escapes a run of exercise text and formats inline Markdown outside math
+  // (\( \), \[ \], \begin{..} \end{..} after normalizeTaskMathDelimiters) and
+  // outside code spans. Each math span is a slot while formatting, so emphasis
+  // may contain math.
+  function proseHtml(text) {
+    var plain = '', maths = [], position = 0;
+    while (position < text.length) {
+      var c = text.charAt(position), codeEnd = c === '`' ? codeSpanEnd(text, position) : -1;
+      var two = text.slice(position, position + 2);
+      var env = /^\\begin\{([^}]*)\}/.exec(text.slice(position, position + 200));
+      var closer = two === '\\(' ? '\\)' : two === '\\[' ? '\\]' : env ? '\\end{' + env[1] + '}' : null;
+      if (codeEnd >= 0) { plain += text.slice(position, codeEnd + 1); position = codeEnd + 1; }
+      else if (closer) {
+        var close = text.indexOf(closer, position + 2);
+        var stop = close >= 0 ? close + closer.length : text.length;
+        maths.push(escHtml(text.slice(position, stop)));
+        plain += MATH_SLOT;
+        position = stop;
+      } else { plain += c; position++; }
+    }
+    var index = 0;
+    return inlineMarkdown(escHtml(plain)).replace(//g, function () { return maths[index++]; });
+  }
+
   function renderTaskText(text, exerciseId, vars, vecdir, mode, questionIsHtml) {
     // Generated variants have already been rendered by Pandoc; preserve their
     // markup and source annotations. Ordinary exercise bodies are plain text.
     if (!questionIsHtml) text = normalizeTaskMathDelimiters(text);
     mode = mode || 'equivalent';
-    var count = 0, fieldIds = [], structuralLabels = [], output = [], position = 0;
+    var count = 0, fieldIds = [], structuralLabels = [], output = [], position = 0, prose = '';
     var dynamicNames = {};
+    function flush() {
+      if (prose) { output.push(questionIsHtml ? prose : proseHtml(prose)); prose = ''; }
+    }
     while (position < text.length) {
       var scalar = /^_+\[/.exec(text.slice(position));
       var boundary = !scalar && (position === 0 || !/[\w]/.test(text.charAt(position - 1)));
@@ -3822,15 +4162,14 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
       var brace = dynamicMatrix ? matchBalanced(text, position + headLength - 1, '{', '}') : null;
       var balanced = bracket || brace;
 
-      // Task prose and TeX are text, never HTML; generated controls below
-      // remain markup. In particular, a<b<c must reach the math renderer.
-      if (!balanced) {
-        var character = text.charAt(position++);
-        output.push(questionIsHtml ? character : escHtml(character));
-        continue;
-      }
+      // Task prose and TeX are text, never HTML (see proseHtml); generated
+      // controls below remain markup. In particular, a<b<c must reach the
+      // math renderer.
+      if (!balanced) { prose += text.charAt(position++); continue; }
+      flush();
 
-      var content = balanced.slice(1, -1), rendered;
+      // Inside an answer marker an escaped dollar is a plain dollar.
+      var content = balanced.slice(1, -1).split(LITERAL_DOLLAR).join('$'), rendered;
       if (scalar) {
         count++;
         var fid = exerciseId + '-f' + count;
@@ -3856,8 +4195,9 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
       }
       position += headLength - 1 + balanced.length;
     }
+    flush();
     return {
-      html: output.join('').replace(/\n/g, '<br>\n'),
+      html: output.join('').split(LITERAL_DOLLAR).join(LITERAL_DOLLAR_HTML).replace(/\n/g, '<br>\n'),
       fieldIds: fieldIds,
       structuralLabels: structuralLabels
     };
@@ -4154,8 +4494,8 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
 
   // Calls the _math_check() helper defined once in ensureSympy() and returns
   // its result as a JSON status string.
-  var CHECK_PY = '_mj.dumps(_math_check())';
-  var CHECK_CUSTOM_PY = '_mj.dumps(_math_check_custom())';
+  var CHECK_PY = runtimeCall('_math_check');
+  var CHECK_CUSTOM_PY = runtimeCall('_math_check_custom');
 
   // Python globals are shared: keep each set-globals/evaluate transaction together.
   var assessmentQueue = Promise.resolve();
@@ -4168,18 +4508,74 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
     var val = el.value.trim();
     if (!val) return { status: 'empty', score: 0.0 };
     opts = opts || {};
-    mainPyodide.globals.set('_math_student',   val);
-    mainPyodide.globals.set('_math_correct',   el.dataset.answer || '');
-    mainPyodide.globals.set('_math_vars',      el.dataset.vars   || '');
-    mainPyodide.globals.set('_math_mode',      mode || 'equivalent');
-    mainPyodide.globals.set('_math_reject',    opts.reject    || '');
-    mainPyodide.globals.set('_math_tolerance', opts.tolerance || '');
-    mainPyodide.globals.set('_math_decplaces', opts.decplaces || '');
-    mainPyodide.globals.set('_math_sigfigs',   opts.sigfigs   || '');
-    mainPyodide.globals.set('_math_form',      opts.form      || '');
-    mainPyodide.globals.set('_math_partial_credit', !!opts.partialCredit);
-    mainPyodide.globals.set('_math_form_credit', Number(opts.formCredit));
-    return JSON.parse(await mainPyodide.runPythonAsync(CHECK_PY));
+    return runOnCurrentRuntime(async function (py) {
+      await Promise.all([
+        py.globals.set('_math_student',   val),
+        py.globals.set('_math_correct',   el.dataset.answer || ''),
+        py.globals.set('_math_vars',      el.dataset.vars   || ''),
+        py.globals.set('_math_mode',      mode || 'equivalent'),
+        py.globals.set('_math_reject',    opts.reject    || ''),
+        py.globals.set('_math_tolerance', opts.tolerance || ''),
+        py.globals.set('_math_decplaces', opts.decplaces || ''),
+        py.globals.set('_math_sigfigs',   opts.sigfigs   || ''),
+        py.globals.set('_math_form',      opts.form      || ''),
+        py.globals.set('_math_partial_credit', !!opts.partialCredit),
+        py.globals.set('_math_form_credit', Number(opts.formCredit)),
+      ]);
+      return JSON.parse(await py.runPythonAsync(CHECK_PY));
+    });
+  }
+
+  // A check that was running when the runtime was replaced (Stop/restart) is
+  // repeated once on the new runtime instead of reporting a spurious error.
+  // The first check also covers SymPy's multi-second setup, so a restart
+  // during setup is retried as well.
+  // A check stopped from any button on the page (runtime.stopCount) is not repeated.
+  // `math-exercise: stop-after:` / `ctm-assessment: stop-after:` (seconds, default 20).
+  var SLOW_CHECK_MS = (typeof window !== 'undefined' && window.__mathExerciseSlowCheckMs) ||
+    (Number(ME_CFG.stopAfter) > 0 ? Number(ME_CFG.stopAfter) * 1000 : 20000);
+  // Checks in progress, told when Python reloads during a retry: loading is
+  // timed by the load limit, not by stop-after. A check counts as loading while
+  // any retry reloads (its Python calls wait behind that reload).
+  var reloadHooks = new Set(), activeReloads = 0;
+  function stoppedSince(epoch) { return epoch !== globalThis.MathExerciseRuntime.stopCount(); }
+  async function runOnCurrentRuntime(run, packages) {
+    var epoch = globalThis.MathExerciseRuntime.stopCount();
+    var attempted = await ensurePyodide(), ready = null;
+    try {
+      ready = await ensureSympy();
+      return await run(ready);
+    } catch (error) {
+      if (stoppedSince(epoch)) throw new Error('math-exercise: stopped by the learner');
+      // Learner code elsewhere on the page removed the checker module: install again.
+      var missing = /No module named '_ctm_|has no attribute '_math_run'/.test(String(error));
+      if (missing) {
+        globalThis.MathExerciseRuntime.forgetModules(ready || attempted);
+        sympyRuntime = null; sympyLoading = null;
+      }
+      var current;
+      activeReloads++;
+      try {
+        reloadHooks.forEach(function (hook) { hook(); });
+        current = await ensureSympy();
+        // The exercise's packages reload within the same loading window.
+        if (packages) await ensurePackages(packages);
+      } catch (reloadError) {
+        // Stop pressed (here or in another exercise) while Python reloaded.
+        if (stoppedSince(epoch)) throw new Error('math-exercise: stopped by the learner');
+        throw reloadError;
+      } finally {
+        activeReloads--;
+        reloadHooks.forEach(function (hook) { hook(); });
+      }
+      if (stoppedSince(epoch)) throw new Error('math-exercise: stopped by the learner');
+      if (current === (ready || attempted) && !missing) throw error;
+      return run(current);
+    }
+  }
+  // Prepares SymPy and the exercise's packages, with the same retry.
+  function prepareRuntime(packages) {
+    return runOnCurrentRuntime(function () { return ensurePackages(packages); }, packages);
   }
 
   async function checkCustomNow(response, opts) {
@@ -4187,15 +4583,29 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
       if (!response || typeof response !== 'object' || Array.isArray(response)) throw new Error('Generated custom responses must be objects');
       response = Object.assign({}, response, {variant: opts.variant});
     }
-    mainPyodide.globals.set('_math_response_json', JSON.stringify(response));
-    mainPyodide.globals.set('_math_vars', opts.vars || '');
-    mainPyodide.globals.set('_math_checker', opts.checker || '');
-    return JSON.parse(await mainPyodide.runPythonAsync(CHECK_CUSTOM_PY));
+    return runOnCurrentRuntime(async function (py) {
+      await ensurePackages(opts.packages);
+      await Promise.all([
+        py.globals.set('_math_response_json', JSON.stringify(response)),
+        py.globals.set('_math_vars', opts.vars || ''),
+        py.globals.set('_math_checker', opts.checker || ''),
+      ]);
+      return JSON.parse(await py.runPythonAsync(CHECK_CUSTOM_PY));
+    }, opts.packages);
   }
 
   // Domain extraction delegates shared context and math-safe serialization.
-  function contextText(root, labels) { return window.AIFeedback.contextText(root, labels); }
-  function questionText(cell, ids, label) { return window.AIFeedback.questionText(cell, ids, label); }
+  // Without ai-feedback on the page (feedback off) a plain text snapshot is
+  // enough: these texts only detect edits and build feedback requests.
+  function contextText(root, labels) {
+    if (window.AIFeedback) return window.AIFeedback.contextText(root, labels);
+    return root ? root.textContent.trim() : '';
+  }
+  function questionText(cell, ids, label) {
+    if (window.AIFeedback) return window.AIFeedback.questionText(cell, ids, label);
+    var question = cell.querySelector('.math-exercise-question');
+    return question ? question.textContent.trim() : '';
+  }
   function resolveContexts(cell) {
     var text = '';
     try { text = JSON.parse(cell.dataset.context || '""'); } catch (_) {}
@@ -4499,9 +4909,44 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
       checkBtn.disabled = true;
       if (feedbackBtn) feedbackBtn.disabled = true;
       fbDiv.innerHTML = '<div class="math-fb-checking">' + L.checking + '</div>';
+      var cancelSlow = function () {}, phase = null, stopNote = null;
+      var offerStop = function (loading) {
+          var note = stopNote = document.createElement('div');
+          note.className = 'math-fb-checking';
+          note.textContent = (loading ? L.slowLoad : L.slowCheck) + ' ';
+          var stopBtn = document.createElement('button');
+          stopBtn.type = 'button';
+          stopBtn.className = 'btn btn-sm btn-outline-danger math-stop-btn';
+          stopBtn.textContent = L.stop;
+          stopBtn.addEventListener('click', function () {
+            globalThis.MathExerciseRuntime.stop('Stopped by the learner');
+          });
+          note.appendChild(stopBtn);
+          fbDiv.replaceChildren(note);
+      };
+      // Loading is timed by the load limit (a load that never finishes can
+      // still be stopped), the check itself by stop-after.
+      var timePhase = function (loading) {
+        // The same phase keeps its timer; a new one starts its own and takes
+        // back a Stop note that belonged to the previous phase.
+        if (loading === phase) return;
+        phase = loading;
+        if (stopNote && stopNote.isConnected) fbDiv.innerHTML = '<div class="math-fb-checking">' + L.checking + '</div>';
+        stopNote = null;
+        cancelSlow();
+        cancelSlow = globalThis.MathExerciseRuntime.whenSlow(
+          loading ? globalThis.MathExerciseRuntime.loadTimeout : SLOW_CHECK_MS,
+          function () { offerStop(loading); });
+      };
+      // A reload during another check's retry ends with that check's own phase.
+      var stillLoading = true;
+      var onReload = function () { timePhase(activeReloads > 0 || stillLoading); };
+      reloadHooks.add(onReload);
       try {
-        await ensureSympy();
-        await ensurePackages(checkOpts.packages);
+        timePhase(true);
+        await prepareRuntime(checkOpts.packages);
+        stillLoading = false;
+        timePhase(activeReloads > 0);
         var parts = [];
         var fieldElements = fieldIds.map(function (id) { return document.getElementById(id); });
         if (mode === 'custom') {
@@ -4555,6 +5000,10 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
       } catch (err) {
         fbDiv.innerHTML = '<div class="math-fb-err">&#9888;&nbsp;' + friendlyError(String(err)) + '</div>';
       } finally {
+        reloadHooks.delete(onReload);
+        cancelSlow();
+        // A check abandoned after an edit returns early: its Stop note goes too.
+        if (stopNote && stopNote.isConnected) stopNote.remove();
         checkBtn.disabled = false;
         if (feedbackBtn) feedbackBtn.disabled = !feedbackHandle;
       }
@@ -4573,6 +5022,17 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
     questionDiv.addEventListener('input', clearAssessmentAfterResize);
     checkBtn.addEventListener('click', runCheck);
     attachKeyListeners();
+
+    // Author-facing hint: a JSXGraph block that the jsxgraph filter did not
+    // process (extension installed but not listed in `filters`) has no iframe.
+    if (checkOpts.responseSource.indexOf('jsxgraph:') === 0) {
+      var diagramId = checkOpts.responseSource.slice('jsxgraph:'.length).trim();
+      var diagram = document.getElementById(diagramId);
+      if (!diagram || diagram.tagName !== 'IFRAME') {
+        fbDiv.innerHTML = '<div class="math-fb-err">&#9888;&nbsp;JSXGraph diagram "' + escHtml(diagramId) +
+          '" is not available. Add <code>jsxgraph</code> to the page\'s <code>filters</code>.</div>';
+      }
+    }
 
     // Selection is shared by random reload and author review; always invalidates old feedback.
     function selectTask(next) {
@@ -4601,7 +5061,7 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
         getVariant: currentVariant,
         selectVariant: function(id) {selectTask(generated.variants.findIndex(function(v){return v.id===id;}));},
         checkFixture: async function(record, fixture) {
-          await ensureSympy(); await ensurePackages(checkOpts.packages);
+          await prepareRuntime(checkOpts.packages);
           var options=Object.assign({}, checkOpts, {checker:record.checker,
             variant:JSON.parse(JSON.stringify({id:record.id, parameters:record.parameters, derived:record.derived, fingerprint:record.fingerprint, context:record['variant-context']}))});
           if(mode==='custom') return [await checkCustom(fixture.response || {kind:'expressions', raw:fixture.answers || [], inputs:{}}, options)];
@@ -4710,6 +5170,9 @@ $T=$ mat{name=T, rows=auto, cols=2, initial-rows=1, min-rows=0, max-rows=3}
       structuredGroupStatus: structuredGroupStatus,
       parsePackageList: parsePackageList,
       ensurePackages: ensurePackages,
+      ensureSympy: ensureSympy,
+      checkField: checkField,
+      runtimeCall: runtimeCall,
       notifyExternalLayout: notifyExternalLayout,
       scheduleExternalLayout: scheduleExternalLayout,
     };
