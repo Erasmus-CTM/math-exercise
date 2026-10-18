@@ -121,3 +121,11 @@ they do not test expression-entry parsing, UI gestures, network loading, or
 complete CPython/Pyodide parity. Keep those browser checks separate.
 
 For controls and pointer gestures, see the separate [browser-test guide](browser-tests.md).
+
+
+## Python versions for native tests
+
+Install the packages the browser uses: Pyodide 0.27.2 ships SymPy 1.13.3 and
+NetworkX 3.4.2 (`python -m pip install sympy==1.13.3 networkx==3.4.2 PyYAML`).
+Native tests with another SymPy version can pass while the browser grades
+differently.

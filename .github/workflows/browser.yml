@@ -34,7 +34,7 @@ jobs:
         uses: ./.github/actions/quarto-dependencies
         with:
           ai-feedback-ref: ${{ steps.review.outputs['ai-feedback'] || 'main' }}
-      - run: python -m pip install sympy==1.14.0 networkx==3.4.2 PyYAML==6.0.2
+      - run: python -m pip install sympy==1.13.3 networkx==3.4.2 PyYAML==6.0.2
       - run: npm ci --ignore-scripts
       - run: npx playwright install --with-deps chromium
       - run: quarto render

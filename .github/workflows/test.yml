@@ -23,7 +23,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install checker test dependencies
-        run: python -m pip install sympy==1.14.0 networkx==3.4.2 PyYAML==6.0.2
+        run: python -m pip install sympy==1.13.3 networkx==3.4.2 PyYAML==6.0.2
       - uses: quarto-dev/quarto-actions/setup@v2
         with:
           version: '1.8.27'
