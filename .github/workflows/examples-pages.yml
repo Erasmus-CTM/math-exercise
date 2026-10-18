@@ -19,8 +19,6 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      AI_FEEDBACK_EXTENSION: ${{ github.workspace }}/_feedback-source/_extensions/ai-feedback
     steps:
       - uses: actions/checkout@v4
         with:
@@ -30,17 +28,13 @@ jobs:
         env:
           REVIEW_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
         run: python3 .github/review-dependencies.py
-      - name: Fetch shared feedback dependency
-        uses: actions/checkout@v4
-        with:
-          repository: Erasmus-CTM/ai-feedback
-          ref: ${{ steps.review.outputs['ai-feedback'] || 'main' }}
-          path: _feedback-source
       - uses: quarto-dev/quarto-actions/setup@v2
         with:
           version: '1.8.27'
-      - name: Install shared Quarto dependency
-        run: quarto add ./_feedback-source --no-prompt
+      - name: Install ai-feedback and JSXGraph
+        uses: ./.github/actions/quarto-dependencies
+        with:
+          ai-feedback-ref: ${{ steps.review.outputs['ai-feedback'] || 'main' }}
 
       - name: Install variant build dependency
         run: python3 -m pip install PyYAML==6.0.2 sympy==1.14.0 networkx==3.4.2

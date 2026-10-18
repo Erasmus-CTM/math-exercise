@@ -1,4 +1,56 @@
 local feedback = nil
+-- AI feedback: "auto" (default) uses an installed ai-feedback extension and
+-- otherwise renders exercises without the Feedback button; true requires it.
+local feedbackSetting = "auto"
+local feedbackWarned = false
+
+-- Without ai-feedback the exercises still work; these stand-ins keep the
+-- rendered data attributes valid.
+local noFeedback = {
+  selection = function(block, opts) return { exercise = opts.label or block.identifier or "", name = "" } end,
+  context = function() return { mode = "none", refs = "", text = "" } end,
+}
+
+local function loadFeedback()
+  if feedback then return feedback end
+  if feedbackSetting == "false" then feedback = noFeedback; return feedback end
+  local ok, shared = pcall(dofile(quarto.utils.resolve_path("feedback-loader.lua")))
+  if ok then feedback = shared; return feedback end
+  if feedbackSetting == "auto" and tostring(shared):match("requires the shared extension") then
+    if not feedbackWarned then
+      feedbackWarned = true
+      quarto.log.warning("math-exercise: AI feedback is off because the ai-feedback extension is not installed. "
+        .. "Install it with `quarto add Erasmus-CTM/ai-feedback`, or set `math-exercise: {feedback: false}` to hide this message.")
+    end
+    feedback = noFeedback
+    return feedback
+  end
+  assert(false, shared)
+end
+
+-- Graphical answers and diagram context need the JSXGraph Quarto extension.
+local function jsxgraphInstalled()
+  local base = quarto.project.directory or pandoc.path.directory(quarto.doc.input_file)
+  while base and base ~= "" do
+    local extensions = pandoc.path.join({base, "_extensions"})
+    local candidates = {pandoc.path.join({extensions, "jsxgraph", "_extension.yml"})}
+    local ok, entries = pcall(pandoc.system.list_directory, extensions)
+    if ok then
+      for _, owner in ipairs(entries) do
+        table.insert(candidates, pandoc.path.join({extensions, owner, "jsxgraph", "_extension.yml"}))
+      end
+    end
+    for _, path in ipairs(candidates) do
+      local file = io.open(path, "r")
+      if file then file:close(); return true end
+    end
+    if quarto.project.directory then break end
+    local parent = pandoc.path.directory(base)
+    if parent == base then break end
+    base = parent
+  end
+  return false
+end
 ----
 -- math-exercise.lua
 --
@@ -564,14 +616,15 @@ end
 -- Shared controls HTML (same for single and pool mode)
 ----
 local function controlsHtml()
+  local withFeedback = feedback ~= noFeedback
   return table.concat({
     '<div class="math-exercise-controls">',
     '  <button type="button" class="btn btn-primary math-check-btn">&#10003;&nbsp;' .. uiT("check") .. '</button>',
     '  <button type="button" class="btn btn-light math-legend-btn">&#9432;&nbsp;' .. uiT("legend") .. '</button>',
-    '  <div class="btn-group">',
-    '    <button type="button" class="btn btn-light math-feedback-btn">&#128172;&nbsp;' .. uiT("feedback") .. '</button>',
-    '    <button type="button" class="btn btn-light math-reconfig-btn" title="' .. uiT("reconfig") .. '">&#9881;</button>',
-    '  </div>',
+    withFeedback and '  <div class="btn-group">' or '',
+    withFeedback and ('    <button type="button" class="btn btn-light math-feedback-btn">&#128172;&nbsp;' .. uiT("feedback") .. '</button>') or '',
+    withFeedback and ('    <button type="button" class="btn btn-light math-reconfig-btn" title="' .. uiT("reconfig") .. '">&#9881;</button>') or '',
+    withFeedback and '  </div>' or '',
     '</div>',
   }, "\n")
 end
@@ -623,6 +676,14 @@ local function buildExercise(el, state)
   local checker   = opts["checker"]   or ""
   local packages  = splitCsv(opts["packages"] or "")
   local response  = opts["response"]  or ""
+  local diagramRefs = {}
+  for ref in ((response .. "," .. (opts["context"] or "") .. "," .. (opts["feedback-context"] or "")):gmatch("jsxgraph:([^,%s\"']+)")) do
+    table.insert(diagramRefs, ref)
+  end
+  if #diagramRefs > 0 then
+    state.jsxgraphRefs = state.jsxgraphRefs or {}
+    for _, ref in ipairs(diagramRefs) do table.insert(state.jsxgraphRefs, {ref = ref, label = opts["label"] or eid}) end
+  end
   local embedResponse = (opts["embed-response"] == "true")
   local partialCredit = (opts["partial-credit"] == "true")
   local formCredit = opts["form-credit"] or "0.5"
@@ -802,25 +863,65 @@ local function walkBlocks(blocks, state)
   end})
 end
 
+local function readFeedbackSetting(meta)
+  local cfg = meta["math-exercise"]
+  local value = cfg and type(cfg) == "table" and cfg["feedback"]
+  if value == nil then return "auto" end
+  value = pandoc.utils.stringify(value)
+  if value ~= "auto" and value ~= "true" and value ~= "false" then
+    -- assert: Quarto 1.8 only logs error() raised directly in a top-level filter.
+    assert(false, "math-exercise: feedback must be auto, true or false (found " .. value .. ")")
+  end
+  return value
+end
+
+-- Each referenced diagram must exist on the page and need the JSXGraph filter.
+local function checkDiagramReferences(doc, refs)
+  if not refs or #refs == 0 then return end
+  local present = {}
+  doc.blocks:walk({
+    CodeBlock = function(b)
+      local id = b.attributes["assessment_id"] or b.attributes["iframe_id"]
+      if b.classes:includes("jsxgraph") and id then present[id] = "code" end
+    end,
+    RawBlock = function(b)
+      for id in b.text:gmatch('<iframe[^>]-%sid="([^"]+)"') do present[id] = "html" end
+    end,
+  })
+  local needsExtension = false
+  for _, item in ipairs(refs) do
+    if not present[item.ref] then
+      assert(false, "math-exercise: exercise " .. item.label .. " refers to jsxgraph:" .. item.ref
+        .. ", but this page has no JSXGraph block with assessment_id=\"" .. item.ref .. "\".")
+    end
+    if present[item.ref] == "code" then needsExtension = true end
+  end
+  if needsExtension and not jsxgraphInstalled() then
+    assert(false, "math-exercise: graphical answers and diagram context need the JSXGraph extension. "
+      .. "Run `quarto add jsxgraph/jsxgraph-quarto` and add `jsxgraph` to this page's filters.")
+  end
+end
+
 local function Pandoc(doc)
+  feedbackSetting = readFeedbackSetting(doc.meta)
   if quarto.doc.is_format("html") then
-    feedback = dofile(quarto.utils.resolve_path("feedback-loader.lua"))()
-    doc = feedback.prepare(doc)
+    doc = loadFeedback().prepare and feedback.prepare(doc) or doc
   end
   doc.meta = Meta(doc.meta)
 
   if quarto.doc.is_format("html") then
     local state = { sectionCtx = {}, review = doc.meta["math-exercise-review"] == true }
     doc.blocks = walkBlocks(doc.blocks, state)
+    checkDiagramReferences(doc, state.jsxgraphRefs)
   end
 
   return doc
 end
 
 return {
+  { Meta = function(meta) feedbackSetting = readFeedbackSetting(meta) end },
   { Callout = function(c)
-      if true and quarto.doc.is_format("html") then
-        feedback = feedback or dofile(quarto.utils.resolve_path("feedback-loader.lua"))()
+      if quarto.doc.is_format("html") and loadFeedback().markCallout then
         return feedback.markCallout(c)
       end
       return c

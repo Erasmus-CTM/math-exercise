@@ -17,12 +17,10 @@ jobs:
       - uses: quarto-dev/quarto-actions/setup@v2
         with:
           version: '1.8.27'
-      - uses: actions/checkout@v4
+      - name: Install ai-feedback and JSXGraph
+        uses: ./.github/actions/quarto-dependencies
         with:
-          repository: Erasmus-CTM/ai-feedback
-          ref: ${{ steps.review.outputs['ai-feedback'] || 'main' }}
-          path: _feedback-source
-      - run: quarto add ./_feedback-source --no-prompt
+          ai-feedback-ref: ${{ steps.review.outputs['ai-feedback'] || 'main' }}
       - name: Install variant build dependency
         run: python3 -m pip install PyYAML==6.0.2
       - name: Render standalone example
