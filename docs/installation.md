@@ -30,8 +30,8 @@ Optional dependencies, needed only for some features:
 
 | Feature | Install | If missing |
 |---|---|---|
-| **Feedback** button (AI feedback or a copyable prompt) | `quarto add Erasmus-CTM/ai-feedback` | Exercises render without the button and rendering prints one message naming this command. Set `math-exercise: {feedback: true}` to make it required, or `false` to silence the message. |
-| Graphical answers, diagram context (`jsxgraph:<id>`) | `quarto add jsxgraph/jsxgraph-quarto` and add `jsxgraph` to `filters` | Not installed, or no block with that `assessment_id`: rendering stops with a message naming the fix. Installed but `jsxgraph` missing from `filters`: the exercise shows a message on the page. |
+| **Feedback** button (AI feedback or a copyable prompt) | `quarto add Erasmus-CTM/ai-feedback` | Exercises render without the button, and each page with exercises prints one message naming this command. Set `math-exercise: {feedback: true}` to make it required, or `false` to silence the message. |
+| Graphical answers, diagram context (`jsxgraph:<id>`) | `quarto add jsxgraph/jsxgraph-quarto` and add `jsxgraph` to `filters` | Not installed, or no block with that `assessment_id`: rendering stops with a message naming the fix. Installed but `jsxgraph` missing from `filters`: a `response:` exercise shows a message on the page; for `context:` the message appears when the learner asks for feedback. |
 | Extra Pyodide packages (`#| packages: networkx`) | nothing to install | Loaded in the browser on first Check. |
 
 Install each extension once per project. If the CTM Assessment umbrella is

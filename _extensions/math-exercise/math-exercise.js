@@ -922,7 +922,8 @@
         continue;
       }
 
-      var content = balanced.slice(1, -1), rendered;
+      // Inside an answer marker an escaped dollar stays as authored.
+      var content = balanced.slice(1, -1).split(LITERAL_DOLLAR).join('\\$'), rendered;
       if (scalar) {
         count++;
         var fid = exerciseId + '-f' + count;
@@ -1280,15 +1281,22 @@
 
   // A check that was running when the runtime was replaced (Stop/restart) is
   // repeated once on the new runtime instead of reporting a spurious error.
+  // The first check also covers SymPy's multi-second setup, so a restart
+  // during setup is retried as well.
   async function runOnCurrentRuntime(run) {
-    var py = await ensureSympy();
+    var attempted = await ensurePyodide(), ready = null;
     try {
-      return await run(py);
+      ready = await ensureSympy();
+      return await run(ready);
     } catch (error) {
       var current = await ensureSympy();
-      if (current === py) throw error;
+      if (current === (ready || attempted)) throw error;
       return run(current);
     }
+  }
+  // Prepares SymPy and the exercise's packages, with the same retry.
+  function prepareRuntime(packages) {
+    return runOnCurrentRuntime(function () { return ensurePackages(packages); });
   }
 
   async function checkCustomNow(response, opts) {
@@ -1623,8 +1631,7 @@
       if (feedbackBtn) feedbackBtn.disabled = true;
       fbDiv.innerHTML = '<div class="math-fb-checking">' + L.checking + '</div>';
       try {
-        await ensureSympy();
-        await ensurePackages(checkOpts.packages);
+        await prepareRuntime(checkOpts.packages);
         var parts = [];
         var fieldElements = fieldIds.map(function (id) { return document.getElementById(id); });
         if (mode === 'custom') {
@@ -1735,7 +1742,7 @@
         getVariant: currentVariant,
         selectVariant: function(id) {selectTask(generated.variants.findIndex(function(v){return v.id===id;}));},
         checkFixture: async function(record, fixture) {
-          await ensureSympy(); await ensurePackages(checkOpts.packages);
+          await prepareRuntime(checkOpts.packages);
           var options=Object.assign({}, checkOpts, {checker:record.checker,
             variant:JSON.parse(JSON.stringify({id:record.id, parameters:record.parameters, derived:record.derived, fingerprint:record.fingerprint, context:record['variant-context']}))});
           if(mode==='custom') return [await checkCustom(fixture.response || {kind:'expressions', raw:fixture.answers || [], inputs:{}}, options)];

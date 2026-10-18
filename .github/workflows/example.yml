@@ -21,6 +21,7 @@ jobs:
         uses: ./.github/actions/quarto-dependencies
         with:
           ai-feedback-ref: ${{ steps.review.outputs['ai-feedback'] || 'main' }}
+          jsxgraph-ref: ${{ steps.review.outputs['jsxgraph'] || 'v1.1.0' }}
       - name: Install variant build dependency
         run: python3 -m pip install PyYAML==6.0.2
       - name: Render standalone example

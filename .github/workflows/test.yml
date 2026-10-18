@@ -31,6 +31,7 @@ jobs:
         uses: ./.github/actions/quarto-dependencies
         with:
           ai-feedback-ref: ${{ steps.review.outputs['ai-feedback'] || 'main' }}
+          jsxgraph-ref: ${{ steps.review.outputs['jsxgraph'] || 'v1.1.0' }}
       - name: Install context extraction test dependencies
         run: npm ci
       - name: Test feedback and provider compatibility

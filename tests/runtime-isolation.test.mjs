@@ -67,6 +67,24 @@ test('a check interrupted by a restart is repeated once on the new runtime', asy
   assert.ok(log.includes('b:check'));
 });
 
+test('a restart during the first SymPy setup is retried on the new runtime', async () => {
+  const log = [];
+  let replacement;
+  const { context, window, api } = load();
+  const first = fakeRuntime('a', log);
+  first.loadPackage = async pkg => {
+    log.push('a:load:' + pkg);
+    context.mainPyodide = undefined; context.qpyodideInstance = Promise.resolve(replacement);
+    window.dispatch('qpyodide-runtime-restart');
+    throw new Error('Python was restarted.');
+  };
+  replacement = fakeRuntime('b', log);
+  context.qpyodideInstance = Promise.resolve(first);
+  const result = await api.checkField({ value: '1', dataset: { answer: '1' } }, 'equivalent', {});
+  assert.equal(result.status, 'correct');
+  assert.deepEqual(log, ['a:load:sympy', 'b:load:sympy', 'b:install', 'b:check']);
+});
+
 test('learner rebinding of SymPy names does not reach the checker module (CPython)', { skip: spawnSync(python, ['-c', 'import sympy']).status ? 'SymPy required' : false }, () => {
   const { api } = load();
   const match = exerciseSource.match(/var source = \[\n([\s\S]*?)\n    \]\.join\('\\n'\);/);

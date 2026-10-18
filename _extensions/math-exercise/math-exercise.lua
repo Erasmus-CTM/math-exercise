@@ -5,7 +5,7 @@ local function fail(message) assert(false, message) end
 -- AI feedback: "auto" (default) uses an installed ai-feedback extension and
 -- otherwise renders exercises without the Feedback button; true requires it.
 local feedbackSetting = "auto"
-local feedbackWarned = false
+local feedbackWarned, feedbackMissing = false, false
 
 -- Without ai-feedback the exercises still work; these stand-ins keep the
 -- rendered data attributes valid.
@@ -20,11 +20,7 @@ local function loadFeedback()
   local ok, shared = pcall(dofile(quarto.utils.resolve_path("feedback-loader.lua")))
   if ok then feedback = shared; return feedback end
   if feedbackSetting == "auto" and tostring(shared):match("requires the shared extension") then
-    if not feedbackWarned then
-      feedbackWarned = true
-      quarto.log.warning("math-exercise: AI feedback is off because the ai-feedback extension is not installed. "
-        .. "Install it with `quarto add Erasmus-CTM/ai-feedback`, or set `math-exercise: {feedback: false}` to hide this message.")
-    end
+    feedbackMissing = true -- reported once the page has an exercise (controlsHtml)
     feedback = noFeedback
     return feedback
   end
@@ -598,7 +594,8 @@ local function processMarkers(text, exerciseId, vars, vecdir, mode)
 
     if bracket or brace then
       local balanced = bracket or brace
-      local content = balanced:sub(2, -2)
+      -- Inside an answer marker an escaped dollar stays as authored.
+      local content = balanced:sub(2, -2):gsub(LITERAL_DOLLAR, "\\$")
       local html, ids, labels
       if scalarHead then
         count = count + 1
@@ -657,6 +654,11 @@ end
 ----
 local function controlsHtml()
   local withFeedback = feedback ~= noFeedback
+  if feedbackMissing and not feedbackWarned then
+    feedbackWarned = true
+    quarto.log.warning("math-exercise: AI feedback is off because the ai-feedback extension is not installed. "
+      .. "Install it with `quarto add Erasmus-CTM/ai-feedback`, or set `math-exercise: {feedback: false}` to hide this message.")
+  end
   return table.concat({
     '<div class="math-exercise-controls">',
     '  <button type="button" class="btn btn-primary math-check-btn">&#10003;&nbsp;' .. uiT("check") .. '</button>',

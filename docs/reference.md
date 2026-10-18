@@ -806,8 +806,10 @@ panel, request feedback, and examine the chat-completions request's
 For local regression tests, install Node dependencies with `npm ci`, install
 the two extension dependencies (`quarto add Erasmus-CTM/ai-feedback` and
 `quarto add jsxgraph/jsxgraph-quarto`; both are git-ignored here) and run
-`npm test`. Set `AI_FEEDBACK_EXTENSION` and `JSXGRAPH_EXTENSION` to the
-installed extension folders if they are elsewhere. The checker tests also
+`npm test` with `AI_FEEDBACK_EXTENSION` set to the installed ai-feedback folder
+(for example `_extensions/Erasmus-CTM/ai-feedback`; the tests read this
+variable). Set `JSXGRAPH_EXTENSION` if JSXGraph is installed outside
+`_extensions/`. The checker tests also
 require Python with SymPy 1.13.3 and NetworkX 3.4.2. Install Quarto (or set
 `QUARTO_BIN`) to run the rendered-document tests; they are skipped when Quarto
 is unavailable. CI requires and runs them.

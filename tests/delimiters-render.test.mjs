@@ -50,3 +50,20 @@ test('KaTeX auto-render typesets the math and keeps escaped dollars literal', ()
     assert.match(el.textContent, /^Price \$5 or \$7, solve /);
   } finally { delete global.Node; delete global.document; dom.window.close(); }
 });
+
+test('an escaped dollar inside an answer marker stays part of the answer', { skip: available ? false : 'Quarto required' }, () => {
+  const marked = String.raw`Cost \$6: _[\$6]`;
+  const dir = mkdtempSync(join(tmpdir(), 'math-delimiters-'));
+  try {
+    cpSync(fileURLToPath(new URL('../_extensions/math-exercise', import.meta.url)), join(dir, '_extensions/math-exercise'), { recursive: true });
+    writeFileSync(join(dir, 'page.qmd'), '---\nformat: html\nfilters: [math-exercise]\nmath-exercise: {feedback: false}\n---\n\n```{math-exercise}\n#| label: d\n#| mode: string\n' + marked + '\n```\n');
+    const r = spawnSync(quarto, ['render', 'page.qmd'], { cwd: dir, encoding: 'utf8', timeout: 120000 });
+    assert.equal(r.status, 0, r.stderr);
+    const lua = readFileSync(join(dir, 'page.html'), 'utf8');
+    const js = api().renderTaskText(marked, 'x', '', 'col', 'string', false).html;
+    for (const [name, html] of [['Lua', lua], ['JS', js]]) {
+      assert.match(html, /data-answer="\\\$6"/, name);
+      assert.ok(html.includes('Cost ' + dollar + '6: '), name);
+    }
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});

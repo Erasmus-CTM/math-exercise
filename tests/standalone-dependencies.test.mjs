@@ -42,6 +42,10 @@ test('renders without ai-feedback: no Feedback button and one clear message', { 
     const html = readFileSync(join(dir, 'page.html'), 'utf8');
     assert.match(html, /math-check-btn/);
     assert.doesNotMatch(html, /class="btn btn-light math-feedback-btn"|feedback-core\.js/);
+    // A page without exercises (math-exercise listed project-wide) stays quiet.
+    const quiet = render(dir, 'filters: [math-exercise]\n', '::: {.callout-note}\nNo exercise here.\n:::');
+    assert.equal(quiet.status, 0, quiet.stderr);
+    assert.doesNotMatch(quiet.stderr, /AI feedback is off/);
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
