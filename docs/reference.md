@@ -264,7 +264,7 @@ applies):
 |--------|---------|
 | `tolerance: 0.5` | absolute tolerance: \|answer − correct\| ≤ 0.5 |
 | `tolerance: 5%` | relative tolerance: 5% of the correct value |
-| `decplaces: 2` | round both values to 2 decimal places, then compare |
+| `decplaces: 2` | round both values to 2 decimal places, then compare (school rounding of the decimal value: 5.395 → 5.40, 0.125 → 0.13) |
 | `sigfigs: 3` | round both values to 3 significant figures, then compare |
 
 ```yaml

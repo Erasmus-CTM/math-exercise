@@ -135,6 +135,19 @@ try:
 except ValueError:
     pass
 assert ask('6*sqrt(2)')['status'] == 'correct', 'a rejected answer must not block later checks'
+# Rounding as written in decimal, half away from zero: 5.395 is 5.40 to two
+# places (the binary float rounds to 5.39), 0.125 is 0.13.
+def numeric(answer, key, decplaces='', sigfigs=''):
+    main.update({'_math_student': answer, '_math_correct': key, '_math_vars': '', '_math_mode': 'numeric',
+      '_math_reject': '', '_math_tolerance': '', '_math_decplaces': decplaces, '_math_sigfigs': sigfigs, '_math_form': '',
+      '_math_partial_credit': False, '_math_form_credit': 0.5})
+    return json.loads(eval(case['call'], main))['status']
+assert numeric('5.395', '5.40', decplaces='2') == 'correct'
+assert numeric('5.394', '5.40', decplaces='2') != 'correct'
+assert numeric('0.125', '0.13', decplaces='2') == 'correct'
+assert numeric('-2.5', '-3', decplaces='0') == 'correct'
+assert numeric('2.675', '2.68', sigfigs='3') == 'correct'
+assert numeric('1e30', '1e30', decplaces='2') == 'correct'
 print('isolated')
 `;
     const r = spawnSync(python, ['-c', script, join(dir, 'case.json')], { encoding: 'utf8', timeout: 120000 });
