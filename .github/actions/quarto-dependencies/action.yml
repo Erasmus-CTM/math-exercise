@@ -22,8 +22,12 @@ runs:
     - name: Install ai-feedback and JSXGraph
       shell: bash
       run: |
-        quarto add ./_feedback-source --no-prompt
-        quarto add "jsxgraph/jsxgraph-quarto@${{ inputs.jsxgraph-ref }}" --no-prompt
-        test -f _extensions/jsxgraph/lua/jsxgraph.lua
+        # Failures become annotations, readable without the raw log.
+        step() { out=$("$@" 2>&1) || { echo "$out"; printf '::error title=%s failed::%s\n' "$*" "$(echo "$out" | tail -25 | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\n/%0A/g')"; exit 1; }; echo "$out"; }
+        step quarto add ./_feedback-source --no-prompt
+        step quarto add "jsxgraph/jsxgraph-quarto@${{ inputs.jsxgraph-ref }}" --no-prompt
+        # GitHub installs go under an owner folder (_extensions/jsxgraph/jsxgraph).
+        lua=$(ls _extensions/jsxgraph/lua/jsxgraph.lua _extensions/*/jsxgraph/lua/jsxgraph.lua 2>/dev/null | head -1)
+        test -n "$lua" || { echo "::error::JSXGraph extension was not installed"; find _extensions -maxdepth 3; exit 1; }
         echo "AI_FEEDBACK_EXTENSION=$GITHUB_WORKSPACE/_feedback-source/_extensions/ai-feedback" >> "$GITHUB_ENV"
-        echo "JSXGRAPH_EXTENSION=$GITHUB_WORKSPACE/_extensions/jsxgraph" >> "$GITHUB_ENV"
+        echo "JSXGRAPH_EXTENSION=$GITHUB_WORKSPACE/$(dirname "$(dirname "$lua")")" >> "$GITHUB_ENV"
