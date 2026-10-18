@@ -183,25 +183,6 @@
 
   function simpleMarkdown(text) { return window.AIFeedback.renderMarkdown(text); }
 
-  function loadScript(src) {
-    return new Promise(function (resolve, reject) {
-      var existing = document.querySelector('script[src="' + src + '"]');
-      if (existing) {
-        if (existing.dataset.qLoaded === '1') { resolve(); return; }
-        existing.addEventListener('load', function () { resolve(); });
-        existing.addEventListener('error', function () {
-          reject(new Error('Failed to load: ' + src));
-        });
-        return;
-      }
-      var s = document.createElement('script');
-      s.src = src;
-      s.onload = function () { s.dataset.qLoaded = '1'; resolve(); };
-      s.onerror = function () { reject(new Error('Failed to load: ' + src)); };
-      document.head.appendChild(s);
-    });
-  }
-
   // ---------------------------------------------------------------------------
   // Pyodide bootstrap  (reuse coatless instance if present)
   // ---------------------------------------------------------------------------
@@ -257,8 +238,16 @@
   // SymPy  (lazy – first Check click)
   // ---------------------------------------------------------------------------
 
-  var sympyReady = false;
-  var packageLoads = Object.create(null);
+  // A Pyodide runtime can be replaced on the page (pyodide-interaktiv's Stop or
+  // restart terminates its worker). SymPy setup and package loads therefore
+  // belong to one runtime object and are repeated for a new one.
+  var sympyRuntime = null;
+  var packageLoads = new WeakMap();
+  if (typeof window !== 'undefined' && window.addEventListener) {
+    window.addEventListener('qpyodide-runtime-restart', function () {
+      sympyRuntime = null; sympyLoading = null;
+    });
+  }
 
   function parsePackageList(value) {
     var packages = Array.isArray(value) ? value : [];
@@ -278,28 +267,53 @@
 
   async function ensurePackages(packages) {
     var requested = parsePackageList(packages);
+    if (!requested.length) return;
+    var py = await ensurePyodide();
+    var loads = packageLoads.get(py);
+    if (!loads) { loads = Object.create(null); packageLoads.set(py, loads); }
     await Promise.all(requested.map(function (name) {
       var key = name.toLowerCase();
-      if (!packageLoads[key]) {
-        packageLoads[key] = mainPyodide.loadPackage(name).catch(function (error) {
-          delete packageLoads[key];
+      if (!loads[key]) {
+        loads[key] = py.loadPackage(name).catch(function (error) {
+          delete loads[key];
           throw error;
         });
       }
-      return packageLoads[key];
+      return loads[key];
     }));
   }
 
   var sympyLoading = null;
-  function ensureSympy() {
-    if (!sympyLoading) sympyLoading = initializeSympy().catch(function(error){sympyLoading=null;throw error;});
+  // Resolves to the runtime on which SymPy and the checker helpers are ready.
+  async function ensureSympy() {
+    var py = await ensurePyodide();
+    if (sympyRuntime === py) return py;
+    if (!sympyLoading || sympyLoading.runtime !== py) {
+      var loading = initializeSympy(py).then(function () { sympyRuntime = py; return py; },
+        function (error) { if (sympyLoading === loading) sympyLoading = null; throw error; });
+      loading.runtime = py;
+      sympyLoading = loading;
+    }
     return sympyLoading;
   }
-  async function initializeSympy() {
-    if (sympyReady) return;
-    await ensurePyodide();
-    await mainPyodide.loadPackage('sympy');
-    await mainPyodide.runPythonAsync([
+  // The checker runtime lives in its own module, not in the interpreter's
+  // global namespace: learner code in other cells on the page (for example
+  // pyodide-interaktiv) shares that namespace and may rebind names such as
+  // `symbols`, `Matrix` or `sqrt`.
+  var MATH_MODULE = '_ctm_math_exercise';
+  var INSTALL_PY = [
+    'import sys as _ctm_sys, types as _ctm_types',
+    '_ctm_module = _ctm_types.ModuleType("' + MATH_MODULE + '")',
+    'exec(_math_runtime_source, _ctm_module.__dict__)',
+    '_ctm_sys.modules["' + MATH_MODULE + '"] = _ctm_module',
+    'del _ctm_sys, _ctm_types, _ctm_module, _math_runtime_source',
+  ].join('\n');
+  function runtimeCall(name) {
+    return '__import__("' + MATH_MODULE + '")._math_run("' + name + '", globals())';
+  }
+  async function initializeSympy(py) {
+    await py.loadPackage('sympy');
+    var source = [
       'from sympy import *',
       'from sympy.parsing.sympy_parser import (',
       '    parse_expr, standard_transformations,',
@@ -635,8 +649,20 @@
       '        return _normalize_custom_result(checker(response, checker_symbols))',
       '    except Exception as _me:',
       '        return {"status": "error", "message": str(_me)}',
-    ].join('\n'));
-    sympyReady = true;
+      '',
+      '_MATH_INPUTS = ("_math_student", "_math_correct", "_math_vars", "_math_mode", "_math_reject",',
+      '                "_math_tolerance", "_math_decplaces", "_math_sigfigs", "_math_form",',
+      '                "_math_partial_credit", "_math_form_credit", "_math_response_json", "_math_checker")',
+      '',
+      'def _math_run(name, caller):',
+      '    # Move this request\'s inputs out of the shared namespace into the module.',
+      '    for key in _MATH_INPUTS:',
+      '        if key in caller:',
+      '            globals()[key] = caller.pop(key)',
+      '    return _mj.dumps(globals()[name]())',
+    ].join('\n');
+    py.globals.set('_math_runtime_source', source);
+    await py.runPythonAsync(INSTALL_PY);
   }
 
   // ---------------------------------------------------------------------------
@@ -1211,8 +1237,8 @@
 
   // Calls the _math_check() helper defined once in ensureSympy() and returns
   // its result as a JSON status string.
-  var CHECK_PY = '_mj.dumps(_math_check())';
-  var CHECK_CUSTOM_PY = '_mj.dumps(_math_check_custom())';
+  var CHECK_PY = runtimeCall('_math_check');
+  var CHECK_CUSTOM_PY = runtimeCall('_math_check_custom');
 
   // Python globals are shared: keep each set-globals/evaluate transaction together.
   var assessmentQueue = Promise.resolve();
@@ -1225,18 +1251,19 @@
     var val = el.value.trim();
     if (!val) return { status: 'empty', score: 0.0 };
     opts = opts || {};
-    mainPyodide.globals.set('_math_student',   val);
-    mainPyodide.globals.set('_math_correct',   el.dataset.answer || '');
-    mainPyodide.globals.set('_math_vars',      el.dataset.vars   || '');
-    mainPyodide.globals.set('_math_mode',      mode || 'equivalent');
-    mainPyodide.globals.set('_math_reject',    opts.reject    || '');
-    mainPyodide.globals.set('_math_tolerance', opts.tolerance || '');
-    mainPyodide.globals.set('_math_decplaces', opts.decplaces || '');
-    mainPyodide.globals.set('_math_sigfigs',   opts.sigfigs   || '');
-    mainPyodide.globals.set('_math_form',      opts.form      || '');
-    mainPyodide.globals.set('_math_partial_credit', !!opts.partialCredit);
-    mainPyodide.globals.set('_math_form_credit', Number(opts.formCredit));
-    return JSON.parse(await mainPyodide.runPythonAsync(CHECK_PY));
+    var py = await ensureSympy();
+    py.globals.set('_math_student',   val);
+    py.globals.set('_math_correct',   el.dataset.answer || '');
+    py.globals.set('_math_vars',      el.dataset.vars   || '');
+    py.globals.set('_math_mode',      mode || 'equivalent');
+    py.globals.set('_math_reject',    opts.reject    || '');
+    py.globals.set('_math_tolerance', opts.tolerance || '');
+    py.globals.set('_math_decplaces', opts.decplaces || '');
+    py.globals.set('_math_sigfigs',   opts.sigfigs   || '');
+    py.globals.set('_math_form',      opts.form      || '');
+    py.globals.set('_math_partial_credit', !!opts.partialCredit);
+    py.globals.set('_math_form_credit', Number(opts.formCredit));
+    return JSON.parse(await py.runPythonAsync(CHECK_PY));
   }
 
   async function checkCustomNow(response, opts) {
@@ -1244,10 +1271,12 @@
       if (!response || typeof response !== 'object' || Array.isArray(response)) throw new Error('Generated custom responses must be objects');
       response = Object.assign({}, response, {variant: opts.variant});
     }
-    mainPyodide.globals.set('_math_response_json', JSON.stringify(response));
-    mainPyodide.globals.set('_math_vars', opts.vars || '');
-    mainPyodide.globals.set('_math_checker', opts.checker || '');
-    return JSON.parse(await mainPyodide.runPythonAsync(CHECK_CUSTOM_PY));
+    var py = await ensureSympy();
+    await ensurePackages(opts.packages);
+    py.globals.set('_math_response_json', JSON.stringify(response));
+    py.globals.set('_math_vars', opts.vars || '');
+    py.globals.set('_math_checker', opts.checker || '');
+    return JSON.parse(await py.runPythonAsync(CHECK_CUSTOM_PY));
   }
 
   // Domain extraction delegates shared context and math-safe serialization.

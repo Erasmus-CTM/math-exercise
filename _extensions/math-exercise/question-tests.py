@@ -15,7 +15,7 @@ def runtime_namespace():
     # Decode only the literal Python string array already shipped to Pyodide.
     # Sharing it keeps the build tests on the same helper implementations.
     source = Path(__file__).with_name('math-exercise.js').read_text()
-    match = re.search(r"runPythonAsync\(\[\n(.*?)\n    \]\.join\('\\n'\)\)", source, re.S)
+    match = re.search(r"var source = \[\n(.*?)\n    \]\.join\('\\n'\);", source, re.S)
     if not match:
         raise ValueError('Cannot locate the math-exercise Python bootstrap')
     lines = ast.literal_eval('[' + match[1] + ']')

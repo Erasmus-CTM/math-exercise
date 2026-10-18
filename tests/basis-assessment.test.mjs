@@ -10,7 +10,7 @@ const source = await readFile(
 );
 
 function sympyBootstrap() {
-  const match = source.match(/runPythonAsync\(\[\n([\s\S]*?)\n    \]\.join\('\\n'\)\)/);
+  const match = source.match(/var source = \[\n([\s\S]*?)\n    \]\.join\('\\n'\);/);
   assert.ok(match, 'could not locate the embedded SymPy bootstrap');
   return vm.runInNewContext(`[${match[1]}]`).join('\n');
 }
