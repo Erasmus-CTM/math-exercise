@@ -899,9 +899,11 @@ working. Grading still runs in the learner's browser and is not tamper-proof.
 If the Pyodide extension restarts its runtime, the next Check sets SymPy up
 again, and a check that was running (also during SymPy's setup) is repeated
 once on the new runtime. With a runtime in a worker (pyodide-interaktiv), a
-check that takes longer than 10 s, for example an answer such as `9**9**9**9`,
-offers **Stop**, which restarts Python for the whole page; a stopped check is
-not repeated. Python running on the page itself cannot be interrupted; the
+check that takes longer than 20 s, for example an answer such as `9**9**9**9`,
+offers **Stop**, which restarts Python for the whole page; a stopped check (from
+any component's Stop) is not repeated. Change the time with
+`math-exercise: {stop-after: 30}` (seconds), or for all CTM components of a
+project with `ctm-assessment: {stop-after: 30}`. Python running on the page itself cannot be interrupted; the
 page then has to be reloaded.
 
 Combination with

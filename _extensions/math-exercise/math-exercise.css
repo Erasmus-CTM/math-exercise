@@ -260,10 +260,16 @@
   margin: 0;
 }
 
-/* Shared settings must not stretch the existing Bootstrap controls. */
+/* Common CTM button size, shared by all CTM components (math-exercise,
+   py-exercise, pyodide-interaktiv, ai-feedback). Set the --ctm-button-*
+   variables in your CSS or theme to change all of them together. */
+.math-exercise-controls button,
+.math-exercise-controls .ai-feedback-gear {
+  font-size: var(--ctm-button-font-size, .875rem);
+  padding: var(--ctm-button-padding-y, .375rem) var(--ctm-button-padding-x, .75rem);
+  line-height: var(--ctm-button-line-height, 1.5);
+  border-radius: var(--ctm-button-radius, var(--bs-border-radius, .375rem));
+}
 .math-exercise-controls .ai-feedback-gear {
   margin: 0;
-  padding: .375rem .75rem;
-  font-size: inherit;
-  line-height: 1.5;
 }

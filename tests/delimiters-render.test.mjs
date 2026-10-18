@@ -51,7 +51,7 @@ test('KaTeX auto-render typesets the math and keeps escaped dollars literal', ()
   } finally { delete global.Node; delete global.document; dom.window.close(); }
 });
 
-test('an escaped dollar inside an answer marker stays part of the answer', { skip: available ? false : 'Quarto required' }, () => {
+test('an escaped dollar inside an answer marker is a plain dollar in the answer', { skip: available ? false : 'Quarto required' }, () => {
   const marked = String.raw`Cost \$6: _[\$6]`;
   const dir = mkdtempSync(join(tmpdir(), 'math-delimiters-'));
   try {
@@ -62,7 +62,7 @@ test('an escaped dollar inside an answer marker stays part of the answer', { ski
     const lua = readFileSync(join(dir, 'page.html'), 'utf8');
     const js = api().renderTaskText(marked, 'x', '', 'col', 'string', false).html;
     for (const [name, html] of [['Lua', lua], ['JS', js]]) {
-      assert.match(html, /data-answer="\\\$6"/, name);
+      assert.match(html, /data-answer="\$6"/, name);
       assert.ok(html.includes('Cost ' + dollar + '6: '), name);
     }
   } finally { rmSync(dir, { recursive: true, force: true }); }

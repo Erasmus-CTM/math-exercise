@@ -31,7 +31,7 @@ function fakeRuntime(name, log, { failOnce } = {}) {
     loadPackage: async pkg => { log.push(name + ':load:' + pkg); },
     globals: { set: async () => {} },
     runPythonAsync: async code => {
-      if (code.includes('_ctm_module_source')) { if (!code.includes('_ctm_guard')) log.push(name + ':install'); return undefined; }
+      if (code.includes('ModuleType(')) { if (!code.includes('"_ctm_guard"')) log.push(name + ':install'); return undefined; }
       if (failOnce && !failed) { failed = true; await failOnce(); throw new Error('Python was restarted.'); }
       log.push(name + ':check');
       return JSON.stringify({ status: 'correct', score: 1 });
@@ -120,6 +120,12 @@ try:
 except ValueError as error:
     assert 'unsupported input' in str(error)
 assert builtins.len is len and ask('6*sqrt(2)')['status'] == 'correct'
+# Author data in a custom response (variant context) is not restricted.
+module = sys.modules['_ctm_math_exercise']
+module._math_student = ''
+module._math_response_json = json.dumps({'kind': 'expressions', 'raw': ['x + 1'], 'inputs': {'m': {'type': 'matrix', 'raw': ['__a']}},
+                                         'variant': {'context': 'The value is __important__'}})
+assert list(module._learner_strings()) == ['', 'x + 1', '__a']
 print('isolated')
 `;
     const r = spawnSync(python, ['-c', script, join(dir, 'case.json')], { encoding: 'utf8', timeout: 120000 });

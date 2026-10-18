@@ -21,10 +21,15 @@ local function deps()
   return dependencies
 end
 
+-- Decided per page before any other pass (preparePage): ai-feedback is
+-- loaded only when the page has exercises with feedback on, or `.ai-feedback`
+-- activities (which are prepared even with exercise feedback off).
+local feedbackForExercises, feedbackForActivities = false, false
+
 local function loadFeedback()
   if feedback then return feedback end
-  if feedbackSetting == "false" then feedback = noFeedback; return feedback end
-  if feedbackSetting == "auto" and not deps().installed("ai-feedback") then
+  if not feedbackForExercises and not feedbackForActivities then feedback = noFeedback; return feedback end
+  if not feedbackForActivities and feedbackSetting == "auto" and not deps().installed("ai-feedback") then
     feedbackMissing = true -- reported once the page has an exercise (controlsHtml)
     feedback = noFeedback
     return feedback
@@ -577,8 +582,8 @@ local function processMarkers(text, exerciseId, vars, vecdir, mode)
 
     if bracket or brace then
       local balanced = bracket or brace
-      -- Inside an answer marker an escaped dollar stays as authored.
-      local content = balanced:sub(2, -2):gsub(LITERAL_DOLLAR, "\\$")
+      -- Inside an answer marker an escaped dollar is a plain dollar.
+      local content = balanced:sub(2, -2):gsub(LITERAL_DOLLAR, "$")
       local html, ids, labels
       if scalarHead then
         count = count + 1
@@ -636,7 +641,7 @@ end
 -- Shared controls HTML (same for single and pool mode)
 ----
 local function controlsHtml()
-  local withFeedback = feedback ~= noFeedback
+  local withFeedback = feedbackForExercises and feedback ~= noFeedback
   if feedbackMissing and not feedbackWarned then
     feedbackWarned = true
     quarto.log.warning("math-exercise: AI feedback is off because the ai-feedback extension is not installed. "
@@ -855,11 +860,12 @@ end
 
 local function Meta(meta)
   lang = resolveLang(meta)
+  if not quarto.doc.is_format("html") then return meta end
 
   -- math-exercise.js reads this to pick its LOCALES entry.
   quarto.doc.include_text("before-body",
     '<script>window.__mathExerciseConfig = ' ..
-    quarto.json.encode({ lang = lang }) .. ';</script>')
+    quarto.json.encode({ lang = lang, stopAfter = deps().stopAfter(meta, "math-exercise") }) .. ';</script>')
 
   return meta
 end
@@ -922,10 +928,21 @@ local function checkDiagramReferences(doc, refs)
   -- (feedback-loader.lua requireUsed).
 end
 
-local function Pandoc(doc)
+-- First pass: stop if the page uses a missing optional extension, and decide
+-- whether ai-feedback is needed at all.
+local function preparePage(doc)
   feedbackSetting = readFeedbackSetting(doc.meta)
+  if not quarto.doc.is_format("html") then return doc end
+  deps().requireUsed(doc, "math-exercise")
+  local exercises = false
+  doc.blocks:walk({ CodeBlock = function(b) if b.classes:includes("{math-exercise}") then exercises = true end end })
+  feedbackForExercises = exercises and feedbackSetting ~= "false"
+  feedbackForActivities = deps().uses(doc)["ai-feedback"] == true
+  return doc
+end
+
+local function Pandoc(doc)
   if quarto.doc.is_format("html") then
-    deps().requireUsed(doc, "math-exercise")
     doc = loadFeedback().prepare and feedback.prepare(doc) or doc
   end
   doc.meta = Meta(doc.meta)
@@ -940,7 +957,7 @@ local function Pandoc(doc)
 end
 
 return {
-  { Meta = function(meta) feedbackSetting = readFeedbackSetting(meta) end },
+  { Pandoc = preparePage },
   { Callout = function(c)
       if quarto.doc.is_format("html") and loadFeedback().markCallout then
         return feedback.markCallout(c)

@@ -664,15 +664,27 @@
       'except ImportError:  # native test runners (question-tests.py) have no page to protect',
       '    _ctm_guard = None',
       '',
+      'def _learner_strings():',
+      '    yield globals().get("_math_student") or ""',
+      '    try:',
+      '        response = _mj.loads(globals().get("_math_response_json") or "null")',
+      '    except ValueError:',
+      '        return',
+      '    if isinstance(response, dict):',
+      '        yield from response.get("raw", []) or []',
+      '        for item in (response.get("inputs") or {}).values():',
+      '            if isinstance(item, dict):',
+      '                yield from item.get("raw", []) or []',
+      '',
       'def _math_run(name, caller):',
       '    # Move this request\'s inputs out of the shared namespace into the module.',
       '    for key in _MATH_INPUTS:',
       '        if key in caller:',
       '            globals()[key] = caller.pop(key)',
-      '    # Answers are parsed by SymPy (which evaluates Python): no dunder access.',
-      '    for key in ("_math_student", "_math_response_json"):',
-      '        if "__" in str(globals().get(key) or ""):',
-      '            raise ValueError("SyntaxError: unsupported input")',
+      '    # Learner answers are parsed by SymPy (which evaluates Python): no dunder',
+      '    # access. Author data (variants, checkers) is not restricted.',
+      '    if any("__" in str(text) for text in _learner_strings()):',
+      '        raise ValueError("SyntaxError: unsupported input")',
       '    # Whatever the parsed answer or checker does, other components on the',
       '    # page keep their interpreter state.',
       '    state = _ctm_guard.snapshot() if _ctm_guard else None',
@@ -947,8 +959,8 @@
         continue;
       }
 
-      // Inside an answer marker an escaped dollar stays as authored.
-      var content = balanced.slice(1, -1).split(LITERAL_DOLLAR).join('\\$'), rendered;
+      // Inside an answer marker an escaped dollar is a plain dollar.
+      var content = balanced.slice(1, -1).split(LITERAL_DOLLAR).join('$'), rendered;
       if (scalar) {
         count++;
         var fid = exerciseId + '-f' + count;
@@ -1308,17 +1320,18 @@
   // repeated once on the new runtime instead of reporting a spurious error.
   // The first check also covers SymPy's multi-second setup, so a restart
   // during setup is retried as well.
-  // Incremented when the learner stops a check: that check is not repeated.
-  var stopEpoch = 0;
-  var SLOW_CHECK_MS = (typeof window !== 'undefined' && window.__mathExerciseSlowCheckMs) || 10000;
+  // A check stopped from any button on the page (runtime.stopCount) is not repeated.
+  // `math-exercise: stop-after:` / `ctm-assessment: stop-after:` (seconds, default 20).
+  var SLOW_CHECK_MS = (typeof window !== 'undefined' && window.__mathExerciseSlowCheckMs) ||
+    (Number(ME_CFG.stopAfter) > 0 ? Number(ME_CFG.stopAfter) * 1000 : 20000);
   async function runOnCurrentRuntime(run) {
-    var epoch = stopEpoch;
+    var epoch = globalThis.MathExerciseRuntime.stopCount();
     var attempted = await ensurePyodide(), ready = null;
     try {
       ready = await ensureSympy();
       return await run(ready);
     } catch (error) {
-      if (epoch !== stopEpoch) throw new Error('math-exercise: stopped by the learner');
+      if (epoch !== globalThis.MathExerciseRuntime.stopCount()) throw new Error('math-exercise: stopped by the learner');
       // Learner code elsewhere on the page removed the checker module: install again.
       var missing = /No module named '_ctm_|has no attribute '_math_run'/.test(String(error));
       if (missing) {
@@ -1667,8 +1680,7 @@
       if (feedbackBtn) feedbackBtn.disabled = true;
       fbDiv.innerHTML = '<div class="math-fb-checking">' + L.checking + '</div>';
       // A runtime in a worker can be stopped: offer it when a check takes long.
-      var slowTimer = setTimeout(function () {
-        if (!globalThis.MathExerciseRuntime.canStop()) return;
+      var cancelSlow = globalThis.MathExerciseRuntime.whenSlow(SLOW_CHECK_MS, function () {
         var note = document.createElement('div');
         note.className = 'math-fb-checking';
         note.textContent = L.slowCheck + ' ';
@@ -1677,12 +1689,11 @@
         stopBtn.className = 'btn btn-sm btn-outline-danger math-stop-btn';
         stopBtn.textContent = L.stop;
         stopBtn.addEventListener('click', function () {
-          stopEpoch++;
           globalThis.MathExerciseRuntime.stop('Stopped by the learner');
         });
         note.appendChild(stopBtn);
         fbDiv.replaceChildren(note);
-      }, SLOW_CHECK_MS);
+      });
       try {
         await prepareRuntime(checkOpts.packages);
         var parts = [];
@@ -1738,7 +1749,7 @@
       } catch (err) {
         fbDiv.innerHTML = '<div class="math-fb-err">&#9888;&nbsp;' + friendlyError(String(err)) + '</div>';
       } finally {
-        clearTimeout(slowTimer);
+        cancelSlow();
         checkBtn.disabled = false;
         if (feedbackBtn) feedbackBtn.disabled = !feedbackHandle;
       }

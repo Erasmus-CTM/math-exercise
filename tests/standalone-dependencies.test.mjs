@@ -148,3 +148,35 @@ test('a page that uses a missing extension stops, also without exercises; unused
     assert.doesNotMatch(readFileSync(join(dir, 'page.html'), 'utf8'), /feedback-core\.js|jsxgraphcore/);
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
+
+test('ai-feedback is loaded only when the page uses it', { skip: skip || (!existsSync(feedback) && 'ai-feedback not installed') }, () => {
+  const dir = project({ withFeedback: true });
+  try {
+    // auto, but nothing on the page needs feedback
+    let r = render(dir, 'filters: [math-exercise]\n', '::: {.callout-note}\nNo exercise here.\n:::');
+    assert.equal(r.status, 0, r.stderr);
+    assert.doesNotMatch(readFileSync(join(dir, 'page.html'), 'utf8'), /feedback-core\.js/);
+    // exercise feedback off, but a text activity on the page is prepared; exercises get no Feedback button
+    r = render(dir, 'filters: [math-exercise]\nmath-exercise:\n  feedback: false\n', plain + '\n\n::: {.ai-feedback}\nExplain.\n:::');
+    assert.equal(r.status, 0, r.stderr);
+    const html = readFileSync(join(dir, 'page.html'), 'utf8');
+    assert.match(html, /ai-feedback-activity/);
+    assert.doesNotMatch(html, /class="btn btn-light math-feedback-btn"/);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('stop-after is read per component or for all components, and validated', { skip }, () => {
+  const dir = project();
+  try {
+    let r = render(dir, 'filters: [math-exercise]\nmath-exercise:\n  feedback: false\n', plain);
+    assert.equal(r.status, 0, r.stderr);
+    assert.match(readFileSync(join(dir, 'page.html'), 'utf8'), /"stopAfter":20/);
+    r = render(dir, 'filters: [math-exercise]\nctm-assessment:\n  stop-after: 45\nmath-exercise:\n  feedback: false\n', plain);
+    assert.match(readFileSync(join(dir, 'page.html'), 'utf8'), /"stopAfter":45/);
+    r = render(dir, 'filters: [math-exercise]\nctm-assessment:\n  stop-after: 45\nmath-exercise:\n  feedback: false\n  stop-after: 5\n', plain);
+    assert.match(readFileSync(join(dir, 'page.html'), 'utf8'), /"stopAfter":5/);
+    r = render(dir, 'filters: [math-exercise]\nmath-exercise:\n  feedback: false\n  stop-after: soon\n', plain);
+    assert.notEqual(r.status, 0);
+    assert.match(r.stderr, /stop-after must be a number of seconds/);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
