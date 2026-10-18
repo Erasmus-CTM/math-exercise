@@ -1,11 +1,13 @@
-// Shared classic-script bootstrap for math-exercise and stack-sympy.
-// Keep the vendored copy in stack-sympy byte-identical to this file.
+// Shared classic-script bootstrap for math-exercise, py-exercise and stack-sympy.
+// py-exercise ships a byte-identical copy (checked in CI); stack-sympy vendors
+// a pinned revision (see its vendor/provenance.json).
 (function (root) {
   'use strict';
 
   if (root.MathExerciseRuntime) return;
 
   var indexURL = 'https://cdn.jsdelivr.net/pyodide/v0.27.2/full/';
+  var LOAD_TIMEOUT = root.__qExercisePyodideTimeout || 180000; // override for tests
 
   function loadScript(src) {
     if (src === indexURL + 'pyodide.js' && typeof root.loadPyodide === 'function') {
@@ -73,7 +75,21 @@
     if (!root.__qExercisePyodide) {
       root.__qExercisePyodide = (async function () {
         await loadScript(indexURL + 'pyodide.js');
-        return root.loadPyodide({ indexURL: indexURL });
+        // A failed WebAssembly download leaves loadPyodide() pending forever;
+        // give up after LOAD_TIMEOUT so that a later attempt can start again.
+        var loading = root.loadPyodide({ indexURL: indexURL });
+        if (typeof setTimeout !== 'function') return loading;
+        var timer;
+        var timeout = new Promise(function (resolve, reject) {
+          timer = setTimeout(function () {
+            var error = new Error('Python did not finish loading within ' + LOAD_TIMEOUT / 1000 + ' s');
+            error.code = 'pyodide-timeout';
+            reject(error);
+          }, LOAD_TIMEOUT);
+        });
+        try {
+          return await Promise.race([loading, timeout]);
+        } finally { clearTimeout(timer); }
       })();
     }
     var pending = root.__qExercisePyodide;
@@ -88,6 +104,7 @@
 
   root.MathExerciseRuntime = {
     indexURL: indexURL,
+    loadTimeout: LOAD_TIMEOUT,
     loadScript: loadScript,
     ensurePyodide: ensurePyodide
   };

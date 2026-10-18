@@ -34,14 +34,21 @@ Optional dependencies, needed only for some features:
 | Graphical answers, diagram context (`jsxgraph:<id>`) | `quarto add jsxgraph/jsxgraph-quarto` and add `jsxgraph` to `filters` | Not installed, or no block with that `assessment_id`: rendering stops with a message naming the fix. Installed but `jsxgraph` missing from `filters`: a `response:` exercise shows a message on the page; for `context:` the message appears when the learner asks for feedback. |
 | Extra Pyodide packages (`#| packages: networkx`) | nothing to install | Loaded in the browser on first Check. |
 
+Invalid exercise source (for example a malformed `mat[...]` or a diagram
+reference without its block) stops rendering with a message. Before 0.9.0
+these messages were printed but the render continued and published a broken
+exercise.
+
 Install each extension once per project. If the CTM Assessment umbrella is
 also installed, its copies sit directly under `_extensions/` and a standalone
 `quarto add Erasmus-CTM/...` goes under `_extensions/Erasmus-CTM/`; the short
 filter name `math-exercise` then selects the umbrella's copy, so use the
 qualified name `Erasmus-CTM/math-exercise` for the standalone one. Each
-extension uses the ai-feedback installed next to it; installations of
-*different* ai-feedback versions in one project stop rendering with a message
-naming both.
+extension uses the ai-feedback installed next to it, so the two sets may use
+different ai-feedback versions; only a page that combines filters from both
+sets with different versions stops, with a message naming both. The umbrella
+also provides JSXGraph: do not add `jsxgraph/jsxgraph-quarto` separately in
+that project.
 
 ---
 

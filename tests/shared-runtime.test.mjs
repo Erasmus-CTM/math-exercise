@@ -127,3 +127,14 @@ test('worker imports Pyodide without reading document or window', async () => {
   assert.deepEqual(imports, [cdn + 'pyodide.js']);
   assert.equal(context.mainPyodide, instance);
 });
+
+test('a load that never finishes (failed WebAssembly) times out and can be retried', async () => {
+  let calls = 0;
+  const ready = { runPythonAsync() {} };
+  const context = runtime({ setTimeout, clearTimeout, __qExercisePyodideTimeout: 50,
+    loadPyodide: () => (++calls === 1 ? new Promise(() => {}) : Promise.resolve(ready)) });
+  await assert.rejects(context.MathExerciseRuntime.ensurePyodide(), error => error.code === 'pyodide-timeout');
+  assert.equal(context.__qExercisePyodide, undefined);
+  assert.equal(await context.MathExerciseRuntime.ensurePyodide(), ready);
+  assert.equal(calls, 2);
+});

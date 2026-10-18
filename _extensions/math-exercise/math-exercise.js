@@ -16,6 +16,7 @@
       errDivZero: "Division by zero: the expression is undefined at this point.",
       errType: "Type error: make sure numbers and variables are combined correctly.",
       errGeneric: "The input could not be processed – use the input help for the correct spelling.",
+      errRuntime: "Python could not be loaded. Check the internet connection and press Check again.",
       vecComponent: function (n) { return 'Component ' + n; },
       matCell: function (row, column) { return 'Row ' + row + ', column ' + column; },
       dynamicMatCell: function (name, row, column) { return name + ', row ' + row + ', column ' + column; },
@@ -63,6 +64,7 @@
       errDivZero: "Division durch Null: der Ausdruck ist an dieser Stelle nicht definiert.",
       errType: "Typ-Fehler: Stelle sicher, dass Zahlen und Variablen korrekt kombiniert sind.",
       errGeneric: "Die Eingabe konnte nicht verarbeitet werden – nutze die Eingabe-Hilfe für korrekte Schreibweisen.",
+      errRuntime: "Python konnte nicht geladen werden. Prüfe die Internetverbindung und drücke erneut auf Überprüfen.",
       vecComponent: function (n) { return 'Komponente ' + n; },
       matCell: function (row, column) { return 'Zeile ' + row + ', Spalte ' + column; },
       dynamicMatCell: function (name, row, column) { return name + ', Zeile ' + row + ', Spalte ' + column; },
@@ -110,6 +112,7 @@
       errDivZero: "Divisjon med null: Uttrykket er ikke definert i dette punktet.",
       errType: "Typefeil: Sjekk at tall og variabler er kombinert riktig.",
       errGeneric: "Inntastingen kunne ikke behandles – bruk inntastingshjelpen for å finne riktig skrivemåte.",
+      errRuntime: "Python kunne ikke lastes inn. Kontroller internettforbindelsen og trykk Sjekk igjen.",
       vecComponent: function (n) { return 'Komponent ' + n; },
       matCell: function (row, column) { return 'Rad ' + row + ', kolonne ' + column; },
       dynamicMatCell: function (name, row, column) { return name + ', rad ' + row + ', kolonne ' + column; },
@@ -700,6 +703,8 @@
 
   function friendlyError(raw) {
     var msg = String(raw || '');
+    if (/did not finish loading|Failed to load: https?:/.test(msg))
+      return L.errRuntime;
     if (/SyntaxError/i.test(msg))
       return L.errSyntax;
     var nm = msg.match(/name ['"]([\w]+)['"] is not defined/);
