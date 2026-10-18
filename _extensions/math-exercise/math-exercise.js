@@ -749,7 +749,7 @@
     var msg = String(raw || '');
     if (/did not finish loading|Failed to load: https?:/.test(msg))
       return L.errRuntime;
-    if (/stopped by the learner/.test(msg))
+    if (/stopped by the learner/i.test(msg))
       return L.errStopped;
     if (/SyntaxError/i.test(msg))
       return L.errSyntax;
@@ -1426,8 +1426,10 @@
   var SLOW_CHECK_MS = (typeof window !== 'undefined' && window.__mathExerciseSlowCheckMs) ||
     (Number(ME_CFG.stopAfter) > 0 ? Number(ME_CFG.stopAfter) * 1000 : 20000);
   // Checks in progress, told when Python reloads during a retry: loading is
-  // timed by the load limit, not by stop-after.
-  var reloadHooks = new Set();
+  // timed by the load limit, not by stop-after. A check counts as loading while
+  // any retry reloads (its Python calls wait behind that reload).
+  var reloadHooks = new Set(), activeReloads = 0;
+  function stoppedSince(epoch) { return epoch !== globalThis.MathExerciseRuntime.stopCount(); }
   async function runOnCurrentRuntime(run, packages) {
     var epoch = globalThis.MathExerciseRuntime.stopCount();
     var attempted = await ensurePyodide(), ready = null;
@@ -1435,20 +1437,29 @@
       ready = await ensureSympy();
       return await run(ready);
     } catch (error) {
-      if (epoch !== globalThis.MathExerciseRuntime.stopCount()) throw new Error('math-exercise: stopped by the learner');
+      if (stoppedSince(epoch)) throw new Error('math-exercise: stopped by the learner');
       // Learner code elsewhere on the page removed the checker module: install again.
       var missing = /No module named '_ctm_|has no attribute '_math_run'/.test(String(error));
       if (missing) {
         globalThis.MathExerciseRuntime.forgetModules(ready || attempted);
         sympyRuntime = null; sympyLoading = null;
       }
-      reloadHooks.forEach(function (hook) { hook(true); });
+      activeReloads++;
+      reloadHooks.forEach(function (hook) { hook(); });
       var current;
       try {
         current = await ensureSympy();
         // The exercise's packages reload within the same loading window.
         if (packages) await ensurePackages(packages);
-      } finally { reloadHooks.forEach(function (hook) { hook(false); }); }
+      } catch (reloadError) {
+        // Stop pressed (here or in another exercise) while Python reloaded.
+        if (stoppedSince(epoch)) throw new Error('math-exercise: stopped by the learner');
+        throw reloadError;
+      } finally {
+        activeReloads--;
+        reloadHooks.forEach(function (hook) { hook(); });
+      }
+      if (stoppedSince(epoch)) throw new Error('math-exercise: stopped by the learner');
       if (current === (ready || attempted) && !missing) throw error;
       return run(current);
     }
@@ -1789,9 +1800,9 @@
       checkBtn.disabled = true;
       if (feedbackBtn) feedbackBtn.disabled = true;
       fbDiv.innerHTML = '<div class="math-fb-checking">' + L.checking + '</div>';
-      var cancelSlow = function () {};
+      var cancelSlow = function () {}, phase = null, stopNote = null;
       var offerStop = function (loading) {
-          var note = document.createElement('div');
+          var note = stopNote = document.createElement('div');
           note.className = 'math-fb-checking';
           note.textContent = (loading ? L.slowLoad : L.slowCheck) + ' ';
           var stopBtn = document.createElement('button');
@@ -1807,6 +1818,12 @@
       // Loading is timed by the load limit (a load that never finishes can
       // still be stopped), the check itself by stop-after.
       var timePhase = function (loading) {
+        // The same phase keeps its timer; a new one starts its own and takes
+        // back a Stop note that belonged to the previous phase.
+        if (loading === phase) return;
+        phase = loading;
+        if (stopNote && stopNote.isConnected) fbDiv.innerHTML = '<div class="math-fb-checking">' + L.checking + '</div>';
+        stopNote = null;
         cancelSlow();
         cancelSlow = globalThis.MathExerciseRuntime.whenSlow(
           loading ? globalThis.MathExerciseRuntime.loadTimeout : SLOW_CHECK_MS,
@@ -1814,13 +1831,13 @@
       };
       // A reload during another check's retry ends with that check's own phase.
       var stillLoading = true;
-      var onReload = function (reloading) { timePhase(reloading || stillLoading); };
+      var onReload = function () { timePhase(activeReloads > 0 || stillLoading); };
       reloadHooks.add(onReload);
       try {
         timePhase(true);
         await prepareRuntime(checkOpts.packages);
         stillLoading = false;
-        timePhase(false);
+        timePhase(activeReloads > 0);
         var parts = [];
         var fieldElements = fieldIds.map(function (id) { return document.getElementById(id); });
         if (mode === 'custom') {
