@@ -27,7 +27,7 @@ runs:
         step quarto add ./_feedback-source --no-prompt
         step quarto add "jsxgraph/jsxgraph-quarto@${{ inputs.jsxgraph-ref }}" --no-prompt
         # GitHub installs go under an owner folder (_extensions/jsxgraph/jsxgraph).
-        lua=$(ls _extensions/jsxgraph/lua/jsxgraph.lua _extensions/*/jsxgraph/lua/jsxgraph.lua 2>/dev/null | head -1)
+        lua=$(ls _extensions/jsxgraph/lua/jsxgraph.lua _extensions/*/jsxgraph/lua/jsxgraph.lua 2>/dev/null | head -1 || true)
         test -n "$lua" || { echo "::error::JSXGraph extension was not installed"; find _extensions -maxdepth 3; exit 1; }
         echo "AI_FEEDBACK_EXTENSION=$GITHUB_WORKSPACE/_feedback-source/_extensions/ai-feedback" >> "$GITHUB_ENV"
         echo "JSXGRAPH_EXTENSION=$GITHUB_WORKSPACE/$(dirname "$(dirname "$lua")")" >> "$GITHUB_ENV"
