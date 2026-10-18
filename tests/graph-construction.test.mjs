@@ -234,7 +234,8 @@ test('graph editor creates vertices, toggles edges, serializes, and registers', 
 
 test('Lua injects the common editor and exercise packages reach the runtime', () => {
   assert.match(jsxLua, /GRAPH_EDITOR_JS = ioRead/);
-  assert.match(jsxLua, /assessment_bridge, GRAPH_EDITOR_JS, jsxgraph/);
+  // Either script order: the bridge before the code (v1.1) or after (deferred start).
+  assert.match(jsxLua, /assessment_bridge, GRAPH_EDITOR_JS, jsxgraph|jsxgraph, GRAPH_EDITOR_JS, assessment_bridge/);
   assert.match(lua, /data-packages=.*jsonArrAttr\(packages\)/);
   assert.match(source, /def graph_from_response\(response, \*, directed=False\):/);
   assert.equal((examples.match(/#\| packages: networkx/g) || []).length, 4);
@@ -276,7 +277,7 @@ test('collapsed JSXGraph assessments request a shared board refresh when opened'
   assert.match(lua, /aria-expanded="false"/);
   assert.match(jsxLua, /if \(message\.type === 'layout'\)/);
   assert.match(jsxLua, /Object\.values\(JXG\.boards \|\| \{\}\)\.forEach/);
-  assert.match(jsxLua, /board\.resizeContainer\(width, height\)/);
+  assert.match(jsxLua, /board\.resizeContainer\(width, height(, true, true)?\)/);
   assert.match(jsxLua, /board\.fullUpdate\(\)/);
   assert.doesNotMatch(lua, /math-exercise-body" style="display:none/);
   assert.match(lua, /math-exercise-body" aria-hidden="true"/);
