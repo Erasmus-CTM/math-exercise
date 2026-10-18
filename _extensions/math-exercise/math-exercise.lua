@@ -561,11 +561,87 @@ end
 -- for localized component/cell feedback. Author-supplied field-labels still
 -- take precedence.
 ----
+-- Exercise text is Markdown-like plain text: HTML is shown as text (so a<b<c
+-- in TeX stays intact), and outside math a small inline Markdown subset is
+-- formatted: **bold**, *italic*, `code`; \* and \` are literal. The same rules
+-- are in proseHtml() in math-exercise.js (parity test).
+local function inlineMarkdown(s)
+  local out, i, n = {}, 1, #s
+  local function closing(delim, from)
+    local j = from
+    while true do
+      local k = s:find(delim, j, true)
+      if not k then return nil end
+      local inner = s:sub(from, k - 1)
+      if inner:find("\n", 1, true) then return nil end
+      local nextChar = s:sub(k + #delim, k + #delim)
+      if delim == "*" and nextChar == "*" then j = k + 2
+      elseif inner ~= "" and not inner:match("^%s") and not inner:match("%s$")
+          and not (delim == "*" and nextChar:match("[%w]")) then return k
+      else j = k + 1 end
+    end
+  end
+  while i <= n do
+    local c = s:sub(i, i)
+    local nextChar = s:sub(i + 1, i + 1)
+    if c == "\\" and (nextChar == "*" or nextChar == "`") then
+      table.insert(out, nextChar); i = i + 2
+    elseif c == "\\" and nextChar == "\n" then
+      i = i + 1   -- Markdown hard line break: the newline already breaks the line
+    elseif c == "`" then
+      local k = s:find("`", i + 1, true)
+      local inner = k and s:sub(i + 1, k - 1)
+      if inner and inner ~= "" and not inner:find("\n", 1, true) then
+        table.insert(out, "<code>" .. inner .. "</code>"); i = k + 1
+      else table.insert(out, c); i = i + 1 end
+    elseif c == "*" and nextChar == "*" then
+      local k = closing("**", i + 2)
+      if k then table.insert(out, "<strong>" .. inlineMarkdown(s:sub(i + 2, k - 1)) .. "</strong>"); i = k + 2
+      else table.insert(out, "**"); i = i + 2 end
+    elseif c == "*" and not (i > 1 and s:sub(i - 1, i - 1):match("[%w]")) then
+      local k = closing("*", i + 1)
+      if k then table.insert(out, "<em>" .. inlineMarkdown(s:sub(i + 1, k - 1)) .. "</em>"); i = k + 1
+      else table.insert(out, c); i = i + 1 end
+    else
+      table.insert(out, c); i = i + 1
+    end
+  end
+  return table.concat(out)
+end
+
+-- Escapes a run of exercise text; formats inline Markdown outside math
+-- (\( \), \[ \], \begin{..} \end{..} after normalizeTaskMathDelimiters).
+local function proseHtml(text)
+  local out, position = {}, 1
+  while position <= #text do
+    local open, closer
+    local a = text:find("\\[%(%[]", position)
+    local b, _, env = text:find("\\begin{([^}]*)}", position)
+    if a and (not b or a <= b) then
+      open, closer = a, (text:sub(a + 1, a + 1) == "(" and "\\)" or "\\]")
+    elseif b then
+      open, closer = b, "\\end{" .. env .. "}"
+    end
+    if not open then
+      table.insert(out, inlineMarkdown(attrEsc(text:sub(position)))); break
+    end
+    table.insert(out, inlineMarkdown(attrEsc(text:sub(position, open - 1))))
+    local close = text:find(closer, open + 2, true)
+    local stop = close and (close + #closer - 1) or #text
+    table.insert(out, (attrEsc(text:sub(open, stop))))
+    position = stop + 1
+  end
+  return table.concat(out)
+end
+
 local function processMarkers(text, exerciseId, vars, vecdir, mode)
   text = normalizeTaskMathDelimiters(text)
   local count, fieldIds, structuralLabels = 0, {}, {}
   local dynamicNames = {}
-  local output, position = {}, 1
+  local output, position, prose = {}, 1, {}
+  local function flush()
+    if #prose > 0 then table.insert(output, proseHtml(table.concat(prose))); prose = {} end
+  end
 
   while position <= #text do
     local rest = text:sub(position)
@@ -601,17 +677,17 @@ local function processMarkers(text, exerciseId, vars, vecdir, mode)
         dynamicNames[dynamicSpec.name] = true
         html, ids, labels = buildDynamicMatrix(exerciseId, content, vars, mode)
       end
+      flush()
       for _, fid in ipairs(ids) do table.insert(fieldIds, fid) end
       for _, label in ipairs(labels) do table.insert(structuralLabels, label) end
       table.insert(output, html)
       position = position + #head - 1 + #balanced
     else
-      -- Escape task text before embedding it in HTML. A TeX inequality
-      -- such as a<b<c must not be parsed as an opening HTML tag.
-      table.insert(output, (attrEsc(text:sub(position, position))))
+      table.insert(prose, text:sub(position, position))
       position = position + 1
     end
   end
+  flush()
 
   local html = table.concat(output):gsub(LITERAL_DOLLAR, LITERAL_DOLLAR_HTML)
   return html, fieldIds, structuralLabels

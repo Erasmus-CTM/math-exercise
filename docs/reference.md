@@ -15,6 +15,26 @@ Question text with an input field: _[correct_answer]
 
 ---
 
+## Formatting the question text
+
+The question text is Markdown-like text, not HTML:
+
+- Math in `$...$`, `$$...$$`, `\(...\)`, `\[...\]` or `\begin{...}...\end{...}`
+  is passed to the math renderer unchanged, so `$a<b<c$` works.
+- Outside math, `**bold**`, `*italic*` and `` `code` `` are formatted. `\*` and
+  `` \` `` give a literal `*` and `` ` ``.
+- A line break in the source is a line break on the page; a blank line leaves
+  an empty line. A backslash at the end of a line (Markdown's hard break) is
+  the same as a plain line break.
+- HTML tags and entities (`<strong>`, `&nbsp;`, `<br>`) are shown as text. Use
+  the Markdown above instead: put several answer fields on separate lines
+  rather than spacing them with `&nbsp;`.
+
+Generated variants (`#| variants:`) are rendered by Pandoc, so their text
+supports Markdown in full.
+
+---
+
 ## Input fields in the question text
 
 | Marker | Width | Element |

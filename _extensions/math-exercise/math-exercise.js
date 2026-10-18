@@ -943,13 +943,76 @@
     return output;
   }
 
+  // Exercise text is Markdown-like plain text: HTML is shown as text (so a<b<c
+  // in TeX stays intact), and outside math a small inline Markdown subset is
+  // formatted: **bold**, *italic*, `code`; \* and \` are literal. Same rules as
+  // proseHtml() in math-exercise.lua (parity test).
+  function inlineMarkdown(s) {
+    var out = '', i = 0, n = s.length;
+    function closing(delim, from) {
+      var j = from;
+      for (;;) {
+        var k = s.indexOf(delim, j);
+        if (k < 0) return -1;
+        var inner = s.slice(from, k), next = s.charAt(k + delim.length);
+        if (inner.indexOf('\n') >= 0) return -1;
+        if (delim === '*' && next === '*') j = k + 2;
+        else if (inner !== '' && !/^[ \t\r\n\f\v]/.test(inner) && !/[ \t\r\n\f\v]$/.test(inner) && !(delim === '*' && /[A-Za-z0-9]/.test(next))) return k;
+        else j = k + 1;
+      }
+    }
+    while (i < n) {
+      var c = s.charAt(i), next = s.charAt(i + 1), k;
+      if (c === '\\' && (next === '*' || next === '`')) { out += next; i += 2; }
+      else if (c === '\\' && next === '\n') i++;   // Markdown hard line break: the newline already breaks the line
+      else if (c === '`') {
+        k = s.indexOf('`', i + 1);
+        var inner = k >= 0 ? s.slice(i + 1, k) : '';
+        if (k >= 0 && inner !== '' && inner.indexOf('\n') < 0) { out += '<code>' + inner + '</code>'; i = k + 1; }
+        else { out += c; i++; }
+      } else if (c === '*' && next === '*') {
+        k = closing('**', i + 2);
+        if (k >= 0) { out += '<strong>' + inlineMarkdown(s.slice(i + 2, k)) + '</strong>'; i = k + 2; }
+        else { out += '**'; i += 2; }
+      } else if (c === '*' && !(i > 0 && /[A-Za-z0-9]/.test(s.charAt(i - 1)))) {
+        k = closing('*', i + 1);
+        if (k >= 0) { out += '<em>' + inlineMarkdown(s.slice(i + 1, k)) + '</em>'; i = k + 1; }
+        else { out += c; i++; }
+      } else { out += c; i++; }
+    }
+    return out;
+  }
+
+  // Escapes a run of exercise text; formats inline Markdown outside math
+  // (\( \), \[ \], \begin{..} \end{..} after normalizeTaskMathDelimiters).
+  function proseHtml(text) {
+    var out = '', position = 0;
+    while (position < text.length) {
+      var rest = text.slice(position);
+      var a = rest.search(/\\[([]/), env = /\\begin\{([^}]*)\}/.exec(rest);
+      var b = env ? env.index : -1, open = -1, closer = '';
+      if (a >= 0 && (b < 0 || a <= b)) { open = a; closer = rest.charAt(a + 1) === '(' ? '\\)' : '\\]'; }
+      else if (b >= 0) { open = b; closer = '\\end{' + env[1] + '}'; }
+      if (open < 0) { out += inlineMarkdown(escHtml(rest)); break; }
+      out += inlineMarkdown(escHtml(rest.slice(0, open)));
+      var close = rest.indexOf(closer, open + 2);
+      var stop = close >= 0 ? close + closer.length : rest.length;
+      out += escHtml(rest.slice(open, stop));
+      position += stop;
+    }
+    return out;
+  }
+
   function renderTaskText(text, exerciseId, vars, vecdir, mode, questionIsHtml) {
     // Generated variants have already been rendered by Pandoc; preserve their
     // markup and source annotations. Ordinary exercise bodies are plain text.
     if (!questionIsHtml) text = normalizeTaskMathDelimiters(text);
     mode = mode || 'equivalent';
-    var count = 0, fieldIds = [], structuralLabels = [], output = [], position = 0;
+    var count = 0, fieldIds = [], structuralLabels = [], output = [], position = 0, prose = '';
     var dynamicNames = {};
+    function flush() {
+      if (prose) { output.push(questionIsHtml ? prose : proseHtml(prose)); prose = ''; }
+    }
     while (position < text.length) {
       var scalar = /^_+\[/.exec(text.slice(position));
       var boundary = !scalar && (position === 0 || !/[\w]/.test(text.charAt(position - 1)));
@@ -961,13 +1024,11 @@
       var brace = dynamicMatrix ? matchBalanced(text, position + headLength - 1, '{', '}') : null;
       var balanced = bracket || brace;
 
-      // Task prose and TeX are text, never HTML; generated controls below
-      // remain markup. In particular, a<b<c must reach the math renderer.
-      if (!balanced) {
-        var character = text.charAt(position++);
-        output.push(questionIsHtml ? character : escHtml(character));
-        continue;
-      }
+      // Task prose and TeX are text, never HTML (see proseHtml); generated
+      // controls below remain markup. In particular, a<b<c must reach the
+      // math renderer.
+      if (!balanced) { prose += text.charAt(position++); continue; }
+      flush();
 
       // Inside an answer marker an escaped dollar is a plain dollar.
       var content = balanced.slice(1, -1).split(LITERAL_DOLLAR).join('$'), rendered;
@@ -996,6 +1057,7 @@
       }
       position += headLength - 1 + balanced.length;
     }
+    flush();
     return {
       html: output.join('').split(LITERAL_DOLLAR).join(LITERAL_DOLLAR_HTML).replace(/\n/g, '<br>\n'),
       fieldIds: fieldIds,

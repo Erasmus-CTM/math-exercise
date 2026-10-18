@@ -67,3 +67,31 @@ test('an escaped dollar inside an answer marker is a plain dollar in the answer'
     }
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
+
+// Exercise text allows a small inline Markdown subset outside math and shows
+// HTML as text; math (also with * or <) is untouched. Lua and JS agree.
+const markdownCases = [
+  [String.raw`**1. Tittel.** La $a<b<c$, *x* er ` + '`kode`' + String.raw`; \*ikke\* <b>tag</b> & mer: _[1]`,
+   String.raw`<strong>1. Tittel.</strong> La \(a&lt;b&lt;c\), <em>x</em> er <code>kode</code>; *ikke* &lt;b&gt;tag&lt;/b&gt; &amp; mer: `],
+  [String.raw`$a*b*c$ og $$x**2$$, 2*3*4 og x * y, **fet *kursiv* inni**: _[1]`,
+   String.raw`\(a*b*c\) og \[x**2\], 2*3*4 og x * y, <strong>fet <em>kursiv</em> inni</strong>: `],
+  ['Linje\\\nny linje: _[1]', 'Linje<br>\nny linje: '],
+  [String.raw`** ikke fet** og *ikke kursiv * og ` + '``' + String.raw` tom: _[1]`,
+   String.raw`** ikke fet** og *ikke kursiv * og ` + '``' + String.raw` tom: `],
+];
+
+test('Lua and JS format inline Markdown in exercise text the same way', { skip: available ? false : 'Quarto required' }, () => {
+  const dir = mkdtempSync(join(tmpdir(), 'math-markdown-'));
+  try {
+    cpSync(fileURLToPath(new URL('../_extensions/math-exercise', import.meta.url)), join(dir, '_extensions/math-exercise'), { recursive: true });
+    const blocks = markdownCases.map(([task], i) => '```{math-exercise}\n#| label: m' + i + '\n' + task + '\n```\n').join('\n');
+    writeFileSync(join(dir, 'page.qmd'), '---\nformat: html\nfilters: [math-exercise]\nmath-exercise: {feedback: false}\n---\n\n' + blocks);
+    const r = spawnSync(quarto, ['render', 'page.qmd'], { cwd: dir, encoding: 'utf8', timeout: 120000 });
+    assert.equal(r.status, 0, r.stderr);
+    const lua = readFileSync(join(dir, 'page.html'), 'utf8');
+    for (const [task, expected] of markdownCases) {
+      assert.ok(lua.includes('>' + expected + '<input'), 'Lua: ' + expected);
+      assert.ok(api().renderTaskText(task, 'x', '', 'col', 'equivalent', false).html.startsWith(expected), 'JS: ' + expected);
+    }
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
