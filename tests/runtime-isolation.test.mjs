@@ -93,6 +93,32 @@ test('a restart during the first SymPy setup is retried on the new runtime', asy
   assert.deepEqual(log, ['a:load:sympy', 'b:load:sympy', 'b:install', 'b:check']);
 });
 
+test('a check on a runtime that never answers holds up no check on the next runtime', async () => {
+  const log = [];
+  const { context, window, api } = load();
+  const hung = fakeRuntime('a', log), next = fakeRuntime('b', log);
+  const run = hung.runPythonAsync;
+  let sent = false;
+  hung.runPythonAsync = code => {
+    if (!code.includes(ANY_CHECK)) return run(code);
+    sent = true;
+    return new Promise(() => {});   // a worker that stopped answering
+  };
+  context.qpyodideInstance = Promise.resolve(hung);
+  const first = api.checkField({ value: '1', dataset: { answer: '1' } }, 'equivalent', {});
+  for (let i = 0; i < 400 && !sent; i++) await new Promise(resolve => setTimeout(resolve, 5));
+  assert.ok(sent);
+  // The page's Python is replaced (another component restarted it).
+  window.dispatch('qpyodide-runtime-restart');
+  context.mainPyodide = undefined;
+  context.qpyodideInstance = Promise.resolve(next);
+  const second = api.checkField({ value: '2', dataset: { answer: '2' } }, 'equivalent', {});
+  const settled = await Promise.race([second.then(result => ({ ...result })), new Promise(resolve => setTimeout(() => resolve('hangs'), 2000))]);
+  assert.deepEqual(settled, { status: 'correct', score: 1 });
+  assert.deepEqual(log, ['a:load:sympy', 'a:install', 'b:load:sympy', 'b:install', 'b:check']);
+  void first;   // never settles: its runtime never answers
+});
+
 test('learner rebinding of SymPy names and of the names call texts use does not reach the checks (CPython)', { skip: spawnSync(python, ['-c', 'import sympy']).status ? 'SymPy required' : false }, async () => {
   // Record exactly what the browser sends to Pyodide (the setup, then a
   // check: its request and ctm-libs' call text), then replay it in CPython,
@@ -126,7 +152,7 @@ for op in case['ops']:
     else:
         run(op[1])
 left = sorted(k for k in main if k.startswith('_ctm_'))
-assert left == ['_ctm_globals', '_ctm_import'], ('the setup leaves only the names of ctm-checkers 0.1.1 call text', left)
+assert left == [], ('the setup leaves no _ctm_ name in the namespace', left)
 wheel = sys.modules['ctm_checkers'].__file__.split('/ctm_checkers/')[0]
 exec('symbols = None\nSymbol = None\nsympify = None\nMatrix = None\nsqrt = None\nsimplify = None\nparse_expr = None\n_mj = None\n'
      '__import__ = None\nglobals = None\n_ctm_import = None\n_ctm_globals = dict\nbuiltins = None\njson = None', main)
@@ -141,7 +167,8 @@ def check(answer, key='sqrt(72)', mode='equivalent', decplaces='', sigfigs=''):
     return ask({'student': answer, 'correct': key, 'vars': '', 'mode': mode, 'reject': '', 'tolerance': '', 'decplaces': decplaces,
                 'sigfigs': sigfigs, 'form': '', 'partial_credit': False, 'form_credit': 0.5})
 assert check('6*sqrt(2)')['status'] == 'correct'
-assert '_ctm_request' not in main
+# The call leaves no _ctm_ name behind, the learner's _ctm_import and _ctm_globals included.
+assert not [k for k in main if k.startswith('_ctm_')], sorted(k for k in main if k.startswith('_ctm_'))
 # Answers are evaluated by SymPy's parser: no access to Python internals.
 try:
     check("__import__('builtins').__dict__.clear()")

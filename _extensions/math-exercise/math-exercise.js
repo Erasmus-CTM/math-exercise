@@ -849,13 +849,13 @@
     return globalThis.MathExerciseRuntime.callCheckers(py, 'math_exercise.' + name, request);
   }
 
-  // Python globals are shared: keep each set-globals/evaluate transaction together.
-  var assessmentQueue = Promise.resolve();
-  function assessmentTransaction(run) {
-    var result=assessmentQueue.then(run);assessmentQueue=result.catch(function(){});return result;
-  }
-  function checkField(el, mode, opts) {var field={value:el.value,dataset:Object.assign({},el.dataset)}, options=JSON.parse(JSON.stringify(opts||{}));return assessmentTransaction(function(){return checkFieldNow(field,mode,options);});}
-  function checkCustom(response, opts) {var answer=JSON.parse(JSON.stringify(response)),options=JSON.parse(JSON.stringify(opts));return assessmentTransaction(function(){return checkCustomNow(answer,options);});}
+  // A check is one request through ctm-libs' callCheckers, which runs the
+  // checks of one runtime one after another (the request is one global
+  // there). There is no queue for the whole page: a runtime that hangs holds
+  // up no check on the next one (after a restart). The answer and the
+  // options are copied when the check is asked for.
+  function checkField(el, mode, opts) {var field={value:el.value,dataset:Object.assign({},el.dataset)}, options=JSON.parse(JSON.stringify(opts||{}));return checkFieldNow(field,mode,options);}
+  function checkCustom(response, opts) {var answer=JSON.parse(JSON.stringify(response)),options=JSON.parse(JSON.stringify(opts));return checkCustomNow(answer,options);}
   async function checkFieldNow(el, mode, opts) {
     var val = el.value.trim();
     if (!val) return { status: 'empty', score: 0.0 };
