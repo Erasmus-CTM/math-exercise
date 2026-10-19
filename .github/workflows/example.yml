@@ -17,10 +17,10 @@ jobs:
       - uses: quarto-dev/quarto-actions/setup@v2
         with:
           version: '1.8.27'
-      - name: Install ai-feedback and JSXGraph
+      - name: Install ctm-libs and JSXGraph
         uses: ./.github/actions/quarto-dependencies
         with:
-          ai-feedback-ref: ${{ steps.review.outputs['ai-feedback'] || 'main' }}
+          ctm-libs-ref: ${{ steps.review.outputs['ctm-libs'] || 'main' }}
           jsxgraph-ref: ${{ steps.review.outputs['jsxgraph'] || 'v1.1.0' }}
       - name: Install variant build dependency
         run: python3 -m pip install 'PyYAML>=6'

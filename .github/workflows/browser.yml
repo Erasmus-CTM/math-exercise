@@ -30,12 +30,12 @@ jobs:
       - uses: quarto-dev/quarto-actions/setup@v2
         with:
           version: '1.8.27'
-      - name: Install ai-feedback and JSXGraph
+      - name: Install ctm-libs and JSXGraph
         uses: ./.github/actions/quarto-dependencies
         with:
-          ai-feedback-ref: ${{ steps.review.outputs['ai-feedback'] || 'main' }}
+          ctm-libs-ref: ${{ steps.review.outputs['ctm-libs'] || 'main' }}
           jsxgraph-ref: ${{ steps.review.outputs['jsxgraph'] || 'v1.1.0' }}
-      - run: python -m pip install sympy==1.13.3 'networkx>=3.4' 'PyYAML>=6'  # SymPy: the version Pyodide 0.27.2 ships
+      - run: python -m pip install sympy==1.13.3 'networkx>=3.4' 'PyYAML>=6'  # SymPy: the version Pyodide 0.28.3 ships
       - run: npm ci --ignore-scripts
       - run: npx playwright install --with-deps chromium
       - run: quarto render
