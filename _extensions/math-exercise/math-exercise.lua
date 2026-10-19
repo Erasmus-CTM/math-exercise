@@ -134,54 +134,15 @@ local MAX_CONTEXT_CHARS = 1500
 ----
 -- Localization (i18n)
 --
--- Active UI language, resolved per render pass from `math-exercise: lang:` or
--- Quarto's own `lang:` (see Meta below). Default: English.
+-- Active UI language, resolved per page by ctm-libs (see Meta below). Every
+-- interface text, in Lua and in math-exercise.js, is in ctm-libs' message
+-- catalogue (locales/math-exercise.js).
 ----
 local lang = "en"
 
--- Supported locales. Extend this set together with LOCALES in math-exercise.js.
-local supportedLangs = {
-  ["en"] = true,
-  ["de"] = true,
-  ["nb"] = true
-}
-
--- Quarto projects in Norway commonly use either `nb` or the older/general
--- `no` code.  The student-facing wording is Bokmål in both cases.
-local langAliases = {
-  ["no"] = "nb"
-}
-
--- Button labels rendered by this filter. Everything else lives in the
--- LOCALES table of math-exercise.js.
-local uiText = {
-  en = {
-    check      = "Check",
-    legend     = "Input help",
-    feedback   = "Feedback",
-    reconfig   = "Change AI configuration",
-    poolReload = "Load a new random task"
-  },
-  de = {
-    check      = "Überprüfen",
-    legend     = "Eingabe-Hilfe",
-    feedback   = "Feedback",
-    reconfig   = "KI-Konfiguration ändern",
-    poolReload = "Neue Zufallsaufgabe laden"
-  },
-  nb = {
-    check      = "Sjekk",
-    legend     = "Inntastingshjelp",
-    feedback   = "Tilbakemelding",
-    reconfig   = "Endre KI-oppsett",
-    poolReload = "Last inn en ny tilfeldig oppgave"
-  }
-}
-
 -- Named uiT (not t) so it does not shadow the local `t` used further below.
 local function uiT(key)
-  local active = uiText[lang] or uiText.en
-  return active[key] or uiText.en[key]
+  return ctm.locale.text("math-exercise", key, lang)
 end
 
 local function readFile(filename)
@@ -196,6 +157,8 @@ end
 local function ensureSetup()
   if hasSetup then return end
   hasSetup = true
+  -- The message catalogue (CTMLocales), read by math-exercise.js.
+  ctm.locale.use("math-exercise")
   local css = readFile("matrix-input.css") .. "\n" .. readFile("math-exercise.css")
   quarto.doc.include_text("in-header",
     "<style type=\"text/css\">\n" .. css .. "\n</style>")
@@ -739,11 +702,11 @@ local function controlsHtml()
   local withFeedback = feedbackForExercises
   return table.concat({
     '<div class="math-exercise-controls">',
-    '  <button type="button" class="btn btn-primary math-check-btn">&#10003;&nbsp;' .. uiT("check") .. '</button>',
-    '  <button type="button" class="btn btn-light math-legend-btn">&#9432;&nbsp;' .. uiT("legend") .. '</button>',
+    '  <button type="button" class="btn btn-primary math-check-btn">&#10003;&nbsp;' .. uiT("checkButton") .. '</button>',
+    '  <button type="button" class="btn btn-light math-legend-btn">&#9432;&nbsp;' .. uiT("legendButton") .. '</button>',
     withFeedback and '  <div class="btn-group">' or '',
-    withFeedback and ('    <button type="button" class="btn btn-light math-feedback-btn">&#128172;&nbsp;' .. uiT("feedback") .. '</button>') or '',
-    withFeedback and ('    <button type="button" class="btn btn-light math-reconfig-btn" title="' .. uiT("reconfig") .. '">&#9881;</button>') or '',
+    withFeedback and ('    <button type="button" class="btn btn-light math-feedback-btn">&#128172;&nbsp;' .. uiT("feedbackButton") .. '</button>') or '',
+    withFeedback and ('    <button type="button" class="btn btn-light math-reconfig-btn" title="' .. uiT("reconfigTitle") .. '">&#9881;</button>') or '',
     withFeedback and '  </div>' or '',
     '</div>',
   }, "\n")
@@ -875,7 +838,7 @@ local function buildExercise(el, state)
     attrs        = attrs .. ' data-pool="'   .. jsonArrAttr(tasks) .. '"'
                          .. ' data-fields="[]"'
                          .. ' data-structural-field-labels="[]"'
-    questionHtml = '<button type="button" class="math-pool-reload" title="' .. uiT("poolReload") .. '">&#8635;</button>\n'
+    questionHtml = '<button type="button" class="math-pool-reload" title="' .. uiT("poolReloadTitle") .. '">&#8635;</button>\n'
                 .. '<div class="math-exercise-question"></div>'
   else
     local body, fieldIds, structuralLabels = processMarkers(questionText, eid, vars, vecdir, mode)
@@ -921,42 +884,20 @@ end
 ----
 -- Meta filter: resolve the UI language and hand it to the JavaScript side.
 --
--- Order of precedence:
---   1. `math-exercise: lang: xx`  – explicit override
---   2. Quarto's own `lang:`       – set per profile in a multilingual project
---   3. "en"                       – fallback
+-- ctm-libs' resolver (ctm.locale.resolve), in order of precedence:
+--   1. `math-exercise: lang: xx`   – explicit override
+--   2. `ctm-assessment: lang: xx`  – every component of the project
+--   3. Quarto's own `lang:`        – set per profile in a multilingual project
+--   4. "en"                        – fallback
 --
--- Region subtags are dropped ("de-DE" -> "de"); unsupported languages fall
--- back to English instead of failing the render.
+-- Region subtags are dropped ("de-DE" -> "de", "no" and "nn" -> "nb");
+-- unsupported languages fall back to English instead of failing the render.
 ----
-local function resolveLang(meta)
-  local raw = nil
-
-  local cfg = meta["math-exercise"]
-  if cfg and cfg["lang"] then
-    raw = pandoc.utils.stringify(cfg["lang"])
-  elseif meta["lang"] then
-    raw = pandoc.utils.stringify(meta["lang"])
-  end
-
-  if raw == nil or raw == "" then
-    return "en"
-  end
-
-  local base = raw:lower():match("^(%a+)")
-  base = langAliases[base] or base
-  if base and supportedLangs[base] then
-    return base
-  end
-
-  return "en"
-end
-
 local function Meta(meta)
-  lang = resolveLang(meta)
   if not quarto.doc.is_format("html") then return meta end
+  lang = ctm.locale.resolve("math-exercise")
 
-  -- math-exercise.js reads this to pick its LOCALES entry. stop-after:
+  -- math-exercise.js reads this to pick its language. stop-after:
   -- `math-exercise: stop-after`, `ctm-assessment: stop-after`, 20 seconds.
   quarto.doc.include_text("before-body",
     '<script>window.__mathExerciseConfig = ' ..
