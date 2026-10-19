@@ -132,7 +132,7 @@ test('learner rebinding of SymPy names and of the names call texts use does not 
   await api.checkField({ value: '1', dataset: { answer: '1' } }, 'equivalent', {});
   const call = ops.slice(setup).find(op => op[0] === 'run' && op[1].includes(ANY_CHECK))[1];
   const cleanup = ops[ops.length - 1][1];
-  assert.match(cleanup, /del _ctm_request/);
+  assert.match(cleanup, /\.pop\("_ctm_request", None\)/);
   const dir = mkdtempSync(join(tmpdir(), 'math-isolation-'));
   try {
     writeFileSync(join(dir, 'case.json'), JSON.stringify({ ops: ops.slice(0, setup), call, cleanup }));
