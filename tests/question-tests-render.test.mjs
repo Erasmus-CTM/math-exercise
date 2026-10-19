@@ -1,20 +1,19 @@
 import assert from 'node:assert/strict';
-import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import test from 'node:test';
+import { install, renderEnv } from './helpers/ctm-libs.mjs';
 
 test('authored tests fail the Quarto build, stay out of checker payloads, and remain optional', () => {
   const dir = mkdtempSync(join(tmpdir(), 'math-question-tests-'));
   try {
     cpSync(new URL('../_extensions/math-exercise', import.meta.url), join(dir, '_extensions/math-exercise'), {recursive: true});
-    if (process.env.AI_FEEDBACK_EXTENSION && existsSync(process.env.AI_FEEDBACK_EXTENSION)) {
-      cpSync(process.env.AI_FEEDBACK_EXTENSION, join(dir, '_extensions/ai-feedback'), {recursive: true});
-    }
+    install(dir);
     const question = (tests = '') => `---\nformat: html\nfilters: [math-exercise]\n---\n\n\x60\x60\x60{math-exercise}\n#| label: author-test-example\n#| mode: custom\n#| checker: |\n#|   def check(response, symbols):\n#|       return {"correct": True}\n${tests}\nAnswer: _[]\n\x60\x60\x60\n`;
     const render = (env = {}) => spawnSync(process.env.QUARTO || 'quarto', ['render', 'lesson.qmd'], {
-      cwd: dir, env: {...process.env, ...env}, encoding: 'utf8', timeout: 60000,
+      cwd: dir, env: {...renderEnv, ...env}, encoding: 'utf8', timeout: 60000,
     });
     writeFileSync(join(dir, 'lesson.qmd'), question());
     let result = render({MATH_EXERCISE_PYTHON: '/this-python-must-not-be-called'});

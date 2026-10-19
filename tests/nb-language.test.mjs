@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import vm from 'node:vm';
+import { FEEDBACK, LOCALE, runInContext, sources } from './helpers/ctm-libs.mjs';
 
 const source = await readFile(
   new URL('../_extensions/math-exercise/math-exercise.js', import.meta.url),
@@ -35,10 +36,11 @@ function loadBundle(lang, replies = []) {
     },
   };
   vm.createContext(context);
-  for (const name of ['feedback-core.js', 'feedback-dom.js']) {
-    vm.runInContext(readFileSync(new URL('file://' + process.env.AI_FEEDBACK_EXTENSION + '/' + name), 'utf8'), context);
+  for (const code of sources(FEEDBACK.slice(0, 2))) {
+    vm.runInContext(code, context);
     context.window.AIFeedback = context.AIFeedback;
   }
+  runInContext(context, LOCALE);
   vm.runInContext(readFileSync(new URL('../_extensions/math-exercise/matrix-input.js', import.meta.url), 'utf8'), context);
   vm.runInContext(source, context);
   return { api: {...context.window.__mathExerciseTestApi, ...sharedTestApi(context.AIFeedback, context.window.__mathExerciseConfig.lang, context.localStorage)}, requests };

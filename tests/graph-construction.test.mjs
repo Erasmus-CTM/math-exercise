@@ -7,6 +7,7 @@ import { readFile } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import test from 'node:test';
 import vm from 'node:vm';
+import { FEEDBACK, LOCALE, RUNTIME, runInContext, sources } from './helpers/ctm-libs.mjs';
 
 // The JSXGraph extension is a declared dependency (jsxgraph/jsxgraph-quarto),
 // installed with `quarto add`, not vendored here.
@@ -43,11 +44,12 @@ function loadBundle(loadPackage) {
     },
   };
   vm.createContext(context);
-  for (const name of ['feedback-core.js', 'feedback-dom.js']) {
-    vm.runInContext(readFileSync(new URL('file://' + process.env.AI_FEEDBACK_EXTENSION + '/' + name), 'utf8'), context);
+  for (const code of sources(FEEDBACK.slice(0, 2))) {
+    vm.runInContext(code, context);
     context.window.AIFeedback = context.AIFeedback;
   }
-  vm.runInContext(readFileSync(new URL('../_extensions/math-exercise/shared/pyodide-runtime.js', import.meta.url), 'utf8'), context);
+  runInContext(context, RUNTIME);
+  runInContext(context, LOCALE);
   vm.runInContext(readFileSync(new URL('../_extensions/math-exercise/matrix-input.js', import.meta.url), 'utf8'), context);
   vm.runInContext(source, context);
   return {...context.window.__mathExerciseTestApi, ...sharedTestApi(context.AIFeedback, context.window.__mathExerciseConfig.lang, context.localStorage)};

@@ -5,6 +5,7 @@ import {join} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import test from 'node:test';
 import {loadPage, typesetMathJax} from './helpers/ai-context.mjs';
+import {install, renderEnv} from './helpers/ctm-libs.mjs';
 
 const katex = readFileSync(new URL('../node_modules/katex/dist/katex.min.js', import.meta.url), 'utf8');
 const autoRender = readFileSync(new URL('../node_modules/katex/dist/contrib/auto-render.min.js', import.meta.url), 'utf8');
@@ -68,9 +69,9 @@ test('Quarto static tasks and saved feedback source retain the complete inequali
   let page;
   try {
     cpSync(new URL('../_extensions/math-exercise', import.meta.url), join(dir, '_extensions/math-exercise'), {recursive: true});
-    cpSync(process.env.AI_FEEDBACK_EXTENSION, join(dir, '_extensions/ai-feedback'), {recursive: true});
+    install(dir);
     writeFileSync(join(dir, 'lesson.qmd'), '---\nformat: html\nfilters: [math-exercise]\n---\n\n```{math-exercise}\n#| label: triple\n' + question + '\n```\n');
-    const result = spawnSync(process.env.QUARTO_BIN || 'quarto', ['render', 'lesson.qmd'], {cwd: dir, encoding: 'utf8', timeout: 60000});
+    const result = spawnSync(process.env.QUARTO_BIN || 'quarto', ['render', 'lesson.qmd'], {cwd: dir, env: renderEnv, encoding: 'utf8', timeout: 60000});
     assert.equal(result.status, 0, result.stderr || result.error?.message);
     page = loadPage(readFileSync(join(dir, 'lesson.html'), 'utf8'));
     const cell = page.document.querySelector('.math-exercise-cell');

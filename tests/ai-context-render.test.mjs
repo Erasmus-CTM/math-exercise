@@ -5,6 +5,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import test from 'node:test';
 import { loadPage, typesetMathJax, requestFeedback, clickFeedback } from './helpers/ai-context.mjs';
+import { install, renderEnv } from './helpers/ctm-libs.mjs';
 
 const quarto = process.env.QUARTO_BIN || 'quarto';
 const available = !spawnSync(quarto, ['--version']).error;
@@ -20,8 +21,8 @@ for (const renderer of ['mathjax', 'katex']) {
         fixture = fixture.replace('html-math-method: mathjax', 'html-math-method: ' + renderer)
           .replace('REPLACE_WITH_OVERSIZED_MATH_PARAGRAPH', 'Oversized formula $\\frac{' + 'x+'.repeat(800) + '1}{l}$ ends here.');
         await writeFile(path.join(dir, 'fixture.qmd'), fixture);
-        await cp(process.env.AI_FEEDBACK_EXTENSION, path.join(dir, '_extensions/ai-feedback'), {recursive:true});
-        const render = spawnSync(quarto, ['render', 'fixture.qmd', '--to', 'html'], { cwd: dir, encoding: 'utf8', timeout: 120000 });
+        install(dir);
+        const render = spawnSync(quarto, ['render', 'fixture.qmd', '--to', 'html'], { cwd: dir, env: renderEnv, encoding: 'utf8', timeout: 120000 });
         assert.equal(render.status, 0, render.stderr || render.error?.message);
         const html = await readFile(path.join(dir, 'fixture.html'), 'utf8');
         page = loadPage(html);

@@ -7,8 +7,9 @@ import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import vm from 'node:vm';
 import test from 'node:test';
+import { LOCALE, RUNTIME, runInContext, sources } from './helpers/ctm-libs.mjs';
 
-const runtimeSource = readFileSync(new URL('../_extensions/math-exercise/shared/pyodide-runtime.js', import.meta.url), 'utf8');
+const [runtimeSource] = sources(RUNTIME);
 const exerciseSource = readFileSync(new URL('../_extensions/math-exercise/math-exercise.js', import.meta.url), 'utf8');
 const python = process.env.MATH_EXERCISE_PYTHON || 'python3';
 
@@ -20,6 +21,7 @@ function load(globals = {}) {
   const context = vm.createContext({ console, setTimeout, clearTimeout, document: { addEventListener() {} }, window, ...globals });
   context.globalThis = context;
   vm.runInContext(runtimeSource, context);
+  runInContext(context, LOCALE);
   vm.runInContext(exerciseSource, context);
   return { context, window, api: window.__mathExerciseTestApi };
 }

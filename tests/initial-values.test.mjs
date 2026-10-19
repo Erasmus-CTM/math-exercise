@@ -5,12 +5,13 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {loadPage} from './helpers/ai-context.mjs';
+import {install,renderEnv} from './helpers/ctm-libs.mjs';
 
 test('starting values are exceptional, survive copied Quarto source, and preserve answer keys',()=>{
   const dir=mkdtempSync(join(tmpdir(),'math-starting-values-')); let page;
   try {
     cpSync(new URL('../_extensions/math-exercise',import.meta.url),join(dir,'_extensions/math-exercise'),{recursive:true});
-    cpSync(process.env.AI_FEEDBACK_EXTENSION,join(dir,'_extensions/ai-feedback'),{recursive:true});
+    install(dir);
     const source='---\nformat: html\nfilters: [math-exercise]\n---\n\n'+[
       ['ordinary','', 'What is 6*7? _[42]'],
       ['draft','#| initial-values: ["40"]\n','What is 6*7? _[42]'],
@@ -19,7 +20,7 @@ test('starting values are exceptional, survive copied Quarto source, and preserv
       ['dynamic','#| initial-values: ["1", "-1", ""]\n#| mode: custom\n#| checker: |\n#|   def check(response, symbols):\n#|       return True\n','Enter mat{name=B,rows=3,cols=auto,initial-cols=1}.']
     ].map(([label,options,question])=>'```{math-exercise}\n#| label: '+label+'\n'+options+question+'\n```').join('\n\n');
     writeFileSync(join(dir,'copied.qmd'),source);
-    let render=spawnSync(process.env.QUARTO_BIN||'quarto',['render','copied.qmd'],{cwd:dir,encoding:'utf8',timeout:60000});
+    let render=spawnSync(process.env.QUARTO_BIN||'quarto',['render','copied.qmd'],{cwd:dir,env:renderEnv,encoding:'utf8',timeout:60000});
     assert.equal(render.status,0,render.stderr);
     page=loadPage(readFileSync(join(dir,'copied.html'),'utf8'));
     const expected={ordinary:[''],draft:['40'],vector:['2*x',''],matrix:['1','','','4'],dynamic:['1','-1','']};
@@ -31,7 +32,7 @@ test('starting values are exceptional, survive copied Quarto source, and preserv
     assert.equal(page.document.querySelector('[data-label="draft"] input').dataset.answer,'42');
     assert.equal(page.document.querySelector('[data-label="draft"] input').value,'40');
     writeFileSync(join(dir,'invalid.qmd'),source.split('```{math-exercise}')[0]+'```{math-exercise}\n#| initial-values: [40]\n_[42]\n```');
-    render=spawnSync(process.env.QUARTO_BIN||'quarto',['render','invalid.qmd'],{cwd:dir,encoding:'utf8',timeout:60000});
+    render=spawnSync(process.env.QUARTO_BIN||'quarto',['render','invalid.qmd'],{cwd:dir,env:renderEnv,encoding:'utf8',timeout:60000});
     assert.notEqual(render.status,0); assert.match(render.stderr,/initial-values must be a JSON array of strings/);
   } finally {page?.window.close();rmSync(dir,{recursive:true,force:true});}
 });

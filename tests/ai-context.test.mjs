@@ -109,9 +109,11 @@ test('none opts out, auto uses its own source, and explicit budget omits whole b
   cell.dataset.contextRefs = 'big, small';
   page.document.getElementById('big').textContent = '\\(' + 'x+'.repeat(3001) + '1\\)';
   const contexts = page.api.resolveContexts(cell);
-  assert.equal(contexts.length, 1);
+  assert.equal(contexts.length, 2);
   assert.equal(contexts[0].id, 'small');
   assert.equal(contexts[0].text, String.raw`Small \(x^2\)`);
+  // Since ctm-libs 0.9 (A5) the section's own prose follows the listed blocks.
+  assert.deepEqual({...contexts[1]}, {id: 'section-context', role: 'context', text: String.raw`Auto \(\frac{1}{2}\)`});
   page.dom.window.close();
 });
 
