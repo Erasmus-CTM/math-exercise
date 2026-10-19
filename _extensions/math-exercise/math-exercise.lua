@@ -628,14 +628,18 @@ local function proseHtml(text)
 end
 
 -- With `blank`, every marker becomes "…" (an exercise shown as text, without
--- answer fields).
-local function processMarkers(text, exerciseId, vars, vecdir, mode, blank)
-  text = normalizeTaskMathDelimiters(text)
+-- answer fields). With `isHtml` the text is a generated variant's question,
+-- which Pandoc has already rendered: its prose stays as it is, as in
+-- renderTaskText(..., questionIsHtml) in math-exercise.js.
+local function processMarkers(text, exerciseId, vars, vecdir, mode, blank, isHtml)
+  if not isHtml then text = normalizeTaskMathDelimiters(text) end
   local count, fieldIds, structuralLabels = 0, {}, {}
   local dynamicNames = {}
   local output, position, prose = {}, 1, {}
   local function flush()
-    if #prose > 0 then table.insert(output, proseHtml(table.concat(prose))); prose = {} end
+    if #prose > 0 then
+      table.insert(output, isHtml and table.concat(prose) or proseHtml(table.concat(prose))); prose = {}
+    end
   end
 
   while position <= #text do
@@ -820,7 +824,7 @@ local function buildExercise(el, state)
       -- The question (a pool's first task, a generated exercise's first
       -- variant) without answer fields and controls, then ctm-libs' note.
       local question = variants and variants.variants[1].question or (isPool and splitTasks(questionText)[1]) or questionText
-      local body = processMarkers(question, eid, vars, vecdir, mode, true):gsub("\n", "<br>\n")
+      local body = processMarkers(question, eid, vars, vecdir, mode, true, variants ~= nil):gsub("\n", "<br>\n")
       local html = (caption and ('<div class="math-exercise-caption">' .. caption .. '</div>\n') or '')
         .. '<div class="math-exercise-question">' .. body .. '</div>'
       return pandoc.Div({pandoc.RawBlock("html", html), decision.note}, pandoc.Attr(eid, {"math-exercise-text"}))
