@@ -1,9 +1,22 @@
 # Changes
 
-## Unreleased
+## 0.11.0 (CTM Assessment 0.10.0)
+
+math-exercise grades with ctm-checkers, the Python checker library of CTM
+Assessment, instead of checker code of its own. Every verdict is unchanged.
 
 ### Changed for authors
 
+- **The checks are ctm-checkers**, which CTM Assessment installs next to
+  math-exercise: the Python of every check mode, custom checkers,
+  `assess_basis` and `graph_from_response`, in the browser, in the
+  build-time question tests and in the rounding of generated variants. A
+  page with an exercise loads ctm-checkers' page script once
+  (`ctm-checkers.js`, about 40 KB, cached with the page's other files), and
+  `math-exercise.js` is about 20 KB smaller. Without ctm-checkers such a
+  page stops with the CTM Assessment install command; with a ctm-libs that
+  has no `ctm.checkers` (before CTM Assessment 0.10) it stops with the
+  update command.
 - **Builds without AI feedback and exercises without a static check**: an
   exercise in `mode: custom` without a `checker` (where its feedback is on)
   is assessed by AI feedback only. In a build without AI feedback,
@@ -15,6 +28,48 @@
   task and a generated exercise's first variant. A generated exercise's
   checker in its YAML options counts. With a ctm-libs that has no
   `ctm.policy.withoutAI`, such exercises are rendered as before.
+
+### Fixed
+
+- Learner code in a Pyodide cell that rebinds `__import__` or `globals` no
+  longer stops every check on the page.
+
+### Unchanged
+
+Grading: the status, score, feedback and details of every check. CI grades
+every exercise of the example site with math-exercise 0.10's code and with
+this version's under Pyodide 0.28.3 (answer keys and their perturbations,
+probes, authored responses, every variant's fixtures and the question
+tests) and fails on any difference. The exercise syntax, the question-test
+command (`question-tests.py`) with its output and exit status, generated
+variants, every interface text and the exercise HTML.
+
+### For maintainers
+
+- The 385 lines of checker Python in `math-exercise.js` are gone; its checks
+  send one JSON request, `_ctm_request`, through ctm-libs'
+  `MathExerciseRuntime.callCheckers` (`math_exercise.check`,
+  `math_exercise.check_custom`), which installs ctm-checkers once per
+  runtime and again after learner code removed it or after a restart. The
+  request carries the values 0.10 set as `_math_*` globals; nothing of a
+  check stays in the namespace learner code shares.
+- Checks are no longer queued for the whole page: ctm-libs runs the checks
+  of one runtime one after another, so a runtime that stops answering holds
+  up no check on the next one. A check waiting behind one that the learner
+  stops is stopped too, as checks that are still loading Python were in 0.10.
+- `question-tests.py` finds ctm-checkers' wheel (`CTM_CHECKERS_WHEEL`, the
+  `ctm-checkers` folder next to math-exercise, or the project's
+  `_extensions/[owner/]ctm-checkers`) and runs
+  `ctm_checkers.math_exercise.authored`; Quarto runs it and `variants.py`
+  with the wheel on `PYTHONPATH` (`ctm.checkers.environment()`).
+  `variants.py` rounds with ctm-checkers' `round_places`.
+- CI and the tests install ctm-checkers at the commit of `.github/pins.json`
+  (`CTM_CHECKERS_EXTENSION`, `CTM_CHECKERS_WHEEL`), or a review commit's
+  `CTM-Review-Refs` trailer, read by the umbrella's
+  `tools/ci/review-dependencies.py` (the umbrella commit is pinned there
+  too; `.github/review-dependencies.py` is removed). The basis assessment
+  tests moved to ctm-checkers. New workflow `parity.yml` (grading parity
+  with the pull request's base, the umbrella's parity harness).
 
 ## 0.10.0 (CTM Assessment 0.9.0)
 

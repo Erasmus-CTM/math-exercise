@@ -55,11 +55,13 @@ For feedback directly on the page, follow the [connection guide](https://github.
 ## Development of math-exercise
 
 The repository builds and tests math-exercise without the CTM Assessment
-package, against a ctm-libs installation (and JSXGraph for graphical answers).
-Both are git-ignored here:
+package, against installations of ctm-libs, ctm-checkers (the Python checker
+library math-exercise grades with, in the browser and at build time) and
+JSXGraph (for graphical answers). All three are git-ignored here:
 
 ```sh
 quarto add Erasmus-CTM/ctm-libs@main --no-prompt     # or a checkout: quarto add ../ctm-libs --no-prompt
+quarto add ../ctm-checkers --no-prompt               # a ctm-checkers checkout at the commit of .github/pins.json
 quarto add jsxgraph/jsxgraph-quarto --no-prompt
 CTM_COMPONENT_DEV=1 quarto render
 ```
@@ -68,15 +70,21 @@ CTM_COMPONENT_DEV=1 quarto render
 ctm-libs' `bootstrap/ctm-bootstrap.lua`, kept byte-identical) that this is a
 development build; without it the render stops because the package is
 missing. CI does the same with the ctm-libs commit under test (the
-`CTM-Review-Refs` trailer of a review commit, else ctm-libs `main`).
+`CTM-Review-Refs` trailer of a review commit, else ctm-libs `main`) and the
+ctm-checkers commit of `.github/pins.json` (or the trailer's). A page with an
+exercise needs ctm-checkers too: without it the render stops with the CTM
+Assessment install command.
 
-Regression tests: install Node dependencies with `npm ci` and the two
+Regression tests: install Node dependencies with `npm ci` and the three
 extensions above, then run `npm test`. The tests read ctm-libs' files from
 `CTM_LIBS_EXTENSION` (for example `_extensions/Erasmus-CTM/ctm-libs`; without
-the variable they look in `_extensions/`) and render their projects with
-`CTM_COMPONENT_DEV=1`. Set `JSXGRAPH_EXTENSION` if JSXGraph is installed
-outside `_extensions/`. The checker tests also require Python with SymPy 1.13
-or later and NetworkX 3.4 or later (CI uses the browser's SymPy 1.13.3).
+the variable they look in `_extensions/`), ctm-checkers from
+`CTM_CHECKERS_EXTENSION` (its `_extensions/ctm-checkers` folder; without the
+variable they look in `_extensions/` and its owner folders) and render their
+projects with `CTM_COMPONENT_DEV=1`. Set `JSXGRAPH_EXTENSION` if JSXGraph is
+installed outside `_extensions/`. The checker tests also require Python with
+SymPy 1.13 or later and NetworkX 3.4 or later (CI uses the browser's SymPy
+1.13.3).
 Install Quarto (or set `QUARTO_BIN`) to run the rendered-document tests; they
 are skipped when Quarto is unavailable. CI requires and runs them. The tests
 use local renderers and a mocked AI endpoint; no model or credentials are
