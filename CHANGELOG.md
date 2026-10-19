@@ -1,5 +1,21 @@
 # Changes
 
+## Unreleased
+
+### Changed for authors
+
+- **Builds without AI feedback and exercises without a static check**: an
+  exercise in `mode: custom` without a `checker` (where its feedback is on)
+  is assessed by AI feedback only. In a build without AI feedback,
+  math-exercise asks ctm-libs (`ctm.policy.withoutAI`), and
+  `ai-feedback: without-ai` decides: the build stops and names it (unset),
+  the question is shown as text without answer fields and Check button,
+  with a note (`text`, and `self-check` for now), or the exercise is left
+  out (`drop`). The text keeps the question's maths, shows a pool's first
+  task and a generated exercise's first variant. A generated exercise's
+  checker in its YAML options counts. With a ctm-libs that has no
+  `ctm.policy.withoutAI`, such exercises are rendered as before.
+
 ## 0.10.0 (CTM Assessment 0.9.0)
 
 math-exercise is a part of CTM Assessment and loads its library ctm-libs for
