@@ -1903,12 +1903,16 @@
 
   document.addEventListener('DOMContentLoaded', async function () {
     var cells = document.querySelectorAll('.math-exercise-cell');
-    if (!cells.length) return;
+    // Exercises shown as text (a build without AI feedback) only need their maths.
+    var texts = document.querySelectorAll('.math-exercise-text .math-exercise-question');
+    if (!cells.length && !texts.length) return;
     // KaTeX rendering must not depend on Pyodide: Pyodide is only needed lazily
     // on the first Check click (ensureSympy()), but if ensurePyodide() rejects
     // (slow/broken network, no other Pyodide extension on the page), a shared
     // Promise.all would previously also block/kill math rendering entirely.
     await ensureKatex();
+    texts.forEach(renderMathInQuestion);
+    if (!cells.length) return;
     cells.forEach(setupCell);
     ensurePyodide().catch(function (e) {
       console.warn('math-exercise: Pyodide preload failed (will retry on the first check):', e);
