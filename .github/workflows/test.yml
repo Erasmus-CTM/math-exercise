@@ -85,8 +85,11 @@ jobs:
           grep -Fq 'class="math-vec' _site/vector-matrix-tests.html
           grep -Fq 'class="math-mat"' _site/vector-matrix-tests.html
           grep -Fq 'data-structural-field-labels=' _site/vector-matrix-tests.html
-          grep -Fq 'Komponent ' _site/vector-matrix-tests.html
-          grep -Fq 'Rad ' _site/vector-matrix-tests.html
+          # Norwegian component and cell labels: the page loads ctm-libs' catalogue.
+          grep -Fq '"lang":"nb"' _site/vector-matrix-tests.html
+          grep -Fq 'quarto-contrib/ctm-locale-math-exercise-' _site/vector-matrix-tests.html
+          grep -Fq '"Komponent {n}"' _site/site_libs/quarto-contrib/ctm-locale-math-exercise-*/math-exercise.js
+          grep -Fq '"Rad {row}, kolonne {column}"' _site/site_libs/quarto-contrib/ctm-locale-math-exercise-*/math-exercise.js
           grep -Fq 'Bases with an unknown number of vectors' _site/dynamic-matrix-tests.html
           grep -Fq 'data-auto-cols="true"' _site/dynamic-matrix-tests.html
           grep -Fq 'data-auto-rows="true"' _site/dynamic-matrix-tests.html
