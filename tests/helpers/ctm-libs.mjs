@@ -5,6 +5,7 @@ import { cpSync, existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
+import { install as installCheckers } from './ctm-checkers.mjs';
 
 // CTM_LIBS_EXTENSION (an _extensions/ctm-libs folder), else the installation
 // in this repository: `quarto add Erasmus-CTM/ctm-libs` installs it under
@@ -39,10 +40,13 @@ export function runInContext(context, files) {
 }
 
 // Copies ctm-libs into a test project's _extensions (or an owner folder), as
-// `quarto add` does.
-export function install(dir, owner = '') {
+// `quarto add` does, and ctm-checkers, the checker library math-exercise
+// grades with (as the CTM Assessment package installs both; `checkers: false`
+// leaves it out).
+export function install(dir, owner = '', { checkers = true } = {}) {
   const target = join(dir, '_extensions', owner, 'ctm-libs');
   cpSync(ctmLibs, target, { recursive: true });
+  if (checkers) installCheckers(dir, owner);
   return target;
 }
 

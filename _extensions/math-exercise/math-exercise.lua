@@ -1,7 +1,10 @@
 -- math-exercise is a part of CTM Assessment. Its library ctm-libs (settings,
 -- languages, the Python runtime, AI feedback, the JSXGraph check) is found by
 -- the canonical bootstrap, which stops the render with the install command
--- when CTM Assessment is missing.
+-- when CTM Assessment is missing. The checks run in ctm-checkers, the Python
+-- checker library of CTM Assessment, which ctm-libs finds (ctm.checkers):
+-- in the browser (its page script) and at build time (its wheel, for the
+-- authored question tests and the variant generator).
 local ctm = dofile(quarto.utils.resolve_path("ctm-bootstrap.lua"))("math-exercise")
 -- Quarto replaces the global error() with a logger that lets the render
 -- continue; authoring errors must stop the render, so fail through assert.
@@ -155,14 +158,29 @@ local function extensionVersion()
   return version or "0"
 end
 
+-- ctm-checkers, once per page: an older ctm-libs has no ctm.checkers, and
+-- ctm.checkers.require stops the render when ctm-checkers is missing or has
+-- another API level, each with the command that fixes it.
+local INSTALL = "quarto add https://erasmus-ctm.github.io/ctm-assessment/ctm-assessment.tar.gz"
+local function requireCheckers()
+  if not ctm.checkers then
+    fail("math-exercise " .. extensionVersion() .. " needs ctm-checkers through a newer ctm-libs than " .. ctm.dir
+      .. " (" .. ctm.version .. "). Update CTM Assessment: " .. INSTALL)
+  end
+  ctm.checkers.require("math-exercise", 1)
+end
+
 -- Scripts and styles as cacheable HTML dependencies, once per page: ctm-libs'
--- Python runtime (MathExerciseRuntime) and message catalogue (CTMLocales) in
--- the head, then this extension's styles, and its scripts at the end of the
--- body (they read window.__mathExerciseConfig, written before the body).
+-- Python runtime (MathExerciseRuntime), ctm-checkers' page script and the
+-- message catalogue (CTMLocales) in the head, then this extension's styles,
+-- and its scripts at the end of the body (they read
+-- window.__mathExerciseConfig, written before the body).
 local function ensureSetup()
   if hasSetup then return end
   hasSetup = true
+  requireCheckers()
   ctm.runtime.use()
+  ctm.checkers.use()
   ctm.locale.use("math-exercise")
   quarto.doc.add_html_dependency({
     name = "math-exercise",
@@ -753,12 +771,15 @@ local function buildExercise(el, state)
   local opts, questionText = parseOptions(el.text)
 
   -- Tests opt into native build-time checking. They are never sent to the
-  -- learner runtime; exercises without tests need no native Python.
+  -- learner runtime; exercises without tests need no native Python. The
+  -- script runs them in ctm-checkers (its wheel on PYTHONPATH).
   if opts["tests"] and opts["tests"]:match("%S") then
     local script = quarto.utils.resolve_path("question-tests.py")
     local python = os.getenv("MATH_EXERCISE_PYTHON") or "python3"
     opts["tests-base"] = quarto.project.directory or pandoc.path.directory(quarto.doc.input_file)
-    local ok, result = pcall(pandoc.pipe, python, {script, "--stdin"}, quarto.json.encode(opts))
+    local ok, result = pcall(pandoc.system.with_environment, ctm.checkers.environment(), function()
+      return pandoc.pipe(python, {script, "--stdin"}, quarto.json.encode(opts))
+    end)
     if not ok then
       io.stderr:write("math-exercise: author tests failed for " .. (opts["label"] or eid) .. "\n" .. tostring(result) .. "\n")
       io.stderr:flush()
@@ -766,7 +787,8 @@ local function buildExercise(el, state)
     end
   end
 
-  local variants = dofile(quarto.utils.resolve_path("variants.lua")).generate(el.text, questionText, opts, state.review)
+  local variants = dofile(quarto.utils.resolve_path("variants.lua")).generate(el.text, questionText, opts, state.review,
+    function() return ctm.checkers.environment() end)
   if variants then opts = variants.options; opts["pool"] = "true" end
 
   local caption   = opts["caption"]   or nil

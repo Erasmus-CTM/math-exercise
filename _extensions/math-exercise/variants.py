@@ -1,4 +1,8 @@
-"""Deterministic build-time variants. Uses PyYAML for authored options; no eval/exec."""
+"""Deterministic build-time variants. Uses PyYAML for authored options; no eval/exec.
+
+Rounds with ctm-checkers' rounding rule (ctm_checkers.math_exercise.numeric,
+standard library only): math-exercise.lua runs this script with ctm-checkers'
+wheel on PYTHONPATH."""
 import ast
 import hashlib
 import itertools
@@ -8,17 +12,19 @@ import operator
 import re
 import sys
 
+from ctm_checkers.math_exercise.numeric import round_places
+
 FUNCTIONS = {name: getattr(math, name) for name in ('sqrt', 'sin', 'cos', 'tan', 'floor', 'ceil', 'exp', 'log')}
 
 def round_half_up(x, digits=None):
-    """Rounds as the checker does (decplaces/sigfigs): the decimal value to 15
-    significant digits, half away from zero. round(1/8, 2) is 0.13, not 0.12."""
-    from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
+    """Rounds as the checker does (decplaces/sigfigs; ctm-checkers'
+    round_places): the decimal value to 15 significant digits, half away from
+    zero. round(1/8, 2) is 0.13, not 0.12. Without digits it gives an int; an
+    int stays an int."""
     if digits is None: return int(round_half_up(x, 0))
     digits = int(digits)
     if isinstance(x, int) and not isinstance(x, bool) and digits >= 0: return x
-    try: return float(Decimal(format(float(x), '.15g')).quantize(Decimal(1).scaleb(-digits), rounding=ROUND_HALF_UP))
-    except (InvalidOperation, ValueError, OverflowError): return round(x, digits)
+    return round_places(x, digits)
 
 def sigfig(x, n):
     return 0 if x == 0 else round_half_up(x, int(n) - 1 - int(math.floor(math.log10(abs(x)))))

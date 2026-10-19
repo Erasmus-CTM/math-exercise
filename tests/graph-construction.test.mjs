@@ -8,6 +8,7 @@ import { spawnSync } from 'node:child_process';
 import test from 'node:test';
 import vm from 'node:vm';
 import { FEEDBACK, LOCALE, RUNTIME, runInContext, sources } from './helpers/ctm-libs.mjs';
+import { pythonEnv } from './helpers/ctm-checkers.mjs';
 
 // The JSXGraph extension is a declared dependency (jsxgraph/jsxgraph-quarto),
 // installed with `quarto add`, not vendored here.
@@ -55,10 +56,10 @@ function loadBundle(loadPackage) {
   return {...context.window.__mathExerciseTestApi, ...sharedTestApi(context.AIFeedback, context.window.__mathExerciseConfig.lang, context.localStorage)};
 }
 
-function sympyBootstrap() {
-  const match = source.match(/var source = \[\n([\s\S]*?)\n    \]\.join\('\\n'\);/);
-  assert.ok(match, 'could not locate the embedded Python bootstrap');
-  return vm.runInNewContext(`[${match[1]}]`).join('\n');
+// The names a #| checker: sees (ctm-checkers' checker namespace), as the
+// page's checks give them; Python runs with ctm-checkers' wheel (pythonEnv).
+function checkerNamespace() {
+  return 'from ctm_checkers.math_exercise import namespace as _namespace\nglobals().update(_namespace())';
 }
 
 function checker(label) {
@@ -239,7 +240,8 @@ test('Lua injects the common editor and exercise packages reach the runtime', ()
   // Either script order: the bridge before the code (v1.1) or after (deferred start).
   assert.match(jsxLua, /assessment_bridge, GRAPH_EDITOR_JS, jsxgraph|jsxgraph, GRAPH_EDITOR_JS, assessment_bridge/);
   assert.match(lua, /data-packages=.*jsonArrAttr\(packages\)/);
-  assert.match(source, /def graph_from_response\(response, \*, directed=False\):/);
+  // graph_from_response is ctm-checkers' (the checker namespace has it; the CPython test below uses it).
+  assert.doesNotMatch(source, /def graph_from_response/);
   assert.equal((examples.match(/#\| packages: networkx/g) || []).length, 4);
   assert.equal((examples.match(/#\| partial-credit: true/g) || []).length, 4);
   assert.equal((examples.match(/JXG\.QuartoGraphEditor\.summarize\(data/g) || []).length, 4);
@@ -307,7 +309,7 @@ test('shared response conversion and all four NetworkX checkers work', () => {
     tooSmall: graph([1, 2], [[1, 2]]),
   };
   const script = [
-    sympyBootstrap(),
+    checkerNamespace(),
     `fixtures = ${JSON.stringify(fixtures)}`,
     `exec(${JSON.stringify(checker('jsxgraph-tree-construction'))})`,
     'assert check(fixtures["tree"], {})["score"] == 1',
@@ -335,6 +337,6 @@ test('shared response conversion and all four NetworkX checkers work', () => {
     'except ValueError:',
     '    pass',
   ].join('\n');
-  const result = spawnSync(process.env.PYTHON || 'python3', ['-c', script], { encoding: 'utf8' });
+  const result = spawnSync(process.env.PYTHON || 'python3', ['-c', script], { encoding: 'utf8', env: pythonEnv });
   assert.equal(result.status, 0, result.stderr || result.stdout);
 });
