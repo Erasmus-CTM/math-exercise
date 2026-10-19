@@ -6,7 +6,7 @@ format:
     toc: true
 engine: markdown
 ai-feedback:
-  page-policy-files: feedback/policy-comparison.yml
+  policy-files: feedback/policy-comparison.yml
 filters:
   - _filters/example-source.lua
   - jsxgraph
