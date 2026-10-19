@@ -30,6 +30,8 @@ jobs:
         run: |
           python -m unittest discover -s tests -p test_variants.py
           node --test tests/*.test.mjs
+      - name: variants.py rounds as math-exercise 0.10 did (ctm-checkers' golden rows, L1)
+        run: python _ctm-checkers-source/tools/golden.py verify --adapter wheel --wheel "$CTM_CHECKERS_WHEEL" --variants . --suite rounding-variants
       - name: Render the examples website
         run: |
           quarto render
@@ -82,6 +84,9 @@ jobs:
           grep -Fq 'quarto-contrib/ctm-locale-math-exercise-' _site/vector-matrix-tests.html
           grep -Fq '"Komponent {n}"' _site/site_libs/quarto-contrib/ctm-locale-math-exercise-*/math-exercise.js
           grep -Fq '"Rad {row}, kolonne {column}"' _site/site_libs/quarto-contrib/ctm-locale-math-exercise-*/math-exercise.js
+          # The checks: ctm-checkers' page script, a cacheable dependency, once per page.
+          test "$(grep -Fc 'quarto-contrib/ctm-checkers-' _site/basic-features.html)" -eq 1
+          ls _site/site_libs/quarto-contrib/ctm-checkers-*/ctm-checkers.js
           grep -Fq 'Bases with an unknown number of vectors' _site/dynamic-matrix-tests.html
           grep -Fq 'data-auto-cols="true"' _site/dynamic-matrix-tests.html
           grep -Fq 'data-auto-rows="true"' _site/dynamic-matrix-tests.html

@@ -1,0 +1,133 @@
+name: Grading parity with math-exercise 0.10 (L2)
+
+# Step-2 design §6.1, L2: math-exercise's example site built at the pull
+# request's base and at its head, every exercise graded by the umbrella's
+# parity harness (integration/pyodide-parity at the umbrella commit in
+# .github/pins.json) with the pages' own scripts in jsdom under Pyodide
+# 0.28.3: answer keys, perturbations, the audit's challenge answers, boundary
+# probes, the probes, teacher answers and authored responses of cells without
+# keys and of diagram cells, every variant's fixtures, and the authored
+# question tests. Any difference in status, score, details or feedback, or a
+# case only one build has, fails unless .github/parity-expected.json lists it
+# (run.cjs --expected). Both builds use the same ctm-libs and JSXGraph; the
+# head grades with ctm-checkers (installed for it only), the base with its own
+# checker code when it is math-exercise 0.10.
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      base:
+        description: 'math-exercise commit, tag or branch built as the base (a branch means origin/<branch>)'
+        default: 'main'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: math-exercise-parity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  builds:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          path: head
+      - name: Pinned commits (.github/pins.json)
+        id: pins
+        run: jq -r 'to_entries[] | select(.value | type == "object") | "\(.key)=\(.value.commit)"' head/.github/pins.json >> "$GITHUB_OUTPUT"
+      - name: The umbrella (its parity harness and review-dependencies script)
+        uses: actions/checkout@v4
+        with:
+          repository: Erasmus-CTM/ctm-assessment
+          ref: ${{ steps.pins.outputs['ctm-assessment'] }}
+          path: umbrella
+          persist-credentials: false
+      - name: Select explicit review dependencies (a head commit's CTM-Review-Refs trailer)
+        id: review
+        working-directory: head
+        env:
+          REVIEW_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: python3 ../umbrella/tools/ci/review-dependencies.py
+      - name: Fetch ctm-libs
+        uses: actions/checkout@v4
+        with:
+          repository: Erasmus-CTM/ctm-libs
+          ref: ${{ steps.review.outputs['ctm-libs'] || 'main' }}
+          path: _ctm-libs-source
+          persist-credentials: false
+      - name: Fetch ctm-checkers
+        uses: actions/checkout@v4
+        with:
+          repository: Erasmus-CTM/ctm-checkers
+          ref: ${{ steps.review.outputs['ctm-checkers'] || steps.pins.outputs['ctm-checkers'] }}
+          path: _ctm-checkers-source
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            umbrella/package-lock.json
+            umbrella/integration/pyodide-parity/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      # SymPy: the version Pyodide 0.28.3 ships (authored tests at build time); PyYAML: the variant generator.
+      - run: python -m pip install sympy==1.13.3 'networkx>=3.4' 'PyYAML>=6'
+      - uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: '1.8.27'
+      - name: Build the example site at the base and at the head
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.inputs.base }}
+          JSXGRAPH: ${{ steps.review.outputs['jsxgraph'] || 'v1.1.0' }}
+          CTM_COMPONENT_DEV: '1'
+        run: |
+          set -e
+          # A commit or tag as it is; a branch name as fetched (origin/<branch>).
+          ref="$BASE"
+          git -C head rev-parse --verify --quiet "$ref^{commit}" > /dev/null || ref="origin/$BASE"
+          git -C head worktree add --detach "$PWD/base" "$(git -C head rev-parse --verify "$ref^{commit}")"
+          echo "Base: $(git -C base log --oneline -1); head: $(git -C head log --oneline -1)"
+          git init -q _jsxgraph-source
+          git -C _jsxgraph-source fetch --depth 1 https://github.com/jsxgraph/jsxgraph-quarto.git "$JSXGRAPH"
+          git -C _jsxgraph-source checkout -q --detach FETCH_HEAD
+          for build in base head; do
+            (cd "$build"
+             quarto add ../_ctm-libs-source --no-prompt > /dev/null
+             quarto add ../_jsxgraph-source --no-prompt > /dev/null
+             # math-exercise 0.11 and later grade with ctm-checkers; 0.10 has its own checker code.
+             if grep -q 'ctm.checkers' _extensions/math-exercise/math-exercise.lua; then quarto add ../_ctm-checkers-source --no-prompt > /dev/null; fi
+             quarto render)
+            test -f "$build/_site/examples.html"
+          done
+      - run: npm ci --ignore-scripts
+        working-directory: umbrella
+      - run: npm ci --ignore-scripts
+        working-directory: umbrella/integration/pyodide-parity
+      - name: Grade every exercise of both builds under Pyodide 0.28.3; any difference fails
+        run: |
+          set -o pipefail
+          expected=()
+          if [ -f head/.github/parity-expected.json ]; then expected=(--expected head/.github/parity-expected.json); echo "Expected differences: head/.github/parity-expected.json"; fi
+          node umbrella/integration/pyodide-parity/run.cjs --builds base="$PWD/base",head="$PWD/head" \
+            --site math-exercise=_site --sources math-exercise=. --extensions _extensions "${expected[@]}" \
+            --out "$RUNNER_TEMP/parity" 2>&1 | tee "$RUNNER_TEMP/parity.log"
+      - name: Report the result as an annotation
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/parity/report.md" ]; then text=$(head -c 6000 "$RUNNER_TEMP/parity/report.md"); else text=$(tail -40 "$RUNNER_TEMP/parity.log" 2>/dev/null || echo 'no output'); fi
+          level=notice; [ "${{ job.status }}" = success ] || level=error
+          printf '::%s title=Grading parity (L2)::%s\n' "$level" "$(printf '%s' "$text" | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\n/%0A/g')"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: grading-parity
+          path: |
+            ${{ runner.temp }}/parity/report.*
+            ${{ runner.temp }}/parity/results-*.jsonl
+            ${{ runner.temp }}/parity/job-*.json
