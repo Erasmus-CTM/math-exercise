@@ -227,13 +227,11 @@ therefore also switches the extension's language automatically.
 
 ### Adding another language
 
-This extension generates the button labels in the Lua filter, everything
-else in JavaScript – so two places need updating:
-
-1. In `_extensions/math-exercise/math-exercise.js`, add a new `LOCALES` block
-   modeled on `de`.
-2. In `math-exercise.lua`, add the language code to `supportedLangs` **and**
-   add the button labels to the `uiText` table.
+The interface texts, in Lua (the buttons) and in JavaScript (everything else),
+are in CTM Assessment's message catalogue, in ctm-libs
+(`locales/math-exercise.js`, shared with the other components' catalogues). A
+new language is added there with all its texts; see ctm-libs'
+[development guide](https://github.com/Erasmus-CTM/ctm-libs/blob/main/docs/development.md#messages).
 
 ---
 
