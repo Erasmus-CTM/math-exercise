@@ -145,27 +145,32 @@ local function uiT(key)
   return ctm.locale.text("math-exercise", key, lang)
 end
 
-local function readFile(filename)
-  local path = quarto.utils.resolve_path(filename)
-  local f = io.open(path, "r")
-  if not f then fail("math-exercise: cannot open '" .. filename .. "'") end
-  local content = f:read("*a")
-  f:close()
-  return content
+-- This extension's version (its _extension.yml), for its HTML dependency.
+local function extensionVersion()
+  local f = io.open(quarto.utils.resolve_path("_extension.yml"), "r")
+  local version = f and f:read("*a"):match("\nversion:%s*['\"]?([%w%.%-]+)")
+  if f then f:close() end
+  return version or "0"
 end
 
+-- Scripts and styles as cacheable HTML dependencies, once per page: ctm-libs'
+-- Python runtime (MathExerciseRuntime) and message catalogue (CTMLocales) in
+-- the head, then this extension's styles, and its scripts at the end of the
+-- body (they read window.__mathExerciseConfig, written before the body).
 local function ensureSetup()
   if hasSetup then return end
   hasSetup = true
-  -- The message catalogue (CTMLocales), read by math-exercise.js.
+  ctm.runtime.use()
   ctm.locale.use("math-exercise")
-  local css = readFile("matrix-input.css") .. "\n" .. readFile("math-exercise.css")
-  quarto.doc.include_text("in-header",
-    "<style type=\"text/css\">\n" .. css .. "\n</style>")
-  local runtime = readFile("shared/pyodide-runtime.js")
-  local js = readFile("matrix-input.js") .. "\n" .. readFile("math-exercise.js")
-  quarto.doc.include_text("after-body",
-    "<script type=\"text/javascript\">\n" .. runtime .. "\n" .. js .. "\n</script>")
+  quarto.doc.add_html_dependency({
+    name = "math-exercise",
+    version = extensionVersion(),
+    stylesheets = {"matrix-input.css", "math-exercise.css"},
+    scripts = {
+      {path = "matrix-input.js", afterBody = true},
+      {path = "math-exercise.js", afterBody = true},
+    },
+  })
 end
 
 ----
