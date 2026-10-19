@@ -22,6 +22,9 @@ local feedback = noFeedback
 -- when exercises want feedback or the page has `.ai-feedback` activities
 -- (which are prepared even with exercise feedback off).
 local feedbackForExercises, feedbackForPage = false, false
+-- Whether exercises get AI feedback where it is on (math-exercise: feedback
+-- is not false), also in a build without it.
+local feedbackWanted = false
 
 ----
 -- math-exercise.lua
@@ -624,13 +627,19 @@ local function proseHtml(text)
   end))
 end
 
-local function processMarkers(text, exerciseId, vars, vecdir, mode)
-  text = normalizeTaskMathDelimiters(text)
+-- With `blank`, every marker becomes "…" (an exercise shown as text, without
+-- answer fields). With `isHtml` the text is a generated variant's question,
+-- which Pandoc has already rendered: its prose stays as it is, as in
+-- renderTaskText(..., questionIsHtml) in math-exercise.js.
+local function processMarkers(text, exerciseId, vars, vecdir, mode, blank, isHtml)
+  if not isHtml then text = normalizeTaskMathDelimiters(text) end
   local count, fieldIds, structuralLabels = 0, {}, {}
   local dynamicNames = {}
   local output, position, prose = {}, 1, {}
   local function flush()
-    if #prose > 0 then table.insert(output, proseHtml(table.concat(prose))); prose = {} end
+    if #prose > 0 then
+      table.insert(output, isHtml and table.concat(prose) or proseHtml(table.concat(prose))); prose = {}
+    end
   end
 
   while position <= #text do
@@ -646,7 +655,10 @@ local function processMarkers(text, exerciseId, vars, vecdir, mode)
     local bracket = head and text:sub(position + #head - 1):match("^%b[]")
     local brace = dynamicMatrixHead and text:sub(position + #dynamicMatrixHead - 1):match("^%b{}")
 
-    if bracket or brace then
+    if (bracket or brace) and blank then
+      table.insert(prose, "…")
+      position = position + #head - 1 + #(bracket or brace)
+    elseif bracket or brace then
       local balanced = bracket or brace
       -- Inside an answer marker an escaped dollar is a plain dollar.
       local content = balanced:sub(2, -2):gsub(LITERAL_DOLLAR, "$")
@@ -796,6 +808,28 @@ local function buildExercise(el, state)
   end
   local isPool    = (opts["pool"]     == "true")
   local vecdir    = opts["vecdir"] == "row" and "row" or "col"
+
+  -- An exercise without a static check (custom mode without a checker) is
+  -- assessed by AI feedback only. In a build without AI feedback ctm-libs
+  -- decides (ai-feedback: without-ai): the question shown as text, or left
+  -- out; with without-ai unset it names the exercise in the error that stops
+  -- the build. An older ctm-libs has no ctm.policy.withoutAI: the exercise is
+  -- rendered as before.
+  local withoutAI = ctm.policy and ctm.policy.withoutAI
+  if withoutAI and feedbackWanted and mode == "custom" and not checker:match("%S") then
+    local decision = withoutAI({component = "math-exercise", kind = "math-exercise in custom mode without a checker",
+      name = opts["label"], text = questionText, lang = lang})
+    if decision and decision.action == "drop" then return {} end
+    if decision then
+      -- The question (a pool's first task, a generated exercise's first
+      -- variant) without answer fields and controls, then ctm-libs' note.
+      local question = variants and variants.variants[1].question or (isPool and splitTasks(questionText)[1]) or questionText
+      local body = processMarkers(question, eid, vars, vecdir, mode, true, variants ~= nil):gsub("\n", "<br>\n")
+      local html = (caption and ('<div class="math-exercise-caption">' .. caption .. '</div>\n') or '')
+        .. '<div class="math-exercise-question">' .. body .. '</div>'
+      return pandoc.Div({pandoc.RawBlock("html", html), decision.note}, pandoc.Attr(eid, {"math-exercise-text"}))
+    end
+  end
 
   local captionHtml = ""
   if caption then
@@ -976,7 +1010,8 @@ local function preparePage(doc)
   ctm.deps.requireUsed(doc, "math-exercise")
   local exercises = false
   doc.blocks:walk({ CodeBlock = function(b) if b.classes:includes("{math-exercise}") then exercises = true end end })
-  local wanted = exercises and setting ~= "false"
+  feedbackWanted = setting ~= "false"
+  local wanted = exercises and feedbackWanted
   if setting == "true" then
     -- Asked for explicitly: a build without AI feedback names it in its message.
     feedbackForExercises = ctm.feedback.request("math-exercise", wanted, "feedback: true" .. (origin and (" in " .. origin) or ""))

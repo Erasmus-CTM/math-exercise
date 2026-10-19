@@ -155,6 +155,17 @@ feedback (`ai-feedback: enabled: false`, for example in a profile, or
 `CTM_FEEDBACK=off quarto render`) has no Feedback button; a page that sets
 `feedback: true` is then named in one build message.
 
+An exercise in `mode: custom` without a `checker` has no static check: only
+AI feedback can assess it. In a build without AI feedback (where its feedback
+is on, any `feedback:` but `false`) the setting `ai-feedback: without-ai`
+decides: unset, the build stops and names the exercise; `text` shows its
+caption and question (a pool's first task, a generated exercise's first
+variant) without answer fields and Check button, with a note that it has no
+automatic feedback in this version; `self-check` is the same as `text` for
+now; `drop` leaves it out. See CTM Assessment's reference for the setting.
+This needs a ctm-libs that offers `ctm.policy.withoutAI`; with an older one
+such an exercise is rendered as before.
+
 These options combine key by key across `_quarto.yml`, profiles,
 `_quarto.yml.local`, `_metadata.yml` files and the page's front matter: a
 page that sets `lang` keeps the project's `feedback` and `stop-after`.
