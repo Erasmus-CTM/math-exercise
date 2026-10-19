@@ -129,7 +129,6 @@ local feedbackForExercises, feedbackForPage = false, false
 
 local hasSetup      = false
 local exerciseCount = 0
-local MAX_CONTEXT_CHARS = 1500
 
 ----
 -- Localization (i18n)
@@ -224,6 +223,12 @@ end
 ----
 -- JSON helpers
 ----
+-- JSON for an inline <script>: <, > and & as \u escapes, so that text such as
+-- "</script>" cannot end the script (as ctm-libs' feedback.lua writes its data).
+local function scriptJson(value)
+  return (quarto.json.encode(value):gsub("<", "\\u003c"):gsub(">", "\\u003e"):gsub("&", "\\u0026"))
+end
+
 local function jsonEsc(s)
   return s:gsub('\\','\\\\'):gsub('"','\\"'):gsub('\n','\\n'):gsub('\r','\\r'):gsub('\t','\\t')
 end
@@ -711,7 +716,7 @@ local function controlsHtml()
     '  <button type="button" class="btn btn-light math-legend-btn">&#9432;&nbsp;' .. uiT("legendButton") .. '</button>',
     withFeedback and '  <div class="btn-group">' or '',
     withFeedback and ('    <button type="button" class="btn btn-light math-feedback-btn">&#128172;&nbsp;' .. uiT("feedbackButton") .. '</button>') or '',
-    withFeedback and ('    <button type="button" class="btn btn-light math-reconfig-btn" title="' .. uiT("reconfigTitle") .. '">&#9881;</button>') or '',
+    withFeedback and ('    <button type="button" class="btn btn-light math-reconfig-btn" title="' .. attrEsc(uiT("reconfigTitle")) .. '">&#9881;</button>') or '',
     withFeedback and '  </div>' or '',
     '</div>',
   }, "\n")
@@ -843,7 +848,7 @@ local function buildExercise(el, state)
     attrs        = attrs .. ' data-pool="'   .. jsonArrAttr(tasks) .. '"'
                          .. ' data-fields="[]"'
                          .. ' data-structural-field-labels="[]"'
-    questionHtml = '<button type="button" class="math-pool-reload" title="' .. uiT("poolReloadTitle") .. '">&#8635;</button>\n'
+    questionHtml = '<button type="button" class="math-pool-reload" title="' .. attrEsc(uiT("poolReloadTitle")) .. '">&#8635;</button>\n'
                 .. '<div class="math-exercise-question"></div>'
   else
     local body, fieldIds, structuralLabels = processMarkers(questionText, eid, vars, vecdir, mode)
@@ -906,7 +911,7 @@ local function Meta(meta)
   -- `math-exercise: stop-after`, `ctm-assessment: stop-after`, 20 seconds.
   quarto.doc.include_text("before-body",
     '<script>window.__mathExerciseConfig = ' ..
-    quarto.json.encode({ lang = lang, stopAfter = ctm.runtime.stopAfter("math-exercise") }) .. ';</script>')
+    scriptJson({ lang = lang, stopAfter = ctm.runtime.stopAfter("math-exercise") }) .. ';</script>')
 
   return meta
 end

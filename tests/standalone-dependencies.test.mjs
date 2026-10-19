@@ -94,6 +94,25 @@ test('feedback: auto and true give the Feedback button, false hides it, other va
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
+test('task text, checkers and settings with "</script>" stay inert', { skip }, () => {
+  const dir = project();
+  try {
+    const r = render(dir, 'filters: [math-exercise]\nmath-exercise:\n  lang: "</script><script>alert(1)</script>"\n',
+      '```{math-exercise}\n#| label: inject\n#| mode: custom\n#| checker: |\n#|   def check(response, symbols):\n#|       return {"correct": True, "feedback": "</script><script>alert(2)</script>"}\n'
+      + 'Type </script><script>alert(3)</script> here: _[1]\n```');
+    assert.equal(r.status, 0, r.stderr);
+    const page = html(dir);
+    // No script of its own: the text stays in attributes and text nodes.
+    const { JSDOM } = require('jsdom');
+    const doc = new JSDOM(page).window.document;
+    assert.deepEqual([...doc.querySelectorAll('script')].filter(script => /^\s*alert\(/.test(script.textContent)), []);
+    assert.match(doc.querySelector('.math-exercise-question').textContent, /Type <\/script><script>alert\(3\)<\/script> here:/);
+    assert.match(JSON.parse(doc.querySelector('.math-exercise-cell').dataset.checker), /"feedback": "<\/script><script>alert\(2\)<\/script>"/);
+    assert.match(page, /window\.__mathExerciseConfig = \{"lang":"en","stopAfter":20\};/);
+    assert.equal((page.match(/class="math-exercise-cell"/g) || []).length, 1);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
 test('a build without AI feedback has no Feedback button; feedback: true is named in one build message', { skip }, () => {
   const dir = project();
   const off = { ...renderEnv, CTM_FEEDBACK: 'off' };
