@@ -13,8 +13,9 @@ quarto add jsxgraph/jsxgraph-quarto
 filters: [jsxgraph, math-exercise]   # either order
 ```
 
-The [CTM Assessment umbrella](https://github.com/Erasmus-CTM/ctm-assessment)
-already contains a tested version. If an exercise refers to `jsxgraph:<id>`
+[CTM Assessment](https://github.com/Erasmus-CTM/ctm-assessment) contains a
+tested version; the commands above are for math-exercise's own development
+builds. If an exercise refers to `jsxgraph:<id>`
 (`response:` or `context:`) and the extension is not installed, or no JSXGraph
 block on the page has `assessment_id="<id>"`, rendering stops with a message
 saying what to add.
@@ -40,8 +41,8 @@ is needed only for `ai.render`. For graph-construction exercises see the
 
 ## Use a diagram as feedback context
 
-With AI Feedback 0.7.0 or later, ordinary typed-answer activities
-can reference a separate applet without making the applet their answer source:
+Ordinary typed-answer activities can reference a separate applet without
+making the applet their answer source:
 
 ```yaml
 #| context: lesson-context, jsxgraph:diagram-id

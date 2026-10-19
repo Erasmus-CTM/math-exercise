@@ -18,13 +18,14 @@ From the project root, including in the VS Code terminal:
 ```bash
 npm ci
 npx playwright install chromium
-quarto render
+CTM_COMPONENT_DEV=1 quarto render
 npm run test:browser
 ```
 
-Install the shared AI Feedback extension and the native dependencies needed by
-the page before rendering, as described in the installation and question-test
-guides. The Playwright configuration starts a local HTTP server for `_site`.
+Install ctm-libs and JSXGraph and the native dependencies needed by the page
+before rendering, and render with `CTM_COMPONENT_DEV=1`, as described in the
+[development setup](installation.md#development-of-math-exercise) and the
+question-test guide. The Playwright configuration starts a local HTTP server for `_site`.
 Its failure report includes a screenshot and trace. Add a test or refine an
 existing one when changing a gesture, control, or response transport.
 

@@ -127,6 +127,6 @@ For controls and pointer gestures, see the separate [browser-test guide](browser
 
 Native tests need SymPy 1.13 or later (1.13 changed how floats compare) and,
 for graph checkers, NetworkX 3.4 or later. The browser grades with the
-versions its Pyodide ships (Pyodide 0.27.2: SymPy 1.13.3, NetworkX 3.4.2);
+versions its Pyodide ships (Pyodide 0.28.3: SymPy 1.13.3, NetworkX 3.4.2);
 a newer SymPy on the build machine can occasionally grade an edge case
 differently, so CI runs the native tests with the browser's versions.
