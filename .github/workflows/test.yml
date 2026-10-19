@@ -23,14 +23,14 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install checker test dependencies
-        run: python -m pip install sympy==1.13.3 'networkx>=3.4' 'PyYAML>=6'  # SymPy: the version Pyodide 0.27.2 ships
+        run: python -m pip install sympy==1.13.3 'networkx>=3.4' 'PyYAML>=6'  # SymPy: the version Pyodide 0.28.3 ships
       - uses: quarto-dev/quarto-actions/setup@v2
         with:
           version: '1.8.27'
-      - name: Install ai-feedback and JSXGraph
+      - name: Install ctm-libs and JSXGraph
         uses: ./.github/actions/quarto-dependencies
         with:
-          ai-feedback-ref: ${{ steps.review.outputs['ai-feedback'] || '79103a6a829b9c5cf62f645857ca7f8330ff7be2' }}
+          ctm-libs-ref: ${{ steps.review.outputs['ctm-libs'] || 'main' }}
           jsxgraph-ref: ${{ steps.review.outputs['jsxgraph'] || 'v1.1.0' }}
       - name: Install context extraction test dependencies
         run: npm ci
@@ -85,8 +85,11 @@ jobs:
           grep -Fq 'class="math-vec' _site/vector-matrix-tests.html
           grep -Fq 'class="math-mat"' _site/vector-matrix-tests.html
           grep -Fq 'data-structural-field-labels=' _site/vector-matrix-tests.html
-          grep -Fq 'Komponent ' _site/vector-matrix-tests.html
-          grep -Fq 'Rad ' _site/vector-matrix-tests.html
+          # Norwegian component and cell labels: the page loads ctm-libs' catalogue.
+          grep -Fq '"lang":"nb"' _site/vector-matrix-tests.html
+          grep -Fq 'quarto-contrib/ctm-locale-math-exercise-' _site/vector-matrix-tests.html
+          grep -Fq '"Komponent {n}"' _site/site_libs/quarto-contrib/ctm-locale-math-exercise-*/math-exercise.js
+          grep -Fq '"Rad {row}, kolonne {column}"' _site/site_libs/quarto-contrib/ctm-locale-math-exercise-*/math-exercise.js
           grep -Fq 'Bases with an unknown number of vectors' _site/dynamic-matrix-tests.html
           grep -Fq 'data-auto-cols="true"' _site/dynamic-matrix-tests.html
           grep -Fq 'data-auto-rows="true"' _site/dynamic-matrix-tests.html

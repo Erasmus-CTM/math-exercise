@@ -30,15 +30,18 @@ local function panel(source, title, testsPanel, jsx)
   table.insert(pieces, '</div>')
   return pandoc.RawBlock('html',table.concat(pieces,'\n'))
 end
+-- The shipped policies of the installed AI feedback: ctm-libs' (also under an
+-- owner folder), else an older standalone ai-feedback's.
 local function defaultPolicySource(base)
   local extensions = pandoc.path.join({base,'_extensions'})
-  local candidates = {pandoc.path.join({extensions,'ai-feedback','feedback-defaults.yml'})}
+  local folders = {extensions}
   local ok, entries = pcall(pandoc.system.list_directory, extensions)
   if ok then
-    for _, owner in ipairs(entries) do
-      table.insert(candidates,pandoc.path.join({extensions,owner,'ai-feedback','feedback-defaults.yml'}))
-    end
+    for _, owner in ipairs(entries) do table.insert(folders,pandoc.path.join({extensions,owner})) end
   end
+  local candidates = {}
+  for _, folder in ipairs(folders) do table.insert(candidates,pandoc.path.join({folder,'ctm-libs','feedback','feedback-defaults.yml'})) end
+  for _, folder in ipairs(folders) do table.insert(candidates,pandoc.path.join({folder,'ai-feedback','feedback-defaults.yml'})) end
   for _, path in ipairs(candidates) do
     local file=io.open(path,'r')
     if file then

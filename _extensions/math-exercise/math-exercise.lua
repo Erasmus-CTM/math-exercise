@@ -1,42 +1,27 @@
-local feedback = nil
+-- math-exercise is a part of CTM Assessment. Its library ctm-libs (settings,
+-- languages, the Python runtime, AI feedback, the JSXGraph check) is found by
+-- the canonical bootstrap, which stops the render with the install command
+-- when CTM Assessment is missing.
+local ctm = dofile(quarto.utils.resolve_path("ctm-bootstrap.lua"))("math-exercise")
 -- Quarto replaces the global error() with a logger that lets the render
 -- continue; authoring errors must stop the render, so fail through assert.
 local function fail(message) assert(false, message) end
--- AI feedback: "auto" (default) uses an installed ai-feedback extension and
--- otherwise renders exercises without the Feedback button; true requires it.
-local feedbackSetting = "auto"
-local feedbackWarned, feedbackMissing = false, false
 
--- Without ai-feedback the exercises still work; these stand-ins keep the
--- rendered data attributes valid.
+-- Without AI feedback on the page these stand-ins keep the rendered data
+-- attributes valid.
 local noFeedback = {
   selection = function(block, opts) return { exercise = opts.label or block.identifier or "", name = "" } end,
   context = function() return { mode = "none", refs = "", text = "" } end,
 }
+local feedback = noFeedback
 
--- Shared locator for ai-feedback and JSXGraph (feedback-loader.lua).
-local dependencies = nil
-local function deps()
-  dependencies = dependencies or dofile(quarto.utils.resolve_path("feedback-loader.lua"))
-  return dependencies
-end
-
--- Decided per page before any other pass (preparePage): ai-feedback is
--- loaded only when the page has exercises with feedback on, or `.ai-feedback`
--- activities (which are prepared even with exercise feedback off).
-local feedbackForExercises, feedbackForActivities = false, false
-
-local function loadFeedback()
-  if feedback then return feedback end
-  if not feedbackForExercises and not feedbackForActivities then feedback = noFeedback; return feedback end
-  if not feedbackForActivities and feedbackSetting == "auto" and not deps().installed("ai-feedback") then
-    feedbackMissing = true -- reported once the page has an exercise (controlsHtml)
-    feedback = noFeedback
-    return feedback
-  end
-  feedback = deps().feedback()
-  return feedback
-end
+-- Decided per page before any other pass (preparePage). `math-exercise:
+-- feedback:` auto (default) and true give every exercise the Feedback button,
+-- false none; a build without AI feedback (ai-feedback: enabled: false or
+-- CTM_FEEDBACK=off) gives none either. ctm-libs' feedback preparation runs
+-- when exercises want feedback or the page has `.ai-feedback` activities
+-- (which are prepared even with exercise feedback off).
+local feedbackForExercises, feedbackForPage = false, false
 
 ----
 -- math-exercise.lua
@@ -144,80 +129,47 @@ end
 
 local hasSetup      = false
 local exerciseCount = 0
-local MAX_CONTEXT_CHARS = 1500
 
 ----
 -- Localization (i18n)
 --
--- Active UI language, resolved per render pass from `math-exercise: lang:` or
--- Quarto's own `lang:` (see Meta below). Default: English.
+-- Active UI language, resolved per page by ctm-libs (see Meta below). Every
+-- interface text, in Lua and in math-exercise.js, is in ctm-libs' message
+-- catalogue (locales/math-exercise.js).
 ----
 local lang = "en"
 
--- Supported locales. Extend this set together with LOCALES in math-exercise.js.
-local supportedLangs = {
-  ["en"] = true,
-  ["de"] = true,
-  ["nb"] = true
-}
-
--- Quarto projects in Norway commonly use either `nb` or the older/general
--- `no` code.  The student-facing wording is Bokmål in both cases.
-local langAliases = {
-  ["no"] = "nb"
-}
-
--- Button labels rendered by this filter. Everything else lives in the
--- LOCALES table of math-exercise.js.
-local uiText = {
-  en = {
-    check      = "Check",
-    legend     = "Input help",
-    feedback   = "Feedback",
-    reconfig   = "Change AI configuration",
-    poolReload = "Load a new random task"
-  },
-  de = {
-    check      = "Überprüfen",
-    legend     = "Eingabe-Hilfe",
-    feedback   = "Feedback",
-    reconfig   = "KI-Konfiguration ändern",
-    poolReload = "Neue Zufallsaufgabe laden"
-  },
-  nb = {
-    check      = "Sjekk",
-    legend     = "Inntastingshjelp",
-    feedback   = "Tilbakemelding",
-    reconfig   = "Endre KI-oppsett",
-    poolReload = "Last inn en ny tilfeldig oppgave"
-  }
-}
-
 -- Named uiT (not t) so it does not shadow the local `t` used further below.
 local function uiT(key)
-  local active = uiText[lang] or uiText.en
-  return active[key] or uiText.en[key]
+  return ctm.locale.text("math-exercise", key, lang)
 end
 
-local function readFile(filename)
-  local path = quarto.utils.resolve_path(filename)
-  local f = io.open(path, "r")
-  if not f then fail("math-exercise: cannot open '" .. filename .. "'") end
-  local content = f:read("*a")
-  f:close()
-  return content
+-- This extension's version (its _extension.yml), for its HTML dependency.
+local function extensionVersion()
+  local f = io.open(quarto.utils.resolve_path("_extension.yml"), "r")
+  local version = f and f:read("*a"):match("\nversion:%s*['\"]?([%w%.%-]+)")
+  if f then f:close() end
+  return version or "0"
 end
 
+-- Scripts and styles as cacheable HTML dependencies, once per page: ctm-libs'
+-- Python runtime (MathExerciseRuntime) and message catalogue (CTMLocales) in
+-- the head, then this extension's styles, and its scripts at the end of the
+-- body (they read window.__mathExerciseConfig, written before the body).
 local function ensureSetup()
   if hasSetup then return end
   hasSetup = true
-  local css = readFile("matrix-input.css") .. "\n" .. readFile("math-exercise.css")
-  quarto.doc.include_text("in-header",
-    "<style type=\"text/css\">\n" .. css .. "\n</style>")
-  local runtime = readFile("shared/pyodide-runtime.js")
-  local js = readFile("matrix-input.js") .. "\n" .. readFile("math-exercise.js")
-  quarto.doc.include_text("after-body",
-    "<script type=\"text/javascript\">\n" .. runtime .. "\n" .. js .. "\n</script>")
+  ctm.runtime.use()
+  ctm.locale.use("math-exercise")
+  quarto.doc.add_html_dependency({
+    name = "math-exercise",
+    version = extensionVersion(),
+    stylesheets = {"matrix-input.css", "math-exercise.css"},
+    scripts = {
+      {path = "matrix-input.js", afterBody = true},
+      {path = "math-exercise.js", afterBody = true},
+    },
+  })
 end
 
 ----
@@ -271,6 +223,12 @@ end
 ----
 -- JSON helpers
 ----
+-- JSON for an inline <script>: <, > and & as \u escapes, so that text such as
+-- "</script>" cannot end the script (as ctm-libs' feedback.lua writes its data).
+local function scriptJson(value)
+  return (quarto.json.encode(value):gsub("<", "\\u003c"):gsub(">", "\\u003e"):gsub("&", "\\u0026"))
+end
+
 local function jsonEsc(s)
   return s:gsub('\\','\\\\'):gsub('"','\\"'):gsub('\n','\\n'):gsub('\r','\\r'):gsub('\t','\\t')
 end
@@ -751,19 +709,14 @@ end
 -- Shared controls HTML (same for single and pool mode)
 ----
 local function controlsHtml()
-  local withFeedback = feedbackForExercises and feedback ~= noFeedback
-  if feedbackMissing and not feedbackWarned then
-    feedbackWarned = true
-    quarto.log.warning("math-exercise: AI feedback is off because the ai-feedback extension is not installed. "
-      .. "Install it with `quarto add Erasmus-CTM/ai-feedback`, or set `math-exercise: {feedback: false}` to hide this message.")
-  end
+  local withFeedback = feedbackForExercises
   return table.concat({
     '<div class="math-exercise-controls">',
-    '  <button type="button" class="btn btn-primary math-check-btn">&#10003;&nbsp;' .. uiT("check") .. '</button>',
-    '  <button type="button" class="btn btn-light math-legend-btn">&#9432;&nbsp;' .. uiT("legend") .. '</button>',
+    '  <button type="button" class="btn btn-primary math-check-btn">&#10003;&nbsp;' .. uiT("checkButton") .. '</button>',
+    '  <button type="button" class="btn btn-light math-legend-btn">&#9432;&nbsp;' .. uiT("legendButton") .. '</button>',
     withFeedback and '  <div class="btn-group">' or '',
-    withFeedback and ('    <button type="button" class="btn btn-light math-feedback-btn">&#128172;&nbsp;' .. uiT("feedback") .. '</button>') or '',
-    withFeedback and ('    <button type="button" class="btn btn-light math-reconfig-btn" title="' .. uiT("reconfig") .. '">&#9881;</button>') or '',
+    withFeedback and ('    <button type="button" class="btn btn-light math-feedback-btn">&#128172;&nbsp;' .. uiT("feedbackButton") .. '</button>') or '',
+    withFeedback and ('    <button type="button" class="btn btn-light math-reconfig-btn" title="' .. attrEsc(uiT("reconfigTitle")) .. '">&#9881;</button>') or '',
     withFeedback and '  </div>' or '',
     '</div>',
   }, "\n")
@@ -852,6 +805,14 @@ local function buildExercise(el, state)
                .. caption .. '</div>\n'
   end
 
+  -- AI feedback's learning context: mode and explicit references (stand-ins
+  -- when the exercises have no feedback), and the prose of the exercise's
+  -- section that ctm-libs' feedback preparation recorded. The prose is taken
+  -- from ctm-libs also when this component's feedback is off: where the page
+  -- was prepared (the package always prepares it) it stays in the page, as before.
+  local fc = feedback.context(el, opts)
+  local sectionText = ctm.feedback.context(el, opts).text
+
   -- Base data attributes shared by both modes
   local attrs = 'id="'             .. eid                .. '"'
              .. ' data-label="'     .. attrEsc(label)     .. '"'
@@ -871,9 +832,9 @@ local function buildExercise(el, state)
              .. ' data-field-labels="' .. jsonArrAttr(fieldLabels) .. '"'
              .. ' data-vecdir="' .. vecdir .. '"'
              .. ' data-feedback-policy="' .. attrEsc(quarto.json.encode(feedback.selection(el, opts))) .. '"'
-             .. ' data-context-mode="' .. feedback.context(el, opts).mode .. '"'
-             .. ' data-context-refs="' .. attrEsc(feedback.context(el, opts).refs) .. '"'
-             .. ' data-context="'      .. attrEsc('"' .. jsonEsc(el.attributes["data-ai-feedback-context"] or "") .. '"') .. '"'
+             .. ' data-context-mode="' .. fc.mode .. '"'
+             .. ' data-context-refs="' .. attrEsc(fc.refs) .. '"'
+             .. ' data-context="'      .. attrEsc('"' .. jsonEsc(sectionText) .. '"') .. '"'
 
   if opts["initial-values"] then
     attrs = attrs .. ' data-initial-values="' .. jsonArrAttr(initialValues) .. '"'
@@ -891,7 +852,7 @@ local function buildExercise(el, state)
     attrs        = attrs .. ' data-pool="'   .. jsonArrAttr(tasks) .. '"'
                          .. ' data-fields="[]"'
                          .. ' data-structural-field-labels="[]"'
-    questionHtml = '<button type="button" class="math-pool-reload" title="' .. uiT("poolReload") .. '">&#8635;</button>\n'
+    questionHtml = '<button type="button" class="math-pool-reload" title="' .. attrEsc(uiT("poolReloadTitle")) .. '">&#8635;</button>\n'
                 .. '<div class="math-exercise-question"></div>'
   else
     local body, fieldIds, structuralLabels = processMarkers(questionText, eid, vars, vecdir, mode)
@@ -937,45 +898,24 @@ end
 ----
 -- Meta filter: resolve the UI language and hand it to the JavaScript side.
 --
--- Order of precedence:
---   1. `math-exercise: lang: xx`  – explicit override
---   2. Quarto's own `lang:`       – set per profile in a multilingual project
---   3. "en"                       – fallback
+-- ctm-libs' resolver (ctm.locale.resolve), in order of precedence:
+--   1. `math-exercise: lang: xx`   – explicit override
+--   2. `ctm-assessment: lang: xx`  – every component of the project
+--   3. Quarto's own `lang:`        – set per profile in a multilingual project
+--   4. "en"                        – fallback
 --
--- Region subtags are dropped ("de-DE" -> "de"); unsupported languages fall
--- back to English instead of failing the render.
+-- Region subtags are dropped ("de-DE" -> "de", "no" and "nn" -> "nb");
+-- unsupported languages fall back to English instead of failing the render.
 ----
-local function resolveLang(meta)
-  local raw = nil
-
-  local cfg = meta["math-exercise"]
-  if cfg and cfg["lang"] then
-    raw = pandoc.utils.stringify(cfg["lang"])
-  elseif meta["lang"] then
-    raw = pandoc.utils.stringify(meta["lang"])
-  end
-
-  if raw == nil or raw == "" then
-    return "en"
-  end
-
-  local base = raw:lower():match("^(%a+)")
-  base = langAliases[base] or base
-  if base and supportedLangs[base] then
-    return base
-  end
-
-  return "en"
-end
-
 local function Meta(meta)
-  lang = resolveLang(meta)
   if not quarto.doc.is_format("html") then return meta end
+  lang = ctm.locale.resolve("math-exercise")
 
-  -- math-exercise.js reads this to pick its LOCALES entry.
+  -- math-exercise.js reads this to pick its language. stop-after:
+  -- `math-exercise: stop-after`, `ctm-assessment: stop-after`, 20 seconds.
   quarto.doc.include_text("before-body",
     '<script>window.__mathExerciseConfig = ' ..
-    quarto.json.encode({ lang = lang, stopAfter = deps().stopAfter(meta, "math-exercise") }) .. ';</script>')
+    scriptJson({ lang = lang, stopAfter = ctm.runtime.stopAfter("math-exercise") }) .. ';</script>')
 
   return meta
 end
@@ -1004,17 +944,6 @@ local function walkBlocks(blocks, state)
   end})
 end
 
-local function readFeedbackSetting(meta)
-  local cfg = meta["math-exercise"]
-  local value = cfg and type(cfg) == "table" and cfg["feedback"]
-  if value == nil then return "auto" end
-  value = pandoc.utils.stringify(value)
-  if value ~= "auto" and value ~= "true" and value ~= "false" then
-    assert(false, "math-exercise: feedback must be auto, true or false (found " .. value .. ")")
-  end
-  return value
-end
-
 -- Each referenced diagram must exist on the page and need the JSXGraph filter.
 local function checkDiagramReferences(doc, refs)
   if not refs or #refs == 0 then return end
@@ -1035,42 +964,45 @@ local function checkDiagramReferences(doc, refs)
     end
   end
   -- A board whose extension is not installed has already stopped the render
-  -- (feedback-loader.lua requireUsed).
+  -- (ctm.deps.requireUsed in preparePage).
 end
 
--- First pass: stop if the page uses a missing optional extension, and decide
--- whether ai-feedback is needed at all.
+-- First pass: read the page's settings, stop if the page uses JSXGraph
+-- without the extension, and decide whether the page needs AI feedback.
 local function preparePage(doc)
-  feedbackSetting = readFeedbackSetting(doc.meta)
   if not quarto.doc.is_format("html") then return doc end
-  deps().requireUsed(doc, "math-exercise")
+  ctm.settings.load(doc.meta)
+  local setting, origin = ctm.settings.choice("math-exercise", "feedback", {"auto", "true", "false"}, {default = "auto"})
+  ctm.deps.requireUsed(doc, "math-exercise")
   local exercises = false
   doc.blocks:walk({ CodeBlock = function(b) if b.classes:includes("{math-exercise}") then exercises = true end end })
-  feedbackForExercises = exercises and feedbackSetting ~= "false"
-  feedbackForActivities = deps().uses(doc)["ai-feedback"] == true
+  local wanted = exercises and setting ~= "false"
+  if setting == "true" then
+    -- Asked for explicitly: a build without AI feedback names it in its message.
+    feedbackForExercises = ctm.feedback.request("math-exercise", wanted, "feedback: true" .. (origin and (" in " .. origin) or ""))
+  else
+    feedbackForExercises = wanted and (ctm.feedback.enabled())
+  end
+  feedbackForPage = wanted or ctm.deps.uses(doc)["ai-feedback"] == true
+  feedback = feedbackForPage and ctm.feedback or noFeedback
   return doc
 end
 
 local function Pandoc(doc)
-  if quarto.doc.is_format("html") then
-    doc = loadFeedback().prepare and feedback.prepare(doc) or doc
-  end
+  if not quarto.doc.is_format("html") then return doc end
+  if feedbackForPage then doc = ctm.feedback.prepare(doc) end
   doc.meta = Meta(doc.meta)
-
-  if quarto.doc.is_format("html") then
-    local state = { sectionCtx = {}, review = doc.meta["math-exercise-review"] == true }
-    doc.blocks = walkBlocks(doc.blocks, state)
-    checkDiagramReferences(doc, state.jsxgraphRefs)
-  end
-
+  local state = { sectionCtx = {}, review = doc.meta["math-exercise-review"] == true }
+  doc.blocks = walkBlocks(doc.blocks, state)
+  checkDiagramReferences(doc, state.jsxgraphRefs)
   return doc
 end
 
 return {
   { Pandoc = preparePage },
   { Callout = function(c)
-      if quarto.doc.is_format("html") and loadFeedback().markCallout then
-        return feedback.markCallout(c)
+      if feedbackForPage and quarto.doc.is_format("html") then
+        return ctm.feedback.markCallout(c)
       end
       return c
     end },

@@ -9,6 +9,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 import test from 'node:test';
+import { install, LOCALE, renderEnv, runInContext } from './helpers/ctm-libs.mjs';
 
 const require = createRequire(import.meta.url);
 const quarto = process.env.QUARTO_BIN || 'quarto';
@@ -20,6 +21,7 @@ const expected = 'Price ' + dollar + '5 or ' + dollar + String.raw`7, solve \(x+
 
 function api() {
   const context = vm.createContext({ console, document: { addEventListener() {} }, window: { __mathExerciseConfig: { lang: 'en' }, __mathExerciseTestMode: true } });
+  runInContext(context, LOCALE);
   vm.runInContext(source, context);
   return context.window.__mathExerciseTestApi;
 }
@@ -28,8 +30,9 @@ test('Lua and JS render task delimiters the same way', { skip: available ? false
   const dir = mkdtempSync(join(tmpdir(), 'math-delimiters-'));
   try {
     cpSync(fileURLToPath(new URL('../_extensions/math-exercise', import.meta.url)), join(dir, '_extensions/math-exercise'), { recursive: true });
+    install(dir);
     writeFileSync(join(dir, 'page.qmd'), '---\nformat: html\nfilters: [math-exercise]\nmath-exercise: {feedback: false}\n---\n\n```{math-exercise}\n#| label: d\n' + task + '\n```\n');
-    const r = spawnSync(quarto, ['render', 'page.qmd'], { cwd: dir, encoding: 'utf8', timeout: 120000 });
+    const r = spawnSync(quarto, ['render', 'page.qmd'], { cwd: dir, env: renderEnv, encoding: 'utf8', timeout: 120000 });
     assert.equal(r.status, 0, r.stderr);
     assert.ok(readFileSync(join(dir, 'page.html'), 'utf8').includes('>' + expected + '<input'), 'Lua rendering');
     assert.ok(api().renderTaskText(task, 'x', '', 'col', 'equivalent', false).html.startsWith(expected), 'JS rendering');
@@ -56,8 +59,9 @@ test('an escaped dollar inside an answer marker is a plain dollar in the answer'
   const dir = mkdtempSync(join(tmpdir(), 'math-delimiters-'));
   try {
     cpSync(fileURLToPath(new URL('../_extensions/math-exercise', import.meta.url)), join(dir, '_extensions/math-exercise'), { recursive: true });
+    install(dir);
     writeFileSync(join(dir, 'page.qmd'), '---\nformat: html\nfilters: [math-exercise]\nmath-exercise: {feedback: false}\n---\n\n```{math-exercise}\n#| label: d\n#| mode: string\n' + marked + '\n```\n');
-    const r = spawnSync(quarto, ['render', 'page.qmd'], { cwd: dir, encoding: 'utf8', timeout: 120000 });
+    const r = spawnSync(quarto, ['render', 'page.qmd'], { cwd: dir, env: renderEnv, encoding: 'utf8', timeout: 120000 });
     assert.equal(r.status, 0, r.stderr);
     const lua = readFileSync(join(dir, 'page.html'), 'utf8');
     const js = api().renderTaskText(marked, 'x', '', 'col', 'string', false).html;
@@ -89,9 +93,10 @@ test('Lua and JS format inline Markdown in exercise text the same way', { skip: 
   const dir = mkdtempSync(join(tmpdir(), 'math-markdown-'));
   try {
     cpSync(fileURLToPath(new URL('../_extensions/math-exercise', import.meta.url)), join(dir, '_extensions/math-exercise'), { recursive: true });
+    install(dir);
     const blocks = markdownCases.map(([task], i) => '```{math-exercise}\n#| label: m' + i + '\n' + task + '\n```\n').join('\n');
     writeFileSync(join(dir, 'page.qmd'), '---\nformat: html\nfilters: [math-exercise]\nmath-exercise: {feedback: false}\n---\n\n' + blocks);
-    const r = spawnSync(quarto, ['render', 'page.qmd'], { cwd: dir, encoding: 'utf8', timeout: 120000 });
+    const r = spawnSync(quarto, ['render', 'page.qmd'], { cwd: dir, env: renderEnv, encoding: 'utf8', timeout: 120000 });
     assert.equal(r.status, 0, r.stderr);
     const lua = readFileSync(join(dir, 'page.html'), 'utf8');
     for (const [task, expected] of markdownCases) {
@@ -105,9 +110,10 @@ test('"{{" before formatted text does not start a Quarto shortcode', { skip: ava
   const dir = mkdtempSync(join(tmpdir(), 'math-shortcode-'));
   try {
     cpSync(fileURLToPath(new URL('../_extensions/math-exercise', import.meta.url)), join(dir, '_extensions/math-exercise'), { recursive: true });
+    install(dir);
     // "{{" before markup or at a line end; the second exercise must survive too.
     writeFileSync(join(dir, 'page.qmd'), '---\nformat: html\nfilters: [math-exercise]\nmath-exercise: {feedback: false}\n---\n\n```{math-exercise}\n#| label: s\na {{*x* b _[1]\n```\n\n```{math-exercise}\n#| label: t\nc {{\nd _[2]\n```\n\n```{math-exercise}\n#| label: u\nlast _[3]\n```\n');
-    const r = spawnSync(quarto, ['render', 'page.qmd'], { cwd: dir, encoding: 'utf8', timeout: 120000 });
+    const r = spawnSync(quarto, ['render', 'page.qmd'], { cwd: dir, env: renderEnv, encoding: 'utf8', timeout: 120000 });
     assert.equal(r.status, 0, r.stderr);
     const html = readFileSync(join(dir, 'page.html'), 'utf8');
     assert.ok(html.includes('>a {{<em>x</em> b <input'), 'the field after "{{" survives');

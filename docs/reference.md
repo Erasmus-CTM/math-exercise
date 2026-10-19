@@ -142,15 +142,25 @@ option for ordinary exercises. No page script or MutationObserver is needed.
 
 ```yaml
 math-exercise:
-  lang: de        # UI language (default: en)
-  feedback: auto  # auto (default) | true | false
+  lang: de          # UI language (default: ctm-assessment: lang, then lang, then en)
+  feedback: auto    # auto (default) | true | false
+  stop-after: 30    # seconds before a running check offers Stop (default: ctm-assessment: stop-after, then 20)
 ```
 
-`feedback: auto` shows the **Feedback** button when the
-[ai-feedback](https://github.com/Erasmus-CTM/ai-feedback) extension is installed
-and otherwise renders the exercises without it, with one render message saying
-what to install. `true` makes ai-feedback required (rendering fails with the
-install command if it is missing); `false` never loads it.
+`feedback: auto` (the default) and `true` give every exercise the **Feedback**
+button; `false` hides it. AI feedback is part of CTM Assessment, so nothing has
+to be installed for it (before 0.10.0, `auto` showed the button only when the
+separate ai-feedback extension was installed). A site built without AI
+feedback (`ai-feedback: enabled: false`, for example in a profile, or
+`CTM_FEEDBACK=off quarto render`) has no Feedback button; a page that sets
+`feedback: true` is then named in one build message.
+
+These options combine key by key across `_quarto.yml`, profiles,
+`_quarto.yml.local`, `_metadata.yml` files and the page's front matter: a
+page that sets `lang` keeps the project's `feedback` and `stop-after`.
+`ctm-assessment: {lang: nb, stop-after: 30}` sets the language and Stop time
+of every CTM Assessment component at once; `math-exercise:` overrides them
+for this component.
 
 ---
 
@@ -163,8 +173,9 @@ Currently supported: **English (`en`)**, **German (`de`)**, and
 The extension resolves the language in this order:
 
 1. `math-exercise: lang:` – explicit override
-2. **Quarto's own `lang:`** – the normal case
-3. `en` – fallback
+2. `ctm-assessment: lang:` – the language of every CTM Assessment component
+3. **Quarto's own `lang:`** – the normal case
+4. `en` – fallback
 
 Quarto's own key is therefore enough; no extra option is needed:
 
@@ -173,12 +184,14 @@ Quarto's own key is therefore enough; no extra option is needed:
 title: "Math Exercises"
 lang: de
 filters:
-  - Erasmus-CTM/math-exercise
+  - ctm-assessment
 ---
 ```
 
-Regional variants are shortened (`de-DE` → `de`). An unsupported language
-(e.g. `fr`) silently falls back to English instead of breaking the render.
+Regional variants are shortened (`de-DE` → `de`); Norwegian `no` and Nynorsk
+`nn` get the Bokmål interface. An unsupported language (e.g. `fr`) silently
+falls back to English instead of breaking the render. The interface texts are
+in CTM Assessment's message catalogue, shared by all its components.
 
 Translated: the buttons (**Check**, **Input help**, **Feedback**), the
 input-help table, all answer feedback messages, the settings dialog, and the
@@ -214,13 +227,11 @@ therefore also switches the extension's language automatically.
 
 ### Adding another language
 
-This extension generates the button labels in the Lua filter, everything
-else in JavaScript – so two places need updating:
-
-1. In `_extensions/math-exercise/math-exercise.js`, add a new `LOCALES` block
-   modeled on `de`.
-2. In `math-exercise.lua`, add the language code to `supportedLangs` **and**
-   add the button labels to the `uiText` table.
+The interface texts, in Lua (the buttons) and in JavaScript (everything else),
+are in CTM Assessment's message catalogue, in ctm-libs
+(`locales/math-exercise.js`, shared with the other components' catalogues). A
+new language is added there with all its texts; see ctm-libs'
+[development guide](https://github.com/Erasmus-CTM/ctm-libs/blob/main/docs/development.md#messages).
 
 ---
 
@@ -478,10 +489,10 @@ they do not replace browser interaction checks or certify Pyodide parity.
 
 Graphical answers use the MIT-licensed
 [`jsxgraph-quarto`](https://github.com/jsxgraph/jsxgraph-quarto) extension
-(version 1.1.0 or later, which contains the generic assessment bridge). It is a
-separate dependency: install it with `quarto add jsxgraph/jsxgraph-quarto` (the
-CTM Assessment umbrella already includes it) and enable both filters, in either
-order:
+(version 1.1.0 or later, which contains the generic assessment bridge). It is
+part of CTM Assessment, whose filter runs it before math-exercise. A component
+development build installs it with `quarto add jsxgraph/jsxgraph-quarto` and
+enables both filters, in either order:
 
 ```yaml
 filters:
@@ -671,8 +682,8 @@ A = _[pi * 49] cm²
 
 ## AI feedback
 
-With ai-feedback installed, every exercise has a **Feedback** button using the shared
-[ai-feedback runtime](https://github.com/Erasmus-CTM/ai-feedback). By default it
+Every exercise has a **Feedback** button using CTM Assessment's shared AI
+feedback ([ctm-libs](https://github.com/Erasmus-CTM/ctm-libs)). By default it
 builds a copyable prompt without an API account. The cogwheel opens the shared
 settings dialog for copy/API mode, base URL, model, API key and browser storage.
 No provider presets are bundled. Existing math credentials are available through
@@ -684,16 +695,15 @@ results. Editing, resizing or selecting another pool variant invalidates that
 evidence and pending feedback. Graph payloads stay local; only the explicitly
 provided AI summary and optional image are sent for feedback.
 
-Install ai-feedback once with `quarto add Erasmus-CTM/ai-feedback`. The math
-filter loads that shared installation automatically; no runtime is bundled here.
-An explicit ai-feedback filter also works, in either order. Without it, see
-`feedback` under [Document options](#document-options-yaml-front-matter).
+AI feedback comes with CTM Assessment; math-exercise loads it from ctm-libs, so
+nothing is bundled here. To hide the button, see `feedback` under
+[Document options](#document-options-yaml-front-matter).
 
-All context collection and teaching instructions now belong to ai-feedback.
+All context collection and teaching instructions belong to ctm-libs' AI feedback.
 Omitted `context` collects preceding section prose; `context: none` opts out;
 `context: id1,id2` selects reusable `.ai-context` blocks shared with text and both
-Python integrations. See the [shared guide](https://github.com/Erasmus-CTM/ai-feedback/blob/main/README.md).
-Tests use the installed dependency through `AI_FEEDBACK_EXTENSION=/absolute/path/to/ai-feedback/_extensions/ai-feedback`.
+Python integrations, followed by the prose of the exercise's own section
+without those blocks. See the [shared guide](https://github.com/Erasmus-CTM/ctm-libs/blob/main/docs/reference.md).
 
 ### Progressive hints
 
@@ -741,7 +751,7 @@ The shared runtime owns provider negotiation, the 60-second timeout,
 cancellation, capability caching and safe Markdown/LaTeX rendering. Mathematics
 adds a language-script validation retry and allows an image-unsupported endpoint
 to retry using the explicit graphical summary. Errors never consume hint steps.
-See the [shared API](https://github.com/Erasmus-CTM/ai-feedback/blob/main/docs/api.md)
+See the [shared API](https://github.com/Erasmus-CTM/ctm-libs/blob/main/docs/api.md)
 for current settings, request limits and transport behavior. The
 [original provider design note](../docs/model-capability-adapter.md) is historical.
 
@@ -803,6 +813,10 @@ Context rules for explicit references:
   single oversized final block therefore leaves automatic context empty.
   Use explicit references for longer explanations. Neither path cuts through
   a formula to meet its budget.
+- Since CTM Assessment 0.9 the listed blocks are followed by the prose of the
+  exercise's own section (since its heading), without the listed blocks, under
+  the automatic case's 1,500-character cap: the task's data stated in the
+  section reaches the feedback too.
 
 To opt an exercise out of context entirely, use `#| context: none`.
 
@@ -824,20 +838,8 @@ include a solenoid example. To inspect a request, open the browser's Network
 panel, request feedback, and examine the chat-completions request's
 `messages[1].content`, especially `<learning_context>` and `<task>`.
 
-For local regression tests, install Node dependencies with `npm ci`, install
-the two extension dependencies (`quarto add Erasmus-CTM/ai-feedback` and
-`quarto add jsxgraph/jsxgraph-quarto`; both are git-ignored here) and run
-`npm test` with `AI_FEEDBACK_EXTENSION` set to the installed ai-feedback folder
-(for example `_extensions/Erasmus-CTM/ai-feedback`; the tests read this
-variable). Set `JSXGRAPH_EXTENSION` if JSXGraph is installed outside
-`_extensions/`. The checker tests also
-require Python with SymPy 1.13 or later and NetworkX 3.4 or later (CI uses the
-browser's SymPy 1.13.3). Install Quarto (or set
-`QUARTO_BIN`) to run the rendered-document tests; they are skipped when Quarto
-is unavailable. CI requires and runs them.
-The tests use local renderers and a mocked AI endpoint; no model or credentials
-are needed.
-In VS Code, **Terminal → Run Task…** offers the same commands (`.vscode/tasks.json`): the default test task runs the tests, the default build task renders and then tests.
+The regression tests use local renderers and a mocked AI endpoint; no model or
+credentials are needed. How to run them: [development](installation.md#development-of-math-exercise).
 
 The AI request contains the selected context, the task, and the student's
 current response as individually labelled fields. A separate private assessment
@@ -956,12 +958,15 @@ deployment.
 
 ## Configurable shared teaching policies
 
-AI Feedback 0.8 loads named definitions from `ai-feedback.policy-files` and
-`page-policy-files` (one path or an ordered list, relative to the project root).
-Files contain `ai-feedback.policies` and optional targeted `exercises` entries.
-Loading a file alone does not change the baseline. Explicitly select
-`project-policy` or `page-policy`; use `#| feedback-policy: name` on a cell for
-an exercise specialization.
+AI feedback loads named definitions from `ai-feedback: policy-files:` (one path
+or an ordered list, relative to the project root); the files of the project,
+profiles, `_metadata.yml` and the page add up. Files contain
+`ai-feedback.policies` and optional targeted `exercises` entries. Loading a
+file alone does not change the baseline. Select a policy with
+`ai-feedback: policy:` (the nearest setting wins); use
+`#| feedback-policy: name` on a cell for an exercise specialization. The
+earlier keys `project-policy`, `page-policy` and `page-policy-files` keep
+working in CTM Assessment 0.9 with a build warning.
 
 A named policy can `extend` another using `extends: parent-name`. Omitted fields
 inherit from its parent and effective integration baseline. `base-prompt`
@@ -972,23 +977,23 @@ Run/Check resets by default; select `reset-on-run: false` to preserve progressio
 Explicit Reset always restarts it. The old `prompt`, authored `defaults` and
 `integrations` forms are rejected.
 
-See the [shared policy guide](https://github.com/Erasmus-CTM/ai-feedback/blob/main/docs/feedback-policies.md).
+See the [shared policy guide](https://github.com/Erasmus-CTM/ctm-libs/blob/main/docs/feedback-policies.md).
 
 ### Standalone example
 
-`example.qmd` demonstrates this package with shared feedback. Install `Erasmus-CTM/ai-feedback@main`, then run `quarto render example.qmd`. No other integration extension is required. The example builds automatically on pushes and pull requests; download the `standalone-example` Actions artifact. Feedback defaults to copy mode, which needs no API key.
+`example.qmd` demonstrates this package with shared feedback. In a [development setup](installation.md#development-of-math-exercise) run `CTM_COMPONENT_DEV=1 quarto render example.qmd`; no other integration extension is required. The example builds automatically on pushes and pull requests; download the `standalone-example` Actions artifact. Feedback defaults to copy mode, which needs no API key.
 
 ### Page and exercise feedback policies
 
 Put teaching policy definitions in YAML files and activate them explicitly with
-`project-policy`, `page-policy` or a cell's `#| feedback-policy: name`. A policy
-file registers definitions; `page-policy-files` alone does not change page
-behavior. The same named policy can be reused across integrations.
+`policy` or a cell's `#| feedback-policy: name`. A policy file registers
+definitions; `policy-files` alone does not change page behavior. The same
+named policy can be reused across integrations.
 
 YAML `ai-feedback.exercises.<integration>.<label>` targets one authored label;
 an explicit named selection takes precedence over that entry. Omitted settings
 inherit; `steps` replaces the entire list. See the
-[shared policy guide](https://github.com/Erasmus-CTM/ai-feedback/blob/main/docs/feedback-policies.md).
+[shared policy guide](https://github.com/Erasmus-CTM/ctm-libs/blob/main/docs/feedback-policies.md).
 # Reusable matrix-input API
 
 `_extensions/math-exercise/matrix-input.js` and `matrix-input.css` expose the

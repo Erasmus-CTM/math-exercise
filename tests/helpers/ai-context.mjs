@@ -2,10 +2,13 @@ import { readFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { JSDOM } from 'jsdom';
 import katex from 'katex';
+import { FEEDBACK, LOCALE, RUNTIME, sources } from './ctm-libs.mjs';
 
 const require = createRequire(import.meta.url);
-const shared = await Promise.all(['feedback-core.js', 'feedback-dom.js', 'ai-feedback.js'].map(name => readFile(new URL('file://' + process.env.AI_FEEDBACK_EXTENSION + '/' + name), 'utf8')));
-const runtime = await readFile(new URL('../../_extensions/math-exercise/shared/pyodide-runtime.js', import.meta.url), 'utf8');
+// ctm-libs' files, as the page loads them before the exercise scripts.
+const shared = sources(FEEDBACK);
+const [runtime] = sources(RUNTIME);
+const locale = sources(LOCALE);
 const source = await readFile(new URL('../../_extensions/math-exercise/math-exercise.js', import.meta.url), 'utf8');
 const matrixInput = await readFile(new URL('../../_extensions/math-exercise/matrix-input.js', import.meta.url), 'utf8');
 
@@ -30,6 +33,7 @@ export function loadPage(html = '', config = {}, prepare = () => {}) {
   shared.forEach(code => w.eval(code));
   w.AIFeedback.typesetFeedback = async () => {};
   w.eval(runtime);
+  locale.forEach(code => w.eval(code));
   w.eval(matrixInput);
   w.eval(source);
   return { dom, window: w, document: w.document, api: w.__mathExerciseTestApi, warnings, requests };

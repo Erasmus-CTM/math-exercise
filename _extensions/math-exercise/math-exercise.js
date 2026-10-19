@@ -1,168 +1,10 @@
 (function () {
   'use strict';
-  // Domain UI translations. Shared feedback UI and prompts live in ai-feedback.
-  var LOCALES = {
-    en: {
-      legend: [["x^2","x^2 \\text{ or } x{**}2","Power"],["\\sqrt{x}","sqrt(x)","Square root"],["\\sqrt[n]{x}","root(x, n)","n-th root"],["\\dfrac{a}{b}","a/b","Fraction"],["\\pi","pi","Pi"],["e","E","Euler's number e"],["\\sin(x)","sin(x)","Sine"],["\\cos(x)","cos(x)","Cosine"],["\\tan(x)","tan(x)","Tangent"],["\\ln(x)","ln(x)","Natural logarithm"],["\\log_a(x)","log(x, a)","Log to base a"],["|x|","Abs(x)","Absolute value"],["\\infty","inf &nbsp;or&nbsp; oo","Infinity"],["\\int f\\,dx","integrate(f, x)","Integral"],["\\dfrac{d}{dx}f","diff(f, x)","Derivative"]],
-      legendOps: "Basic operators:&nbsp;<code>+</code>&nbsp;<code>-</code>&nbsp;<code>*</code>&nbsp;<code>/</code>&nbsp;&nbsp;|&nbsp;&nbsp;Brackets:&nbsp;<code>(</code>&nbsp;<code>)</code>&nbsp;&nbsp;|&nbsp;&nbsp;Power:&nbsp;<code>^</code>&nbsp;or&nbsp;<code>**</code>",
-      legendThExpr: "Expression",
-      legendThInput: "Input",
-      legendThMeaning: "Meaning",
-      errSyntax: "Syntax error: check that all brackets are closed and no operator is missing.",
-      errUnknownName: function (name) {
-        return 'Unknown name &bdquo;' + name + '&ldquo; – use the input help (e.g. <code>pi</code> instead of <code>π</code>).';
-      },
-      errNameGeneric: "Unknown name – use the input help for the correct spelling.",
-      errDivZero: "Division by zero: the expression is undefined at this point.",
-      errType: "Type error: make sure numbers and variables are combined correctly.",
-      errGeneric: "The input could not be processed – use the input help for the correct spelling.",
-      errRuntime: "Python could not be loaded. Check the internet connection and press Check again.",
-      vecComponent: function (n) { return 'Component ' + n; },
-      matCell: function (row, column) { return 'Row ' + row + ', column ' + column; },
-      dynamicMatCell: function (name, row, column) { return name + ', row ' + row + ', column ' + column; },
-      matrixAddRow: "Add row",
-      matrixRemoveRow: "Remove row",
-      matrixAddColumn: "Add column",
-      matrixRemoveColumn: "Remove column",
-      matrixRows: "Rows",
-      matrixColumns: "Columns",
-      emptyMatrix: "Empty matrix",
-      resEmpty: "Please enter an answer.",
-      resCorrect: "Correct!",
-      resPartial: function (pct) { return 'Partially correct (' + pct + '%).'; },
-      resPartialNoScore: "Partially correct.",
-      resScore: function (pct) { return 'Overall score: ' + pct + '%.'; },
-      resWrong: "Not correct – try again.",
-      resRejected: "Mathematically correct, but not simplified yet. Keep transforming the expression.",
-      resNotExact: "Mathematically correct, but not in the requested form. Rewrite the expression exactly as asked.",
-      resNotForm: function (form) {
-        var names = { factored: 'factored form', expanded: 'expanded form',
-          single_fraction: 'a single fraction', lowest_terms: 'lowest terms' };
-        return 'Mathematically correct, but not written in ' + (names[form] || 'the required form') +
-          '. Rewrite the expression accordingly.';
-      },
-      loadingHelp: "&#9203; Loading help&hellip;",
-      checking: "&#9203; Checking&hellip;",
-      slowCheck: "Still checking – the answer may be too large to evaluate.",
-      slowLoad: "Python is still loading.",
-      stop: "Stop",
-      errStopped: "Stopped. Python was restarted (interactive cells on this page lost their variables).",
-      needAnswerFirst: "Please enter an answer first, then request feedback.",
-      outputLanguageCode: "en",
-      feedbackFieldSingle: "Answer",
-      feedbackFieldNumbered: function (n) { return 'Answer field ' + n; },
-      warnExtraFieldLabels: "math-exercise: extra field-labels entries were ignored for",
-      errorPrefix: "Error:"
-    },
-    de: {
-      legend: [["x^2","x^2 \\text{ oder } x{**}2","Potenz"],["\\sqrt{x}","sqrt(x)","Quadratwurzel"],["\\sqrt[n]{x}","root(x, n)","n-te Wurzel"],["\\dfrac{a}{b}","a/b","Bruch"],["\\pi","pi","Kreiszahl π"],["e","E","Eulersche Zahl e"],["\\sin(x)","sin(x)","Sinus"],["\\cos(x)","cos(x)","Kosinus"],["\\tan(x)","tan(x)","Tangens"],["\\ln(x)","ln(x)","Nat. Logarithmus"],["\\log_a(x)","log(x, a)","Log. zur Basis a"],["|x|","Abs(x)","Betrag"],["\\infty","inf &nbsp;oder&nbsp; oo","Unendlich"],["\\int f\\,dx","integrate(f, x)","Integral"],["\\dfrac{d}{dx}f","diff(f, x)","Ableitung"]],
-      legendOps: "Grundrechenzeichen:&nbsp;<code>+</code>&nbsp;<code>-</code>&nbsp;<code>*</code>&nbsp;<code>/</code>&nbsp;&nbsp;|&nbsp;&nbsp;Klammern:&nbsp;<code>(</code>&nbsp;<code>)</code>&nbsp;&nbsp;|&nbsp;&nbsp;Potenz:&nbsp;<code>^</code>&nbsp;oder&nbsp;<code>**</code>",
-      legendThExpr: "Ausdruck",
-      legendThInput: "Eingabe",
-      legendThMeaning: "Bedeutung",
-      errSyntax: "Syntax-Fehler: Prüfe ob alle Klammern geschlossen sind und kein Operatorzeichen fehlt.",
-      errUnknownName: function (name) {
-        return 'Unbekannte Bezeichnung &bdquo;' + name + '&ldquo; – nutze die Eingabe-Hilfe (z.&nbsp;B. <code>pi</code> statt <code>π</code>).';
-      },
-      errNameGeneric: "Unbekannte Bezeichnung – nutze die Eingabe-Hilfe für korrekte Schreibweisen.",
-      errDivZero: "Division durch Null: der Ausdruck ist an dieser Stelle nicht definiert.",
-      errType: "Typ-Fehler: Stelle sicher, dass Zahlen und Variablen korrekt kombiniert sind.",
-      errGeneric: "Die Eingabe konnte nicht verarbeitet werden – nutze die Eingabe-Hilfe für korrekte Schreibweisen.",
-      errRuntime: "Python konnte nicht geladen werden. Prüfe die Internetverbindung und drücke erneut auf Überprüfen.",
-      vecComponent: function (n) { return 'Komponente ' + n; },
-      matCell: function (row, column) { return 'Zeile ' + row + ', Spalte ' + column; },
-      dynamicMatCell: function (name, row, column) { return name + ', Zeile ' + row + ', Spalte ' + column; },
-      matrixAddRow: "Zeile hinzufügen",
-      matrixRemoveRow: "Zeile entfernen",
-      matrixAddColumn: "Spalte hinzufügen",
-      matrixRemoveColumn: "Spalte entfernen",
-      matrixRows: "Zeilen",
-      matrixColumns: "Spalten",
-      emptyMatrix: "Leere Matrix",
-      resEmpty: "Bitte eine Antwort eingeben.",
-      resCorrect: "Richtig!",
-      resPartial: function (pct) { return 'Teilweise richtig (' + pct + '&nbsp;%).'; },
-      resPartialNoScore: "Teilweise richtig.",
-      resScore: function (pct) { return 'Gesamtpunktzahl: ' + pct + '&nbsp;%.'; },
-      resWrong: "Nicht korrekt – versuche es noch einmal.",
-      resRejected: "Mathematisch korrekt, aber noch nicht vereinfacht. Forme den Ausdruck weiter um.",
-      resNotExact: "Mathematisch korrekt, aber nicht in der gesuchten Form. Schreibe den Ausdruck genau so um, wie gefordert.",
-      resNotForm: function (form) {
-        var names = { factored: 'faktorisierter Form', expanded: 'ausmultiplizierter Form',
-          single_fraction: 'einem einzigen Bruch', lowest_terms: 'vollständig gekürzter Form' };
-        return 'Mathematisch korrekt, aber nicht in ' + (names[form] || 'der geforderten Form') +
-          ' geschrieben. Forme den Ausdruck entsprechend um.';
-      },
-      loadingHelp: "&#9203; Lade Hilfe&hellip;",
-      checking: "&#9203; Überprüfe&hellip;",
-      slowCheck: "Die Prüfung dauert noch – die Antwort ist vielleicht zu groß zum Auswerten.",
-      slowLoad: "Python wird noch geladen.",
-      stop: "Abbrechen",
-      errStopped: "Abgebrochen. Python wurde neu gestartet (interaktive Zellen auf dieser Seite haben ihre Variablen verloren).",
-      needAnswerFirst: "Bitte zuerst eine Antwort eingeben, dann Feedback anfordern.",
-      outputLanguageCode: "de",
-      feedbackFieldSingle: "Antwort",
-      feedbackFieldNumbered: function (n) { return 'Antwortfeld ' + n; },
-      warnExtraFieldLabels: "math-exercise: Überzählige field-labels-Einträge wurden ignoriert für",
-      errorPrefix: "Fehler:"
-    },
-    nb: {
-      legend: [["x^2","x^2 \\text{ eller } x{**}2","Potens"],["\\sqrt{x}","sqrt(x)","Kvadratrot"],["\\sqrt[n]{x}","root(x, n)","n-te rot"],["\\dfrac{a}{b}","a/b","Brøk"],["\\pi","pi","Pi"],["e","E","Eulers tall e"],["\\sin(x)","sin(x)","Sinus"],["\\cos(x)","cos(x)","Cosinus"],["\\tan(x)","tan(x)","Tangens"],["\\ln(x)","ln(x)","Naturlig logaritme"],["\\log_a(x)","log(x, a)","Logaritme med grunntall a"],["|x|","Abs(x)","Absoluttverdi"],["\\infty","inf &nbsp;eller&nbsp; oo","Uendelig"],["\\int f\\,dx","integrate(f, x)","Integral"],["\\dfrac{d}{dx}f","diff(f, x)","Derivert"]],
-      legendOps: "Grunnleggende operatorer:&nbsp;<code>+</code>&nbsp;<code>-</code>&nbsp;<code>*</code>&nbsp;<code>/</code>&nbsp;&nbsp;|&nbsp;&nbsp;Parenteser:&nbsp;<code>(</code>&nbsp;<code>)</code>&nbsp;&nbsp;|&nbsp;&nbsp;Potens:&nbsp;<code>^</code>&nbsp;eller&nbsp;<code>**</code>",
-      legendThExpr: "Uttrykk",
-      legendThInput: "Inntasting",
-      legendThMeaning: "Betydning",
-      errSyntax: "Syntaksfeil: Sjekk at alle parenteser er lukket, og at ingen operator mangler.",
-      errUnknownName: function (name) {
-      return 'Ukjent navn «' + name + '» – bruk inntastingshjelpen (for eksempel <code>pi</code> i stedet for <code>π</code>).';
-    },
-      errNameGeneric: "Ukjent navn – bruk inntastingshjelpen for å finne riktig skrivemåte.",
-      errDivZero: "Divisjon med null: Uttrykket er ikke definert i dette punktet.",
-      errType: "Typefeil: Sjekk at tall og variabler er kombinert riktig.",
-      errGeneric: "Inntastingen kunne ikke behandles – bruk inntastingshjelpen for å finne riktig skrivemåte.",
-      errRuntime: "Python kunne ikke lastes inn. Kontroller internettforbindelsen og trykk Sjekk igjen.",
-      vecComponent: function (n) { return 'Komponent ' + n; },
-      matCell: function (row, column) { return 'Rad ' + row + ', kolonne ' + column; },
-      dynamicMatCell: function (name, row, column) { return name + ', rad ' + row + ', kolonne ' + column; },
-      matrixAddRow: "Legg til rad",
-      matrixRemoveRow: "Fjern rad",
-      matrixAddColumn: "Legg til kolonne",
-      matrixRemoveColumn: "Fjern kolonne",
-      matrixRows: "Rader",
-      matrixColumns: "Kolonner",
-      emptyMatrix: "Tom matrise",
-      resEmpty: "Skriv inn et svar.",
-      resCorrect: "Riktig!",
-      resPartial: function (pct) { return 'Delvis riktig (' + pct + '%).'; },
-      resPartialNoScore: "Delvis riktig.",
-      resScore: function (pct) { return 'Samlet poengsum: ' + pct + ' %.'; },
-      resWrong: "Ikke riktig – prøv igjen.",
-      resRejected: "Matematisk riktig, men ikke forenklet ennå. Fortsett å omforme uttrykket.",
-      resNotExact: "Matematisk riktig, men ikke på formen det ble spurt om. Skriv om uttrykket nøyaktig som angitt.",
-      resNotForm: function (form) {
-      var names = { factored: 'faktorisert form', expanded: 'utvidet form',
-        single_fraction: 'én brøk', lowest_terms: 'fullstendig forkortet form' };
-      return 'Matematisk riktig, men ikke skrevet på ' + (names[form] || 'den påkrevde formen') +
-        '. Skriv om uttrykket.';
-    },
-      loadingHelp: "&#9203; Laster hjelp&hellip;",
-      checking: "&#9203; Sjekker&hellip;",
-      slowCheck: "Sjekken pågår fortsatt – svaret er kanskje for stort til å regnes ut.",
-      slowLoad: "Python lastes fortsatt inn.",
-      stop: "Avbryt",
-      errStopped: "Avbrutt. Python ble startet på nytt (interaktive celler på denne siden mistet variablene sine).",
-      needAnswerFirst: "Skriv inn et svar før du ber om tilbakemelding.",
-      outputLanguageCode: "nb",
-      feedbackFieldSingle: "Svar",
-      feedbackFieldNumbered: function (n) { return 'Svarfelt ' + n; },
-      warnExtraFieldLabels: "math-exercise: Overflødige field-labels-oppføringer ble ignorert for",
-      errorPrefix: "Feil:"
-    }
-  };
-
-  // Active locale. Unknown language -> English (never undefined).
+  // Interface texts: ctm-libs' message catalogue (locales/math-exercise.js),
+  // compiled for the page's language (an unknown language gives English).
+  // The feedback interface and prompts live in ctm-libs' AI feedback.
   var ME_CFG = window.__mathExerciseConfig || { lang: 'en' };
-  var L = LOCALES[ME_CFG.lang] || LOCALES.en;
+  var L = CTMLocales.table('math-exercise', ME_CFG.lang);
 
   // ---------------------------------------------------------------------------
   // Utilities
@@ -1976,21 +1818,11 @@
       output.className = 'ai-feedback-output';
       fbDiv.after(output);
       output.setAttribute('aria-live', 'polite');
-      var version = F && String(F.version || '').split('.').map(Number);
-      if (!version || !(version[0] > 0 || version[1] >= 5)) {
-        feedbackBtn.disabled = true;
-        output.textContent = 'Math feedback requires ai-feedback 0.5.0 or later. Update the installed ai-feedback extension and render this page again. Check remains available.';
-        if (reconfigBtn && F) reconfigBtn.replaceWith(F.settingsButton(L.outputLanguageCode));
-        return;
-      }
       feedbackHandle = F.attach({
         contextRefs: function () { return cell.dataset.contextMode === 'none' ? '' : cell.dataset.contextRefs; },
         integration: 'math-exercise', policySelection: JSON.parse(cell.dataset.feedbackPolicy || '{}'), requestOptions: {imageFallback:'text'}, id: 'math-' + label, button: feedbackBtn, output: output,
         uiLanguage: L.outputLanguageCode,
         getRequest: async function (state) {
-          if (cell.dataset.contextMode !== 'none' && /(^|,)\s*jsxgraph:/.test(cell.dataset.contextRefs || '') && !F.collectVisualContexts) {
-            throw new Error('JSXGraph feedback context requires AI Feedback 0.7.0 or later. Update the shared extension and render again.');
-          }
           var before = localSnapshot();
           var structuredInputs = collectDynamicMatrixInputs(questionDiv);
           var responses = fieldIds.map(function (id, i) {
