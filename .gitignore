@@ -18,9 +18,14 @@ __pycache__/
 /playwright-report/
 /test-results/
 
-# Locally installed dependencies (quarto add); never vendored here
+# Locally installed dependencies (quarto add); never vendored here.
+# `quarto add` of ctm-libs also installs its ai-feedback alias.
+/_extensions/ctm-libs/
 /_extensions/ai-feedback/
 /_extensions/jsxgraph/
+/_extensions/*/ctm-libs/
 /_extensions/*/ai-feedback/
 /_extensions/*/jsxgraph/
+/_ctm-libs-source/
 /_feedback-source/
+/_jsxgraph-source/

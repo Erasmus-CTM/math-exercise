@@ -1,42 +1,27 @@
-local feedback = nil
+-- math-exercise is a part of CTM Assessment. Its library ctm-libs (settings,
+-- languages, the Python runtime, AI feedback, the JSXGraph check) is found by
+-- the canonical bootstrap, which stops the render with the install command
+-- when CTM Assessment is missing.
+local ctm = dofile(quarto.utils.resolve_path("ctm-bootstrap.lua"))("math-exercise")
 -- Quarto replaces the global error() with a logger that lets the render
 -- continue; authoring errors must stop the render, so fail through assert.
 local function fail(message) assert(false, message) end
--- AI feedback: "auto" (default) uses an installed ai-feedback extension and
--- otherwise renders exercises without the Feedback button; true requires it.
-local feedbackSetting = "auto"
-local feedbackWarned, feedbackMissing = false, false
 
--- Without ai-feedback the exercises still work; these stand-ins keep the
--- rendered data attributes valid.
+-- Without AI feedback on the page these stand-ins keep the rendered data
+-- attributes valid.
 local noFeedback = {
   selection = function(block, opts) return { exercise = opts.label or block.identifier or "", name = "" } end,
   context = function() return { mode = "none", refs = "", text = "" } end,
 }
+local feedback = noFeedback
 
--- Shared locator for ai-feedback and JSXGraph (feedback-loader.lua).
-local dependencies = nil
-local function deps()
-  dependencies = dependencies or dofile(quarto.utils.resolve_path("feedback-loader.lua"))
-  return dependencies
-end
-
--- Decided per page before any other pass (preparePage): ai-feedback is
--- loaded only when the page has exercises with feedback on, or `.ai-feedback`
--- activities (which are prepared even with exercise feedback off).
-local feedbackForExercises, feedbackForActivities = false, false
-
-local function loadFeedback()
-  if feedback then return feedback end
-  if not feedbackForExercises and not feedbackForActivities then feedback = noFeedback; return feedback end
-  if not feedbackForActivities and feedbackSetting == "auto" and not deps().installed("ai-feedback") then
-    feedbackMissing = true -- reported once the page has an exercise (controlsHtml)
-    feedback = noFeedback
-    return feedback
-  end
-  feedback = deps().feedback()
-  return feedback
-end
+-- Decided per page before any other pass (preparePage). `math-exercise:
+-- feedback:` auto (default) and true give every exercise the Feedback button,
+-- false none; a build without AI feedback (ai-feedback: enabled: false or
+-- CTM_FEEDBACK=off) gives none either. ctm-libs' feedback preparation runs
+-- when exercises want feedback or the page has `.ai-feedback` activities
+-- (which are prepared even with exercise feedback off).
+local feedbackForExercises, feedbackForPage = false, false
 
 ----
 -- math-exercise.lua
@@ -751,12 +736,7 @@ end
 -- Shared controls HTML (same for single and pool mode)
 ----
 local function controlsHtml()
-  local withFeedback = feedbackForExercises and feedback ~= noFeedback
-  if feedbackMissing and not feedbackWarned then
-    feedbackWarned = true
-    quarto.log.warning("math-exercise: AI feedback is off because the ai-feedback extension is not installed. "
-      .. "Install it with `quarto add Erasmus-CTM/ai-feedback`, or set `math-exercise: {feedback: false}` to hide this message.")
-  end
+  local withFeedback = feedbackForExercises
   return table.concat({
     '<div class="math-exercise-controls">',
     '  <button type="button" class="btn btn-primary math-check-btn">&#10003;&nbsp;' .. uiT("check") .. '</button>',
@@ -852,6 +832,10 @@ local function buildExercise(el, state)
                .. caption .. '</div>\n'
   end
 
+  -- AI feedback's learning context: mode, explicit references and the
+  -- section's prose (collected by ctm-libs' feedback preparation).
+  local fc = feedback.context(el, opts)
+
   -- Base data attributes shared by both modes
   local attrs = 'id="'             .. eid                .. '"'
              .. ' data-label="'     .. attrEsc(label)     .. '"'
@@ -871,9 +855,9 @@ local function buildExercise(el, state)
              .. ' data-field-labels="' .. jsonArrAttr(fieldLabels) .. '"'
              .. ' data-vecdir="' .. vecdir .. '"'
              .. ' data-feedback-policy="' .. attrEsc(quarto.json.encode(feedback.selection(el, opts))) .. '"'
-             .. ' data-context-mode="' .. feedback.context(el, opts).mode .. '"'
-             .. ' data-context-refs="' .. attrEsc(feedback.context(el, opts).refs) .. '"'
-             .. ' data-context="'      .. attrEsc('"' .. jsonEsc(el.attributes["data-ai-feedback-context"] or "") .. '"') .. '"'
+             .. ' data-context-mode="' .. fc.mode .. '"'
+             .. ' data-context-refs="' .. attrEsc(fc.refs) .. '"'
+             .. ' data-context="'      .. attrEsc('"' .. jsonEsc(fc.text) .. '"') .. '"'
 
   if opts["initial-values"] then
     attrs = attrs .. ' data-initial-values="' .. jsonArrAttr(initialValues) .. '"'
@@ -972,10 +956,11 @@ local function Meta(meta)
   lang = resolveLang(meta)
   if not quarto.doc.is_format("html") then return meta end
 
-  -- math-exercise.js reads this to pick its LOCALES entry.
+  -- math-exercise.js reads this to pick its LOCALES entry. stop-after:
+  -- `math-exercise: stop-after`, `ctm-assessment: stop-after`, 20 seconds.
   quarto.doc.include_text("before-body",
     '<script>window.__mathExerciseConfig = ' ..
-    quarto.json.encode({ lang = lang, stopAfter = deps().stopAfter(meta, "math-exercise") }) .. ';</script>')
+    quarto.json.encode({ lang = lang, stopAfter = ctm.runtime.stopAfter("math-exercise") }) .. ';</script>')
 
   return meta
 end
@@ -1004,17 +989,6 @@ local function walkBlocks(blocks, state)
   end})
 end
 
-local function readFeedbackSetting(meta)
-  local cfg = meta["math-exercise"]
-  local value = cfg and type(cfg) == "table" and cfg["feedback"]
-  if value == nil then return "auto" end
-  value = pandoc.utils.stringify(value)
-  if value ~= "auto" and value ~= "true" and value ~= "false" then
-    assert(false, "math-exercise: feedback must be auto, true or false (found " .. value .. ")")
-  end
-  return value
-end
-
 -- Each referenced diagram must exist on the page and need the JSXGraph filter.
 local function checkDiagramReferences(doc, refs)
   if not refs or #refs == 0 then return end
@@ -1035,42 +1009,45 @@ local function checkDiagramReferences(doc, refs)
     end
   end
   -- A board whose extension is not installed has already stopped the render
-  -- (feedback-loader.lua requireUsed).
+  -- (ctm.deps.requireUsed in preparePage).
 end
 
--- First pass: stop if the page uses a missing optional extension, and decide
--- whether ai-feedback is needed at all.
+-- First pass: read the page's settings, stop if the page uses JSXGraph
+-- without the extension, and decide whether the page needs AI feedback.
 local function preparePage(doc)
-  feedbackSetting = readFeedbackSetting(doc.meta)
   if not quarto.doc.is_format("html") then return doc end
-  deps().requireUsed(doc, "math-exercise")
+  ctm.settings.load(doc.meta)
+  local setting, origin = ctm.settings.choice("math-exercise", "feedback", {"auto", "true", "false"}, {default = "auto"})
+  ctm.deps.requireUsed(doc, "math-exercise")
   local exercises = false
   doc.blocks:walk({ CodeBlock = function(b) if b.classes:includes("{math-exercise}") then exercises = true end end })
-  feedbackForExercises = exercises and feedbackSetting ~= "false"
-  feedbackForActivities = deps().uses(doc)["ai-feedback"] == true
+  local wanted = exercises and setting ~= "false"
+  if setting == "true" then
+    -- Asked for explicitly: a build without AI feedback names it in its message.
+    feedbackForExercises = ctm.feedback.request("math-exercise", wanted, "feedback: true" .. (origin and (" in " .. origin) or ""))
+  else
+    feedbackForExercises = wanted and (ctm.feedback.enabled())
+  end
+  feedbackForPage = wanted or ctm.deps.uses(doc)["ai-feedback"] == true
+  feedback = feedbackForPage and ctm.feedback or noFeedback
   return doc
 end
 
 local function Pandoc(doc)
-  if quarto.doc.is_format("html") then
-    doc = loadFeedback().prepare and feedback.prepare(doc) or doc
-  end
+  if not quarto.doc.is_format("html") then return doc end
+  if feedbackForPage then doc = ctm.feedback.prepare(doc) end
   doc.meta = Meta(doc.meta)
-
-  if quarto.doc.is_format("html") then
-    local state = { sectionCtx = {}, review = doc.meta["math-exercise-review"] == true }
-    doc.blocks = walkBlocks(doc.blocks, state)
-    checkDiagramReferences(doc, state.jsxgraphRefs)
-  end
-
+  local state = { sectionCtx = {}, review = doc.meta["math-exercise-review"] == true }
+  doc.blocks = walkBlocks(doc.blocks, state)
+  checkDiagramReferences(doc, state.jsxgraphRefs)
   return doc
 end
 
 return {
   { Pandoc = preparePage },
   { Callout = function(c)
-      if quarto.doc.is_format("html") and loadFeedback().markCallout then
-        return feedback.markCallout(c)
+      if feedbackForPage and quarto.doc.is_format("html") then
+        return ctm.feedback.markCallout(c)
       end
       return c
     end },
