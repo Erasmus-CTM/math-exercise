@@ -805,9 +805,13 @@ local function buildExercise(el, state)
                .. caption .. '</div>\n'
   end
 
-  -- AI feedback's learning context: mode, explicit references and the
-  -- section's prose (collected by ctm-libs' feedback preparation).
+  -- AI feedback's learning context: mode and explicit references (stand-ins
+  -- when the exercises have no feedback), and the prose of the exercise's
+  -- section that ctm-libs' feedback preparation recorded. The prose is taken
+  -- from ctm-libs also when this component's feedback is off: where the page
+  -- was prepared (the package always prepares it) it stays in the page, as before.
   local fc = feedback.context(el, opts)
+  local sectionText = ctm.feedback.context(el, opts).text
 
   -- Base data attributes shared by both modes
   local attrs = 'id="'             .. eid                .. '"'
@@ -830,7 +834,7 @@ local function buildExercise(el, state)
              .. ' data-feedback-policy="' .. attrEsc(quarto.json.encode(feedback.selection(el, opts))) .. '"'
              .. ' data-context-mode="' .. fc.mode .. '"'
              .. ' data-context-refs="' .. attrEsc(fc.refs) .. '"'
-             .. ' data-context="'      .. attrEsc('"' .. jsonEsc(fc.text) .. '"') .. '"'
+             .. ' data-context="'      .. attrEsc('"' .. jsonEsc(sectionText) .. '"') .. '"'
 
   if opts["initial-values"] then
     attrs = attrs .. ' data-initial-values="' .. jsonArrAttr(initialValues) .. '"'

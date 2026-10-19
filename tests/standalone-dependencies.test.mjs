@@ -94,6 +94,23 @@ test('feedback: auto and true give the Feedback button, false hides it, other va
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
+test('feedback: false keeps the section prose that ctm-libs recorded for the page (package order)', { skip }, () => {
+  const dir = project();
+  try {
+    const page = '## Area\n\nA square has side 3.\n\n' + plain;
+    for (const [filters, prose] of [['[ctm-libs, math-exercise]', true], ['[math-exercise]', false]]) {
+      const r = render(dir, 'filters: ' + filters + '\nmath-exercise:\n  feedback: false\n', page);
+      assert.equal(r.status, 0, r.stderr);
+      const cell = html(dir).match(/<div class="math-exercise-cell"[^>]*>/)[0];
+      assert.match(cell, /data-context-mode="none"/);
+      assert.match(cell, /data-context-refs=""/);
+      // As before the switch: the prose that the page's feedback preparation recorded stays.
+      assert.equal(/data-context="&quot;Area\\nA square has side 3\.&quot;"/.test(cell), prose, filters + ': ' + cell);
+      assert.doesNotMatch(html(dir), /class="btn btn-light math-feedback-btn"/);
+    }
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
 test('task text, checkers and settings with "</script>" stay inert', { skip }, () => {
   const dir = project();
   try {
