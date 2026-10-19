@@ -1818,21 +1818,11 @@
       output.className = 'ai-feedback-output';
       fbDiv.after(output);
       output.setAttribute('aria-live', 'polite');
-      var version = F && String(F.version || '').split('.').map(Number);
-      if (!version || !(version[0] > 0 || version[1] >= 5)) {
-        feedbackBtn.disabled = true;
-        output.textContent = 'Math feedback requires ai-feedback 0.5.0 or later. Update the installed ai-feedback extension and render this page again. Check remains available.';
-        if (reconfigBtn && F) reconfigBtn.replaceWith(F.settingsButton(L.outputLanguageCode));
-        return;
-      }
       feedbackHandle = F.attach({
         contextRefs: function () { return cell.dataset.contextMode === 'none' ? '' : cell.dataset.contextRefs; },
         integration: 'math-exercise', policySelection: JSON.parse(cell.dataset.feedbackPolicy || '{}'), requestOptions: {imageFallback:'text'}, id: 'math-' + label, button: feedbackBtn, output: output,
         uiLanguage: L.outputLanguageCode,
         getRequest: async function (state) {
-          if (cell.dataset.contextMode !== 'none' && /(^|,)\s*jsxgraph:/.test(cell.dataset.contextRefs || '') && !F.collectVisualContexts) {
-            throw new Error('JSXGraph feedback context requires AI Feedback 0.7.0 or later. Update the shared extension and render again.');
-          }
           var before = localSnapshot();
           var structuredInputs = collectDynamicMatrixInputs(questionDiv);
           var responses = fieldIds.map(function (id, i) {
