@@ -34,7 +34,7 @@ jobs:
       - name: Install ai-feedback and JSXGraph
         uses: ./.github/actions/quarto-dependencies
         with:
-          ai-feedback-ref: ${{ steps.review.outputs['ai-feedback'] || 'main' }}
+          ai-feedback-ref: ${{ steps.review.outputs['ai-feedback'] || '79103a6a829b9c5cf62f645857ca7f8330ff7be2' }}
           jsxgraph-ref: ${{ steps.review.outputs['jsxgraph'] || 'v1.1.0' }}
 
       - name: Install variant build dependency
