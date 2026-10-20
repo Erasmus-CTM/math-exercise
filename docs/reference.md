@@ -939,7 +939,7 @@ again, and a check that was running (also during SymPy's setup) is repeated
 once on the new runtime. With a runtime in a worker (pyodide-interaktiv), a
 check that takes longer than 20 s, for example an answer such as `9**9**9**9`,
 offers **Stop** (the time to load SymPy and packages is not counted; a load that has not finished after 180 s offers Stop, or ends with a message while Python is still starting), which restarts Python for the whole page; a stopped check (from
-any component's Stop) is not repeated. Change the time with
+any component's Stop) is not repeated, and checks waiting behind it are stopped too (the next Check runs on the restarted Python). Change the time with
 `math-exercise: {stop-after: 30}` (seconds), or for all CTM components of a
 project with `ctm-assessment: {stop-after: 30}`. Python running on the page itself cannot be interrupted; the
 page then has to be reloaded.

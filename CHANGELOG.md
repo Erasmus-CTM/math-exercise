@@ -29,6 +29,15 @@ Assessment, instead of checker code of its own. Every verdict is unchanged.
   checker in its YAML options counts. With a ctm-libs that has no
   `ctm.policy.withoutAI`, such exercises are rendered as before.
 
+### Changed for learners
+
+- **Stop**: a check waiting behind the one the learner stops is now stopped
+  too and shows "Stopped. Python was restarted …" (the next Check runs on the
+  restarted Python); in 0.10 it ran after the restart. Checks that were still
+  loading Python were already stopped this way.
+- A runtime that stops answering after Stop no longer holds up the next
+  checks: they run on the restarted runtime.
+
 ### Fixed
 
 - Learner code in a Pyodide cell that rebinds `__import__` or `globals` no
@@ -55,17 +64,19 @@ variants, every interface text and the exercise HTML.
   check stays in the namespace learner code shares.
 - Checks are no longer queued for the whole page: ctm-libs runs the checks
   of one runtime one after another, so a runtime that stops answering holds
-  up no check on the next one. A check waiting behind one that the learner
-  stops is stopped too, as checks that are still loading Python were in 0.10.
+  up no check on the next one (the Stop changes under *Changed for
+  learners*).
 - `question-tests.py` finds ctm-checkers' wheel (`CTM_CHECKERS_WHEEL`, the
   `ctm-checkers` folder next to math-exercise, or the project's
   `_extensions/[owner/]ctm-checkers`) and runs
   `ctm_checkers.math_exercise.authored`; Quarto runs it and `variants.py`
   with the wheel on `PYTHONPATH` (`ctm.checkers.environment()`).
-  `variants.py` rounds with ctm-checkers' `round_places`.
-- CI and the tests install ctm-checkers at the commit of `.github/pins.json`
-  (`CTM_CHECKERS_EXTENSION`, `CTM_CHECKERS_WHEEL`), or a review commit's
-  `CTM-Review-Refs` trailer, read by the umbrella's
+  `CTM_CHECKERS_WHEEL` naming a missing file stops the command with a message
+  that says so. `variants.py` rounds with ctm-checkers' `round_places`.
+- CI and the tests install ctm-libs and ctm-checkers at the commits of
+  `.github/pins.json` (`CTM_LIBS_EXTENSION`, `CTM_CHECKERS_EXTENSION`,
+  `CTM_CHECKERS_WHEEL`; before, CI used ctm-libs `main`), or those of a review
+  commit's `CTM-Review-Refs` trailer, read by the umbrella's
   `tools/ci/review-dependencies.py` (the umbrella commit is pinned there
   too; `.github/review-dependencies.py` is removed). The basis assessment
   tests moved to ctm-checkers. New workflow `parity.yml` (grading parity
