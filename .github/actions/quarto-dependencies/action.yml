@@ -8,13 +8,13 @@ description: >
   answers). The commits: .github/pins.json, and for review a head commit's
   `CTM-Review-Refs` trailer, read by the umbrella's
   tools/ci/review-dependencies.py (the one copy, at the pinned umbrella
-  commit); ctm-libs follows main. The CTM Assessment package itself is not
+  commit). The CTM Assessment package itself is not
   installed, so later steps run as a component development build
   (CTM_COMPONENT_DEV=1). Requires Quarto, Python 3 and a checkout with the
   head commit (fetch-depth 2).
 inputs:
   ctm-libs-ref:
-    description: Erasmus-CTM/ctm-libs branch, tag or commit (default the review ref, else main)
+    description: Erasmus-CTM/ctm-libs branch, tag or commit (default the review ref, else the pin in .github/pins.json)
     default: ''
   ctm-checkers-ref:
     description: Erasmus-CTM/ctm-checkers commit (default the review ref, else the pin in .github/pins.json)
@@ -57,7 +57,7 @@ runs:
       id: refs
       shell: bash
       env:
-        LIBS: ${{ inputs.ctm-libs-ref || steps.review.outputs['ctm-libs'] || 'main' }}
+        LIBS: ${{ inputs.ctm-libs-ref || steps.review.outputs['ctm-libs'] || steps.pins.outputs['ctm-libs'] }}
         CHECKERS: ${{ inputs.ctm-checkers-ref || steps.review.outputs['ctm-checkers'] || steps.pins.outputs['ctm-checkers'] }}
         JSXGRAPH: ${{ inputs.jsxgraph-ref || steps.review.outputs['jsxgraph'] || 'v1.1.0' }}
       run: |

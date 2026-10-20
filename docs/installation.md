@@ -17,8 +17,12 @@ filters: [ctm-assessment]
 ```
 
 math-exercise uses CTM Assessment's library ctm-libs for its settings, its
-languages, the page's Python runtime and AI feedback. Without the package a
-page with math-exercise stops rendering with the install command above.
+languages, the page's Python runtime and AI feedback, and its checker library
+ctm-checkers for every check (in the browser, in the build-time question tests
+and in the rounding of generated variants). Without the package, or without
+ctm-checkers in it, a page with math-exercise stops rendering with the install
+command above; with a CTM Assessment older than 0.10 it stops with the update
+command.
 
 Requirements: Quarto 1.8.27 or later (the earliest version tested) and a browser. Students'
 browsers download Pyodide 0.28.3 and SymPy from jsDelivr: Pyodide starts loading
@@ -60,7 +64,7 @@ library math-exercise grades with, in the browser and at build time) and
 JSXGraph (for graphical answers). All three are git-ignored here:
 
 ```sh
-quarto add Erasmus-CTM/ctm-libs@main --no-prompt     # or a checkout: quarto add ../ctm-libs --no-prompt
+quarto add ../ctm-libs --no-prompt                   # a ctm-libs checkout at the commit of .github/pins.json
 quarto add ../ctm-checkers --no-prompt               # a ctm-checkers checkout at the commit of .github/pins.json
 quarto add jsxgraph/jsxgraph-quarto --no-prompt
 CTM_COMPONENT_DEV=1 quarto render
@@ -69,11 +73,10 @@ CTM_COMPONENT_DEV=1 quarto render
 `CTM_COMPONENT_DEV=1` tells the component's `ctm-bootstrap.lua` (a copy of
 ctm-libs' `bootstrap/ctm-bootstrap.lua`, kept byte-identical) that this is a
 development build; without it the render stops because the package is
-missing. CI does the same with the ctm-libs commit under test (the
-`CTM-Review-Refs` trailer of a review commit, else ctm-libs `main`) and the
-ctm-checkers commit of `.github/pins.json` (or the trailer's). A page with an
-exercise needs ctm-checkers too: without it the render stops with the CTM
-Assessment install command.
+missing. CI does the same with the ctm-libs and ctm-checkers commits of
+`.github/pins.json`, or those a review commit's `CTM-Review-Refs` trailer
+names. A page with an exercise needs ctm-checkers too: without it the render
+stops with the CTM Assessment install command.
 
 Regression tests: install Node dependencies with `npm ci` and the three
 extensions above, then run `npm test`. The tests read ctm-libs' files from

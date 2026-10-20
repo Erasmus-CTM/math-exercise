@@ -18,7 +18,7 @@ function locate() {
     ...(existsSync(extensions) ? readdirSync(extensions).map(owner => join(extensions, owner, 'ctm-libs')) : [])];
   const found = candidates.find(dir => existsSync(join(dir, 'lua', 'ctm.lua')));
   if (!found) {
-    throw new Error('Install ctm-libs first (quarto add Erasmus-CTM/ctm-libs@main --no-prompt), '
+    throw new Error('Install ctm-libs first (quarto add of a ctm-libs checkout at the commit of .github/pins.json), '
       + 'or set CTM_LIBS_EXTENSION to its _extensions/ctm-libs folder.');
   }
   return found;
