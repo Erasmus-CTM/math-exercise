@@ -840,7 +840,9 @@
   // 0.10 set as `_math_*` globals, under their names without `_math_`),
   // through ctm-libs' MathExerciseRuntime.callCheckers, which installs
   // ctm-checkers again and repeats a call once when learner code removed it.
-  // form_credit is the cell's finite value (JSON has no NaN).
+  // form_credit: a number from 0 to 1, else 0.5 (the default of
+  // `form-credit`, also for api.checkField without formCredit; JSON has no
+  // NaN). setupCell reads data-form-credit through it too.
   function finiteCredit(value) {
     var credit = Number(value);
     return Number.isFinite(credit) && credit >= 0 && credit <= 1 ? credit : 0.5;
@@ -1022,8 +1024,7 @@
     try { checker = JSON.parse(cell.dataset.checker || '""'); } catch (e) {}
     var packages = [];
     try { packages = JSON.parse(cell.dataset.packages || '[]'); } catch (e) {}
-    var formCredit = Number(cell.dataset.formCredit || '0.5');
-    if (!Number.isFinite(formCredit) || formCredit < 0 || formCredit > 1) formCredit = 0.5;
+    var formCredit = finiteCredit(cell.dataset.formCredit || '0.5');
     var checkOpts = {
       reject:    reject,
       tolerance: cell.dataset.tolerance || '',

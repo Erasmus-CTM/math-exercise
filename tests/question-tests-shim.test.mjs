@@ -66,9 +66,14 @@ test('without ctm-checkers the command says how to install it', () => {
   const result = run({ component: 'math-exercise' });
   assert.equal(result.status, 1);
   assert.equal(result.stderr, MISSING);
-  const wrong = run({ component: 'math-exercise', env: { CTM_CHECKERS_WHEEL: '/no/such/wheel.whl' } });
+});
+
+test('CTM_CHECKERS_WHEEL naming a missing file is reported as such', () => {
+  // Also with ctm-checkers installed: the variable decides.
+  const wrong = run({ component: 'math-exercise', checkers: 'ctm-checkers', env: { CTM_CHECKERS_WHEEL: '/no/such/wheel.whl' } });
   assert.equal(wrong.status, 1);
-  assert.equal(wrong.stderr, MISSING);
+  assert.equal(wrong.stderr,
+    'math-exercise question tests failed: CTM_CHECKERS_WHEEL names /no/such/wheel.whl, which does not exist.\n');
 });
 
 test('the messages and exit statuses of the command stay those of math-exercise 0.10', () => {

@@ -74,6 +74,18 @@ test('without ctm-checkers, the checker library of CTM Assessment, the render st
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
+test('with a ctm-libs without ctm.checkers (before CTM Assessment 0.10) the render stops with the update command', { skip }, () => {
+  const dir = project();
+  try {
+    rmSync(join(dir, '_extensions/ctm-libs/lua/checkers.lua'));
+    const r = render(dir, 'filters: [math-exercise]\n', plain);
+    assert.notEqual(r.status, 0);
+    // No ctm-libs version in the text (the check is whether ctm.checkers exists).
+    assert.match(r.stderr, /math-exercise \d+\.\d+\.\d+ needs ctm-checkers, which the ctm-libs in \S+ does not provide\. Update CTM Assessment: /);
+    assert.ok(r.stderr.includes(INSTALL.replace('Install', 'Update')), r.stderr);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
 test('next to the CTM Assessment package it renders without CTM_COMPONENT_DEV', { skip }, () => {
   const dir = project({ withPackage: true });
   try {

@@ -1,11 +1,9 @@
 import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import vm from 'node:vm';
 import { FEEDBACK, LOCALE, runInContext, sources } from './helpers/ctm-libs.mjs';
-import { wheel } from './helpers/ctm-checkers.mjs';
 
 const source = await readFile(
   new URL('../_extensions/math-exercise/math-exercise.js', import.meta.url),
@@ -211,15 +209,7 @@ test('basis examples delegate symmetric assessment to the shared helper', () => 
   assert.equal((dynamicExamples.match(/#\|           axis="columns"/g) || []).length, 4);
   assert.equal((dynamicExamples.match(/#\|           axis="rows"/g) || []).length, 1);
   assert.doesNotMatch(dynamicExamples, /accepted|adds_direction|redundant vector/);
-  // The helper (assess_basis) is ctm-checkers' ctm_checkers.matrix.
-  const helper = spawnSync(process.env.MATH_EXERCISE_PYTHON || 'python3', ['-c',
-    'import sys, zipfile; sys.stdout.write(zipfile.ZipFile(sys.argv[1]).read("ctm_checkers/matrix.py").decode())', wheel],
-  { encoding: 'utf8' });
-  assert.equal(helper.status, 0, helper.stderr);
-  assert.match(helper.stdout, /def assess_basis\(/);
-  assert.match(helper.stdout, /dependent = rank < valid_count/);
-  assert.match(helper.stdout, /\("dependent" if dependent else "correct"\) if valid else "incorrect"/);
-  assert.match(helper.stdout, /coverage \* validity \* independence/);
+  // assess_basis itself is ctm-checkers' (ctm_checkers.matrix), tested there.
   assert.match(source, /\^\(correct\|dependent\|partial\|incorrect\|empty\|invalid\)\$/);
   assert.match(source, /custom\.show_score === false \? L\.resPartialNoScore/);
   assert.doesNotMatch(dynamicExamples, /missing independent direction|spans only \{rank\}/);

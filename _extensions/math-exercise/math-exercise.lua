@@ -164,8 +164,9 @@ end
 local INSTALL = "quarto add https://erasmus-ctm.github.io/ctm-assessment/ctm-assessment.tar.gz"
 local function requireCheckers()
   if not ctm.checkers then
-    fail("math-exercise " .. extensionVersion() .. " needs ctm-checkers through a newer ctm-libs than " .. ctm.dir
-      .. " (" .. ctm.version .. "). Update CTM Assessment: " .. INSTALL)
+    -- No ctm-libs version in the text: whether ctm.checkers exists decides.
+    fail("math-exercise " .. extensionVersion() .. " needs ctm-checkers, which the ctm-libs in " .. ctm.dir
+      .. " does not provide. Update CTM Assessment: " .. INSTALL)
   end
   ctm.checkers.require("math-exercise", 1)
 end

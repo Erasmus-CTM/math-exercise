@@ -33,8 +33,7 @@ def checkers_wheel():
     project's _extensions/[owner/]ctm-checkers (the _extensions folder that
     holds this component)."""
     if os.environ.get('CTM_CHECKERS_WHEEL'):
-        wheel = Path(os.environ['CTM_CHECKERS_WHEEL'])
-        return wheel if wheel.is_file() else None
+        return Path(os.environ['CTM_CHECKERS_WHEEL'])
     here = Path(__file__).resolve().parent
     found = _wheel_in(here.parent / 'ctm-checkers')
     if found:
@@ -52,6 +51,10 @@ def main(argv):
     wheel = checkers_wheel()
     if wheel is None:
         print(INSTALL, file=sys.stderr)
+        return 1
+    if not wheel.is_file():
+        print(f'math-exercise question tests failed: CTM_CHECKERS_WHEEL names {wheel}, which does not exist.',
+              file=sys.stderr)
         return 1
     sys.path.insert(0, str(wheel))
     try:
