@@ -1,5 +1,11 @@
 # Changes
 
+## Unreleased
+
+- `ctm-bootstrap.lua` is ctm-libs' new copy (CTM Assessment consolidation
+  step 3): the bootstrap takes options for pyodide-interaktiv 1.9. math-exercise
+  passes none, so its messages and behaviour are unchanged.
+
 ## 0.11.0 (CTM Assessment 0.10.0)
 
 math-exercise grades with ctm-checkers, the Python checker library of CTM
