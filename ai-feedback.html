@@ -75,17 +75,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-f53186b9ac0866246e638800b9d808a6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-1fb0d51e40fe6f5582e8efb4582ff5a4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script src="site_libs/quarto-contrib/ai-feedback-0.9.0/feedback-core.js"></script>
 <script src="site_libs/quarto-contrib/ai-feedback-0.9.0/feedback-dom.js"></script>
 <script src="site_libs/quarto-contrib/ai-feedback-0.9.0/ai-feedback.js"></script>
 <link href="site_libs/quarto-contrib/ai-feedback-0.9.0/ai-feedback.css" rel="stylesheet">
 <script src="site_libs/quarto-contrib/ctm-runtime-0.9.0/pyodide-runtime.js"></script>
+<script src="site_libs/quarto-contrib/ctm-checkers-0.1.1.dev0+be41199f/ctm-checkers.js"></script>
 <script src="site_libs/quarto-contrib/ctm-locale-0.9.0/ctm-locale.js"></script>
 <script src="site_libs/quarto-contrib/ctm-locale-0.9.0/common.js"></script>
 <script src="site_libs/quarto-contrib/ctm-locale-math-exercise-0.9.0/math-exercise.js"></script>
-<link href="site_libs/quarto-contrib/math-exercise-0.10.0/matrix-input.css" rel="stylesheet">
-<link href="site_libs/quarto-contrib/math-exercise-0.10.0/math-exercise.css" rel="stylesheet">
+<link href="site_libs/quarto-contrib/math-exercise-0.11.0/matrix-input.css" rel="stylesheet">
+<link href="site_libs/quarto-contrib/math-exercise-0.11.0/math-exercise.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -392,7 +393,7 @@ For $2x^2+3x-2=0$, compute the discriminant: _[25]
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Newton’s method uses <span data-ai-feedback-tex="x_{k+1}=x_k-f(x_k)/f'(x_k)" data-ai-feedback-display="false"><span class="math inline">\(x_{k+1}=x_k-f(x_k)/f'(x_k)\)</span></span>. Evaluate the function and derivative at the current iterate before forming the next iterate.</p>
+<p>Newton’s method uses <span data-ai-feedback-display="false" data-ai-feedback-tex="x_{k+1}=x_k-f(x_k)/f'(x_k)"><span class="math inline">\(x_{k+1}=x_k-f(x_k)/f'(x_k)\)</span></span>. Evaluate the function and derivative at the current iterate before forming the next iterate.</p>
 </div>
 </div>
 </div>
@@ -767,10 +768,10 @@ tangent at $x=2$: _[12].
 <h2 class="anchored" data-anchor-id="mathematics-in-ai-context">Mathematics in AI context</h2>
 <p>Feedback can refer to the same formulas students see in the lesson. Here the notation for a solenoid gives students the definitions they need for the task.</p>
 <div id="solenoid-notation" class="math-exercise-context">
-<p>A long solenoid has <span data-ai-feedback-tex="N" data-ai-feedback-display="false"><span class="math inline">\(N\)</span></span> turns over a length <span data-ai-feedback-tex="l" data-ai-feedback-display="false"><span class="math inline">\(l\)</span></span>. Its turn density is <span data-ai-feedback-tex="n=\frac{N}{l}" data-ai-feedback-display="false"><span class="math inline">\(n=\frac{N}{l}\)</span></span>, measured in <span data-ai-feedback-tex="\mathrm{m}^{-1}" data-ai-feedback-display="false"><span class="math inline">\(\mathrm{m}^{-1}\)</span></span>. In vacuum, <span data-ai-feedback-tex="\mu_0\approx 4\pi\times10^{-7}\,\mathrm{H/m}" data-ai-feedback-display="false"><span class="math inline">\(\mu_0\approx 4\pi\times10^{-7}\,\mathrm{H/m}\)</span></span>. For radius <span data-ai-feedback-tex="2a" data-ai-feedback-display="false"><span class="math inline">\(2a\)</span></span>, the ideal long-solenoid approximation gives</p>
-<p><span data-ai-feedback-tex="
+<p>A long solenoid has <span data-ai-feedback-display="false" data-ai-feedback-tex="N"><span class="math inline">\(N\)</span></span> turns over a length <span data-ai-feedback-display="false" data-ai-feedback-tex="l"><span class="math inline">\(l\)</span></span>. Its turn density is <span data-ai-feedback-display="false" data-ai-feedback-tex="n=\frac{N}{l}"><span class="math inline">\(n=\frac{N}{l}\)</span></span>, measured in <span data-ai-feedback-display="false" data-ai-feedback-tex="\mathrm{m}^{-1}"><span class="math inline">\(\mathrm{m}^{-1}\)</span></span>. In vacuum, <span data-ai-feedback-display="false" data-ai-feedback-tex="\mu_0\approx 4\pi\times10^{-7}\,\mathrm{H/m}"><span class="math inline">\(\mu_0\approx 4\pi\times10^{-7}\,\mathrm{H/m}\)</span></span>. For radius <span data-ai-feedback-display="false" data-ai-feedback-tex="2a"><span class="math inline">\(2a\)</span></span>, the ideal long-solenoid approximation gives</p>
+<p><span data-ai-feedback-display="true" data-ai-feedback-tex="
 L=\frac{4\pi\mu_0N^2a^2}{l}.
-" data-ai-feedback-display="true"><span class="math display">\[
+"><span class="math display">\[
 L=\frac{4\pi\mu_0N^2a^2}{l}.
 \]</span></span></p>
 </div>
@@ -1275,6 +1276,6 @@ Write the turn density in terms of $N$ and $l$: _[N/l]
 
 
 
-<script src="site_libs/quarto-contrib/math-exercise-0.10.0/matrix-input.js"></script>
-<script src="site_libs/quarto-contrib/math-exercise-0.10.0/math-exercise.js"></script>
+<script src="site_libs/quarto-contrib/math-exercise-0.11.0/matrix-input.js"></script>
+<script src="site_libs/quarto-contrib/math-exercise-0.11.0/math-exercise.js"></script>
 </body></html>
