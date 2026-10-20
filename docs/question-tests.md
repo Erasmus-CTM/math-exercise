@@ -7,8 +7,8 @@ before and do not require native Python.
 
 Use short inline assertions for small exercises. Put larger fixtures in a
 neighboring Python file and reference it from the exercise. Both formats use
-the same runner shipped with the extension; no separate question-test schema
-or test service is needed.
+the same runner, `question-tests.py` in the extension; no separate
+question-test schema or test service is needed.
 
 ## Inline tests
 
@@ -97,11 +97,25 @@ use a particular Python executable. A failed test identifies the exercise
 label and exits with a nonzero status. VS Code shows the error in the render
 output or terminal; GitHub Actions marks the command and action as failed.
 
+### Where the runner lives
+
+The tests run in ctm-checkers, the Python checker library of CTM Assessment,
+which also grades the exercises in the browser
+(`ctm_checkers.math_exercise.authored`). `question-tests.py` finds
+ctm-checkers' wheel and runs the tests with it: the wheel named by
+`CTM_CHECKERS_WHEEL`, else the `ctm-checkers` folder next to the math-exercise
+folder (as in CTM Assessment), else the project's `_extensions/ctm-checkers`
+or `_extensions/<owner>/ctm-checkers`. A test's `check` is therefore the
+browser's checker, with the same SymPy names and helpers. The command, its
+output and its exit status are those of earlier versions; without ctm-checkers
+it stops with the command that installs CTM Assessment. Run the file as a
+script, as above, not with `python -m`.
+
 An existing action can run either `quarto render`, the direct test command, or
 both. In this repository `npm test` calls the direct runner for the example
 sources, and the rendering action also exercises the build-time checks. Tests
-are not embedded in the browser's grading payload. They remain visible as
-author source in the demonstration's source panels.
+are not embedded in the page's grading data. They remain visible as author
+source in the demonstration's source panels.
 
 ## Useful cases for a custom checker
 

@@ -3,6 +3,7 @@ import { createRequire } from 'node:module';
 import { JSDOM } from 'jsdom';
 import katex from 'katex';
 import { FEEDBACK, LOCALE, RUNTIME, sources } from './ctm-libs.mjs';
+import { script as checkersScript } from './ctm-checkers.mjs';
 
 const require = createRequire(import.meta.url);
 // ctm-libs' files, as the page loads them before the exercise scripts.
@@ -33,6 +34,7 @@ export function loadPage(html = '', config = {}, prepare = () => {}) {
   shared.forEach(code => w.eval(code));
   w.AIFeedback.typesetFeedback = async () => {};
   w.eval(runtime);
+  w.eval(checkersScript);   // ctm-checkers' page script (CTMCheckers), after the runtime in the head
   locale.forEach(code => w.eval(code));
   w.eval(matrixInput);
   w.eval(source);

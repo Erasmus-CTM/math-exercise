@@ -209,9 +209,7 @@ test('basis examples delegate symmetric assessment to the shared helper', () => 
   assert.equal((dynamicExamples.match(/#\|           axis="columns"/g) || []).length, 4);
   assert.equal((dynamicExamples.match(/#\|           axis="rows"/g) || []).length, 1);
   assert.doesNotMatch(dynamicExamples, /accepted|adds_direction|redundant vector/);
-  assert.match(source, /dependent = rank < valid_count/);
-  assert.match(source, /\("dependent" if dependent else "correct"\) if valid else "incorrect"/);
-  assert.match(source, /coverage \* validity \* independence/);
+  // assess_basis itself is ctm-checkers' (ctm_checkers.matrix), tested there.
   assert.match(source, /\^\(correct\|dependent\|partial\|incorrect\|empty\|invalid\)\$/);
   assert.match(source, /custom\.show_score === false \? L\.resPartialNoScore/);
   assert.doesNotMatch(dynamicExamples, /missing independent direction|spans only \{rank\}/);

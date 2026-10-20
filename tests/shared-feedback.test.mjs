@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { loadPage } from './helpers/ai-context.mjs';
+import { ANY_CHECK } from './helpers/ctm-checkers.mjs';
 
 function setup({mode = 'equivalent', question = 'Compute 6 times 7: _[SECRET_EXPECTED]', lang = 'en', graph = false} = {}) {
   const p = loadPage(`<div id="cell" class="math-exercise-cell" data-label="test" data-context-mode="none" data-mode="${mode}"><div class="math-exercise-question"></div><button class="math-check-btn">Check</button><button class="math-legend-btn">Help</button><button class="math-feedback-btn">Feedback</button><button class="math-reconfig-btn">Settings</button><div class="math-legend-panel" style="display:none"></div><div class="math-feedback-area"></div></div>`, {lang});
@@ -178,7 +179,7 @@ test('a long check in a worker runtime offers Stop; a stopped check is not repea
   let checks = 0, restarts = 0, reject;
   p.window.mainPyodide = {loadPackage: async () => {}, globals: {set: async () => {}},
     restart() { restarts++; reject(new Error('Python was restarted.')); },
-    runPythonAsync: code => code.includes('_math_check') ? (checks++, new Promise((_, r) => { reject = r; })) : Promise.resolve()};
+    runPythonAsync: code => code.includes(ANY_CHECK) ? (checks++, new Promise((_, r) => { reject = r; })) : Promise.resolve()};
   p.api.setupCell(cell);
   cell.querySelector('.math-input').value = '9**9**9**9';
   cell.querySelector('.math-check-btn').click();
@@ -201,7 +202,7 @@ test('loading SymPy does not count towards stop-after; the check itself does', a
   let loaded;
   const loading = new Promise(r => { loaded = r; });   // a slow network
   p.window.mainPyodide = {loadPackage: () => loading, globals: {set: async () => {}}, restart() {},
-    runPythonAsync: code => code.includes('_math_check') ? new Promise(() => {}) : Promise.resolve()};
+    runPythonAsync: code => code.includes(ANY_CHECK) ? new Promise(() => {}) : Promise.resolve()};
   p.api.setupCell(cell);
   cell.querySelector('.math-input').value = '2';
   cell.querySelector('.math-check-btn').click();
@@ -250,9 +251,9 @@ test('reloading SymPy after a runtime restart is timed by the load limit, not st
   const {p, cell} = stopCell(w => { w.__mathExerciseSlowCheckMs = 50; w.__qExercisePyodideTimeout = 5000; });
   let rejectCheck = null, reloaded = null, repeated = 0;
   const v1 = {loadPackage: async () => {}, globals: {set: async () => {}}, restart() {},
-    runPythonAsync: code => code.includes('_math_check') ? new Promise((_, r) => { rejectCheck = r; }) : Promise.resolve()};
+    runPythonAsync: code => code.includes(ANY_CHECK) ? new Promise((_, r) => { rejectCheck = r; }) : Promise.resolve()};
   const v2 = {loadPackage: () => new Promise(r => { reloaded = r; }), globals: {set: async () => {}}, restart() {},
-    runPythonAsync: code => code.includes('_math_check') ? (repeated++, Promise.resolve(JSON.stringify({status: 'correct', score: 1}))) : Promise.resolve()};
+    runPythonAsync: code => code.includes(ANY_CHECK) ? (repeated++, Promise.resolve(JSON.stringify({status: 'correct', score: 1}))) : Promise.resolve()};
   p.window.mainPyodide = v1;
   p.api.setupCell(cell);
   cell.querySelector('.math-input').value = '2';

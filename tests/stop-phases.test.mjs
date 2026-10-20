@@ -3,6 +3,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { loadPage } from './helpers/ai-context.mjs';
+import { ANY_CHECK, CHECK_CUSTOM } from './helpers/ctm-checkers.mjs';
 
 const CELL = (id, mode, pkgs) => `<div id="${id}" class="math-exercise-cell" data-label="${id}" data-context-mode="none" data-mode="${mode}" data-packages='${JSON.stringify(pkgs)}' data-checker='"def check(r): return True"'><div class="math-exercise-question"></div><button class="math-check-btn">Check</button><button class="math-legend-btn">Help</button><div class="math-legend-panel" style="display:none"></div><div class="math-feedback-area"></div></div>`;
 
@@ -50,7 +51,7 @@ test('a check still reloading its packages after a restart keeps the load limit 
   const v1 = {
     loadPackage: n => String(n).includes('numpy') ? new Promise((_, r) => { rejectNumpy = r; }) : Promise.resolve(),
     globals: {set: async () => {}}, restart() {},
-    runPythonAsync: code => code.includes('_math_check_custom') ? new Promise((_, r) => { rejectCustom = r; }) : Promise.resolve(JSON.stringify({status: 'correct', score: 1}))};
+    runPythonAsync: code => code.includes(CHECK_CUSTOM) ? new Promise((_, r) => { rejectCustom = r; }) : Promise.resolve(JSON.stringify({status: 'correct', score: 1}))};
   const v2 = {
     loadPackage: n => String(n).includes('scipy') ? new Promise(r => { scipyV2 = r; }) : Promise.resolve(),
     globals: {set: async () => {}}, restart() {},
@@ -82,7 +83,7 @@ test('the loading Stop note is taken back when the check itself starts', async (
   const cell = prep(p, 'cell', 'equivalent');
   let loaded = null, checking = false;
   p.window.mainPyodide = {loadPackage: () => new Promise(r => { loaded = r; }), globals: {set: async () => {}}, restart() {},
-    runPythonAsync: code => code.includes('_math_check') ? (checking = true, new Promise(() => {})) : Promise.resolve()};
+    runPythonAsync: code => code.includes(ANY_CHECK) ? (checking = true, new Promise(() => {})) : Promise.resolve()};
   p.api.setupCell(cell);
   cell.querySelector('.math-input').value = '2';
   cell.querySelector('.math-check-btn').click();
@@ -99,7 +100,7 @@ test('a Stop note offered after an edit during the check goes with the abandoned
   const cell = prep(p, 'cell', 'equivalent');
   let restarts = 0;
   p.window.mainPyodide = {loadPackage: async () => {}, globals: {set: async () => {}}, restart() { restarts++; },
-    runPythonAsync: code => code.includes('_math_check') ? new Promise(r => setTimeout(() => r(JSON.stringify({status: 'correct', score: 1})), 300)) : Promise.resolve()};
+    runPythonAsync: code => code.includes(ANY_CHECK) ? new Promise(r => setTimeout(() => r(JSON.stringify({status: 'correct', score: 1})), 300)) : Promise.resolve()};
   p.api.setupCell(cell);
   const input = cell.querySelector('.math-input');
   input.value = '2';

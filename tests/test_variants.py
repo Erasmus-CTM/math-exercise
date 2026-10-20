@@ -1,7 +1,26 @@
 import copy
 import importlib.util
+import json
+import os
 from pathlib import Path
+import sys
 import unittest
+
+# variants.py rounds with ctm-checkers (ctm_checkers.math_exercise.numeric):
+# its wheel first on sys.path, as math-exercise.lua runs the script.
+# CTM_CHECKERS_WHEEL; else the wheel of CTM_CHECKERS_EXTENSION (an
+# _extensions/ctm-checkers folder, as the Node tests read it; the umbrella's
+# package tests set it); else the ctm-checkers installed in this repository.
+def checkers_wheel():
+    if os.environ.get('CTM_CHECKERS_WHEEL'):
+        return os.environ['CTM_CHECKERS_WHEEL']
+    extensions=Path(__file__).resolve().parents[1]/'_extensions'
+    named=[Path(os.environ['CTM_CHECKERS_EXTENSION'])] if os.environ.get('CTM_CHECKERS_EXTENSION') else []
+    for folder in named+[extensions/'ctm-checkers']+sorted(extensions.glob('*/ctm-checkers')):
+        if (folder/'checkers.json').is_file():
+            return str(folder/json.loads((folder/'checkers.json').read_text())['wheel'])
+    raise RuntimeError('Install ctm-checkers first (quarto add of a ctm-checkers checkout), or set CTM_CHECKERS_EXTENSION to its folder or CTM_CHECKERS_WHEEL to its wheel.')
+sys.path.insert(0,checkers_wheel())
 
 path=Path(__file__).resolve().parents[1]/'_extensions/math-exercise/variants.py'
 spec=importlib.util.spec_from_file_location('variants',path);v=importlib.util.module_from_spec(spec);spec.loader.exec_module(v)

@@ -2,44 +2,104 @@ name: Install Quarto extension dependencies
 description: >
   Installs what math-exercise builds against in its own repository: ctm-libs,
   the library of CTM Assessment (settings, languages, the Python runtime, AI
-  feedback; `quarto add` also installs its ai-feedback alias), and the
-  upstream JSXGraph extension (needed for graphical answers). Requires
-  Quarto. The CTM Assessment package itself is not installed, so later steps
-  run as a component development build (CTM_COMPONENT_DEV=1).
+  feedback; `quarto add` also installs its ai-feedback alias), ctm-checkers,
+  the Python checker library math-exercise grades with (its wheel and page
+  script), and the upstream JSXGraph extension (needed for graphical
+  answers). The commits: .github/pins.json, and for review a head commit's
+  `CTM-Review-Refs` trailer, read by the umbrella's
+  tools/ci/review-dependencies.py (the one copy, at the pinned umbrella
+  commit). The CTM Assessment package itself is not
+  installed, so later steps run as a component development build
+  (CTM_COMPONENT_DEV=1). Requires Quarto, Python 3 and a checkout with the
+  head commit (fetch-depth 2).
 inputs:
   ctm-libs-ref:
-    description: Erasmus-CTM/ctm-libs branch, tag or commit
-    default: main
+    description: Erasmus-CTM/ctm-libs branch, tag or commit (default the review ref, else the pin in .github/pins.json)
+    default: ''
+  ctm-checkers-ref:
+    description: Erasmus-CTM/ctm-checkers commit (default the review ref, else the pin in .github/pins.json)
+    default: ''
   jsxgraph-ref:
-    description: jsxgraph/jsxgraph-quarto tag, branch or full commit (the tested pin)
-    default: v1.1.0
+    description: jsxgraph/jsxgraph-quarto tag, branch or full commit (default the review ref, else the tested pin v1.1.0)
+    default: ''
+outputs:
+  ctm-libs:
+    description: The ctm-libs ref installed
+    value: ${{ steps.refs.outputs.ctm-libs }}
+  ctm-checkers:
+    description: The ctm-checkers commit installed
+    value: ${{ steps.refs.outputs.ctm-checkers }}
+  jsxgraph:
+    description: The JSXGraph ref installed
+    value: ${{ steps.refs.outputs.jsxgraph }}
 runs:
   using: composite
   steps:
+    - name: Pinned commits (.github/pins.json)
+      id: pins
+      shell: bash
+      run: jq -r 'to_entries[] | select(.value | type == "object") | "\(.key)=\(.value.commit)"' .github/pins.json >> "$GITHUB_OUTPUT"
+    - name: The umbrella's review-dependencies script
+      uses: actions/checkout@v4
+      with:
+        repository: Erasmus-CTM/ctm-assessment
+        ref: ${{ steps.pins.outputs['ctm-assessment'] }}
+        path: _ci/ctm-assessment
+        sparse-checkout: tools/ci
+        persist-credentials: false
+    - name: Select explicit review dependencies (main keeps normal defaults)
+      id: review
+      shell: bash
+      env:
+        REVIEW_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      run: python3 _ci/ctm-assessment/tools/ci/review-dependencies.py
+    - name: The refs to install
+      id: refs
+      shell: bash
+      env:
+        LIBS: ${{ inputs.ctm-libs-ref || steps.review.outputs['ctm-libs'] || steps.pins.outputs['ctm-libs'] }}
+        CHECKERS: ${{ inputs.ctm-checkers-ref || steps.review.outputs['ctm-checkers'] || steps.pins.outputs['ctm-checkers'] }}
+        JSXGRAPH: ${{ inputs.jsxgraph-ref || steps.review.outputs['jsxgraph'] || 'v1.1.0' }}
+      run: |
+        { echo "ctm-libs=$LIBS"; echo "ctm-checkers=$CHECKERS"; echo "jsxgraph=$JSXGRAPH"; } >> "$GITHUB_OUTPUT"
+        echo "ctm-libs $LIBS, ctm-checkers $CHECKERS, JSXGraph $JSXGRAPH"
     - name: Fetch ctm-libs
       uses: actions/checkout@v4
       with:
         repository: Erasmus-CTM/ctm-libs
-        ref: ${{ inputs.ctm-libs-ref }}
+        ref: ${{ steps.refs.outputs.ctm-libs }}
         path: _ctm-libs-source
-    - name: Install ctm-libs and JSXGraph
+        persist-credentials: false
+    - name: Fetch ctm-checkers
+      uses: actions/checkout@v4
+      with:
+        repository: Erasmus-CTM/ctm-checkers
+        ref: ${{ steps.refs.outputs.ctm-checkers }}
+        path: _ctm-checkers-source
+        persist-credentials: false
+    - name: Install ctm-libs, ctm-checkers and JSXGraph
       shell: bash
       run: |
         # Failures become annotations, readable without the raw log.
         step() { out=$("$@" 2>&1) || { echo "$out"; printf '::error title=%s failed::%s\n' "$*" "$(echo "$out" | tail -25 | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\n/%0A/g')"; exit 1; }; echo "$out"; }
         step quarto add ./_ctm-libs-source --no-prompt
         test -f _extensions/ctm-libs/lua/ctm.lua || { echo "::error::ctm-libs was not installed (is ctm-libs-ref a ctm-libs 0.9 or later commit?)"; find _extensions -maxdepth 3; exit 1; }
+        test -f _extensions/ctm-libs/lua/checkers.lua || { echo "::error::this ctm-libs has no ctm.checkers (math-exercise 0.11 needs a ctm-libs from consolidation step 2 on)"; exit 1; }
+        step quarto add ./_ctm-checkers-source --no-prompt
+        test -f _extensions/ctm-checkers/checkers.json || { echo "::error::ctm-checkers was not installed"; find _extensions -maxdepth 3; exit 1; }
         # git fetch accepts a tag, a branch or any commit GitHub serves for the
         # repository, including a pull request's commit from a fork (quarto add
         # owner/repo@ref does not find those).
         step git init -q _jsxgraph-source
-        step git -C _jsxgraph-source fetch --depth 1 https://github.com/jsxgraph/jsxgraph-quarto.git "${{ inputs.jsxgraph-ref }}"
+        step git -C _jsxgraph-source fetch --depth 1 https://github.com/jsxgraph/jsxgraph-quarto.git "${{ steps.refs.outputs.jsxgraph }}"
         step git -C _jsxgraph-source checkout -q --detach FETCH_HEAD
         step quarto add ./_jsxgraph-source --no-prompt
         # GitHub installs go under an owner folder (_extensions/jsxgraph/jsxgraph).
         lua=$(ls _extensions/jsxgraph/lua/jsxgraph.lua _extensions/*/jsxgraph/lua/jsxgraph.lua 2>/dev/null | head -1 || true)
         test -n "$lua" || { echo "::error::JSXGraph extension was not installed"; find _extensions -maxdepth 3; exit 1; }
         echo "CTM_LIBS_EXTENSION=$GITHUB_WORKSPACE/_ctm-libs-source/_extensions/ctm-libs" >> "$GITHUB_ENV"
+        echo "CTM_CHECKERS_EXTENSION=$GITHUB_WORKSPACE/_extensions/ctm-checkers" >> "$GITHUB_ENV"
+        echo "CTM_CHECKERS_WHEEL=$GITHUB_WORKSPACE/_extensions/ctm-checkers/$(jq -r .wheel _extensions/ctm-checkers/checkers.json)" >> "$GITHUB_ENV"
         echo "JSXGRAPH_EXTENSION=$GITHUB_WORKSPACE/$(dirname "$(dirname "$lua")")" >> "$GITHUB_ENV"
         # math-exercise stops without the CTM Assessment package unless the
         # build says it is a component development build.

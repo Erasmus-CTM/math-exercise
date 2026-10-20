@@ -9,19 +9,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 2
-      - name: Select explicit review dependencies (main keeps normal defaults)
-        id: review
-        env:
-          REVIEW_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
-        run: python3 .github/review-dependencies.py
       - uses: quarto-dev/quarto-actions/setup@v2
         with:
           version: '1.8.27'
-      - name: Install ctm-libs and JSXGraph
+      - name: Install ctm-libs, ctm-checkers and JSXGraph (pins, review refs)
         uses: ./.github/actions/quarto-dependencies
-        with:
-          ctm-libs-ref: ${{ steps.review.outputs['ctm-libs'] || 'main' }}
-          jsxgraph-ref: ${{ steps.review.outputs['jsxgraph'] || 'v1.1.0' }}
       - name: Install variant build dependency
         run: python3 -m pip install 'PyYAML>=6'
       - name: Render standalone example

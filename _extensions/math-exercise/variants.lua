@@ -21,10 +21,15 @@ local function html(source, markers)
   local result = pandoc.write(doc, 'html', {html_math_method='mathjax', wrap_text='none'}):gsub('\n', ' ')
   return result:gsub('CTMVARIANTFIELD(%d+)END', function(i) return fields[tonumber(i)] end)
 end
-function M.generate(raw, question, opts, review)
+-- `environment()`: the environment variants.py runs in (it rounds with
+-- ctm-checkers' numeric module: its wheel on PYTHONPATH).
+function M.generate(raw, question, opts, review, environment)
   if not raw:match('#|%s*parameters:') then return nil end
   local generator = quarto.utils.resolve_path('variants.py')
-  local result = quarto.json.decode(pandoc.pipe('python3', {generator}, quarto.json.encode({source=raw, review=review or false})))
+  local input = quarto.json.encode({source=raw, review=review or false})
+  local function run() return pandoc.pipe('python3', {generator}, input) end
+  local output = environment and pandoc.system.with_environment(environment(), run) or run()
+  local result = quarto.json.decode(output)
   for _, record in ipairs(result.variants) do
     record.question = html(record.question, true)
     record.solution = html(record.solution, false)

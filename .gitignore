@@ -19,13 +19,18 @@ __pycache__/
 /test-results/
 
 # Locally installed dependencies (quarto add); never vendored here.
-# `quarto add` of ctm-libs also installs its ai-feedback alias.
+# `quarto add` of ctm-libs also installs its ai-feedback alias; ctm-checkers
+# is the checker library math-exercise grades with.
 /_extensions/ctm-libs/
+/_extensions/ctm-checkers/
 /_extensions/ai-feedback/
 /_extensions/jsxgraph/
 /_extensions/*/ctm-libs/
+/_extensions/*/ctm-checkers/
 /_extensions/*/ai-feedback/
 /_extensions/*/jsxgraph/
 /_ctm-libs-source/
+/_ctm-checkers-source/
 /_feedback-source/
 /_jsxgraph-source/
+/_ci/

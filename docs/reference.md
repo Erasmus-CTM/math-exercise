@@ -473,7 +473,9 @@ Python and stops the build on failure, identifying the exercise label. Install
 SymPy in that build environment, plus any packages imported by the checker
 (for example, NetworkX). Set `MATH_EXERCISE_PYTHON` to choose a Python
 executable. Exercises without a tests block retain their existing build
-requirements.
+requirements. The tests run in ctm-checkers, CTM Assessment's Python checker
+library, which also grades in the browser (see
+[where the runner lives](question-tests.md#where-the-runner-lives)).
 
 Run the same tests directly, without rendering, with:
 
@@ -492,7 +494,7 @@ authors can copy the exercise and its tests together.
 
 This repository's `npm test` and GitHub action call that same runner. Tests
 travel with the copied exercise and remain visible in its documentation source
-panel; they are excluded from the browser's checker payload. They are trusted
+panel; they are excluded from the page's grading data. They are trusted
 author code executed during the build. Native tests exercise checker logic;
 they do not replace browser interaction checks or certify Pyodide parity.
 
@@ -921,9 +923,11 @@ The extension works **with and without** a `{pyodide}` code block:
   opens; SymPy is loaded on the first **Check** (that click takes a few seconds
   longer).
 
-The checker helpers run in their own Python module, so learner code in Pyodide
-cells that rebinds names such as `symbols`, `Matrix` or `sqrt` no longer breaks
-checks; if other code removes that module, the next Check installs it again.
+The checks are ctm-checkers, the Python checker library of CTM Assessment,
+installed once per runtime as its own package (`ctm_checkers`), so learner code
+in Pyodide cells that rebinds names such as `symbols`, `Matrix`, `sqrt`,
+`__import__` or `globals` does not break checks; if other code removes the
+package, the next Check installs it again.
 Answers are parsed by SymPy, which evaluates Python: input containing `__`
 is rejected, and interpreter state that an answer or a custom checker changes
 (`builtins`, standard streams, recursion limit, `sys.path`, working directory,
@@ -935,7 +939,7 @@ again, and a check that was running (also during SymPy's setup) is repeated
 once on the new runtime. With a runtime in a worker (pyodide-interaktiv), a
 check that takes longer than 20 s, for example an answer such as `9**9**9**9`,
 offers **Stop** (the time to load SymPy and packages is not counted; a load that has not finished after 180 s offers Stop, or ends with a message while Python is still starting), which restarts Python for the whole page; a stopped check (from
-any component's Stop) is not repeated. Change the time with
+any component's Stop) is not repeated, and checks waiting behind it are stopped too (the next Check runs on the restarted Python). Change the time with
 `math-exercise: {stop-after: 30}` (seconds), or for all CTM components of a
 project with `ctm-assessment: {stop-after: 30}`. Python running on the page itself cannot be interrupted; the
 page then has to be reloaded.

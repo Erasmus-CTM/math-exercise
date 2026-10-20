@@ -20,10 +20,10 @@ const extension = fileURLToPath(new URL('../_extensions/math-exercise', import.m
 const jsxgraph = process.env.JSXGRAPH_EXTENSION || fileURLToPath(new URL('../_extensions/jsxgraph', import.meta.url));
 const INSTALL = 'Install CTM Assessment: quarto add https://erasmus-ctm.github.io/ctm-assessment/ctm-assessment.tar.gz';
 
-function project({ withCtmLibs = true, withJsxgraph = false, withPackage = false } = {}) {
+function project({ withCtmLibs = true, withCheckers = withCtmLibs, withJsxgraph = false, withPackage = false } = {}) {
   const dir = mkdtempSync(join(tmpdir(), 'math-standalone-'));
   cpSync(extension, join(dir, '_extensions/math-exercise'), { recursive: true });
-  if (withCtmLibs) install(dir);
+  if (withCtmLibs) install(dir, '', { checkers: withCheckers });
   if (withJsxgraph) cpSync(jsxgraph, join(dir, '_extensions/jsxgraph'), { recursive: true });
   if (withPackage) {
     // The CTM Assessment package's manifest, which the bootstrap looks for.
@@ -61,6 +61,28 @@ test('without CTM Assessment or its library ctm-libs the render stops with the i
     const r = render(dir, 'filters: [math-exercise]\n', plain, withoutDev());
     assert.notEqual(r.status, 0);
     assert.ok(r.stderr.includes(INSTALL), r.stderr);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('without ctm-checkers, the checker library of CTM Assessment, the render stops with the install command', { skip }, () => {
+  const dir = project({ withCheckers: false });
+  try {
+    const r = render(dir, 'filters: [math-exercise]\n', plain);
+    assert.notEqual(r.status, 0);
+    assert.match(r.stderr, /math-exercise needs ctm-checkers, the checker library of CTM Assessment, which is not installed in this project/);
+    assert.ok(r.stderr.includes(INSTALL), r.stderr);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('with a ctm-libs without ctm.checkers (before CTM Assessment 0.10) the render stops with the update command', { skip }, () => {
+  const dir = project();
+  try {
+    rmSync(join(dir, '_extensions/ctm-libs/lua/checkers.lua'));
+    const r = render(dir, 'filters: [math-exercise]\n', plain);
+    assert.notEqual(r.status, 0);
+    // No ctm-libs version in the text (the check is whether ctm.checkers exists).
+    assert.match(r.stderr, /math-exercise \d+\.\d+\.\d+ needs ctm-checkers, which the ctm-libs in \S+ does not provide\. Update CTM Assessment: /);
+    assert.ok(r.stderr.includes(INSTALL.replace('Install', 'Update')), r.stderr);
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
@@ -152,14 +174,15 @@ test('scripts and styles are cacheable dependencies: once per page, the runtime 
     const r = render(dir, 'filters: [math-exercise]\nlang: nb\n', plain + '\n\n' + plain.replace('two', 'three'));
     assert.equal(r.status, 0, r.stderr);
     const page = html(dir);
-    const order = ['ctm-runtime-[\\d.]+/pyodide-runtime\\.js', 'ctm-locale-[\\d.]+/ctm-locale\\.js', 'ctm-locale-math-exercise-[\\d.]+/math-exercise\\.js',
+    const order = ['ctm-runtime-[\\d.]+/pyodide-runtime\\.js', 'ctm-checkers-[\\w.+]+/ctm-checkers\\.js', 'ctm-locale-[\\d.]+/ctm-locale\\.js',
+      'ctm-locale-math-exercise-[\\d.]+/math-exercise\\.js',
       'math-exercise-[\\d.]+/matrix-input\\.js', 'math-exercise-[\\d.]+/math-exercise\\.js'].map(file => {
       const found = [...page.matchAll(new RegExp('<script src="[^"]*/' + file + '"></script>', 'g'))];
       assert.equal(found.length, 1, file);
       return found[0].index;
     });
     assert.deepEqual([...order].sort((a, b) => a - b), order);
-    assert.ok(page.indexOf('window.__mathExerciseConfig = {"lang":"nb"') < order[3]);
+    assert.ok(page.indexOf('window.__mathExerciseConfig = {"lang":"nb"') < order[4]);
     assert.equal((page.match(/<link href="[^"]*\/math-exercise-[\d.]+\/math-exercise\.css" rel="stylesheet">/g) || []).length, 1);
     assert.doesNotMatch(page, /MathExerciseRuntime = |var LOCALES|<style type="text\/css">/);
     assert.match(page, /math-check-btn">✓&nbsp;Sjekk</);
@@ -208,12 +231,13 @@ test('Check grades with the page\'s own scripts and no AI feedback on the page (
     const w = dom.window;
     assert.equal(w.AIFeedback, undefined);
     w.__mathExerciseTestMode = true;
+    // ctm-checkers' install, the check (ctm-libs' call text) and the request's removal all get this answer.
     w.mainPyodide = { loadPackage: async () => {}, globals: { set() {} },
-      runPythonAsync: async code => code.includes('_math_runtime_source') ? undefined : JSON.stringify({ status: 'correct', score: 1 }) };
+      runPythonAsync: async () => JSON.stringify({ status: 'correct', score: 1 }) };
     // KaTeX is imported from a CDN as an ES module; jsdom cannot, so the legend gets a stub.
     w.__katexStub = { default: { render() {}, renderToString: () => '' } };
-    // The page's dependencies (ctm-libs' runtime and catalogue, then this
-    // extension's scripts), in document order.
+    // The page's dependencies (ctm-libs' runtime, ctm-checkers' page script
+    // and the catalogue, then this extension's scripts), in document order.
     const scripts = [...w.document.querySelectorAll('script[src*="quarto-contrib/"]')].map(script => script.getAttribute('src'));
     assert.ok(scripts.length >= 5, scripts.join(', '));
     for (const src of scripts) {

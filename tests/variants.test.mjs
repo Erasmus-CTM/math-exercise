@@ -2,19 +2,19 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
 import path from 'node:path';
-import vm from 'node:vm';
 import test from 'node:test';
 import {loadPage, requestFeedback, typesetMathJax} from './helpers/ai-context.mjs';
+import {pythonEnv} from './helpers/ctm-checkers.mjs';
 const root=path.resolve(import.meta.dirname,'..'),extension=path.join(root,'_extensions/math-exercise');
 function compiled(name,review=false){
  const source=readFileSync(path.join(root,'_includes/variants',name+'.qmd'),'utf8').split('\n').slice(1,-2).join('\n');
- const p=spawnSync('python3',[path.join(extension,'variants.py')],{input:JSON.stringify({source,review}),encoding:'utf8'});
+ const p=spawnSync('python3',[path.join(extension,'variants.py')],{input:JSON.stringify({source,review}),encoding:'utf8',env:pythonEnv});
  assert.equal(p.status,0,p.stderr);return JSON.parse(p.stdout);
 }
 function render(name){
  const input=readFileSync(path.join(root,'_includes/variants',name+'.qmd'),'utf8').replace('```{math-exercise}','```{.math-exercise}');
  const args=['--lua-filter',path.join(root,'tests/fixtures/variants-pandoc.lua'),'-t','plain','--wrap=none'];
- const p=spawnSync(process.env.PANDOC_BIN||'quarto',process.env.PANDOC_BIN?args:['pandoc',...args],{input,encoding:'utf8',env:{...process.env,VARIANT_EXTENSION:extension}});
+ const p=spawnSync(process.env.PANDOC_BIN||'quarto',process.env.PANDOC_BIN?args:['pandoc',...args],{input,encoding:'utf8',env:{...pythonEnv,VARIANT_EXTENSION:extension}});
  assert.equal(p.status,0,p.stderr);return JSON.parse(p.stdout);
 }
 function cellHTML(data){
@@ -45,10 +45,8 @@ test('generated selection persists stable IDs, syncs solution, emits protocol an
  page.window.close();
 });
 test('all authored vector, matrix, coupled, geometric and expression fixtures use the real Python checkers',()=>{
- const source=readFileSync(path.join(extension,'math-exercise.js'),'utf8');
- const match=source.match(/var source = \[\n([\s\S]*?)\n    \]\.join\('\\n'\);/);
- const python=vm.runInNewContext(`[${match[1]}]`).join('\n');
+ // ctm-checkers' checks (its wheel), with the requests the page sends for each fixture.
  const cases=['triangle','perpendicular','matrix','coupled','geometry'].map(x=>compiled(x,true));
- const script=`import json,sys\nexec(${JSON.stringify(python)})\ncases=json.load(sys.stdin)\ncount=0\nfor data in cases:\n o=data['options']\n for r in data['variants']:\n  for t in r['tests']:\n   _math_vars=o.get('vars','')\n   if o['mode']=='custom':\n    response=t.get('response',{'kind':'expressions','raw':t.get('answers',[]),'inputs':{}}).copy()\n    response['variant']={k:r[k] for k in ('id','parameters','derived','fingerprint')}\n    response['variant']['context']=r['variant-context']\n    _math_response_json=json.dumps(response)\n    _math_checker=r['checker']\n    actual=[_math_check_custom()['status']]\n   else:\n    import re\n    expected_answers=re.findall(r'_+\\[([^\\]]+)\\]',r['question'])\n    _math_mode=o['mode'];_math_reject='';_math_tolerance=o.get('tolerance','');_math_decplaces=o.get('decplaces','');_math_sigfigs='';_math_form='';_math_partial_credit=False;_math_form_credit=.5\n    actual=[]\n    for _math_student,_math_correct in zip(t['answers'],expected_answers):actual.append(_math_check()['status'])\n   expected=t['expected'] if isinstance(t['expected'],list) else [t['expected']]\n   assert actual==expected,(o['label'],r['id'],t,actual,expected)\n   count+=1\nprint(count,'real checker fixtures passed')\n`;
- const result=spawnSync('python3',['-c',script],{input:JSON.stringify(cases),encoding:'utf8'});assert.equal(result.status,0,result.stderr);assert.match(result.stdout,/fixtures passed/);
+ const script=`import json,re,sys\nfrom ctm_checkers.math_exercise import check,check_custom\ncases=json.load(sys.stdin)\ncount=0\nfor data in cases:\n o=data['options']\n for r in data['variants']:\n  for t in r['tests']:\n   if o['mode']=='custom':\n    response=t.get('response',{'kind':'expressions','raw':t.get('answers',[]),'inputs':{}}).copy()\n    response['variant']={k:r[k] for k in ('id','parameters','derived','fingerprint')}\n    response['variant']['context']=r['variant-context']\n    actual=[check_custom({'response':response,'vars':o.get('vars',''),'checker':r['checker']})['status']]\n   else:\n    expected_answers=re.findall(r'_+\\[([^\\]]+)\\]',r['question'])\n    actual=[check({'student':s,'correct':c,'vars':o.get('vars',''),'mode':o['mode'],'reject':'','tolerance':o.get('tolerance',''),'decplaces':o.get('decplaces',''),'sigfigs':'','form':'','partial_credit':False,'form_credit':.5})['status'] for s,c in zip(t['answers'],expected_answers)]\n   expected=t['expected'] if isinstance(t['expected'],list) else [t['expected']]\n   assert actual==expected,(o['label'],r['id'],t,actual,expected)\n   count+=1\nprint(count,'real checker fixtures passed')\n`;
+ const result=spawnSync('python3',['-c',script],{input:JSON.stringify(cases),encoding:'utf8',env:pythonEnv});assert.equal(result.status,0,result.stderr);assert.match(result.stdout,/fixtures passed/);
 });
