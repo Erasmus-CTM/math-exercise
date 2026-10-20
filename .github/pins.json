@@ -2,7 +2,7 @@
  "comment": "Commits CI uses (.github/actions/quarto-dependencies and parity.yml; a head commit's CTM-Review-Refs trailer names others for review). ctm-libs: the library of CTM Assessment (settings, languages, the Python runtime, AI feedback). ctm-checkers: the Python checker library math-exercise grades with, installed with quarto add. ctm-assessment: the umbrella, for tools/ci/review-dependencies.py (the one copy of every CTM repository) and its parity harness (integration/pyodide-parity), which compares math-exercise's example site built at a pull request's base and at its head (parity.yml, L2).",
  "ctm-libs": {
   "repository": "Erasmus-CTM/ctm-libs",
-  "commit": "dd6eaa48a0803344c3f17f2ac6b2327f4628f3ed"
+  "commit": "55c4f3be3b16b253bddc361b619f0531607da0c8"
  },
  "ctm-checkers": {
   "repository": "Erasmus-CTM/ctm-checkers",
