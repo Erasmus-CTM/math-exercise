@@ -821,6 +821,7 @@ local function buildExercise(el, state)
   local form      = opts["form"]      or ""
   local checker   = opts["checker"]   or ""
   local packages  = splitCsv(opts["packages"] or "")
+  dofile(quarto.utils.resolve_path("author-imports.lua"))(ctm, checker, packages, label, variants)
   local response  = opts["response"]  or ""
   local diagramRefs = {}
   for ref in ((response .. "," .. (opts["context"] or "") .. "," .. (opts["feedback-context"] or "")):gmatch("jsxgraph:([^,%s\"']+)")) do
