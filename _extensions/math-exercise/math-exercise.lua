@@ -180,6 +180,10 @@ local function ensureSetup()
   if hasSetup then return end
   hasSetup = true
   requireCheckers()
+  if not ctm.assets then
+    ctm.fail("math-exercise needs the shared assets API. Update CTM Assessment: " .. INSTALL)
+  end
+  ctm.assets.use()
   ctm.runtime.use()
   ctm.checkers.use()
   ctm.locale.use("math-exercise")

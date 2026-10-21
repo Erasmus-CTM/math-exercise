@@ -55,14 +55,13 @@
   var katexReady = false;
   var katexLib = null;
   var renderMathInElementFn = null;
-  var KATEX = 'https://cdn.jsdelivr.net/npm/katex@0.16/';
-
   async function ensureKatex() {
     if (katexReady) return;
+    var KATEX = window.CTMAssets.url('katex', '');
     var link = document.createElement('link');
     link.rel = 'stylesheet'; link.href = KATEX + 'dist/katex.min.css';
     document.head.appendChild(link);
-    // Loaded as ES modules (jsDelivr's `+esm` build), not classic <script>
+    // Load the package's own ES modules in both asset modes, not classic <script>
     // tags. Reason: KaTeX's classic UMD bundles register themselves through
     // Monaco's global AMD loader (vs/loader.js, injected here for the code
     // editor) instead of setting window.katex / window.renderMathInElement,
@@ -72,8 +71,8 @@
     // of racing Monaco's own concurrent module loads (a "temporarily hide
     // define.amd" workaround was tried first and broke Monaco's lazily
     // loaded markdown renderer for hover tooltips).
-    var katexMod      = await import(KATEX + '+esm');
-    var autoRenderMod = await import(KATEX + 'contrib/auto-render/+esm');
+    var katexMod      = await import(KATEX + 'dist/katex.mjs');
+    var autoRenderMod = await import(KATEX + 'dist/contrib/auto-render.mjs');
     katexLib = katexMod.default;
     renderMathInElementFn = autoRenderMod.default;
     katexReady = true;

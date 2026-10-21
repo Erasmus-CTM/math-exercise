@@ -234,8 +234,12 @@ test('Check grades with the page\'s own scripts and no AI feedback on the page (
     // ctm-checkers' install, the check (ctm-libs' call text) and the request's removal all get this answer.
     w.mainPyodide = { loadPackage: async () => {}, globals: { set() {} },
       runPythonAsync: async () => JSON.stringify({ status: 'correct', score: 1 }) };
-    // KaTeX is imported from a CDN as an ES module; jsdom cannot, so the legend gets a stub.
+    // Dynamic ES modules are outside jsdom; the legend gets a stub.
     w.__katexStub = { default: { render() {}, renderToString: () => '' } };
+    // Evaluate the real rendered asset configuration before its resolver.
+    const assetConfig = [...w.document.querySelectorAll("script:not([src])")].find(script => script.textContent.includes("globalThis.CTM_ASSETS="));
+    assert.ok(assetConfig, "the rendered page must provide its asset configuration");
+    w.eval(assetConfig.textContent);
     // The page's dependencies (ctm-libs' runtime, ctm-checkers' page script
     // and the catalogue, then this extension's scripts), in document order.
     const scripts = [...w.document.querySelectorAll('script[src*="quarto-contrib/"]')].map(script => script.getAttribute('src'));

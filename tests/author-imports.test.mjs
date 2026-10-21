@@ -33,7 +33,7 @@ test('local mode stops explicitly when the package collector is missing; CDN rem
   assert.match(local.stderr, /quarto add https:\/\/erasmus-ctm.github.io\/ctm-assessment\/ctm-assessment.tar.gz/);
   const cdn = run('cdn', true);
   assert.equal(cdn.status, 0, cdn.stderr);
-  assert.deepEqual(JSON.parse(JSON.parse(cdn.stdout).blocks[0].c[1]), []);
+  assert.equal(Object.keys(JSON.parse(JSON.parse(cdn.stdout).blocks[0].c[1])).length, 0);
 });
 
 test('the real Quarto handler registers built-in, custom, pool and generated checker inputs', {skip: !available && 'Quarto required'}, () => {
