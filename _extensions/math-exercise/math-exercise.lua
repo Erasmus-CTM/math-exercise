@@ -189,6 +189,7 @@ local function ensureSetup()
     stylesheets = {"matrix-input.css", "math-exercise.css"},
     scripts = {
       {path = "matrix-input.js", afterBody = true},
+      {path = "math-store.js", afterBody = true},
       {path = "math-exercise.js", afterBody = true},
     },
   })
@@ -893,6 +894,16 @@ local function buildExercise(el, state)
              .. ' data-context-refs="' .. attrEsc(fc.refs) .. '"'
              .. ' data-context="'      .. attrEsc('"' .. jsonEsc(sectionText) .. '"') .. '"'
 
+  if ctm.ui and ctm.ui.exercise then
+    local saved = ctm.ui.exercise{
+      component = "math-exercise", id = opts["label"],
+      source = pandoc.utils.sha1(el.text):sub(1, 16), save = opts["save"]
+    }
+    for key, value in pairs(saved.attributes or {}) do
+      attrs = attrs .. ' ' .. key .. '="' .. attrEsc(tostring(value)) .. '"'
+    end
+  end
+
   if opts["initial-values"] then
     attrs = attrs .. ' data-initial-values="' .. jsonArrAttr(initialValues) .. '"'
   end
@@ -906,6 +917,18 @@ local function buildExercise(el, state)
       for _, record in ipairs(variants.variants) do tasks[#tasks+1] = record.question end
       attrs = attrs .. ' data-variants="' .. attrEsc(quarto.json.encode(variants)) .. '"'
     end
+    local descriptors = {}
+    for index, task in ipairs(tasks) do
+      local record = variants and variants.variants[index] or nil
+      -- Storage identities do not change the checker or legacy variant payload.
+      -- Ignore a whole-definition fingerprint: match resolved deployed content.
+      local content = record and quarto.json.encode({
+        record.question or "", record.checker or "", record.solution or "", record["variant-context"] or ""
+      }) or task
+      local hash = pandoc.utils.sha1(content):sub(1, 16)
+      descriptors[#descriptors + 1] = {n = index, id = record and record.id or ("pool:" .. hash), hash = hash}
+    end
+    attrs = attrs .. ' data-storage-variants="' .. attrEsc(quarto.json.encode(descriptors)) .. '"'
     attrs        = attrs .. ' data-pool="'   .. jsonArrAttr(tasks) .. '"'
                          .. ' data-fields="[]"'
                          .. ' data-structural-field-labels="[]"'

@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Math answers use CTM Assessment's shared browser store. Matching sources or
+  deployed variant hashes restore fields and matrix sizes without running a
+  check. Changed or withdrawn answers remain read-only; the last result is
+  shown as historical until a new Check. Exercise labels are required for
+  saving; duplicate or missing labels use the shared warning and remain unsaved.
+- Components can export typed fields and matrices through the shared page
+  export. Graphical responses are not restored. Checker requests and grading
+  are unchanged.
+
 - `ctm-bootstrap.lua` is ctm-libs' new copy (CTM Assessment consolidation
   step 3): the bootstrap takes options for pyodide-interaktiv 1.9. math-exercise
   passes none, so its messages and behaviour are unchanged.
