@@ -168,6 +168,26 @@ test('a build without AI feedback has no Feedback button; feedback: true is name
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
+test('an API3 library without the assets capability stops with its update command in either mode', { skip }, () => {
+  for (const mode of ['cdn', 'local']) {
+    const dir = project();
+    try {
+      const library = join(dir, '_extensions/ctm-libs');
+      assert.match(readFileSync(join(library, 'lua/ctm.lua'), 'utf8'), /api = 3/);
+      // Reproduce an API3 installation without the new capability, using its
+      // actual module loader and the real component's Quarto filter passes.
+      rmSync(join(library, 'lua/assets.lua'));
+      const result = render(dir, 'filters: [math-exercise]\nctm-assessment:\n  assets: ' + mode + '\nmath-exercise:\n  feedback: false\n', plain);
+      assert.notEqual(result.status, 0, mode + ': an absent capability must stop the render');
+      assert.match(result.stderr, /math-exercise needs the shared assets API/);
+      assert.match(result.stderr, /Update CTM Assessment: quarto add https:\/\/erasmus-ctm.github.io\/ctm-assessment\/ctm-assessment.tar.gz/);
+      assert.doesNotMatch(result.stderr, /attempt to index|local asset manifest is missing/);
+    } finally {
+      rmSync(dir, {recursive: true, force: true});
+    }
+  }
+});
+
 test('scripts and styles are cacheable dependencies: once per page, the runtime and catalogue before the exercise scripts', { skip }, () => {
   const dir = project();
   try {
