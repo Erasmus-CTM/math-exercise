@@ -17,8 +17,9 @@ const math = new Proxy({legend: [], feedbackFieldSingle: 'Answer', feedbackField
 {get: (object, key) => key in object ? object[key] : String(key)});
 
 function page({meta = {state: 'empty'}, question = '<input class="math-input" id="e-f1" data-answer="42">',
-  labels = [], variants = [], pool = null, mode = 'equivalent', partial = false, graphical = false} = {}) {
-  const html = '<div class="math-exercise-cell" id="e" data-label="task" data-ctm-id="task" data-ctm-source="0123456789abcdef"'
+  labels = [], variants = [], pool = null, mode = 'equivalent', partial = false, graphical = false, rootId = 'e'} = {}) {
+  question = question.replaceAll('id="e-', 'id="' + rootId + '-');
+  const html = '<div class="math-exercise-cell" id="' + rootId + '" data-label="task" data-ctm-id="task" data-ctm-source="0123456789abcdef"'
     + ' data-mode="' + mode + '" data-fields="[]" data-field-labels="' + esc(JSON.stringify(labels)) + '"'
     + ' data-storage-variants="' + esc(JSON.stringify(variants)) + '" data-partial-credit="' + partial + '"'
     + (pool ? ' data-pool="' + esc(JSON.stringify(pool)) + '"' : '')
@@ -53,7 +54,7 @@ function page({meta = {state: 'empty'}, question = '<input class="math-input" id
   w.eval(source('matrix-input.js'));
   w.eval(source('math-store.js'));
   w.eval(source('math-exercise.js'));
-  const cell = w.document.getElementById('e');
+  const cell = w.document.getElementById(rootId);
   w.__mathExerciseTestApi.setupCell(cell);
   return {dom, w, cell, get registration() {return registration;}, get changes() {return changes;},
     get runtimeCalls() {return runtimeCalls;}, events, copies, verdict(value) {verdict = value;},
@@ -115,7 +116,7 @@ test('duplicate field labels fall back to distinct ids instead of losing respons
   const p = page({labels: ['x', 'x'], question: '<input class="math-input" id="e-f1"><input class="math-input" id="e-f2">'});
   const fields = p.cell.querySelectorAll('input');
   fields[0].value = 'one'; fields[1].value = 'two';
-  assert.deepEqual(plain(p.registration.read()).fields, {'e-f1': 'one', 'e-f2': 'two'});
+  assert.deepEqual(plain(p.registration.read()).fields, {f1: 'one', f2: 'two'});
   p.dom.window.close();
 });
 
@@ -170,5 +171,37 @@ test('copy uses the shared helper with visible, exercise-specific labeling and n
   copy.click();
   assert.deepEqual(p.copies, [{text: 'x: 3/4', options: {label: 'Copy the answer in exercise task'}}]);
   assert.equal(p.runtimeCalls, 0);
+  p.dom.window.close();
+});
+
+test('unlabelled field keys survive a preceding exercise changing generated DOM prefixes', () => {
+  const first=page({question:'<input class="math-input" id="e-f1"><input class="math-input" id="e-f2">'});
+  const inputs=first.cell.querySelectorAll('input');
+  inputs[0].value='first';inputs[1].value='second';
+  const saved=plain(first.registration.read());
+  assert.deepEqual(saved.fields,{f1:'first',f2:'second'});
+  first.dom.window.close();
+  const later=page({rootId:'math-exercise-27',question:'<input class="math-input" id="e-f1"><input class="math-input" id="e-f2">'});
+  later.registration.write(saved,{});
+  assert.deepEqual([...later.cell.querySelectorAll('input')].map(x=>x.value),['first','second']);
+  assert.deepEqual(plain(later.registration.read()),saved);
+  assert.equal(later.runtimeCalls,0);
+  later.dom.window.close();
+});
+test('configured labels cannot collide with exercise-relative fallback keys', () => {
+  const p=page({labels:['f2',''],question:'<input class="math-input" id="e-f1"><input class="math-input" id="e-f2">'});
+  const fields=p.cell.querySelectorAll('input');fields[0].value='named';fields[1].value='unnamed';
+  assert.deepEqual(plain(p.registration.read()).fields,{f2:'named','@field:f2':'unnamed'});
+  p.dom.window.close();
+});
+
+test('dynamic matrix cell keys restore after the exercise gets a different page ordinal', () => {
+  const values={'dm-A-1-1':'1','dm-A-1-2':'2','dm-A-2-1':'3','dm-A-2-2':'4'};
+  const p=page({rootId:'math-exercise-27',mode:'custom',variants:[{n:1,id:'a',hash:'a'.repeat(16)}],
+    pool:['mat{name=A, rows=auto, cols=auto, initial-rows=1, initial-cols=1, min-rows=0, min-cols=0, max-rows=3, max-cols=3}'],
+    meta:{state:'restored',record:{inputs:{fields:values,matrices:{A:{rows:2,cols:2}}}}}});
+  assert.deepEqual(plain(p.cell.querySelector('.math-dynamic-matrix-wrap').matrixInput.read()).raw,['1','2','3','4']);
+  assert.deepEqual(plain(p.registration.read()).fields,values);
+  assert.equal(p.runtimeCalls,0);
   p.dom.window.close();
 });

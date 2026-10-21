@@ -765,6 +765,23 @@ end
 -- Exercise cell builder (called from the document-order block walk below so
 -- it can read the auto-collected section context).
 ----
+-- A storage revision follows deployed content and checker inputs, not the
+-- page's exercise order or a whole generator-definition fingerprint. Sort
+-- nested map keys so equivalent generated data hashes the same on every build.
+local function storageContent(value)
+  if type(value) ~= "table" then return quarto.json.encode(value) end
+  local keys, parts = {}, {}
+  for key in pairs(value) do keys[#keys + 1] = key end
+  table.sort(keys, function(a, b)
+    return type(a) .. ":" .. tostring(a) < type(b) .. ":" .. tostring(b)
+  end)
+  for _, key in ipairs(keys) do
+    parts[#parts + 1] = "[" .. quarto.json.encode(type(key) .. ":" .. tostring(key))
+      .. "," .. storageContent(value[key]) .. "]"
+  end
+  return "[" .. table.concat(parts, ",") .. "]"
+end
+
 local function buildExercise(el, state)
   ensureSetup()
   exerciseCount = exerciseCount + 1
@@ -920,11 +937,23 @@ local function buildExercise(el, state)
     local descriptors = {}
     for index, task in ipairs(tasks) do
       local record = variants and variants.variants[index] or nil
-      -- Storage identities do not change the checker or legacy variant payload.
-      -- Ignore a whole-definition fingerprint: match resolved deployed content.
-      local content = record and quarto.json.encode({
-        record.question or "", record.checker or "", record.solution or "", record["variant-context"] or ""
-      }) or task
+      -- Parameters and derived values reach custom checkers even when they do
+      -- not appear in the question. Grading options also change the revision.
+      -- Keep generated stable ids; omit only the whole-definition fingerprint
+      -- so reordering or adding unrelated variants preserves exact matches.
+      local content = storageContent({
+        question = record and record.question or task,
+        solution = record and record.solution or "",
+        context = record and record["variant-context"] or "",
+        parameters = record and record.parameters or false,
+        derived = record and record.derived or false,
+        variantId = record and record.id or false,
+        grading = {mode = mode, reject = reject, tolerance = tolerance,
+          decplaces = decplaces, sigfigs = sigfigs, form = form, vars = vars,
+          checker = record and record.checker or checker, packages = packages,
+          response = response, partialCredit = partialCredit, formCredit = formCredit,
+          vecdir = vecdir, fieldLabels = fieldLabels}
+      })
       local hash = pandoc.utils.sha1(content):sub(1, 16)
       local descriptor = {id = record and record.id or ("pool:" .. hash), hash = hash}
       -- Legacy generated records have stable ids but no stable number. An

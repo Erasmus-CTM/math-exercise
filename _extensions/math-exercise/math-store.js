@@ -16,10 +16,18 @@
     function fields() {
       var items = options.fields(), counts = Object.create(null);
       items.forEach(function (item) { if (item.key) counts[item.key] = (counts[item.key] || 0) + 1; });
-      return items.map(function (item) {
-        // Repeated display labels must not overwrite another response.
-        return {element: item.element, label: item.label,
-          key: item.key && counts[item.key] === 1 ? item.key : item.element.id};
+      var used = Object.create(null), prefix = cell.id + '-';
+      items.forEach(function (item) { if (item.key && counts[item.key] === 1) used[item.key] = true; });
+      return items.map(function (item, index) {
+        var key = item.key && counts[item.key] === 1 ? item.key : null;
+        if (!key) {
+          // DOM ids include the page's exercise ordinal. Only the part local
+          // to this exercise identifies a saved field across page edits.
+          key = item.element.id.indexOf(prefix) === 0 ? item.element.id.slice(prefix.length) : 'field-' + (index + 1);
+          while (used[key]) key = '@field:' + key;
+          used[key] = true;
+        }
+        return {element: item.element, label: item.label, key: key};
       });
     }
     function matrices() { return Array.from(options.question.querySelectorAll('.math-dynamic-matrix-wrap')); }
@@ -52,8 +60,9 @@
           if (size) wrap.matrixInput.resize(size.rows, size.cols, true);
         });
         fields().forEach(function (item) {
-          item.element.value = inputs.fields && Object.prototype.hasOwnProperty.call(inputs.fields, item.key)
-            ? String(inputs.fields[item.key]) : '';
+          var values = inputs.fields || {};
+          var key = Object.prototype.hasOwnProperty.call(values, item.key) ? item.key : item.element.id;
+          item.element.value = Object.prototype.hasOwnProperty.call(values, key) ? String(values[key]) : '';
         });
         options.invalidate();
       } finally { restoring = false; }
