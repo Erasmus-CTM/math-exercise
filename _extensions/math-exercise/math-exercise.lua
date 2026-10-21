@@ -896,7 +896,7 @@ local function buildExercise(el, state)
 
   if ctm.ui and ctm.ui.exercise then
     local saved = ctm.ui.exercise{
-      component = "math-exercise", id = opts["label"],
+      component = "math-exercise", id = opts["label"], block = el,
       source = pandoc.utils.sha1(el.text):sub(1, 16), save = opts["save"]
     }
     for key, value in pairs(saved.attributes or {}) do
