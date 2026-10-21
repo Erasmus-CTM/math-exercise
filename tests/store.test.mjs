@@ -169,7 +169,7 @@ test('copy uses the shared helper with visible, exercise-specific labeling and n
   assert.equal(copy.textContent, 'Copy answer');
   assert.equal(copy.getAttribute('aria-label'), 'Copy the answer in exercise task');
   copy.click();
-  assert.deepEqual(p.copies, [{text: 'x: 3/4', options: {label: 'Copy the answer in exercise task'}}]);
+  assert.deepEqual(plain(p.copies), [{text: 'x: 3/4', options: {label: 'Copy the answer in exercise task'}}]);
   assert.equal(p.runtimeCalls, 0);
   p.dom.window.close();
 });

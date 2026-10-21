@@ -40,13 +40,13 @@ test('rendered storage revisions follow checker inputs and survive unrelated var
       'local f=assert(io.open("fixtures.json","r"));local fixtures=quarto.json.decode(f:read("*a"));f:close()\n'
       +'return {generate=function(raw,question,opts) return fixtures[opts.label] end}\n');
     let body='---\nfilters: [math-exercise]\nmath-exercise:\n  feedback: false\n---\n\n';
-    for(const name of Object.keys(fixtures)) body+='~~~{math-exercise}\n#| label: '+name+'\nQuestion.\n~~~\n\n';
+    for(const name of Object.keys(fixtures)) body+='```{math-exercise}\n#| label: '+name+'\nQuestion.\n```\n\n';
     for(const [name,checker,tolerance,question] of [
       ['plain-base','return True','0','First _[1].\n---\nSecond _[2].'],
       ['plain-checker','return False','0','First _[1].\n---\nSecond _[2].'],
       ['plain-tolerance','return True','1','First _[1].\n---\nSecond _[2].'],
       ['plain-reordered','return True','0','Second _[2].\n---\nFirst _[1].']
-    ]) body+='~~~{math-exercise}\n#| label: '+name+'\n#| pool: true\n#| mode: custom\n#| checker: '+checker+'\n#| tolerance: '+tolerance+'\n'+question+'\n~~~\n\n';
+    ]) body+='```{math-exercise}\n#| label: '+name+'\n#| pool: true\n#| mode: custom\n#| checker: '+checker+'\n#| tolerance: '+tolerance+'\n'+question+'\n```\n\n';
     await writeFile(path.join(dir,'fixture.qmd'),body);
     const rendered=spawnSync(quarto,['render','fixture.qmd','--to','html'],{cwd:dir,env:renderEnv,encoding:'utf8',timeout:120000});
     assert.equal(rendered.status,0,rendered.stderr);
@@ -65,3 +65,4 @@ test('rendered storage revisions follow checker inputs and survive unrelated var
     assert.equal(variants['plain-reordered'][1].hash,variants['plain-base'][0].hash);
   } finally {await rm(dir,{recursive:true,force:true});}
 });
+

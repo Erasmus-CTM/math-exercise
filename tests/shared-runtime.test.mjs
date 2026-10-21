@@ -13,7 +13,7 @@ const exercise = await readFile(new URL('../_extensions/math-exercise/math-exerc
 test('Lua registers the shared runtime, ctm-checkers and the exercise files as dependencies, no inline bundle', () => {
   assert.match(lua, /requireCheckers\(\)\s+ctm\.runtime\.use\(\)\s+ctm\.checkers\.use\(\)\s+ctm\.locale\.use\("math-exercise"\)\s+quarto\.doc\.add_html_dependency\(\{\s+name = "math-exercise"/);
   assert.match(lua, /ctm\.checkers\.require\("math-exercise", 1\)/);
-  assert.match(lua, /\{path = "matrix-input\.js", afterBody = true\},\s+\{path = "math-exercise\.js", afterBody = true\}/);
+  assert.match(lua, /\{path = "matrix-input\.js", afterBody = true\},\s+\{path = "math-store\.js", afterBody = true\},\s+\{path = "math-exercise\.js", afterBody = true\}/);
   assert.doesNotMatch(lua, /include_text\("after-body"/);
   assert.doesNotMatch(lua, /pyodide-runtime\.js/);
   assert.match(exercise, /globalThis\.MathExerciseRuntime\.ensurePyodide\(\)/);
