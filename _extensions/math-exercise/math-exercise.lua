@@ -208,7 +208,7 @@ local function parseOptions(raw)
     local line = source[i]
     local k, v = line:match("^#|%s*(.-):%s*(.-)%s*$")
     if k and v then
-      if v == "|" then
+      if v == "|" or (k == "tests" and v == "") then
         local block = {}
         i = i + 1
         while i <= #source do
@@ -774,10 +774,11 @@ local function buildExercise(el, state)
   -- Tests opt into native build-time checking. They are never sent to the
   -- learner runtime; exercises without tests need no native Python. The
   -- script runs them in ctm-checkers (its wheel on PYTHONPATH).
-  if opts["tests"] and opts["tests"]:match("%S") then
+  if not opts["parameters"] and opts["tests"] and opts["tests"]:match("%S") then
     local script = quarto.utils.resolve_path("question-tests.py")
-    local python = os.getenv("MATH_EXERCISE_PYTHON") or "python3"
+    local python = os.getenv("MATH_EXERCISE_PYTHON") or (pandoc.system.os == "mingw32" and "python" or "python3")
     opts["tests-base"] = quarto.project.directory or pandoc.path.directory(quarto.doc.input_file)
+    opts["question"] = questionText
     local ok, result = pcall(pandoc.system.with_environment, ctm.checkers.environment(), function()
       return pandoc.pipe(python, {script, "--stdin"}, quarto.json.encode(opts))
     end)
