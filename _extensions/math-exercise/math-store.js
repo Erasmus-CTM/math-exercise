@@ -85,21 +85,35 @@
       note.append(message, details);
     }
     function exportItem() {
-      var parts = [], grouped = new Set();
-      options.question.querySelectorAll('.math-mat, .math-vec').forEach(function (matrix, index) {
-        var elements = Array.from(matrix.querySelectorAll('input.math-input, textarea.math-input'));
-        elements.forEach(function (element) { grouped.add(element); });
-        var cols = Number(matrix.dataset.cols || matrix.style.getPropertyValue('--cols'));
-        if (matrix.classList.contains('math-vec')) cols = matrix.classList.contains('math-vec-row') ? elements.length : 1;
-        var rows = [], values = elements.map(function (element) { return element.value; });
+      var parts = [], labels = new Map(), matrixIndex = 0;
+      fields().forEach(function (item) { labels.set(item.element, item.label); });
+      options.question.querySelectorAll('.math-mat, .math-vec, input.math-input, textarea.math-input').forEach(function (element) {
+        if (!element.classList.contains('math-mat') && !element.classList.contains('math-vec')) {
+          if (!element.closest('.math-mat, .math-vec')) parts.push({kind: 'answer', label: labels.get(element), text: element.value});
+          return;
+        }
+        matrixIndex++;
+        var elements = Array.from(element.querySelectorAll('input.math-input, textarea.math-input'));
+        var cols = Number(element.dataset.cols || element.style.getPropertyValue('--cols'));
+        if (element.classList.contains('math-vec')) cols = element.classList.contains('math-vec-row') ? elements.length : 1;
+        var rows = [], values = elements.map(function (input) { return input.value; });
         for (var i = 0; cols > 0 && i < values.length; i += cols) rows.push('[' + values.slice(i, i + cols).join(', ') + ']');
-        parts.push({kind: 'answer', label: matrix.dataset.matrixName || '[' + (index + 1) + ']', text: '[' + rows.join(', ') + ']'});
-      });
-      fields().forEach(function (item) {
-        if (!grouped.has(item.element)) parts.push({kind: 'answer', label: item.label, text: item.element.value});
+        parts.push({kind: 'answer', label: element.dataset.matrixName || '[' + matrixIndex + ']', text: '[' + rows.join(', ') + ']'});
       });
       var caption = cell.querySelector('.math-exercise-caption');
       return {title: caption ? caption.textContent.trim() : options.id, parts: parts};
+    }
+    if (root.CTMCopy && !options.graphical) {
+      var copy = document.createElement('button');
+      copy.type = 'button';
+      copy.className = 'btn btn-light math-copy-answer';
+      copy.textContent = L.copyAnswer;
+      copy.setAttribute('aria-label', L.copyAnswerLabel(options.id));
+      copy.addEventListener('click', function () {
+        var text = exportItem().parts.map(function (part) { return part.label + ': ' + part.text; }).join('\n');
+        root.CTMCopy.text(text, {label: L.copyAnswerLabel(options.id)});
+      });
+      (cell.querySelector('.math-exercise-controls') || cell).append(copy);
     }
     handle = store.register({component: 'math-exercise', id: options.id, element: cell,
       source: cell.dataset.ctmSource, save: cell.dataset.ctmSave !== 'false' && !options.graphical,
@@ -109,7 +123,12 @@
     return {
       changed: function () {
         if (restoring) return;
-        note.replaceChildren(); last.replaceChildren(); handle.changed();
+        note.replaceChildren();
+        if (last.textContent && last.dataset.outdated !== 'true') {
+          last.textContent += ' ' + L.outdated;
+          last.dataset.outdated = 'true';
+        }
+        handle.changed();
       },
       result: function (value) { note.replaceChildren(); last.replaceChildren(); handle.result(value); },
       beforeVariant: function () {

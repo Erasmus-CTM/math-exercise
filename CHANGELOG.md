@@ -7,7 +7,8 @@
   check. Changed or withdrawn answers remain read-only; the last result is
   shown as historical until a new Check. Exercise labels are required for
   saving; duplicate or missing labels use the shared warning and remain unsaved.
-- Components can export typed fields and matrices through the shared page
+- A visible Copy answer button uses CTM Assessment's shared copy helper.
+  Components can export typed fields and matrices through the shared page
   export. Graphical responses are not restored. Checker requests and grading
   are unchanged.
 

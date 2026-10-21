@@ -7,6 +7,7 @@ const source = name => readFileSync(new URL('../_extensions/math-exercise/' + na
 const plain = value => JSON.parse(JSON.stringify(value));
 const esc = value => String(value).replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;');
 const ui = {sourceChanged: 'Source changed', variantChanged: 'Variant changed', variantWithdrawn: 'Variant withdrawn',
+  copyAnswer: 'Copy answer', copyAnswerLabel: id => 'Copy the answer in exercise ' + id,
   showSaved: 'Show saved answers', outdated: 'Outdated', statusCorrect: 'Correct', statusPartial: 'Partial',
   statusWrong: 'Wrong', statusInvalid: 'Invalid', confirmNewVariant: 'Replace the answers?',
   lastChecked: (date, status, percent) => 'Last checked ' + date + ': ' + status + ' (' + percent + '%)'};
@@ -34,7 +35,8 @@ function page({meta = {state: 'empty'}, question = '<input class="math-input" id
   w.confirm = () => false;
   w.Math.random = () => 0;
   let registration, changes = 0, runtimeCalls = 0, verdict = {status: 'correct', score: 1};
-  const events = [];
+  const events = [], copies = [];
+  w.CTMCopy = {text: (text, options) => {copies.push({text, options});}};
   // Only the shared-store boundary is mocked: revision matching is tested in
   // ctm-libs; this suite verifies the adapter writes solely when asked to.
   w.CTMStore = {register(options) {
@@ -54,7 +56,7 @@ function page({meta = {state: 'empty'}, question = '<input class="math-input" id
   const cell = w.document.getElementById('e');
   w.__mathExerciseTestApi.setupCell(cell);
   return {dom, w, cell, get registration() {return registration;}, get changes() {return changes;},
-    get runtimeCalls() {return runtimeCalls;}, events, verdict(value) {verdict = value;},
+    get runtimeCalls() {return runtimeCalls;}, events, copies, verdict(value) {verdict = value;},
     field() {return cell.querySelector('input.math-input');}};
 }
 async function check(p) {
@@ -73,6 +75,10 @@ test('matching saved fields restore without Python, checks or fresh result event
   assert.match(p.cell.querySelector('.math-saved-result').textContent, /Partial \(50%\)/);
   assert.equal(p.field().classList.contains('math-input-partial'), false);
   assert.deepEqual(plain(p.registration.read()).fields, {x: '3/4'});
+  p.field().value = 'edited';
+  p.field().dispatchEvent(new p.w.Event('input', {bubbles: true}));
+  assert.match(p.cell.querySelector('.math-saved-result').textContent, /Partial \(50%\).*Outdated/);
+  assert.equal(p.runtimeCalls, 0);
   p.dom.window.close();
 });
 
@@ -128,7 +134,7 @@ test('matrix sizes and field values restore together through the real editor', (
   p.dom.window.close();
 });
 
-test('a new check publishes the actual result; editing invalidates historical UI', async () => {
+test('a new check publishes the actual result; editing requests a shared save', async () => {
   const p = page({labels: ['x']});
   p.field().value = '42';
   await check(p);
@@ -153,4 +159,16 @@ test('export exposes typed answers only, and graphical responses do not opt into
   assert.equal(graphical.registration.save, false);
   assert.equal(graphical.registration.read(), null);
   graphical.dom.window.close();
+});
+
+test('copy uses the shared helper with visible, exercise-specific labeling and no check', () => {
+  const p = page({labels: ['x']});
+  p.field().value = '3/4';
+  const copy = p.cell.querySelector('.math-copy-answer');
+  assert.equal(copy.textContent, 'Copy answer');
+  assert.equal(copy.getAttribute('aria-label'), 'Copy the answer in exercise task');
+  copy.click();
+  assert.deepEqual(p.copies, [{text: 'x: 3/4', options: {label: 'Copy the answer in exercise task'}}]);
+  assert.equal(p.runtimeCalls, 0);
+  p.dom.window.close();
 });

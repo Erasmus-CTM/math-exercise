@@ -926,7 +926,11 @@ local function buildExercise(el, state)
         record.question or "", record.checker or "", record.solution or "", record["variant-context"] or ""
       }) or task
       local hash = pandoc.utils.sha1(content):sub(1, 16)
-      descriptors[#descriptors + 1] = {n = index, id = record and record.id or ("pool:" .. hash), hash = hash}
+      local descriptor = {id = record and record.id or ("pool:" .. hash), hash = hash}
+      -- Legacy generated records have stable ids but no stable number. An
+      -- invented position would mask an id match after a deployment reorder.
+      descriptor.n = record and record.n or (not record and index or nil)
+      descriptors[#descriptors + 1] = descriptor
     end
     attrs = attrs .. ' data-storage-variants="' .. attrEsc(quarto.json.encode(descriptors)) .. '"'
     attrs        = attrs .. ' data-pool="'   .. jsonArrAttr(tasks) .. '"'
@@ -1081,6 +1085,12 @@ end
 
 return {
   { Pandoc = preparePage },
+  { Pandoc = function(doc)
+      if quarto.doc.is_format("html") and ctm.progress and ctm.progress.prepare then
+        return ctm.progress.prepare(doc)
+      end
+      return doc
+    end },
   { Callout = function(c)
       if feedbackForPage and quarto.doc.is_format("html") then
         return ctm.feedback.markCallout(c)
@@ -1088,4 +1098,10 @@ return {
       return c
     end },
   { Pandoc = Pandoc },
+  { Pandoc = function(doc)
+      if quarto.doc.is_format("html") and ctm.ui and ctm.ui.finalize then
+        return ctm.ui.finalize(doc)
+      end
+      return doc
+    end },
 }
