@@ -177,7 +177,7 @@ test('an API3 library without the assets capability stops with its update comman
       // Reproduce an API3 installation without the new capability, using its
       // actual module loader and the real component's Quarto filter passes.
       if (capability === 'missing') rmSync(join(library, 'lua/assets.lua'));
-      else writeFileSync(join(library, 'lua/assets.lua'), capability === 'boolean' ? 'return true\n' : 'return {use = true}\n');
+      else writeFileSync(join(library, 'lua/assets.lua'), capability === 'boolean' ? 'return function() return true end\n' : 'return function() return {use = true} end\n');
       const settings = join(library, 'lua/settings.lua');
       writeFileSync(settings, readFileSync(settings, 'utf8').replace('function M.load(meta)', 'function M.load(meta)\nerror("META SETTINGS TRIPWIRE")'));
       const result = render(dir, 'filters: [math-exercise]\nctm-assessment:\n  assets: ' + mode + '\nmath-exercise:\n  feedback: false\n', plain);
