@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Declarative question tests run through the real grader in every mode at
+  build time and through the direct question-tests.py command. Named fields,
+  raw student strings and score/partial expectations share ctm-checkers'
+  runner; legacy custom test(check, symbols) assertions remain supported.
+
 - `ctm-bootstrap.lua` is ctm-libs' new copy (CTM Assessment consolidation
   step 3): the bootstrap takes options for pyodide-interaktiv 1.9. math-exercise
   passes none, so its messages and behaviour are unchanged.
