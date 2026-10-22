@@ -172,7 +172,8 @@ local function requireCheckers()
 end
 
 local function requireAssets()
-  if not ctm.assets then
+  if type(ctm.assets) ~= "table" or type(ctm.assets.use) ~= "function"
+      or type(ctm.assets.mode) ~= "function" or type(ctm.assets.url) ~= "function" then
     ctm.fail("math-exercise needs the shared assets API. Update CTM Assessment: " .. INSTALL)
   end
 end

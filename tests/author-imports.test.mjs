@@ -11,9 +11,9 @@ const quarto = process.env.QUARTO_BIN || 'quarto';
 const available = !spawnSync(quarto, ['--version']).error;
 const fixture = fileURLToPath(new URL('./fixtures/author-imports-pandoc.lua', import.meta.url));
 const adapter = fileURLToPath(new URL('../_extensions/math-exercise/author-imports.lua', import.meta.url));
-function run(mode, absent = false) {
+function run(mode, absent = false, malformed = '') {
   return spawnSync(quarto, ['pandoc', '--from', 'markdown', '--to', 'json', '--lua-filter', fixture], {
-    input: `---\nmode: ${mode}\nabsent: ${absent}\n---\n`,
+    input: `---\nmode: ${mode}\nabsent: ${absent}\nmalformed: "${malformed}"\n---\n`,
     env: {...process.env, MATH_IMPORT_ADAPTER: adapter}, encoding: 'utf8', timeout: 30000,
   });
 }
@@ -74,4 +74,13 @@ test('the real Quarto handler registers built-in, custom, pool and generated che
   } finally {
     rmSync(dir, {recursive: true, force: true});
   }
+});
+
+for (const malformed of ['boolean', 'invalid']) test('local mode diagnoses a ' + malformed + ' collector; CDN remains usable', {skip: !available && 'Quarto required'}, () => {
+  const local = run('local', false, malformed);
+  assert.notEqual(local.status, 0);
+  assert.match(local.stderr, /local assets need CTM Assessment's author Python collector/);
+  assert.doesNotMatch(local.stderr, /attempt to index/);
+  const cdn = run('cdn', false, malformed);
+  assert.equal(cdn.status, 0, cdn.stderr);
 });

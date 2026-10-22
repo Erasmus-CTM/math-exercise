@@ -169,19 +169,22 @@ test('a build without AI feedback has no Feedback button; feedback: true is name
 });
 
 test('an API3 library without the assets capability stops with its update command in either mode', { skip }, () => {
-  for (const mode of ['cdn', 'local']) {
+  for (const mode of ['cdn', 'local']) for (const capability of ['missing', 'boolean', 'invalid']) {
     const dir = project();
     try {
       const library = join(dir, '_extensions/ctm-libs');
       assert.match(readFileSync(join(library, 'lua/ctm.lua'), 'utf8'), /api = 3/);
       // Reproduce an API3 installation without the new capability, using its
       // actual module loader and the real component's Quarto filter passes.
-      rmSync(join(library, 'lua/assets.lua'));
+      if (capability === 'missing') rmSync(join(library, 'lua/assets.lua'));
+      else writeFileSync(join(library, 'lua/assets.lua'), capability === 'boolean' ? 'return true\n' : 'return {use = true}\n');
+      const settings = join(library, 'lua/settings.lua');
+      writeFileSync(settings, readFileSync(settings, 'utf8').replace('function M.load(meta)', 'function M.load(meta)\nerror("META SETTINGS TRIPWIRE")'));
       const result = render(dir, 'filters: [math-exercise]\nctm-assessment:\n  assets: ' + mode + '\nmath-exercise:\n  feedback: false\n', plain);
       assert.notEqual(result.status, 0, mode + ': an absent capability must stop the render');
       assert.match(result.stderr, /math-exercise needs the shared assets API/);
       assert.match(result.stderr, /Update CTM Assessment: quarto add https:\/\/erasmus-ctm.github.io\/ctm-assessment\/ctm-assessment.tar.gz/);
-      assert.doesNotMatch(result.stderr, /attempt to index|local asset manifest is missing/);
+      assert.doesNotMatch(result.stderr, /attempt to index|local asset manifest is missing|META SETTINGS TRIPWIRE/);
     } finally {
       rmSync(dir, {recursive: true, force: true});
     }

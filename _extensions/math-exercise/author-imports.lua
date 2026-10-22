@@ -2,7 +2,7 @@
 -- The package collector owns Python import analysis and local subset checks.
 return function(ctm, checker, packages, label, variants)
   local imports = rawget(_G, "__ctmAuthorImports")
-  if not imports or type(imports.add) ~= "function" then
+  if type(imports) ~= "table" or type(imports.add) ~= "function" then
     if ctm.assets and ctm.assets.mode() == "local" then
       ctm.fail("math-exercise: local assets need CTM Assessment's author Python collector. Update CTM Assessment: quarto add https://erasmus-ctm.github.io/ctm-assessment/ctm-assessment.tar.gz; include the ctm-assessment filter before math-exercise.")
     end
