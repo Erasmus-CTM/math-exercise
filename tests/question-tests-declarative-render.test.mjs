@@ -37,7 +37,11 @@ test('declarative tests run at real Quarto build time in every grading mode',()=
       assert.match(html,new RegExp('declarative-'+mode));
     }
     // Mutating a real grading expectation must stop the build by name.
-    writeFileSync(join(dir,'lesson.qmd'),source.replace('#|     answers: [raw("0.501")]','#|     answers: [raw("9")]'));
+    const wrongNumeric=source.replace(
+      '#|     answers: ['+JSON.stringify('raw("0.501")')+']',
+      '#|     answers: ['+JSON.stringify('raw("9")')+']');
+    assert.notEqual(wrongNumeric,source,'the numeric grading mutation changes the fixture');
+    writeFileSync(join(dir,'lesson.qmd'),wrongNumeric);
     result=render();
     assert.notEqual(result.status,0);
     assert.match(result.stdout+result.stderr,/declarative-numeric/);
