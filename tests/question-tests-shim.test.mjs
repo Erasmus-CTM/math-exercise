@@ -34,8 +34,12 @@ function run({ component, checkers, env = {}, args, question = QUESTION }) {
     const environment = { ...process.env, ...env };
     if (!('CTM_CHECKERS_WHEEL' in env)) delete environment.CTM_CHECKERS_WHEEL;
     delete environment.PYTHONPATH;
-    return spawnSync(python, [join(dir, '_extensions', component, 'question-tests.py'), ...(args || ['lesson.qmd'])],
+    const result = spawnSync(python, [join(dir, '_extensions', component, 'question-tests.py'), ...(args || ['lesson.qmd'])],
       { cwd: dir, env: environment, encoding: 'utf8', timeout: 120000, input: args && args[0] === '--stdin' ? JSON.stringify(question) : undefined });
+    // Python uses the platform's native line ending; the message stays exact.
+    result.stdout = result.stdout?.replace(/\r\n/g, '\n');
+    result.stderr = result.stderr?.replace(/\r\n/g, '\n');
+    return result;
   } finally { rmSync(dir, { recursive: true, force: true }); }
 }
 const passed = /^1 authored question tests passed; 0 custom questions without tests\.\n$/;
@@ -70,10 +74,11 @@ test('without ctm-checkers the command says how to install it', () => {
 
 test('CTM_CHECKERS_WHEEL naming a missing file is reported as such', () => {
   // Also with ctm-checkers installed: the variable decides.
-  const wrong = run({ component: 'math-exercise', checkers: 'ctm-checkers', env: { CTM_CHECKERS_WHEEL: '/no/such/wheel.whl' } });
+  const missing = join(tmpdir(), 'no-such-ctm-checkers-' + process.pid, 'wheel.whl');
+  const wrong = run({ component: 'math-exercise', checkers: 'ctm-checkers', env: { CTM_CHECKERS_WHEEL: missing } });
   assert.equal(wrong.status, 1);
   assert.equal(wrong.stderr,
-    'math-exercise question tests failed: CTM_CHECKERS_WHEEL names /no/such/wheel.whl, which does not exist.\n');
+    'math-exercise question tests failed: CTM_CHECKERS_WHEEL names ' + missing + ', which does not exist.\n');
 });
 
 test('the messages and exit statuses of the command stay those of math-exercise 0.10', () => {

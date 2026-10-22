@@ -1,14 +1,51 @@
 # Tests owned by an exercise
 
-A custom checker can accept many different answers. Keep its tests with the
+Every grading mode can have declarative tests. A custom checker can also keep
+its existing Python assertions. Keep its tests with the
 exercise so that an author can review, change, and copy the assessment as one
 unit. Tests are optional: older exercises without a `tests` option render as
 before and do not require native Python.
 
 Use short inline assertions for small exercises. Put larger fixtures in a
-neighboring Python file and reference it from the exercise. Both formats use
-the same runner, `question-tests.py` in the extension; no separate
-question-test schema or test service is needed.
+neighboring Python file and reference it from the exercise. Both legacy forms use the same direct script, `question-tests.py`, which delegates
+to ctm-checkers. Declarative cases use that script too.
+
+## Declarative cases in every mode
+
+A named case gives answers and an expected overall verdict or a list of
+verdicts in field order. A mapping uses field-labels exactly as written.
+
+    #| label: sum
+    #| mode: numeric
+    #| field-labels: sum
+    #| tolerance: 0.01
+    #| tests:
+    #|   - name: near the correct number
+    #|     answers: {sum: raw("2.005")}
+    #|     expect: correct
+    #|   - name: a common error
+    #|     answers: [raw("3")]
+    #|     expect: wrong
+
+The body remains ordinary Markdown, for example "Compute 1+1: _[2]."
+Cases run through the existing grader in equivalent, numeric, exact, set,
+string, string_ci and custom modes. raw("...") preserves typed text; other
+values are expressions in the question's symbols and resolved variables.
+Raw text is a complete fixture value, never an argument inside a computed
+SymPy expression. Unknown fields, duplicate names, null/empty expectations
+and malformed cases stop the build with the exercise and case name.
+
+Optional score and partial assertions check the overall result. Use
+partial-credit: true when expecting partial credit across built-in fields.
+Per-field expectations remain available independently of that option.
+Custom graphical cases can give response instead of answers. No authored
+tests are shipped to student pages. Native declarative YAML requires
+SymPy and PyYAML on the render machine; exercises without tests still need
+no native Python.
+
+The format and callback contract live in ctm-checkers' docs/question-tests.md.
+It is shared with the future variants and H1 adapters. This change leaves the
+existing variant generator and legacy custom checker assertions in place.
 
 ## Inline tests
 

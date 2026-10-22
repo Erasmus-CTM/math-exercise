@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Declarative question tests run through the real grader in every mode at
+  build time and through the direct question-tests.py command. Named fields,
+  raw student strings and score/partial expectations share ctm-checkers'
+  runner; legacy custom test(check, symbols) assertions remain supported.
+
 - Math answers use CTM Assessment's shared browser store. Matching sources or
   deployed variant hashes restore fields and matrix sizes without running a
   check. Changed or withdrawn answers remain read-only; the last result is

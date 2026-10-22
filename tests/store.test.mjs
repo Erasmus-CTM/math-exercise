@@ -205,3 +205,42 @@ test('dynamic matrix cell keys restore after the exercise gets a different page 
   assert.equal(p.runtimeCalls,0);
   p.dom.window.close();
 });
+
+test('forget removes only saved history and preserves current answers and feedback', () => {
+  for (const state of ['restored', 'changed', 'withdrawn']) {
+    const p = page({labels: ['x'], meta: {state, outdated: state !== 'restored',
+      record: {inputs: {fields: {x: 'saved answer'}, matrices: {}},
+        result: {at: '2026-10-20', status: 'partial', score: .5}}}});
+    p.field().value = 'live answer';
+    const feedback = p.cell.querySelector('.math-feedback-area');
+    feedback.textContent = 'keep current feedback and output';
+    const sibling = p.w.document.createElement('div');
+    sibling.className = 'math-saved-result'; sibling.textContent = 'another exercise history';
+    p.w.document.body.append(sibling);
+    assert.notEqual(p.cell.querySelector('.math-saved-result').textContent, '');
+    p.registration.forget(); p.registration.forget();
+    assert.equal(p.field().value, 'live answer');
+    assert.equal(feedback.textContent, 'keep current feedback and output');
+    assert.equal(p.cell.querySelector('.math-saved-answer').textContent, '');
+    assert.equal(p.cell.querySelector('.math-saved-result').textContent, '');
+    assert.equal(sibling.textContent, 'another exercise history');
+    assert.equal(p.changes, 0);
+    assert.equal(p.runtimeCalls, 0);
+    assert.deepEqual(p.events, []);
+    p.dom.window.close();
+  }
+});
+
+test('explicit clear resets current fields and removes saved history without scheduling a save', () => {
+  const p = page({labels: ['x'], meta: {state: 'changed', outdated: true,
+    record: {inputs: {fields: {x: 'old answer'}}, result: {at: '2026-10-20', status: 'wrong', score: 0}}}});
+  p.field().value = 'live answer';
+  assert.ok(p.cell.querySelector('.math-saved-answer pre'));
+  p.registration.clear();
+  assert.equal(p.field().value, '');
+  assert.equal(p.cell.querySelector('.math-saved-answer').textContent, '');
+  assert.equal(p.cell.querySelector('.math-saved-result').textContent, '');
+  assert.equal(p.changes, 0);
+  assert.equal(p.runtimeCalls, 0);
+  p.dom.window.close();
+});

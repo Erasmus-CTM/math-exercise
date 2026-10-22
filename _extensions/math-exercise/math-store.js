@@ -42,6 +42,10 @@
       if (!filled && !options.variants().length && !Object.keys(sizes).length) return null;
       return {fields: values, matrices: sizes};
     }
+    function forget() {
+      note.replaceChildren();
+      last.replaceChildren();
+    }
     function clearInputs() {
       restoring = true;
       try {
@@ -127,7 +131,7 @@
     handle = store.register({component: 'math-exercise', id: options.id, element: cell,
       source: cell.dataset.ctmSource, save: cell.dataset.ctmSave !== 'false' && !options.graphical,
       variant: options.variant, variants: options.variants, read: read, write: write,
-      clear: function () { clearInputs(); note.replaceChildren(); last.replaceChildren(); }, exportItem: exportItem});
+      forget: forget, clear: function () { clearInputs(); forget(); }, exportItem: exportItem});
     restored(handle.restore());
     return {
       changed: function () {
