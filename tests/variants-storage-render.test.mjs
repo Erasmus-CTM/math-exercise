@@ -26,7 +26,7 @@ test('generated math HTML and saved variant revisions are stable across fresh Qu
       ['context',question,solution,'Changed context {{a}}.'],
     ];
     const fence=String.fromCharCode(96).repeat(3);
-    let body='---\nfilters: [math-exercise]\nmath-exercise:\n  feedback: false\n---\n\n';
+    let body='---\nengine: markdown\nfilters: [math-exercise]\nmath-exercise:\n  feedback: false\n---\n\n';
     for(const [label,text,answer,context] of cases) {
       body+=fence+'{math-exercise}\n#| label: '+label+'\n#| parameters: {a: [1,2]}\n'
         +'#| derived: {b: a+1}\n#| mode: numeric\n#| tolerance: "0.01"\n'
