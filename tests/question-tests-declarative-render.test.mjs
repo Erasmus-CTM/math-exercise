@@ -9,7 +9,7 @@ import {install,renderEnv} from './helpers/ctm-libs.mjs';
 const fence=String.fromCharCode(96).repeat(3);
 function block(mode,teacher,answer,expect='correct',extra=''){
   return [fence+'{math-exercise}','#| label: declarative-'+mode,'#| mode: '+mode,extra,
-    '#| tests:','#|   - name: actual '+mode+' grading','#|     answers: ['+answer+']',
+    '#| tests:','#|   - name: actual '+mode+' grading','#|     answers: ['+JSON.stringify(answer)+']',
     '#|     expect: '+expect,'Answer: _['+teacher+'].',fence].filter(Boolean).join('\n');
 }
 test('declarative tests run at real Quarto build time in every grading mode',()=>{
