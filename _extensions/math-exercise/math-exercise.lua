@@ -836,6 +836,12 @@ local function buildExercise(el, state)
 
   local caption   = opts["caption"]   or nil
   local label     = opts["label"]     or eid
+  local questionId = label .. '-question'
+  assert(not questionId:find('%s'), 'math-exercise: question label must not contain whitespace: ' .. label)
+  state.questionIds = state.questionIds or {}
+  assert(not state.questionIds[questionId], 'math-exercise: duplicate question id: ' .. questionId)
+  state.questionIds[questionId] = true
+  local questionAttr = ' id="' .. attrEsc(questionId) .. '" class="math-exercise-question ai-feedback-context"'
   local vars      = opts["vars"]      or ""
   local mode      = opts["mode"]      or "equivalent"
   local reject    = opts["reject"]    or ""
@@ -906,7 +912,7 @@ local function buildExercise(el, state)
       local question = variants and variants.variants[1].question or (isPool and splitTasks(questionText)[1]) or questionText
       local body = processMarkers(question, eid, vars, vecdir, mode, true, variants ~= nil and not variants.native):gsub("\n", "<br>\n")
       local html = (caption and ('<div class="math-exercise-caption">' .. caption .. '</div>\n') or '')
-        .. '<div class="math-exercise-question">' .. body .. '</div>'
+        .. '<div' .. questionAttr .. '>' .. body .. '</div>'
       return pandoc.Div({pandoc.RawBlock("html", html), decision.note}, pandoc.Attr(eid, {"math-exercise-text"}))
     end
   end
@@ -1007,7 +1013,7 @@ local function buildExercise(el, state)
                          .. ' data-fields="[]"'
                          .. ' data-structural-field-labels="[]"'
     questionHtml = '<button type="button" class="math-pool-reload" title="' .. attrEsc(uiT("poolReloadTitle")) .. '">&#8635;</button>\n'
-                .. '<div class="math-exercise-question"></div>'
+                .. '<div' .. questionAttr .. '></div>'
     if variants and variants.native and (variants.unapproved or variants.renderMode == 'review') then
       local warning = variants.renderMode == 'review' and 'variantReview' or 'variantUnapproved'
       questionHtml = '<p class="math-variant-unapproved" role="status">' .. attrEsc(uiT(warning)) .. '</p>\n' .. questionHtml
@@ -1020,7 +1026,7 @@ local function buildExercise(el, state)
     -- Retain the pre-typesetting HTML, but never copy answer keys into the
     -- AI source. Inputs keep their ids so JS can insert current field labels.
     local source = body:gsub(' data%-answer="[^"]*"', '')
-    questionHtml = '<div class="math-exercise-question" data-math-exercise-source="'
+    questionHtml = '<div' .. questionAttr .. ' data-math-exercise-source="'
       .. attrEsc(source) .. '">' .. body .. '</div>'
   end
 
@@ -1154,7 +1160,19 @@ local function Pandoc(doc)
   if not quarto.doc.is_format("html") then return doc end
   if feedbackForPage then doc = ctm.feedback.prepare(doc) end
   doc.meta = Meta(doc.meta)
-  local state = { sectionCtx = {}, review = doc.meta["math-exercise-review"] == true }
+  local ids = {}
+  local function remember(el)
+    if el.identifier and el.identifier ~= '' then ids[el.identifier] = true end
+  end
+  local function rememberRaw(el)
+    if el.format ~= 'html' then return end
+    for quote, id in el.text:gmatch([=[%s[iI][dD]%s*=%s*(["'])(.-)%1]=]) do ids[id] = true end
+    for id in el.text:gmatch([=[%s[iI][dD]%s*=%s*([^%s"'=<>`]+)]=]) do ids[id] = true end
+  end
+  doc:walk({Header=remember,Div=remember,Span=remember,CodeBlock=remember,
+    Link=remember,Image=remember,Table=remember,Figure=remember,
+    RawBlock=rememberRaw,RawInline=rememberRaw})
+  local state = { sectionCtx = {}, review = doc.meta["math-exercise-review"] == true, questionIds=ids }
   doc.blocks = walkBlocks(doc.blocks, state)
   checkDiagramReferences(doc, state.jsxgraphRefs)
   return doc

@@ -147,3 +147,21 @@ test('explicit native board metadata carries plain public values without changin
   dom.window.close();
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
+
+test('question context IDs are stable and conflicting authored IDs fail clearly',()=>{
+ const dir=mkdtempSync(join(tmpdir(),'math-question-ids-'));
+ try{
+  cpSync(new URL('../_extensions/math-exercise',import.meta.url),join(dir,'_extensions/math-exercise'),{recursive:true});install(dir);
+  const header=['---','format: html','filters: [math-exercise]','ai-feedback:','  enabled: false','math-exercise:','  feedback: false','---',''].join('\n');
+  const ordinary=[fence+'{math-exercise}','#| label: stable','Answer _[2].',fence].join('\n');
+  const pool=[fence+'{math-exercise}','#| label: pool-context','#| pool: true','First _[2].','---','Second _[3].',fence].join('\n');
+  function render(body){writeFileSync(join(dir,'lesson.qmd'),header+body);return spawnSync(process.env.QUARTO||'quarto',['render','lesson.qmd'],{cwd:dir,env:renderEnv,encoding:'utf8',timeout:30000});}
+  let result=render(ordinary+'\n\n'+pool);assert.equal(result.status,0,result.stdout+result.stderr);
+  const dom=new JSDOM(readFileSync(join(dir,'lesson.html'),'utf8'));
+  for(const id of ['stable-question','pool-context-question']){const node=dom.window.document.getElementById(id);assert.ok(node);assert.ok(node.classList.contains('ai-feedback-context'));}
+  dom.window.close();
+  for(const conflict of ['::: {#stable-question}\nAuthored context\n:::','<div id="stable-question">Authored context</div>','<div ID="stable-question">Authored context</div>','<div id=stable-question>Authored context</div>',ordinary]){
+   result=render(conflict+'\n\n'+ordinary);assert.notEqual(result.status,0);assert.match(result.stdout+result.stderr,/duplicate question id: stable-question/);
+  }
+ }finally{rmSync(dir,{recursive:true,force:true});}
+});

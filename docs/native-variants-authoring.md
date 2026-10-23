@@ -90,3 +90,7 @@ safe JSON numbers where exact, other exact scalars as input strings, and recursi
 arrays/maps with null preserved. The exact grading codec remains unchanged.
 Figure transport cannot delay Check or Python readiness. Handwritten pools use
 the shared chooser without starting the native authoring process.
+
+Each rendered question exposes `<label>-question` with `ai-feedback-context`
+(design §3.6.j). Labels containing whitespace and generated IDs colliding with
+an authored AST ID, quoted/unquoted HTML ID, or another question fail the build.
