@@ -3,7 +3,7 @@
 // wheel; this does not claim Pyodide bootstrap or browser-engine acceptance.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync,writeFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {JSDOM} from 'jsdom';
@@ -176,6 +176,7 @@ for packet in json.loads(sys.argv[1]):
 print(json.dumps(out))`,JSON.stringify(packets)],{env:pythonEnv,encoding:'utf8',timeout:15000});
  assert.equal(result.status,0,result.stderr);const verdicts=JSON.parse(result.stdout);
  assert.equal(verdicts.length,2);for(const verdict of verdicts){assert.equal(verdict.status,'correct',JSON.stringify(verdict));assert.equal(verdict.score,1);}
+ if(process.env.CTM_VARIANTS_TRANSPORT_EVIDENCE)writeFileSync(process.env.CTM_VARIANTS_TRANSPORT_EVIDENCE,JSON.stringify({scope:'Actual component JS custom scalar/vector packets through installed native wheel browser.call; no Pyodide bootstrap claim',packets,verdicts},null,2)+'\n');
 });
 
 test('review warning persists for approved choices and optional boards receive only public projected values',()=>{
