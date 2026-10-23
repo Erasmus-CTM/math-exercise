@@ -31,8 +31,8 @@ The question text is Markdown-like text, not HTML:
   the Markdown above instead: put several answer fields on separate lines
   rather than spacing them with `&nbsp;`.
 
-Generated variants (`#| parameters:`) are rendered by Pandoc, so their text
-supports Markdown in full.
+Native generated variants use `#| variables:` and the exact native authoring API.
+Legacy `parameters` syntax fails explicitly. See [native authoring](build-time-variants.md).
 
 ---
 

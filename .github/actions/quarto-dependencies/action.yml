@@ -102,6 +102,8 @@ runs:
         echo "CTM_LIBS_EXTENSION=$GITHUB_WORKSPACE/_ctm-libs-source/_extensions/ctm-libs" >> "$GITHUB_ENV"
         echo "CTM_CHECKERS_EXTENSION=$GITHUB_WORKSPACE/_extensions/ctm-checkers" >> "$GITHUB_ENV"
         echo "CTM_CHECKERS_WHEEL=$GITHUB_WORKSPACE/_extensions/ctm-checkers/$(jq -r .wheel _extensions/ctm-checkers/checkers.json)" >> "$GITHUB_ENV"
+        echo "CTM_VARIANTS_NATIVE=$GITHUB_WORKSPACE/_extensions/ctm-checkers/native-authoring" >> "$GITHUB_ENV"
+        echo "PYTHONPATH=$GITHUB_WORKSPACE/_extensions/ctm-checkers/native-authoring:$GITHUB_WORKSPACE/_extensions/ctm-checkers/$(jq -r .wheel _extensions/ctm-checkers/checkers.json)" >> "$GITHUB_ENV"
         echo "JSXGRAPH_EXTENSION=$GITHUB_WORKSPACE/$(dirname "$(dirname "$lua")")" >> "$GITHUB_ENV"
         # math-exercise stops without the CTM Assessment package unless the
         # build says it is a component development build.

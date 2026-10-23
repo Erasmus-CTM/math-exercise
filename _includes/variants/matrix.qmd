@@ -1,42 +1,26 @@
 ```{math-exercise}
 #| label: variant-matrix
+#| variables: |
+#|   a = pick([2, 3])
+#| field-labels: A11,A12,A21,A22
+#| note: a={#a#}
 #| mode: custom
 #| context: none
-#| parameters:
-#|   a:
-#|   - 2
-#|   - 3
 #| tests:
-#| - response:
-#|     kind: expressions
-#|     raw: []
-#|     inputs:
-#|       A:
-#|         type: matrix
-#|         rows: 2
-#|         cols: 2
-#|         raw:
-#|         - '{{a}}'
-#|         - 0
-#|         - 0
-#|         - -{{a}}
-#|   expected: correct
-#| - response:
-#|     kind: expressions
-#|     raw: []
-#|     inputs:
-#|       A:
-#|         type: matrix
-#|         rows: 1
-#|         cols: 1
-#|         raw:
-#|         - '{{a}}'
-#|   expected: wrong
+#|   - name: diagonal solution
+#|     answers: [a, 0, 0, -a]
+#|     expect: correct
+#|   - name: zero matrix
+#|     answers: [0, 0, 0, 0]
+#|     expect: wrong
 #| checker: |
 #|   def check(response, symbols):
-#|       a = response['variant']['parameters']['a']
-#|       A = response['inputs']['A']['matrix']
-#|       return {'correct': A.shape == (2,2) and simplify(A*A-a*a*eye(2)) == zeros(2)}
+#|       a = response['variables']['a']
+#|       entries = response['answers']
+#|       A = Matrix([[entries['A11'], entries['A12']], [entries['A21'], entries['A22']]])
+#|       return {'correct': simplify(A*A-a*a*eye(2)) == zeros(2)}
 
-Find a $2\times 2$ matrix $A$ with $A^2={{a}}^2 I$: mat{name=A, rows=2, cols=2}.
+Find a $2\times2$ matrix $A$ with $A^2={@a@}^2I$.
+Enter its four entries in row order:
+$A_{11}=$ _[{@a@}], $A_{12}=$ _[0], $A_{21}=$ _[0], $A_{22}=$ _[{@-a@}].
 ```

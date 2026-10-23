@@ -2,7 +2,7 @@
   "name": "math-exercise-regression-tests",
   "private": true,
   "scripts": {
-    "test": "python3 -m unittest discover -s tests -p test_variants.py && node --test tests/*.test.mjs",
+    "test": "python3 -m unittest discover -s tests -p \"test_*.py\" && node --test tests/*.test.mjs",
     "test:browser": "playwright test"
   },
   "devDependencies": {
