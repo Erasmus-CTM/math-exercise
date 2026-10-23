@@ -188,7 +188,7 @@ def request(payload):
     if type(payload) is not dict or payload.get("version") != 1:
         raise ValueError("invalid component variants request/version")
     action = payload.get("action", "resolve")
-    if action not in ("resolve", "generate", "decide", "decide-many", "check-pool"):
+    if action not in ("resolve", "resolve-more", "generate", "decide", "decide-many", "check-pool"):
         raise ValueError("unknown component variants action")
     options = payload.get("options")
     if not isinstance(options, dict) or not isinstance(payload.get("question"), str) or not isinstance(payload.get("source"), str):
@@ -211,6 +211,8 @@ def request(payload):
     approval, render_mode = payload.get("approval", "required"), payload.get("renderMode", "publish")
     if approval not in ("required", "optional") or render_mode not in ("publish", "preview", "review"):
         raise ValueError("invalid approval/render mode")
+    if action == "resolve-more" and render_mode != "review":
+        raise ValueError("resolve-more is read-only and requires explicit review mode")
     label, file = payload["label"], payload.get("file", "<question>")
     path = _path(payload["projectRoot"], payload["manifest"])
     value, token = history.load(path, label)
@@ -225,7 +227,7 @@ def request(payload):
     mutation = False
     # A new preview may resolve a bounded tested batch without writing it.
     # Explicit Generate is the only proposal mutation and requires its lease.
-    if action == "generate" or (action == "resolve" and not records and not value["proposals"]
+    if action in ("generate", "resolve-more") or (action == "resolve" and not records and not value["proposals"]
                                 and (render_mode != "publish" or approval == "optional")):
         generated = orchestration.generate(value, source, resolve, current=records,
             attempt_limit=5000, max_source_records=1000, seed=label, **common)
