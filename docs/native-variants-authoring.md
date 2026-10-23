@@ -30,10 +30,11 @@ use the shared native decision engine. Every mutation requires the original
 manifest `baseHash` and performs one leased atomic write after validation.
 
 For a mutation, `sourceFile` (falling back to `file`) must identify the actual
-authored file inside the project. It currently supports one uniquely labelled
-top-level exact fenced `{math-exercise}` block, with backtick or tilde fences.
-Indented/list-nested blocks and alternate fence attributes are not supported by
-this file adapter: they fail to locate the current source. A downloaded request
+authored file inside the project. Quarto's bundled Pandoc reads that raw file as
+`commonmark_x` and finds one uniquely labelled `{math-exercise}` CodeBlock in its
+AST, excluding code examples inside comments, raw HTML or enclosing fences.
+This reads source only, without project/component filters or execution. Quarto
+must be on PATH, or explicitly selected by `CTM_VARIANTS_QUARTO`. A downloaded request
 is resolved against that file again; stale teacher/hash selections fail. The
 same block is re-read immediately before writing to detect edits during native
 resolution. This is optimistic checking, not a filesystem transaction with the

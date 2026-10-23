@@ -148,6 +148,13 @@ class WrapperTests(unittest.TestCase):
         generated = self.call(self.request)
         self.assertEqual(generated["counters"]["tested"], 2)
 
+    def test_commented_and_raw_html_examples_are_not_authoritative_questions(self):
+        example = "```{math-exercise}\n" + self.request["source"].replace("_[{#a#}]", "_[99]") + "\n```\n"
+        hidden = "<!--\n" + example + "-->\n\n<pre>\n" + example + "</pre>\n\n"
+        (self.root / "lesson.qmd").write_text(hidden + "```{math-exercise}\n" + self.request["source"] + "\n```\n")
+        generated = self.call(self.request)
+        self.assertEqual(generated["counters"]["tested"], 2)
+
 
 if __name__ == "__main__":
     unittest.main()

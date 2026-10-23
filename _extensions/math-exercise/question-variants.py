@@ -107,30 +107,39 @@ def parse_source(source):
 
 def current_source(payload):
     """Re-read the labelled block for file/UI mutations before resolving it."""
-    import re
+    import shutil
+    import subprocess
     from ctm_variants.review import _path
     file = _path(payload["projectRoot"], payload.get("sourceFile", payload.get("file", "")))
     if not file.is_file() or file.stat().st_size > 1024 * 1024:
         raise ValueError("sourceFile must name the current authored file inside projectRoot (at most 1 MiB)")
     text = file.read_text(encoding="utf-8")
-    found, fence, body, is_math = [], None, [], False
+    quarto = os.environ.get("CTM_VARIANTS_QUARTO") or shutil.which("quarto")
+    if not quarto:
+        raise ValueError("sourceFile freshness needs Quarto on PATH (or explicit CTM_VARIANTS_QUARTO)")
+    # CommonMark preserves Quarto's literal {math-exercise} language class;
+    # Pandoc's markdown reader otherwise treats that bare-brace info as inline
+    # code. No project/component filter or authored executable code is loaded.
+    parsed = subprocess.run([quarto, "pandoc", "--from", "commonmark_x", "--to", "json"],
+        input=text, text=True, capture_output=True, timeout=15)
+    if parsed.returncode:
+        raise ValueError("sourceFile Pandoc extraction failed: " + parsed.stderr[:4096])
+    if len(parsed.stdout.encode("utf-8")) > 8 * 1024 * 1024:
+        raise ValueError("sourceFile AST exceeds byte budget")
+    document = json.loads(parsed.stdout)
     blocks = []
-    for line in text.splitlines():
-        if fence is not None:
-            closing = re.fullmatch(r" {0,3}" + re.escape(fence[0]) + "{" + str(len(fence)) + r",}[ \t]*", line)
-            if closing:
-                if is_math:
-                    blocks.append("\n".join(body))
-                fence, body, is_math = None, [], False
-            elif is_math:
-                body.append(line)
-            continue
-        opening = re.match(r"^( {0,3})(`{3,}|~{3,})(.*)$", line)
-        if opening:
-            fence = opening[2]
-            is_math = not opening[1] and opening[3].strip() == "{math-exercise}"
-    if fence is not None and is_math:
-        raise ValueError("sourceFile has an unterminated math-exercise fence")
+    def walk(node):
+        if isinstance(node, dict):
+            if node.get("t") == "CodeBlock" and "{math-exercise}" in node["c"][0][1]:
+                blocks.append(node["c"][1])
+            else:
+                for child in node.values():
+                    walk(child)
+        elif isinstance(node, list):
+            for child in node:
+                walk(child)
+    walk(document.get("blocks", []))
+    found = []
     for raw in blocks:
         options, question = parse_source(raw)
         if options.get("label") == payload["label"]:
@@ -229,7 +238,7 @@ def request(payload):
         mutation = True
     target = options.get("variants", 25)
     if target == "all":
-        target = max(25, len(records))
+        raise ValueError("variants: all is not implemented by the tested batch workflow; use a positive target and Generate 25 more")
     elif isinstance(target, str):
         target = int(target)
     selected = history.publication(value["decisions"], records, approval=approval,
