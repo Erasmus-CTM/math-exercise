@@ -55,11 +55,11 @@ function page({records=[record(),record(1)],local={},session={},query='?variant=
  w.MathExerciseRuntime={trackInitialUI(p){tracked.push(p);p.catch(()=>{});},ensurePyodide:async()=>{runtime++;return py;},ensureGuard:async()=>{},ensureCheckers:async()=>{},stopCount:()=>0,whenSlow:()=>()=>{},
  callCheckers:async(_py,name,request)=>{requests.push({name,request:plain(request)});return JSON.stringify({status:'correct',score:1});}};
  w.eval(own('matrix-input.js'));w.eval(own('math-store.js'));w.eval(own('math-exercise.js'));
- const element=w.document.getElementById('cell');const boardCalls=[];
+ const element=w.document.getElementById('cell');const boardCalls=[],boardTitles=[];
  if(review){const payload=JSON.parse(element.dataset.variants);payload.renderMode='review';element.dataset.variants=JSON.stringify(payload);element.insertAdjacentHTML('afterbegin','<p class="math-variant-unapproved">Review warning</p>');}
- if(boards){element.dataset.variantBoards='["figure"]';w.MathExerciseBoards={attach(options){boardCalls.push(plain(options.getVariant()));return {changed(){boardCalls.push(plain(options.getVariant()));}};}};}
+ if(boards){element.dataset.variantBoards='["figure"]';element.dataset.variantBoardTitle='Authored descriptive diagram';w.MathExerciseBoards={attach(options){boardTitles.push(options.title);boardCalls.push(plain(options.getVariant()));return {changed(){boardCalls.push(plain(options.getVariant()));}};}};}
  if(!automatic)w.__mathExerciseTestApi.setupCell(element);
- return {w,dom,element,errors,requests,tracked,boardCalls,get runtime(){return runtime;},start:()=>ready(),feedbackRequest:()=>feedbackOptions.getRequest({}),
+ return {w,dom,element,errors,requests,tracked,boardCalls,boardTitles,get runtime(){return runtime;},start:()=>ready(),feedbackRequest:()=>feedbackOptions.getRequest({}),
  field:()=>element.querySelector('input.math-input'),next:()=>element.querySelector('.math-pool-reload').click(),
  local:()=>Object.fromEntries(Object.entries(w.localStorage)),session:()=>Object.fromEntries(Object.entries(w.sessionStorage)),
  stored:()=>JSON.parse(w.localStorage.getItem(w.CTMStore.key('q'))),close:()=>w.close()};
@@ -184,6 +184,7 @@ test('review warning persists for approved choices and optional boards receive o
  const records=[record(),record(1)];records[0].values={a:'1/3',vector:[1,2]};records[1].values={a:'2/3'};
  const p=page({records,boards:true,review:true});
  assert.equal(p.element.querySelector('.math-variant-unapproved').hidden,false);
+ assert.deepEqual(p.boardTitles,['Authored descriptive diagram']);
  assert.deepEqual(p.boardCalls,[{n:2,id:records[0].id,values:records[0].values}]);
  p.next();assert.equal(p.boardCalls.length,2);assert.deepEqual(p.boardCalls[1],{n:7,id:records[1].id,values:records[1].values});
  assert.equal(p.element.querySelector('.math-variant-unapproved').hidden,false);assert.equal(p.runtime,0);p.close();

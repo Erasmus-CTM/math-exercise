@@ -1588,7 +1588,7 @@
     // Optional boards receive only the producer's public projection, after saved choice hydration.
     if (cell.dataset.variantBoards && window.MathExerciseBoards) {
       try {
-        variantBoards = window.MathExerciseBoards.attach({label: label,
+        variantBoards = window.MathExerciseBoards.attach({label: label, title: cell.dataset.variantBoardTitle,
           boards: JSON.parse(cell.dataset.variantBoards), getVariant: function () {
             var row = nativeVariants ? generated.variants[idx] : null;
             var identity = chooser ? chooser.current() : storedVariant();
