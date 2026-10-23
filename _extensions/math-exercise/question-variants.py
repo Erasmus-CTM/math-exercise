@@ -321,10 +321,10 @@ def file_request(payload, command):
                 **{key: downloaded.get(key)})
 
 
-def review_html(result, payload):
+def review_html(result, payload, connected_endpoint=None):
     """Use the shared review UI, prefilled for this explicit local operation."""
     from ctm_variants.review import document
-    page = document(result)
+    page = document(result, connected_endpoint=connected_endpoint)
     # The existing disconnected UI accepts project/manifest text controls. Keep
     # its exported decision protocol unchanged; --file supplies source context
     # when a downloaded request is applied through this component wrapper.
@@ -423,6 +423,7 @@ def main(argv=None):
     parser.add_argument("--label", help="unique authored exercise label")
     parser.add_argument("--manifest", help="manifest inside the project (default: _variants/LABEL.yml)")
     parser.add_argument("--html", type=Path, help="write a disconnected review HTML file")
+    parser.add_argument("--connected-endpoint", help=argparse.SUPPRESS)
     parser.add_argument("--worker", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--file-command", choices=("generate25more", "review", "apply"), help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
@@ -453,6 +454,8 @@ def main(argv=None):
             worker_args = ["--file-command", args.command] if args.command else []
             if args.html is not None:
                 worker_args += ["--html", str(args.html.resolve())]
+            if args.connected_endpoint is not None:
+                worker_args += ["--connected-endpoint", args.connected_endpoint]
             code, stdout, stderr = supervised(raw, worker_args=worker_args)
             sys.stdout.buffer.write(stdout)
             sys.stderr.buffer.write(stderr)
@@ -477,7 +480,7 @@ def main(argv=None):
             result = request(payload)
             if args.html is not None:
                 try:
-                    args.html.write_text(review_html(result, payload), encoding="utf-8")
+                    args.html.write_text(review_html(result, payload, args.connected_endpoint), encoding="utf-8")
                 except OSError as error:
                     raise ValueError("variant operation completed but review HTML could not be written; run review --html again: " + str(error)) from error
         print(json.dumps(result, ensure_ascii=True, allow_nan=False))
