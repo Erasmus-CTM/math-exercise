@@ -66,6 +66,27 @@ def _board_value(value):
     return _input(value)
 
 
+def teacher_display_projection(values):
+    """Late review-only presentation of decoded exact values; no parsing/eval."""
+    import sympy as sp
+    from ctm_variants.review import teacher_display
+    displays = {}
+    for field, value in values.items():
+        if not isinstance(value, (sp.Basic, sp.MatrixBase, int, float)):
+            continue
+        try:
+            mathml = '<math xmlns="http://www.w3.org/1998/Math/MathML">' + sp.mathml(value, printer="presentation") + '</math>'
+            latex = sp.latex(value).replace("<", r"\lt ").replace(">", r"\gt ")
+            display = teacher_display({"mathml": mathml, "latex": latex})
+        except Exception:
+            # A presentation failure cannot change a tested answer. The shared
+            # overview retains its escaped canonical input as the fallback.
+            display = None
+        if display is not None:
+            displays[field] = display
+    return displays
+
+
 def _identity_parts(rendered):
     """Order mathematical spans and raw prose values without hashing prose offsets."""
     events = [(item["span"]["start"], item["span"]["end"], "math", item["input"])

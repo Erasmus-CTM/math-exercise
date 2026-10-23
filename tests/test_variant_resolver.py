@@ -94,5 +94,20 @@ class ResolverTests(unittest.TestCase):
         self.assertNotIn("board-values", self.row()["data"]["options"])
 
 
+    def test_review_teacher_display_is_exact_late_and_rejects_printer_markup(self):
+        from sympy import Rational, Matrix, Symbol, pi
+        values={'ratio':Rational(1,3),'matrix':Matrix([[1,Rational(2,3)],[3,4]]),'greek':pi,
+                'hostile':Symbol('<script>alert(1)</script>'),'literal':'plain text'}
+        before=copy.deepcopy(values)
+        row=self.row();candidate_before=copy.deepcopy(row)
+        display=module.teacher_display_projection(values)
+        self.assertEqual(set(display),{'ratio','matrix','greek'})
+        self.assertIn('<mfrac>',display['ratio']['mathml']);self.assertEqual(display['ratio']['latex'],r'\frac{1}{3}')
+        self.assertIn('<mtable>',display['matrix']['mathml']);self.assertNotIn('mfenced',display['matrix']['mathml'])
+        self.assertIn('π',display['greek']['mathml'])
+        self.assertEqual(values,before);self.assertEqual(row,candidate_before)
+        self.assertEqual(set(row['data']),{'options','context','teacher_inputs'})
+
+
 if __name__ == "__main__":
     unittest.main()

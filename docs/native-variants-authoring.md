@@ -101,3 +101,10 @@ the shared chooser without starting the native authoring process.
 Each rendered question exposes `<label>-question` with `ai-feedback-context`
 (design §3.6.j). Labels containing whitespace and generated IDs colliding with
 an authored AST ID, quoted/unquoted HTML ID, or another question fail the build.
+
+Review-only `teacherDisplay` is computed late from the decoded exact teacher
+values, without parsing strings or changing candidate data, identity or history.
+The shared overview validates printer output through one strict MathML Core
+sanitizer and retains the escaped canonical input beside it. Unsupported or
+malformed presentation falls back to that input. This sidecar is not included
+in the student payload; checklist math uses the same validator.

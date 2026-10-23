@@ -183,7 +183,7 @@ def request(payload):
     from ctm_variants.review import _path, apply_decisions
     from ctm_checkers.math_exercise.parsing import build_locals
     from ctm_checkers.variants import decode_context, question_context
-    from variant_resolver import resolver
+    from variant_resolver import resolver, teacher_display_projection
 
     if type(payload) is not dict or payload.get("version") != 1:
         raise ValueError("invalid component variants request/version")
@@ -265,6 +265,7 @@ def request(payload):
             "solution": candidate["data"]["options"].get("solution", ""),
             "options": candidate["data"]["options"], "teacherInputs": candidate["data"]["teacher_inputs"],
             "values": copy.deepcopy(candidate["data"]["options"].get("board-values", {})),
+            "teacherDisplay": teacher_display_projection(teacher),
             "context": question_context(fields, variables, teacher, identity)})
     if mutation:
         # All generation, decision and publication/response validation finishes

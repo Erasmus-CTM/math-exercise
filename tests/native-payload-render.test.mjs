@@ -21,6 +21,7 @@ test('native questions have one serialized source while handwritten pools retain
   assert.equal(native.hasAttribute('data-pool'),false);
   const rows=JSON.parse(native.dataset.variants).variants;
   assert.equal(rows.length,1);assert.equal(rows[0].question,'Unique native question _[2]');
+  assert.equal(Object.hasOwn(rows[0],'teacherDisplay'),false); // review-only presentation never enlarges student payload
   assert.equal(JSON.parse(native.dataset.storageVariants).length,1);
   assert.deepEqual(JSON.parse(pool.dataset.pool),['First _[2]','Second _[3]']);
   dom.window.close();
