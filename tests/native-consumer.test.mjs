@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 import {readFileSync,writeFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {spawnSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
 import {JSDOM} from 'jsdom';
 import {ctmLibs} from './helpers/ctm-libs.mjs';
 import {pythonEnv} from './helpers/ctm-checkers.mjs';
@@ -36,7 +37,7 @@ function cell(records,{id='cell',label='q',mode='custom',initial,legacy=false,po
  return `<div id="${id}" class="math-exercise-cell" data-ctm-source="source123" data-ctm-id="${label}" data-label="${label}" data-mode="${mode}" data-vars="x" data-fields="[]" data-field-labels="${esc(JSON.stringify(records[0].context?.fields||['Answer']))}" data-storage-variants="${esc(JSON.stringify(descriptors))}" data-pool="${esc(JSON.stringify(tasks))}" ${pool?'':`data-variants="${esc(JSON.stringify(generated))}"`} ${initial?`data-initial-values="${esc(JSON.stringify([initial]))}"`:''}>
  <div class="math-exercise-question"></div><button class="math-pool-reload"></button><button class="math-check-btn"></button><button class="math-legend-btn"></button><div class="math-legend-panel" style="display:none"></div><div class="math-feedback-area"></div></div>`;
 }
-function page({records=[record(),record(1)],local={},session={},query='?variant=q:2',lang='en',initial,disabled=false,automatic=false,missingChooser=false,extra='',pool=false,legacy=false,feedback=false,boards=false,review=false,mode='custom',canonicalPayloadOnly=false}={}) {
+function page({records=[record(),record(1)],local={},session={},query='?variant=q:2',lang='en',initial,disabled=false,automatic=false,missingChooser=false,extra='',pool=false,legacy=false,feedback=false,boards=false,review=false,mode='custom',canonicalPayloadOnly=false,beforeSetup}={}) {
  const dom=new JSDOM('<script id="ctm-store-manifest" type="application/json">'+JSON.stringify({course:'course',exercises:[{id:'q',component:'math-exercise'},{id:'ordinary',component:'math-exercise'}]})+'</script>'+cell(records,{initial,pool,legacy,mode})+extra,
  {url:'https://example.test/lesson.html'+query,runScripts:'outside-only'});
  const w=dom.window;w.TextEncoder=TextEncoder;let feedbackOptions;const feedbackResets=[];
@@ -59,6 +60,7 @@ function page({records=[record(),record(1)],local={},session={},query='?variant=
  if(canonicalPayloadOnly)delete element.dataset.pool;
  if(review){const payload=JSON.parse(element.dataset.variants);payload.renderMode='review';element.dataset.variants=JSON.stringify(payload);element.insertAdjacentHTML('afterbegin','<p class="math-variant-unapproved">Review warning</p>');}
  if(boards){element.dataset.variantBoards='["figure"]';element.dataset.variantBoardTitle='Authored descriptive diagram';w.MathExerciseBoards={attach(options){boardTitles.push(options.title);boardCalls.push(plain(options.getVariant()));return {changed(){boardCalls.push(plain(options.getVariant()));}};}};}
+ if(beforeSetup)beforeSetup(w,element);
  if(!automatic)w.__mathExerciseTestApi.setupCell(element);
  return {w,dom,element,errors,requests,tracked,boardCalls,boardTitles,feedbackResets,get runtime(){return runtime;},start:()=>ready(),feedbackRequest:()=>feedbackOptions.getRequest({}),
  field:()=>element.querySelector('input.math-input'),next:()=>element.querySelector('.math-pool-reload').click(),
@@ -245,4 +247,47 @@ test('canonical native payload alone supplies initial task, stable choice and ex
  assert.equal(p.element.mathExercise.getVariant().n,2);assert.equal(p.requests.length,0);
  p.next();assert.equal(p.element.mathExercise.getVariant().n,7);assert.deepEqual(p.stored().seen,[2,7]);
  p.field().value='2/3';await check(p);assert.equal(p.requests.length,1);assert.deepEqual(p.requests[0].request.question_context,records[1].context);p.close();
+});
+
+const catalogRows=()=>[record(),record(1)].map((row,index)=>({...row,
+ reviewKey:createHash('sha256').update(JSON.stringify([row.id,row.hash])).digest('hex'),
+ question:'Catalog '+(index?'second':'first')+' _[2/3]'}));
+test('review catalog selects one exact card and never restores or saves learner state',async()=>{
+ let ordinary=page();ordinary.field().value='Previous learner answer';ordinary.field().dispatchEvent(new ordinary.w.Event('input',{bubbles:true}));ordinary.w.dispatchEvent(new ordinary.w.Event('pagehide'));
+ const local=ordinary.local(),session={...ordinary.session(),'math-pool|/lesson.html|q|id':'other legacy card'};ordinary.close();
+ const records=catalogRows();let storeCalls=0;
+ const forbid=(w)=>{for(const key of ['register','seed'])w.CTMStore[key]=()=>{storeCalls++;throw Error('Catalog touched learner state');};w.Math.random=()=>{throw Error('Catalog used random selection');};};
+ for(const index of [1,0]){
+  const p=page({records,local,session,review:true,missingChooser:true,query:'?ctm-review='+records[index].reviewKey,beforeSetup:forbid});
+  assert.equal(p.element.mathExercise.getVariant().n,index?7:2);assert.match(p.element.querySelector('.math-exercise-question').textContent,new RegExp(index?'second':'first'));
+  assert.equal(p.field().value,'');assert.equal(p.element.querySelector('.math-pool-reload').disabled,true);assert.equal(p.element.querySelector('.math-saved-answer'),null);
+  assert.equal(p.runtime,0);assert.equal(p.requests.length,0);assert.deepEqual(p.local(),local);assert.deepEqual(p.session(),session);
+  assert.throws(()=>p.element.mathExercise.selectVariant(records[1-index].id),/Invalid variant selection/);
+  p.field().value='2/3';await check(p);assert.deepEqual(p.requests[0].request.question_context,records[index].context);
+  p.w.dispatchEvent(new p.w.Event('pagehide'));assert.deepEqual(p.local(),local);assert.deepEqual(p.session(),session);p.close();
+ }
+ assert.equal(storeCalls,0);
+ const proposal={...record(3),reviewKey:'c'.repeat(64)};const p=page({records:[proposal],review:true,query:'?ctm-review='+proposal.reviewKey,beforeSetup:forbid});
+ assert.equal(p.element.mathExercise.getVariant(),null);p.field().value='2/3';await check(p);assert.equal(p.requests[0].request.question_context.variant,null);assert.doesNotMatch(p.element.textContent,/Variant (0|null)/);p.close();
+});
+test('review catalog invalid or ambiguous selectors fail locally while ordinary sibling Check remains usable',async()=>{
+ const ordinary='<div id="ordinary" class="math-exercise-cell" data-label="ordinary" data-mode="equivalent" data-fields="[&quot;o-f1&quot;]"><div class="math-exercise-question"><input class="math-input" id="o-f1" data-answer="42"></div><button class="math-check-btn"></button><button class="math-legend-btn"></button><div class="math-legend-panel"></div><div class="math-feedback-area"></div></div>';
+ const records=catalogRows(),key=records[0].reviewKey;
+ for(const [query,rows] of [['?ctm-review='+ 'f'.repeat(64),records],['?ctm-review=bad',records],['?ctm-review='+key+'&ctm-review='+key,records],['?ctm-review='+key,[records[0],{...records[1],reviewKey:key}]]]){
+  const p=page({records:rows,query,review:true,automatic:true,extra:ordinary});p.start();await assert.rejects(p.tracked[0],/renderer-unavailable/);
+  assert.equal(p.element.querySelector('.math-check-btn').disabled,true);assert.ok(p.element.querySelector('.math-setup-unavailable'));assert.match(p.errors[0][1].message,/review candidate selector/);
+  const good=p.w.document.getElementById('ordinary');good.querySelector('input').value='42';good.querySelector('.math-check-btn').click();
+  for(let i=0;i<30&&good.querySelector('.math-check-btn').disabled;i++)await new Promise(resolve=>setTimeout(resolve,0));
+  assert.equal(good.querySelector('.math-check-btn').disabled,false);assert.equal(p.requests[0].name,'math_exercise.check');p.close();
+ }
+});
+test('catalog query has no effect outside explicit native review and normal review retains its store',()=>{
+ const records=catalogRows();
+ for(const mode of ['publish','preview']){
+  const p=page({records,query:'?variant=q:2&ctm-review='+records[1].reviewKey,beforeSetup(w,element){const value=JSON.parse(element.dataset.variants);value.renderMode=mode;element.dataset.variants=JSON.stringify(value);}});
+  assert.equal(p.element.mathExercise.getVariant().n,2);assert.equal(p.stored().variant.n,2);assert.ok(p.element.querySelector('.math-saved-answer'));p.close();
+ }
+ let p=page({records,review:true});p.field().value='Normal review answer';p.field().dispatchEvent(new p.w.Event('input',{bubbles:true}));p.w.dispatchEvent(new p.w.Event('pagehide'));const local=p.local();p.close();
+ p=page({records,review:true,local});assert.equal(p.field().value,'Normal review answer');p.close();
+ p=page({records,pool:true,query:'?variant=q:2&ctm-review=bad'});assert.equal(p.stored().variant.n,2);assert.equal(p.element.querySelector('.math-check-btn').disabled,false);p.close();
 });

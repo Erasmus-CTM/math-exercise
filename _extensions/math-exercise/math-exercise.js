@@ -1076,7 +1076,21 @@
     function storedVariant() { return storageVariants[idx] || null; }
     var generated = cell.dataset.variants ? JSON.parse(cell.dataset.variants) : null;
     var nativeVariants = !!(generated && generated.native), chooser = null;
-    if ((nativeVariants || (!generated && cell.dataset.pool)) && (!window.CTMVariants || !window.CTMStore)) {
+    // A static review catalog selects one exact tested record, without learner state.
+    var catalogReview = false;
+    if (nativeVariants && generated.renderMode === 'review') {
+      var reviewKeys = new URLSearchParams(location.search).getAll('ctm-review');
+      if (reviewKeys.length) {
+        if (reviewKeys.length !== 1 || !/^[0-9a-f]{64}$/.test(reviewKeys[0])) throw new Error('Invalid review candidate selector.');
+        var matches = generated.variants.filter(function (record) {return record.reviewKey === reviewKeys[0];});
+        if (matches.length !== 1) throw new Error('Unknown or ambiguous review candidate selector.');
+        var selected = matches[0];
+        generated.variants = [selected];
+        storageVariants = [{n:selected.n, id:selected.id, hash:selected.hash, proposal:selected.proposal === true}];
+        catalogReview = true;
+      }
+    }
+    if (!catalogReview && (nativeVariants || (!generated && cell.dataset.pool)) && (!window.CTMVariants || !window.CTMStore)) {
       throw new Error('Shared variant selection is unavailable. Update CTM Assessment or reload the page.');
     }
     function makeChooser(saved) {
@@ -1105,7 +1119,7 @@
       if (nativeVariants) checkOpts.questionContext = JSON.parse(JSON.stringify(record.context));
       checkOpts.checker = record.checker;
       cell.dataset.variantId = record.id;
-      if (!chooser) { try { sessionStorage.setItem(poolKey + '|id', record.id); } catch (_) {} }
+      if (!chooser && !catalogReview) { try { sessionStorage.setItem(poolKey + '|id', record.id); } catch (_) {} }
       var target = generated.solutionTarget && document.getElementById(generated.solutionTarget);
       if (!target && record.solution) {
         var details = cell.querySelector('.math-variant-solution');
@@ -1135,7 +1149,8 @@
     // Shared pools restore a stable choice; legacy generated tasks retain their compatibility path.
     if (poolTasks) {
       var idx;
-      if ((!generated || nativeVariants) && window.CTMVariants && window.CTMStore) {
+      if (catalogReview) idx = 0;
+      else if ((!generated || nativeVariants) && window.CTMVariants && window.CTMStore) {
         idx = makeChooser(null);
       } else try {
         idx = generated ? generated.variants.findIndex(function(v){return v.id === sessionStorage.getItem(poolKey + '|id');})
@@ -1180,6 +1195,7 @@
     var reloadBtn    = cell.querySelector('.math-pool-reload');
     var variantLabel = null, variantAnnouncement = null;
     var variantUI = L;
+    if (catalogReview && reloadBtn) reloadBtn.disabled = true;
     if (chooser && reloadBtn) {
       reloadBtn.textContent = variantUI.newVariant || 'New variant';
       reloadBtn.title = reloadBtn.textContent;
@@ -1484,7 +1500,7 @@
       invalidateFeedback();
       if (feedbackHandle) feedbackHandle.reset();
       idx = next;
-      if (!chooser) { try { sessionStorage.setItem(poolKey, String(next)); } catch(e) {} }
+      if (!chooser && !catalogReview) { try { sessionStorage.setItem(poolKey, String(next)); } catch(e) {} }
       var r = renderTaskText(poolTasks[next], cell.id, vars, vecdir, mode, !!generated && !nativeVariants);
       questionDiv.querySelectorAll('.math-dynamic-matrix-wrap').forEach(function (wrap) { if (wrap.matrixInput) wrap.matrixInput.destroy(); });
       setQuestionContent(questionDiv, r);
@@ -1561,7 +1577,7 @@
       if(generated.review) setupVariantReview(cell, generated);
     }
 
-    if (window.MathExerciseStore) {
+    if (window.MathExerciseStore && !catalogReview) {
       storedAnswers = window.MathExerciseStore.attach({
         element: cell, question: questionDiv, id: cell.dataset.ctmId || label, lang: ME_CFG.lang,
         graphical: !!checkOpts.responseSource,
