@@ -1214,7 +1214,8 @@
       refreshFields();
       var identityOptions = Object.assign({}, checkOpts);
       delete identityOptions.questionContext;
-      if (nativeVariants) delete identityOptions.checker;
+      delete identityOptions.checker;
+      delete identityOptions.variant;
       return JSON.stringify({ task: questionText(cell, fieldIds, fieldLabel),
         variant: poolTasks ? idx : null,
         fields: fieldIds.map(function (id, i) { return [id, fieldLabel(i), document.getElementById(id).value.trim()]; }),

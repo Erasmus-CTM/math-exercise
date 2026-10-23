@@ -205,3 +205,9 @@ test('external worked solution collapses only on an accepted real change',()=>{
  p.w.confirm=()=>true;p.next();assert.equal(hidden,1);assert.equal(accepted.length,1);assert.equal(p.w.document.querySelector('details').open,false);
  p.element.mathExercise.selectVariant('id-7');assert.equal(hidden,1);assert.equal(accepted.length,1,'same selection does not reset authored work');p.close();
 });
+
+test('legacy custom feedback identities omit checker source and parameter bags',async()=>{
+ const row=record();row.parameters={privateTeacher:'secret-value'};row.derived={privateDerived:'hidden-result'};row.checker='def check(response, symbols): return 42 # hidden-checker';
+ const p=page({records:[row],legacy:true,feedback:true});p.field().value='learner answer';
+ const request=await p.feedbackRequest();assert.doesNotMatch(JSON.stringify(request),/secret-value|hidden-result|hidden-checker|def check|parameters|derived/);p.close();
+});
