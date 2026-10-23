@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import vm from 'node:vm';
-import { FEEDBACK, LOCALE, runInContext, sources } from './helpers/ctm-libs.mjs';
+import { FEEDBACK, LOCALE, RUNTIME, runInContext, sources } from './helpers/ctm-libs.mjs';
 
 const source = await readFile(
   new URL('../_extensions/math-exercise/math-exercise.js', import.meta.url),
@@ -17,7 +17,7 @@ function loadBundle(lang = 'en') {
     document: { addEventListener() {} },
     setTimeout,
     clearTimeout,
-    window: {
+    window: { addEventListener() {},
       __mathExerciseConfig: { lang },
       __mathExerciseTestMode: true,
     },
@@ -27,6 +27,8 @@ function loadBundle(lang = 'en') {
     vm.runInContext(code, context);
     context.window.AIFeedback = context.AIFeedback;
   }
+  context.addEventListener = () => {};
+  runInContext(context, RUNTIME);
   runInContext(context, LOCALE);
   vm.runInContext(readFileSync(new URL('../_extensions/math-exercise/matrix-input.js', import.meta.url), 'utf8'), context);
   vm.runInContext(source, context);
