@@ -188,7 +188,7 @@ def request(payload):
     if type(payload) is not dict or payload.get("version") != 1:
         raise ValueError("invalid component variants request/version")
     action = payload.get("action", "resolve")
-    if action not in ("resolve", "generate", "decide", "decide-many"):
+    if action not in ("resolve", "generate", "decide", "decide-many", "check-pool"):
         raise ValueError("unknown component variants action")
     options = payload.get("options")
     if not isinstance(options, dict) or not isinstance(payload.get("question"), str) or not isinstance(payload.get("source"), str):
@@ -201,6 +201,10 @@ def request(payload):
         options = payload["options"]
     if "parameters" in options:
         raise ValueError("legacy parameters syntax was removed; use variables and review the generated candidates")
+    if action == "check-pool":
+        from variant_resolver import validate_pool
+        return validate_pool(payload["question"], options, payload["projectRoot"],
+                             file=payload.get("file", "<question>"), label=payload["label"])
     source = options.get("variables")
     if not isinstance(source, str) or not source.strip():
         raise ValueError("generated variants require variables source")

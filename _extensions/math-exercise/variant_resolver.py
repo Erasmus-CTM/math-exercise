@@ -78,6 +78,45 @@ def _identity_parts(rendered):
             for _, _, kind, value in events]
 
 
+def validate_pool(question, options, base, *, file="<question>", label="<exercise>"):
+    """Check every handwritten task through the ordinary canonical grader.
+
+    This read-only CI leaf generates no values, identities, approvals or files.
+    Ordinary Quarto pool rendering never invokes it.
+    """
+    from ctm_checkers.math_exercise.authored import _teacher_fields, run_question
+    from ctm_checkers.testing import Raw, _expect
+
+    if options.get("pool") not in (True, "true") or "variables" in options:
+        raise ValueError(f"{file}: {label}: handwritten pool checking needs pool: true without variables")
+    tasks = [part.strip() for part in re.split(r"(?m)^---[ \t]*$", question)]
+    if not tasks or len(tasks) > 1000 or any(not part for part in tasks):
+        raise ValueError(f"{file}: {label}: pool needs 1..1000 nonempty tasks")
+    reports = []
+    for number, task in enumerate(tasks, 1):
+        try:
+            keys = _teacher_fields(task)
+            labels = options.get("field-labels", "")
+            labels = [value.strip() for value in labels.split(",")] if isinstance(labels, str) and labels else list(labels)
+            labels = labels or [str(index) for index in range(1, len(keys) + 1)]
+            automatic = {"name": "teacher answers", "answers": {
+                name: Raw(value) for name, value in zip(labels, keys)}, "expect": "correct"}
+            resolved = dict(options, question=task)
+            teacher = run_question(dict(resolved, tests=[automatic]), base)[0]
+            for field, actual in teacher["actual"].get("fields", {}).items():
+                _expect(actual, "correct", "teacher answers/" + str(field))
+            authored = run_question(resolved, base) if options.get("tests") else []
+            if authored is None:
+                # The unchanged legacy assertion runner succeeds without a
+                # report value. Preserve that contract with an explicit receipt.
+                authored = [{"name": "legacy authored tests", "passed": True}]
+            reports.append({"n": number, "teacher": teacher, "tests": authored})
+        except Exception as error:
+            raise ValueError(f"{file}: {label}: pool task {number}: {error}") from error
+    return {"version": 1, "kind": "pool", "label": label, "passed": True,
+            "count": len(reports), "tasks": reports}
+
+
 def resolver(question, options, *, file="<question>", label="<exercise>"):
     """Return execution->{neutral candidate}; the native collector grades it.
 

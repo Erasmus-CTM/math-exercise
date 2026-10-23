@@ -65,6 +65,13 @@ Legacy `parameters` now fails with a migration message on this authoring branch;
 there is no legacy alias or converter. The earlier loading branch is unchanged.
 Native generation is never invoked for an ordinary question without `variables`.
 
+The trusted native CI producer can separately request `check-pool` for a
+handwritten `pool: true` question. This read-only supervised action checks every
+task's teacher answers and supplied authored tests through the ordinary canonical
+grader, naming the task on failure. It creates no variants manifest or approvals
+and generates no values. Ordinary Quarto pool rendering remains Python-free;
+this authoring check is a separate CI operation.
+
 The outer supervisor bounds a whole native request to 300 seconds and observes
 a 16 MiB aggregate stdout/stderr limit, with bounded returned buffers. Output is
 spooled to temporary files and checked every 50 ms, so disk output can overshoot
