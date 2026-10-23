@@ -76,7 +76,7 @@ class Review:
         self.preview_outputs = {}
         for record in response["records"]:
             slug = hashlib.sha256(record["id"].encode()).hexdigest()
-            self.preview_choices[slug] = (record["id"], languages)
+            self.preview_choices[slug] = (record["id"], languages, record["hash"], response["baseHash"])
             previews[record["id"]] = [dict(language=language,
                 url=endpoint + "previews/" + slug + "/" + language + "/index.html")
                 for language in languages]
@@ -108,13 +108,22 @@ class Review:
                 raise ValueError("student review package copy exceeds byte budget")
             shutil.copytree(source, target / "_extensions" / name)
 
-    def render_student(self, identifier, language):
+    def render_student(self, identifier, language, expected_hash=None, expected_lease=None):
         """Render one tested candidate with the actual component, on demand."""
-        response = json.loads(self.run("review").stdout)
-        if not any(record["id"] == identifier for record in response["records"]):
-            raise ValueError("review candidate changed; rebuild review")
         payload = self.source_payload()
         manifest = (Path(self.project) / self.manifest).read_bytes()
+        response = json.loads(self.run("review").stdout)
+        candidate = next((record for record in response["records"] if record["id"] == identifier), None)
+        if candidate is None:
+            raise ValueError("review candidate changed; rebuild review")
+        if ((expected_hash is not None and candidate["hash"] != expected_hash)
+                or (expected_lease is not None and response["baseHash"] != expected_lease)):
+            raise ValueError("review source or history changed; rebuild review")
+        def fresh():
+            if (self.source_payload()["source"] != payload["source"]
+                    or (Path(self.project) / self.manifest).read_bytes() != manifest):
+                raise ValueError("review source or history changed while rendering; rebuild review")
+        fresh()
         key = hashlib.sha256((payload["source"] + identifier + language).encode() + manifest).hexdigest()
         if key in self.preview_cache:
             return self.preview_cache[key]
@@ -146,6 +155,7 @@ class Review:
             (root / "preview.qmd").write_text("---\n" + json.dumps(metadata) + "\n---\n\n"
                 + fence + "{math-exercise}\n" + payload["source"] + "\n" + fence + "\n", encoding="utf-8")
             self.render_command([quarto, "render", "preview.qmd", "--output-dir", "site", "--output", "index.html"], root, environment)
+            fresh()
             output = root / "site"
             if not (output / "index.html").is_file():
                 raise ValueError("student review render produced no HTML")
@@ -212,7 +222,7 @@ class Review:
             raise ValueError("unknown student preview")
         key = (slug, language)
         if asset == ["index.html"]:
-            self.preview_outputs[key] = self.render_student(choice[0], language)
+            self.preview_outputs[key] = self.render_student(choice[0], language, *choice[2:])
         output = self.preview_outputs.get(key)
         if output is None:
             raise ValueError("open the student preview before requesting its assets")

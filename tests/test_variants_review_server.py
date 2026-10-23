@@ -126,6 +126,23 @@ class PreviewTests(unittest.TestCase):
             for route in ('slug/nb/../lesson.qmd','slug/nb/%2e%2e/lesson.qmd','slug/nb/escape','unknown/nb/index.html','slug/en/index.html','slug/default/asset.js'):
                 with self.assertRaises(ValueError,msg=route):review.preview(route)
 
+    def test_student_preview_refuses_stale_card_hash_lease_and_source(self):
+        from types import SimpleNamespace
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);(root/'lesson.qmd').write_text('source');(root/'_variants').mkdir();(root/'_variants/q.yml').write_text('{}')
+            review=review_server.Review(root,'lesson.qmd','q');self.addCleanup(review.preview_directory.cleanup)
+            response={'records':[{'id':'candidate','hash':'current'}],'baseHash':'current-lease'}
+            review.run=lambda *args:SimpleNamespace(stdout=json.dumps(response))
+            review.source_payload=lambda:{'source':'current source'}
+            with self.assertRaisesRegex(ValueError,'changed; rebuild'):
+                review.render_student('candidate','default','old-hash','current-lease')
+            with self.assertRaisesRegex(ValueError,'changed; rebuild'):
+                review.render_student('candidate','default','current','old-lease')
+            sources=iter([{'source':'old source'},{'source':'new source'}]);review.source_payload=lambda:next(sources)
+            with self.assertRaisesRegex(ValueError,'changed while rendering'):
+                review.render_student('candidate','default','current','current-lease')
+            self.assertEqual((root/'_variants/q.yml').read_text(),'{}')
+
     def test_render_supervisor_limits_time_and_output(self):
         import os,sys
         with tempfile.TemporaryDirectory() as directory:
