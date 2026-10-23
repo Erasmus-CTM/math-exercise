@@ -179,7 +179,7 @@ def install_imports():
 
 def request(payload):
     from ctm_variants import history, orchestration
-    from ctm_variants.model import classify
+    from ctm_variants.model import classify, digest
     from ctm_variants.review import _path, apply_decisions
     from ctm_checkers.math_exercise.parsing import build_locals
     from ctm_checkers.variants import decode_context, question_context
@@ -266,6 +266,7 @@ def request(payload):
             "options": candidate["data"]["options"], "teacherInputs": candidate["data"]["teacher_inputs"],
             "values": copy.deepcopy(candidate["data"]["options"].get("board-values", {})),
             "teacherDisplay": teacher_display_projection(teacher),
+            "reviewKey": digest([candidate["id"], candidate["hash"]]),
             "context": question_context(fields, variables, teacher, identity)})
     if mutation:
         # All generation, decision and publication/response validation finishes

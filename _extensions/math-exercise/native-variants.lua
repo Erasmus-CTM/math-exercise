@@ -70,6 +70,8 @@ function M.generate(raw, question, opts, ctm, language)
   local approval, renderMode = ctm.variants.approval(), ctm.variants.renderMode()
   local reviewCandidate = os.getenv('CTM_VARIANTS_REVIEW_CANDIDATE')
   local reviewLanguage = os.getenv('CTM_VARIANTS_REVIEW_LANGUAGE')
+  local reviewCatalog = os.getenv('CTM_VARIANTS_REVIEW_CATALOG')
+  assert(not reviewCatalog or (reviewCatalog == '1' and renderMode == 'review'), 'Review catalogue requires explicit review mode.')
   assert(not (reviewCandidate or reviewLanguage) or renderMode == 'review',
     'Internal review candidate/language selectors require explicit review mode.')
   assert(not reviewLanguage or reviewLanguage == 'default' or reviewLanguage == 'en'
@@ -77,7 +79,7 @@ function M.generate(raw, question, opts, ctm, language)
   if reviewLanguage then language = reviewLanguage == 'default' and '' or reviewLanguage end
   local payload = {version=1,action='resolve',source=raw,question=question,options=opts,
     projectRoot=project,file=file,label=label,manifest='_variants/' .. label .. '.yml',
-    approval=approval,renderMode=renderMode,solutionTarget=opts['solution-target']}
+    approval=approval,renderMode=renderMode,reviewCatalog=reviewCatalog == '1' or nil,solutionTarget=opts['solution-target']}
   local python = os.getenv('MATH_EXERCISE_PYTHON') or (pandoc.system.os == 'mingw32' and 'python' or 'python3')
   local script = quarto.utils.resolve_path('question-variants.py')
   local environment = ctm.checkers.environment()
@@ -92,6 +94,9 @@ function M.generate(raw, question, opts, ctm, language)
   assert(response.version == 1 and type(response.records) == 'table', 'Invalid native variant response')
   local selected = {}
   for _, id in ipairs(response.deployableIds) do selected[id] = true end
+  if renderMode == 'review' then
+    for _, record in ipairs(response.records) do selected[record.id] = true end
+  end
   local records, unapproved = {}, false
   for _, record in ipairs(response.records) do
     if selected[record.id] and (not reviewCandidate or record.id == reviewCandidate) then
@@ -100,7 +105,7 @@ function M.generate(raw, question, opts, ctm, language)
         and type(record.context.variant.n) == 'number' and record.context.variant.n > 0
       records[#records+1] = {id=record.id,hash=record.hash,n=numbered and record.n or pandoc.json.null,
         proposal=not numbered,status=record.status,state=record.state,context=record.context,
-        values=record.values,
+        values=record.values, reviewKey=renderMode == 'review' and record.reviewKey or nil,
         question=content and content.question or record.question,
         solution=solutionHtml(content and content.solution or record.solution),
         checker=record.options.checker or '', ['variant-context']=record.options['context-text'] or '',
@@ -118,7 +123,7 @@ function M.generate(raw, question, opts, ctm, language)
   end
   ctm.variants.use()
   return {version=1,native=true,options=studentOptions,variants=records,unapproved=unapproved,
-    approval=approval,renderMode=renderMode,solutionTarget=opts['solution-target']}
+    approval=approval,renderMode=renderMode,reviewCatalog=reviewCatalog == '1' or nil,solutionTarget=opts['solution-target']}
 end
 
 return M

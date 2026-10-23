@@ -63,3 +63,26 @@ Generate25more and decisions both preserve the page's original manifest lease.
 An outdated page must rebuild; a failed authored test is never silently resampled.
 The live Check control uses the normal browser runtime. Source/DOM and stubbed
 browser checks do not establish CDN/engine or final-course acceptance.
+
+The trusted artifact producer can export static student catalogues with the same
+component renderer, without starting the loopback server:
+
+```sh
+python -I _extensions/math-exercise/variants-review.py --project . \
+  --file lesson.qmd --label q --export-student-previews OUTPUT \
+  --response-json tested-response.json --url-prefix students/q
+```
+
+This interface consumes a trusted supervised response, stages its tested history
+in an isolated synthetic project, and builds once per declared language. The
+original history decisions, events and retained proposal prefix must match;
+source/history changes abort the export. OUTPUT contains language directories;
+stdout supplies row links with exact id/hash-derived review keys. Only explicit
+review catalogues accept these keys, require one valid key, and disable learner
+persistence. Rejected current candidates remain reviewable; absent candidates
+are excluded. Publishing approval policy and student payloads remain unchanged.
+
+Generated assets are limited to 4096 files, 16 MiB each and 64 MiB total. The
+artifact producer inventories them before privileged publication; this exporter
+performs no deployment. Actual browser checks may use an explicit grading stub;
+such checks establish catalogue isolation, not engine or first-visit acceptance.

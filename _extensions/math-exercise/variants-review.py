@@ -74,7 +74,7 @@ class Review:
         previews = {}
         self.preview_choices = {}
         self.preview_outputs = {}
-        source_hash = hashlib.sha256(payload["source"].encode()).hexdigest()
+        source_hash = hashlib.sha256((Path(self.project) / self.source).read_bytes()).hexdigest()
         for record in response["records"]:
             slug = hashlib.sha256(json.dumps([record["id"], record["hash"],
                 response["baseHash"], source_hash]).encode()).hexdigest()
@@ -113,8 +113,9 @@ class Review:
     def render_student(self, identifier, language, expected_hash=None, expected_lease=None, expected_source=None):
         """Render one tested candidate with the actual component, on demand."""
         payload = self.source_payload()
-        if expected_source is not None and hashlib.sha256(payload["source"].encode()).hexdigest() != expected_source:
+        if expected_source is not None and hashlib.sha256((Path(self.project) / self.source).read_bytes()).hexdigest() != expected_source:
             raise ValueError("review source changed; rebuild review")
+        source_bytes = (Path(self.project) / self.source).read_bytes()
         manifest = (Path(self.project) / self.manifest).read_bytes()
         response = json.loads(self.run("review").stdout)
         candidate = next((record for record in response["records"] if record["id"] == identifier), None)
@@ -124,11 +125,16 @@ class Review:
                 or (expected_lease is not None and response["baseHash"] != expected_lease)):
             raise ValueError("review source or history changed; rebuild review")
         def fresh():
-            if (self.source_payload()["source"] != payload["source"]
+            if ((Path(self.project) / self.source).read_bytes() != source_bytes
+                    or self.source_payload()["source"] != payload["source"]
                     or (Path(self.project) / self.manifest).read_bytes() != manifest):
                 raise ValueError("review source or history changed while rendering; rebuild review")
         fresh()
-        key = hashlib.sha256((payload["source"] + identifier + language).encode() + manifest).hexdigest()
+        return self.render_snapshot(payload, manifest, language, identifier=identifier, fresh=fresh)
+
+    def render_snapshot(self, payload, manifest, language, *, identifier=None, fresh=lambda: None):
+        key = hashlib.sha256(json.dumps([payload["source"], identifier, language]).encode()
+            + (Path(self.project) / self.source).read_bytes() + manifest).hexdigest()
         if key in self.preview_cache:
             return self.preview_cache[key]
         root = Path(self.preview_directory.name) / key
@@ -139,8 +145,13 @@ class Review:
             (root / self.manifest).write_bytes(manifest)
             # A sufficiently long fence preserves the exact canonical block.
             fence = "`" * max(3, max((len(run) + 1 for run in re.findall(r"`+", payload["source"])), default=3))
-            environment = dict(os.environ, CTM_VARIANTS="review",
-                CTM_VARIANTS_REVIEW_CANDIDATE=identifier, CTM_VARIANTS_REVIEW_LANGUAGE=language)
+            environment = dict(os.environ, CTM_VARIANTS="review", CTM_VARIANTS_REVIEW_LANGUAGE=language)
+            environment.pop("CTM_VARIANTS_REVIEW_CANDIDATE", None)
+            environment.pop("CTM_VARIANTS_REVIEW_CATALOG", None)
+            if identifier is None:
+                environment["CTM_VARIANTS_REVIEW_CATALOG"] = "1"
+            if identifier is not None:
+                environment["CTM_VARIANTS_REVIEW_CANDIDATE"] = identifier
             quarto = environment.get("CTM_VARIANTS_QUARTO") or shutil.which("quarto")
             if not quarto:
                 raise ValueError("student review needs Quarto on PATH")
@@ -176,6 +187,93 @@ class Review:
         except Exception:
             shutil.rmtree(root, ignore_errors=True)
             raise
+
+    def export_students(self, response, destination, url_prefix):
+        """Export generated review sites from a tested transient history snapshot."""
+        self.component()
+        from ctm_variants import history
+        from ctm_variants.model import digest
+        if url_prefix != "students/" + self.label:
+            raise ValueError("student export prefix must match the fixed question")
+        destination = Path(destination)
+        if any(path.is_symlink() for path in (destination, *destination.parents)) or (destination.exists() and any(destination.iterdir())):
+            raise ValueError("student export needs an empty ordinary output directory")
+        destination.mkdir(parents=True, exist_ok=True)
+        source_path = Path(self.project) / self.source
+        source_bytes = source_path.read_bytes()
+        payload = self.source_payload()
+        if source_path.read_bytes() != source_bytes:
+            raise ValueError("student export source changed while parsing")
+        manifest_path = Path(self.project) / self.manifest
+        original_bytes = manifest_path.read_bytes() if manifest_path.exists() else None
+        original, lease = history.load(manifest_path, self.label)
+        staged = history.validate(response["manifest"])
+        if (response.get("version") != 1 or response.get("baseHash") != lease
+                or staged["question"] != self.label
+                or staged["decisions"] != original["decisions"]
+                or staged["events"] != original["events"]
+                or staged["proposals"][:len(original["proposals"])] != original["proposals"]):
+            raise ValueError("student export snapshot does not preserve current history")
+        records = response["records"]
+        identities = [(record["id"], record["hash"]) for record in records]
+        if len(set(identities)) != len(identities):
+            raise ValueError("duplicate student review identity")
+        retained = {(item["record"]["id"], item["record"]["hash"]): item["record"]
+                    for item in staged["proposals"]}
+        for record in records:
+            neutral = {key: record[key] for key in ("id", "hash", "note", "snapshot", "data", "tests")}
+            if retained.get((record["id"], record["hash"])) != neutral:
+                raise ValueError("student export requires tested retained proposal records")
+        def fresh():
+            current = manifest_path.read_bytes() if manifest_path.exists() else None
+            if source_path.read_bytes() != source_bytes or current != original_bytes:
+                raise ValueError("student export source or history changed")
+        languages = ["default"] + list(payload["options"].get("translations", {}))
+        if any(language not in ("default", "en", "de", "nb") for language in languages):
+            raise ValueError("unsupported student export language")
+        previews = {record["id"]: [] for record in records}
+        manifest = json.dumps(staged, ensure_ascii=False).encode("utf-8")
+        for language in languages if records else []:
+            fresh()
+            site = self.render_snapshot(payload, manifest, language, fresh=fresh)
+            # Check the actual emitted component catalogue, rather than assuming
+            # the synthetic build preserved the transient tested snapshot.
+            from html.parser import HTMLParser
+            class Catalogue(HTMLParser):
+                rows = None
+                def handle_starttag(self, tag, attributes):
+                    attributes = dict(attributes)
+                    if "math-exercise-cell" in attributes.get("class", "").split():
+                        if self.rows is not None:
+                            raise ValueError("unexpected duplicate student catalogue")
+                        self.rows = json.loads(attributes["data-variants"])["variants"]
+            catalogue = Catalogue()
+            catalogue.feed((site / "index.html").read_text(encoding="utf-8"))
+            rows = catalogue.rows
+            if rows is None or [(row["id"], row["hash"]) for row in rows] != identities:
+                raise ValueError("rendered student catalogue differs from tested records")
+            for row, record in zip(rows, records):
+                if row.get("reviewKey") != digest([record["id"], record["hash"]]) or row["context"] != record["context"]:
+                    raise ValueError("rendered student identity/context differs")
+            shutil.copytree(site, destination / language)
+            for record in records:
+                previews[record["id"]].append(dict(language=language, hash=record["hash"],
+                    url=url_prefix + "/" + language + "/index.html?ctm-review="
+                        + digest([record["id"], record["hash"]])))
+        files = list(destination.rglob("*"))
+        total = 0
+        count = 0
+        for path in files:
+            if path.is_symlink() or not (path.is_dir() or path.is_file()):
+                raise ValueError("student export contains a nonordinary generated asset")
+            if path.is_file():
+                count += 1
+                size = path.stat().st_size
+                total += size
+                if size > 16 * 1024 * 1024 or total > 64 * 1024 * 1024 or count > 4096:
+                    raise ValueError("student export exceeds generated asset budget")
+        fresh()
+        return {"studentPreviews": previews}
 
     @staticmethod
     def render_command(command, root, environment, *, timeout=330, output_limit=16 * 1024 * 1024, return_output=False):
@@ -338,9 +436,20 @@ def main():
     parser.add_argument("--port", type=int, default=0)
     parser.add_argument("--no-browser", action="store_true")
     parser.add_argument("--language", choices=("en", "de", "nb"), default="en")
+    parser.add_argument("--export-student-previews", type=Path)
+    parser.add_argument("--response-json", type=Path)
+    parser.add_argument("--url-prefix")
     args = parser.parse_args()
     review = Review(args.project, args.file, args.label, args.language)
     try:
+        if args.export_student_previews is not None:
+            if args.response_json is None or args.url_prefix is None:
+                parser.error("export requires --response-json and --url-prefix")
+            if args.response_json.stat().st_size > 16 * 1024 * 1024:
+                raise ValueError("student export response exceeds byte budget")
+            response = json.loads(args.response_json.read_text(encoding="utf-8"))
+            print(json.dumps(review.export_students(response, args.export_student_previews, args.url_prefix)))
+            return
         with server(review, args.port) as instance:
             print("Connected local variant review: " + instance.review_url, flush=True)
             print("Stop with Ctrl-C. Decisions use the canonical current-source validator; no files are watched.", flush=True)

@@ -161,8 +161,25 @@ class PreviewTests(unittest.TestCase):
                 review.page('/'+'t'*44+'/');new=next(iter(review.preview_choices));self.assertNotEqual(old,new)
                 with self.assertRaisesRegex(ValueError,'unknown student preview'):review.preview(old+'/default/index.html')
                 source['source']='changed prose, same B1 and history'
+                (root/'lesson.qmd').write_text('changed full authored source')
                 review.page('/'+'t'*44+'/');self.assertNotEqual(new,next(iter(review.preview_choices)))
                 with self.assertRaisesRegex(ValueError,'unknown student preview'):review.preview(new+'/default/index.html')
+
+    def test_export_refuses_symlink_ancestor_before_source_work(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);(root/'lesson.qmd').write_text('source');(root/'real').mkdir()
+            (root/'link').symlink_to(root/'real',target_is_directory=True)
+            review=review_server.Review(root,'lesson.qmd','q');self.addCleanup(review.preview_directory.cleanup)
+            review.component=lambda:None
+            import sys,types
+            from unittest.mock import patch
+            package=types.ModuleType('ctm_variants');package.__path__=[]
+            history=types.ModuleType('ctm_variants.history')
+            model=types.ModuleType('ctm_variants.model');model.digest=lambda value:'unused'
+            with patch.dict(sys.modules,{'ctm_variants':package,'ctm_variants.history':history,'ctm_variants.model':model}):
+                with self.assertRaisesRegex(ValueError,'empty ordinary'):
+                    review.export_students({},root/'link/out','students/q')
+            self.assertFalse((root/'real/out').exists())
 
     def test_render_supervisor_limits_time_and_output(self):
         import os,sys
