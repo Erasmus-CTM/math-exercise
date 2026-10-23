@@ -73,6 +73,11 @@ class ResolverTests(unittest.TestCase):
         self.assertEqual(plain["hash"], translated["hash"])
         self.assertTrue(translated["data"]["options"]["translations"]["nb"]["question"].endswith("_[1]"))
 
+    def test_translations_cannot_change_teacher_answers_or_field_structure(self):
+        for question in ("_[{@a/2+1@}]", "No input", "_[1] _[2]"):
+            with self.assertRaisesRegex(ValueError, "teacher answers|field-labels"):
+                self.row(options={"translations": {"nb": {"question": question, "solution": ""}}})
+
 
 if __name__ == "__main__":
     unittest.main()

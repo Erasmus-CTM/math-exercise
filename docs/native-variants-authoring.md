@@ -2,8 +2,11 @@
 
 `_extensions/math-exercise/question-variants.py --stdin` is the component-owned
 version-1 JSON adapter described by ctm-checkers' native authoring interface.
-It is not yet activated by the Lua filter or the student UI. This slice does
-not complete teacher authoring or establish course readiness.
+The Lua filter now resolves `variables` questions through this adapter. The
+student JS consumer is still pending: its inherited legacy generated-question
+HTML mode and context transport do not yet consume the new Markdown/exact codec.
+Do not use this draft source for students or claim browser grading acceptance.
+This slice does not complete teacher authoring or establish course readiness.
 
 Install the canonical checker extension and produce its separate
 `ctm-checkers/native-authoring` directory with ctm-checkers'
@@ -45,6 +48,22 @@ exact teacher marker transport and grading semantics. It returns the existing
 exact-context codec with `variant: null` until a decision; no number zero is
 invented. The native collector runs real teacher and authored declarative tests.
 Translation copies of the same mathematical sequence do not duplicate identity.
+Translated answer markers must retain the same ordered fields and exact teacher
+answers as the default language. The actual Quarto Lua/HTML boundary uses
+`pandoc.json` to retain `variant: null`; Quarto's JSON decoder drops null fields.
+
+The approved variants design §3.6.i requires ordinary inline Markdown question
+rendering with raw HTML shown as text, and Pandoc solutions with raw HTML removed.
+The build emits resolved Markdown questions and strips raw HTML tokens from
+solution HTML, preserving surrounding text. Required is the ordinary build
+default; `CTM_VARIANTS=optional` explicitly selects OPEN. `CTM_VARIANTS=review`
+selects the nonstudent review route. Quarto 1.8.27 exposes no verified stable Lua
+preview signal, so ordinary `quarto preview` is not inferred to bypass publishing
+gates. This explicit-preview integration remains unfinished.
+
+Legacy `parameters` now fails with a migration message on this authoring branch;
+there is no legacy alias or converter. The earlier loading branch is unchanged.
+Native generation is never invoked for an ordinary question without `variables`.
 
 The outer supervisor bounds a whole native request to 300 seconds and observes
 a 16 MiB aggregate stdout/stderr limit, with bounded returned buffers. Output is
@@ -59,5 +78,8 @@ isolated installed imports, initial preview/optional batches, stable decisions,
 required/optional publish gates, stale leases and downloaded-source changes,
 native tamper checks, bootstrap deadlines and stalled-checker descendant
 termination. These are native/component tests, not browser or final-artifact
-acceptance. The shared chooser, Lua bridge, review UI/bot and course migration
-remain separate work.
+acceptance. The shared chooser consumer, review UI/bot integration and course
+migration remain separate work. A focused real Quarto fixture verifies required/
+OPEN/review builds, proposal nulls across Lua, explicit positive decision identity,
+changed approval refusal and raw HTML solution removal; this is source/build
+evidence only.

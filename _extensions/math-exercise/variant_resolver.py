@@ -79,6 +79,24 @@ def resolver(question, options, *, file="<question>", label="<exercise>"):
 
     def resolve(execution):
         variables = execution["variables"]
+        def teacher_for(marker_keys):
+            if len(marker_keys) != len(labels):
+                raise ValueError(f"{file}: {label}: translated answer markers must match default-language field-labels")
+            inputs = {}
+            for name, key in zip(labels, marker_keys):
+                raw = re.sub(r"(?<!\\)\{@(.*?)@\}", r"{#\1#}", key, flags=re.S)
+                inputs[name] = render(raw, variables=variables, file=file, label=label)["text"]
+            if original.get("mode", "equivalent") in ("string", "string_ci", "set"):
+                return inputs, dict(inputs)
+            names = []
+            for index in range(len(labels)):
+                name = "ctmTeacher" + str(index)
+                while name in variables or name in names:
+                    name += "Value"
+                names.append(name)
+            source = "\n".join(name + " = " + inputs[field] for name, field in zip(names, labels))
+            values = execute(source, variables=variables, file=file, label=label)["variables"]
+            return inputs, {field: values[name] for field, name in zip(labels, names)}
         rendered = render(_answer_input_placeholders(question), variables=variables, file=file, label=label)
         resolved = copy.deepcopy(original)
         resolved.update(question=rendered["text"], tests=copy.deepcopy(tests))
@@ -111,26 +129,11 @@ def resolver(question, options, *, file="<question>", label="<exercise>"):
                         identity.extend(parts)
                         covered.add(tuple(parts))
             resolved["translations"] = translated
-        teacher_inputs = {}
-        for name, key in zip(labels, keys):
-            # Answer markers always contain literal input syntax, even when an
-            # author selected a LaTeX placeholder in the marker.
-            raw = re.sub(r"(?<!\\)\{@(.*?)@\}", r"{#\1#}", key, flags=re.S)
-            teacher_inputs[name] = render(raw, variables=variables, file=file, label=label)["text"]
-        mode = original.get("mode", "equivalent")
-        if mode in ("string", "string_ci", "set"):
-            teacher = dict(teacher_inputs)
-        else:
-            names = []
-            for index in range(len(labels)):
-                name = "ctmTeacher" + str(index)
-                while name in variables or name in names:
-                    name += "Value"
-                names.append(name)
-            source = "\n".join(name + " = " + teacher_inputs[field]
-                               for name, field in zip(names, labels))
-            values = execute(source, variables=variables, file=file, label=label)["variables"]
-            teacher = {field: values[name] for field, name in zip(labels, names)}
+        teacher_inputs, teacher = teacher_for(keys)
+        for language, content in original.get("translations", {}).items():
+            _, translated_teacher = teacher_for(_teacher_fields(content["question"]))
+            if translated_teacher != teacher:
+                raise ValueError(f"{file}: {label}: translation {language} has different teacher answers from the default language")
         canonical_teacher = {field: value if isinstance(value, str) else _input(value)
                              for field, value in teacher.items()}
         canonical_variables = {}
