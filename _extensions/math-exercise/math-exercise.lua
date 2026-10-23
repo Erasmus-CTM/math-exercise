@@ -207,6 +207,16 @@ end
 ----
 -- Parse #| key: value lines; return opts table + remaining content
 ----
+local boardSetup = false
+local function ensureVariantBoards()
+  if boardSetup then return end
+  boardSetup = true
+  quarto.doc.add_html_dependency({
+    name = 'math-exercise-variants-board', version = extensionVersion(),
+    scripts = {{path='variants-board.js',afterBody=true}},
+  })
+end
+
 local function parseOptions(raw)
   local opts, lines, source = {}, {}, {}
   for line in (raw .. "\n"):gmatch("([^\r\n]*)\n") do
@@ -863,6 +873,20 @@ local function buildExercise(el, state)
     initialValues = values
   end
   local isPool    = (opts["pool"]     == "true")
+  if isPool then
+    assert(ctm.variants and ctm.variants.use, 'math-exercise pools need the shared variant chooser. Update CTM Assessment.')
+    ctm.variants.use()
+  end
+  local boards = splitCsv(opts['boards'] or '')
+  if #boards > 0 then
+    assert(isPool, 'math-exercise: boards requires generated variants or a handwritten pool.')
+    local seen = {}
+    for _, id in ipairs(boards) do
+      assert(not id:find('%s') and not seen[id], 'math-exercise: boards must name distinct iframe IDs without whitespace.')
+      seen[id] = true
+    end
+    ensureVariantBoards()
+  end
   local vecdir    = opts["vecdir"] == "row" and "row" or "col"
 
   -- An exercise without a static check (custom mode without a checker) is
@@ -922,6 +946,7 @@ local function buildExercise(el, state)
              .. ' data-field-labels="' .. jsonArrAttr(fieldLabels) .. '"'
              .. ' data-vecdir="' .. vecdir .. '"'
              .. ' data-feedback-policy="' .. attrEsc(quarto.json.encode(feedback.selection(el, opts))) .. '"'
+             .. ' data-variant-boards="' .. jsonArrAttr(boards) .. '"'
              .. ' data-context-mode="' .. fc.mode .. '"'
              .. ' data-context-refs="' .. attrEsc(fc.refs) .. '"'
              .. ' data-context="'      .. attrEsc('"' .. jsonEsc(sectionText) .. '"') .. '"'

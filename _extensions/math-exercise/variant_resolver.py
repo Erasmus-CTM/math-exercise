@@ -39,6 +39,33 @@ def _answer_input_placeholders(question):
     return "".join(output)
 
 
+def _board_value(value):
+    """Public figure data; grading retains its separate exact-context codec."""
+    import math
+    import sympy as sp
+    from ctm_variants.placeholders import _input
+    if value is None:
+        return None
+    if isinstance(value, (str, bool)):
+        return value
+    if isinstance(value, (int, sp.Integer)):
+        number = int(value)
+        return number if abs(number) <= 2**53 - 1 else str(number)
+    if isinstance(value, sp.Rational):
+        try:
+            number = float(value)
+        except OverflowError:
+            return _input(value)
+        return number if math.isfinite(number) and sp.Rational(number) == value else _input(value)
+    if isinstance(value, sp.MatrixBase):
+        return [[_board_value(item) for item in row] for row in value.tolist()]
+    if isinstance(value, (list, tuple)):
+        return [_board_value(item) for item in value]
+    if isinstance(value, dict) and all(isinstance(key, str) for key in value):
+        return {key: _board_value(item) for key, item in value.items()}
+    return _input(value)
+
+
 def _identity_parts(rendered):
     """Order mathematical spans and raw prose values without hashing prose offsets."""
     events = [(item["span"]["start"], item["span"]["end"], "math", item["input"])
@@ -102,6 +129,8 @@ def resolver(question, options, *, file="<question>", label="<exercise>"):
         resolved.update(question=rendered["text"], tests=copy.deepcopy(tests))
         resolved.pop("variables", None)
         resolved["field-labels"] = list(labels)
+        if original.get("boards"):
+            resolved["board-values"] = {name: _board_value(value) for name, value in variables.items()}
         identity = _identity_parts(rendered)
         covered = {tuple(identity)}
         for name in ("solution", "note", "context-text"):

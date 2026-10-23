@@ -70,7 +70,7 @@ function M.generate(raw, question, opts, ctm, language)
   local approval, renderMode = ctm.variants.approval(), ctm.variants.renderMode()
   local payload = {version=1,action='resolve',source=raw,question=question,options=opts,
     projectRoot=project,file=file,label=label,manifest='_variants/' .. label .. '.yml',
-    approval=approval,renderMode=renderMode}
+    approval=approval,renderMode=renderMode,solutionTarget=opts['solution-target']}
   local python = os.getenv('MATH_EXERCISE_PYTHON') or (pandoc.system.os == 'mingw32' and 'python' or 'python3')
   local script = quarto.utils.resolve_path('question-variants.py')
   local environment = ctm.checkers.environment()
@@ -93,6 +93,7 @@ function M.generate(raw, question, opts, ctm, language)
         and type(record.context.variant.n) == 'number' and record.context.variant.n > 0
       records[#records+1] = {id=record.id,hash=record.hash,n=numbered and record.n or pandoc.json.null,
         proposal=not numbered,status=record.status,state=record.state,context=record.context,
+        values=record.values,
         question=content and content.question or record.question,
         solution=solutionHtml(content and content.solution or record.solution),
         checker=record.options.checker or '', ['variant-context']=record.options['context-text'] or '',
@@ -109,7 +110,7 @@ function M.generate(raw, question, opts, ctm, language)
   end
   ctm.variants.use()
   return {version=1,native=true,options=studentOptions,variants=records,unapproved=unapproved,
-    approval=approval,renderMode=renderMode}
+    approval=approval,renderMode=renderMode,solutionTarget=opts['solution-target']}
 end
 
 return M

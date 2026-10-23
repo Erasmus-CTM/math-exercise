@@ -78,6 +78,21 @@ class ResolverTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "teacher answers|field-labels"):
                 self.row(options={"translations": {"nb": {"question": question, "solution": ""}}})
 
+    def test_explicit_board_projection_is_plain_json_and_preserves_exact_grading_values(self):
+        from sympy import Integer, Rational, Symbol, Matrix
+        from ctm_checkers.variants import decode_context
+        variables = {"a": Integer(2), "x": Symbol("x"), "half": Rational(1,2),
+                     "third": Rational(1,3), "large": Integer(2)**70, "matrix": Matrix([[Rational(1,2)]]),
+                     "optional": None, "nested": [None, {"empty": None}]}
+        row = self.row(options={"boards": "diagram"}, variables=variables)
+        values = row["data"]["options"]["board-values"]
+        self.assertEqual(values, {"a": 2, "x": "x", "half": .5, "third": "1/3",
+                                  "large": str(2**70), "matrix": [[.5]], "optional": None, "nested": [None, {"empty": None}]})
+        context_variables = decode_context(row["data"]["context"])[1]
+        self.assertEqual(context_variables["third"], Rational(1,3))
+        self.assertEqual(context_variables["large"], Integer(2)**70)
+        self.assertNotIn("board-values", self.row()["data"]["options"])
+
 
 if __name__ == "__main__":
     unittest.main()

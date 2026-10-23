@@ -3,10 +3,10 @@
 `_extensions/math-exercise/question-variants.py --stdin` is the component-owned
 version-1 JSON adapter described by ctm-checkers' native authoring interface.
 The Lua filter now resolves `variables` questions through this adapter. The
-student JS consumer is still pending: its inherited legacy generated-question
-HTML mode and context transport do not yet consume the new Markdown/exact codec.
-Do not use this draft source for students or claim browser grading acceptance.
-This slice does not complete teacher authoring or establish course readiness.
+student consumer uses resolved Markdown, exact custom-checker context, the shared
+chooser and P17 storage. Focused module tests exercise real installed checker
+grading alongside UI stubs; this is not final-artifact browser grading acceptance.
+The draft does not establish course readiness or authorize student deployment.
 
 Install the canonical checker extension and produce its separate
 `ctm-checkers/native-authoring` directory with ctm-checkers'
@@ -78,8 +78,15 @@ isolated installed imports, initial preview/optional batches, stable decisions,
 required/optional publish gates, stale leases and downloaded-source changes,
 native tamper checks, bootstrap deadlines and stalled-checker descendant
 termination. These are native/component tests, not browser or final-artifact
-acceptance. The shared chooser consumer, review UI/bot integration and course
-migration remain separate work. A focused real Quarto fixture verifies required/
+acceptance. Connected review UI/bot integration and course migration have
+separate validation gates. A focused real Quarto fixture verifies required/
 OPEN/review builds, proposal nulls across Lua, explicit positive decision identity,
 changed approval refusal and raw HTML solution removal; this is source/build
 evidence only.
+
+Explicit `boards` names iframe IDs for optional variant figure messages (design
+§3.6.j and amendment 780). The Lua payload exposes separate public `values`:
+safe JSON numbers where exact, other exact scalars as input strings, and recursive
+arrays/maps with null preserved. The exact grading codec remains unchanged.
+Figure transport cannot delay Check or Python readiness. Handwritten pools use
+the shared chooser without starting the native authoring process.

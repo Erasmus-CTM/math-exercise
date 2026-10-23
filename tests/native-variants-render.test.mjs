@@ -84,3 +84,66 @@ test('native Quarto bridge enforces approval and preserves exact contexts across
   result=render();assert.equal(result.status,0,result.stdout+result.stderr);
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
+
+test('ordinary pools register the shared chooser without a native authoring installation',()=>{
+ const dir=mkdtempSync(join(tmpdir(),'math-native-free-pool-'));
+ try{
+  cpSync(new URL('../_extensions/math-exercise',import.meta.url),join(dir,'_extensions/math-exercise'),{recursive:true});install(dir);
+  writeFileSync(join(dir,'lesson.qmd'),[
+   '---','format: html','filters: [math-exercise]','ai-feedback:','  enabled: false','math-exercise:','  feedback: false','---','',
+   fence+'{math-exercise}','#| label: ordinary-pool','#| pool: true','First _[2]','---','Second _[3]',fence].join('\n'));
+  const result=spawnSync(process.env.QUARTO||'quarto',['render','lesson.qmd'],{
+   cwd:dir,env:{...renderEnv,CTM_VARIANTS_NATIVE:'/missing-native-authoring'},encoding:'utf8',timeout:30000});
+  assert.equal(result.status,0,result.stdout+result.stderr);
+  const html=readFileSync(join(dir,'lesson.html'),'utf8');assert.match(html,/ctm-variants-/);
+  const dom=new JSDOM(html),cell=dom.window.document.querySelector('.math-exercise-cell');
+  assert.deepEqual(JSON.parse(cell.dataset.storageVariants).map(row=>row.n),[1,2]);
+  assert.equal(cell.dataset.variants,undefined);dom.window.close();
+ }finally{rmSync(dir,{recursive:true,force:true});}
+});
+
+test('native stdin supervision preserves the real Quarto pipe transport',()=>{
+ const dir=mkdtempSync(join(tmpdir(),'math-native-pipe-'));
+ try{
+  cpSync(new URL('../_extensions/math-exercise',import.meta.url),join(dir,'_extensions/math-exercise'),{recursive:true});install(dir);
+  writeFileSync(join(dir,'lesson.qmd'),[
+   '---','format: html','filters: [math-exercise]','ai-feedback:','  enabled: false','math-exercise:','  feedback: false','---','',
+   fence+'{math-exercise}','#| label: native-pipe','#| variables: |','#|   a = pick([1,2])',
+   '#| field-labels: Answer','#| note: a={#a#}','Answer _[{@a@}].',fence].join('\n'));
+  const result=spawnSync(process.env.QUARTO||'quarto',['render','lesson.qmd'],{
+   cwd:dir,env:{...renderEnv,CTM_VARIANTS:'optional'},encoding:'utf8',timeout:30000});
+  assert.equal(result.status,0,result.stdout+result.stderr);
+  const dom=new JSDOM(readFileSync(join(dir,'lesson.html'),'utf8'));
+  const records=JSON.parse(dom.window.document.querySelector('.math-exercise-cell').dataset.variants).variants;
+  assert.equal(records.length,2);assert.ok(records.every(row=>row.context.variant===null));dom.window.close();
+ }finally{rmSync(dir,{recursive:true,force:true});}
+});
+
+test('explicit native board metadata carries plain public values without changing exact grading context',()=>{
+ const dir=mkdtempSync(join(tmpdir(),'math-native-board-values-'));
+ try{
+  cpSync(new URL('../_extensions/math-exercise',import.meta.url),join(dir,'_extensions/math-exercise'),{recursive:true});install(dir);
+  writeFileSync(join(dir,'lesson.qmd'),[
+   '---','format: html','filters: [math-exercise]','ai-feedback:','  enabled: false','math-exercise:','  feedback: false','---','',
+   fence+'{math-exercise}','#| label: native-board-values','#| variables: |','#|   a = pick([1,2])',
+   '#|   half = 1/2','#|   third = 1/3','#|   large = 2^70','#|   matrix = Matrix([[1/2,1/3]])','#|   optional = None','#|   nested = [None]',
+   '#| field-labels: Answer','#| note: a={#a#}','#| solution-target: worked-answer','#| boards: diagram, second-diagram','Answer _[{@a@}].',fence].join('\n'));
+  const result=spawnSync(process.env.QUARTO||'quarto',['render','lesson.qmd'],{
+   cwd:dir,env:{...renderEnv,CTM_VARIANTS:'optional'},encoding:'utf8',timeout:30000});
+  assert.equal(result.status,0,result.stdout+result.stderr);
+  const html=readFileSync(join(dir,'lesson.html'),'utf8');assert.match(html,/math-exercise-variants-board-/);
+  const dom=new JSDOM(html),cell=dom.window.document.querySelector('.math-exercise-cell');
+  assert.deepEqual(JSON.parse(cell.dataset.variantBoards),['diagram','second-diagram']);
+  const payload=JSON.parse(cell.dataset.variants);assert.equal(payload.solutionTarget,'worked-answer');
+  const records=payload.variants;
+  assert.equal(records.length,2);
+  for(const row of records){
+   assert.equal(typeof row.values.a,'number');assert.equal(row.values.half,.5);assert.equal(row.values.third,'1/3');
+   assert.equal(row.values.large,String(2n**70n));assert.deepEqual(row.values.matrix,[[.5,'1/3']]);
+   assert.equal(row.values.optional,null);assert.deepEqual(row.values.nested,[null]);
+   assert.equal(row.context.variant,null);assert.equal(row.n,null);
+   const variables=new Map(row.context.variables.value[1]);assert.deepEqual(variables.get('third'),['rational','1','3']);
+  }
+  dom.window.close();
+ }finally{rmSync(dir,{recursive:true,force:true});}
+});
