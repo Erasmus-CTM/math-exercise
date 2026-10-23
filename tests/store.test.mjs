@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {JSDOM} from 'jsdom';
+import {ctmLibs} from './helpers/ctm-libs.mjs';
 
 const source = name => readFileSync(new URL('../_extensions/math-exercise/' + name, import.meta.url), 'utf8');
 const plain = value => JSON.parse(JSON.stringify(value));
@@ -40,14 +41,15 @@ function page({meta = {state: 'empty'}, question = '<input class="math-input" id
   w.CTMLocales = {table: component => component === 'ui' ? ui : math};
   w.confirm = () => false;
   w.Math.random = () => 0;
+  w.TextEncoder = TextEncoder;
   let registration, changes = 0, runtimeCalls = 0, verdict = {status: 'correct', score: 1};
   const events = [], copies = [], initialUI = [];
   w.CTMCopy = {text: (text, options) => {copies.push({text, options});}};
   // Only the shared-store boundary is mocked: revision matching is tested in
   // ctm-libs; this suite verifies the adapter writes solely when asked to.
-  w.CTMStore = {register(options) {
+  w.CTMStore = {seed: () => 'adapter-fixture', page: '/tasks', register(options) {
     registration = options;
-    return {restore() {
+    return {restoreChoice() { return meta.variant ? {variant: meta.variant} : meta.record || null; }, restore() {
       if (meta.state === 'restored') options.write(meta.record.inputs, meta);
       return meta;
     }, changed() { changes++; }, result(value) { events.push(plain(value)); }, clear() { options.clear(); }};
@@ -56,6 +58,7 @@ function page({meta = {state: 'empty'}, question = '<input class="math-input" id
   w.MathExerciseRuntime = {trackInitialUI: promise => {initialUI.push(promise); return promise;}, ensurePyodide: async () => {runtimeCalls++; return py;},
     ensureGuard: async () => {}, ensureCheckers: async () => {}, stopCount: () => 0,
     whenSlow: () => () => {}, callCheckers: async () => JSON.stringify(verdict)};
+  w.eval(readFileSync(new URL('ui/variants.js', 'file://' + ctmLibs + '/'), 'utf8'));
   w.eval(source('matrix-input.js'));
   w.eval(source('math-store.js'));
   w.eval(source('math-exercise.js'));

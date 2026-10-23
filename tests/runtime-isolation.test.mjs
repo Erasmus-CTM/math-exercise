@@ -22,6 +22,7 @@ function load(globals = {}) {
     dispatch: type => (listeners[type] || []).forEach(fn => fn({ type })) };
   const context = vm.createContext({ console, setTimeout, clearTimeout, document: { addEventListener() {} }, window, ...globals });
   context.globalThis = context;
+  context.addEventListener = window.addEventListener;
   vm.runInContext(runtimeSource, context);
   vm.runInContext(checkersScript, context);
   runInContext(context, LOCALE);
