@@ -1128,7 +1128,8 @@
       updateVariantLabel();
     }
     var poolRaw   = cell.dataset.pool;
-    var poolTasks = poolRaw ? JSON.parse(poolRaw) : null;
+    var poolTasks = nativeVariants ? generated.variants.map(function (record) {return record.question;})
+      : poolRaw ? JSON.parse(poolRaw) : null;
     var poolKey   = 'math-pool|' + location.pathname + '|' + label;
 
     // Shared pools restore a stable choice; legacy generated tasks retain their compatibility path.

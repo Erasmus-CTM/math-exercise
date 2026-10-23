@@ -1011,8 +1011,10 @@ local function buildExercise(el, state)
       descriptors[#descriptors + 1] = descriptor
     end
     attrs = attrs .. ' data-storage-variants="' .. attrEsc(variants and variants.native and pandoc.json.encode(descriptors) or quarto.json.encode(descriptors)) .. '"'
-    attrs        = attrs .. ' data-pool="'   .. jsonArrAttr(tasks) .. '"'
-                         .. ' data-fields="[]"'
+    if not (variants and variants.native) then
+      attrs = attrs .. ' data-pool="' .. jsonArrAttr(tasks) .. '"'
+    end
+    attrs        = attrs .. ' data-fields="[]"'
                          .. ' data-structural-field-labels="[]"'
     questionHtml = '<button type="button" class="math-pool-reload" title="' .. attrEsc(uiT("poolReloadTitle")) .. '">&#8635;</button>\n'
                 .. '<div' .. questionAttr .. '></div>'

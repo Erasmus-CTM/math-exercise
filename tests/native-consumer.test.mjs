@@ -36,8 +36,8 @@ function cell(records,{id='cell',label='q',mode='custom',initial,legacy=false,po
  return `<div id="${id}" class="math-exercise-cell" data-ctm-source="source123" data-ctm-id="${label}" data-label="${label}" data-mode="${mode}" data-vars="x" data-fields="[]" data-field-labels="${esc(JSON.stringify(records[0].context?.fields||['Answer']))}" data-storage-variants="${esc(JSON.stringify(descriptors))}" data-pool="${esc(JSON.stringify(tasks))}" ${pool?'':`data-variants="${esc(JSON.stringify(generated))}"`} ${initial?`data-initial-values="${esc(JSON.stringify([initial]))}"`:''}>
  <div class="math-exercise-question"></div><button class="math-pool-reload"></button><button class="math-check-btn"></button><button class="math-legend-btn"></button><div class="math-legend-panel" style="display:none"></div><div class="math-feedback-area"></div></div>`;
 }
-function page({records=[record(),record(1)],local={},session={},query='?variant=q:2',lang='en',initial,disabled=false,automatic=false,missingChooser=false,extra='',pool=false,legacy=false,feedback=false,boards=false,review=false}={}) {
- const dom=new JSDOM('<script id="ctm-store-manifest" type="application/json">'+JSON.stringify({course:'course',exercises:[{id:'q',component:'math-exercise'},{id:'ordinary',component:'math-exercise'}]})+'</script>'+cell(records,{initial,pool,legacy})+extra,
+function page({records=[record(),record(1)],local={},session={},query='?variant=q:2',lang='en',initial,disabled=false,automatic=false,missingChooser=false,extra='',pool=false,legacy=false,feedback=false,boards=false,review=false,mode='custom',canonicalPayloadOnly=false}={}) {
+ const dom=new JSDOM('<script id="ctm-store-manifest" type="application/json">'+JSON.stringify({course:'course',exercises:[{id:'q',component:'math-exercise'},{id:'ordinary',component:'math-exercise'}]})+'</script>'+cell(records,{initial,pool,legacy,mode})+extra,
  {url:'https://example.test/lesson.html'+query,runScripts:'outside-only'});
  const w=dom.window;w.TextEncoder=TextEncoder;let feedbackOptions;const feedbackResets=[];
  if(feedback){w.document.getElementById('cell').insertAdjacentHTML('beforeend','<button class="math-feedback-btn"></button>');w.AIFeedback={questionText:cell=>cell.querySelector('.math-exercise-question').textContent,contextMaterials:()=>[],attach(options){feedbackOptions=options;return {reset(){feedbackResets.push(true);},cancel(){}};}};}
@@ -56,6 +56,7 @@ function page({records=[record(),record(1)],local={},session={},query='?variant=
  callCheckers:async(_py,name,request)=>{requests.push({name,request:plain(request)});return JSON.stringify({status:'correct',score:1});}};
  w.eval(own('matrix-input.js'));w.eval(own('math-store.js'));w.eval(own('math-exercise.js'));
  const element=w.document.getElementById('cell');const boardCalls=[],boardTitles=[];
+ if(canonicalPayloadOnly)delete element.dataset.pool;
  if(review){const payload=JSON.parse(element.dataset.variants);payload.renderMode='review';element.dataset.variants=JSON.stringify(payload);element.insertAdjacentHTML('afterbegin','<p class="math-variant-unapproved">Review warning</p>');}
  if(boards){element.dataset.variantBoards='["figure"]';element.dataset.variantBoardTitle='Authored descriptive diagram';w.MathExerciseBoards={attach(options){boardTitles.push(options.title);boardCalls.push(plain(options.getVariant()));return {changed(){boardCalls.push(plain(options.getVariant()));}};}};}
  if(!automatic)w.__mathExerciseTestApi.setupCell(element);
@@ -66,6 +67,25 @@ function page({records=[record(),record(1)],local={},session={},query='?variant=
 }
 async function check(p){const button=p.element.querySelector('.math-check-btn');button.click();
  for(let i=0;i<30&&button.disabled;i++)await new Promise(r=>setTimeout(r,0));assert.equal(button.disabled,false,p.element.textContent);}
+
+test('shared chooser result events expose numbers while P17 and progress keep their identities',async()=>{
+ const p=page();const node=p.w.document.getElementById('ctm-store-manifest'),manifest=JSON.parse(node.textContent);manifest.progress=true;node.textContent=JSON.stringify(manifest);
+ p.w.CTMLayout.ready=fn=>fn();p.w.eval(lib('ui/ctm-progress.js'));
+ const events=[];p.w.document.addEventListener('ctm:result',event=>events.push(plain(event.detail)));
+ p.field().value='2/3';await check(p);
+ assert.equal(events[0].variant,2);assert.deepEqual(events[0].variantIdentity,contexts[0].variant);assert.deepEqual(p.stored().variant,contexts[0].variant);
+ const tile=()=>p.w.document.querySelector('.ctm-progress button');assert.equal(tile().dataset.status,'correct');
+ p.w.confirm=()=>true;p.next();assert.equal(tile().dataset.status,'unattempted');assert.equal(p.stored().variant.n,7);
+ p.field().value='2/3';await check(p);assert.equal(events[1].variant,7);assert.equal(tile().dataset.status,'correct');p.close();
+ for(const options of [{pool:true,mode:'equivalent'},{records:[record(3)],query:''},{records:[record()],legacy:true}]){
+  const q=page(options),actual=[];q.w.document.addEventListener('ctm:result',event=>actual.push(plain(event.detail)));q.field().value='2/3';await check(q);
+  assert.equal(actual.length,1);
+  if(options.legacy){const {n,id,hash}=actual[0].variant;assert.deepEqual({n,id,hash},q.stored().variant);assert.equal(actual[0].variant.proposal,false);assert.equal('variantIdentity' in actual[0],false);}
+  else if(options.records){assert.equal(actual[0].variant,null);assert.equal(actual[0].variantIdentity,null);assert.equal(q.stored().variant,null);assert.deepEqual(q.stored().proposal,{id:'proposal-one',hash:'c'.repeat(16)});}
+  else{assert.equal(actual[0].variant,2);assert.deepEqual(actual[0].variantIdentity,q.stored().variant);}
+  q.close();
+ }
+});
 
 test('native Markdown stays text and custom requests carry exact context, never legacy variant fields',async()=>{
  const p=page();assert.equal(p.runtime,0);assert.equal(p.requests.length,0);
@@ -217,4 +237,12 @@ test('cancelled New variant preserves integrated feedback; accepted change reset
  const p=page({feedback:true});p.field().value='answer';
  p.w.confirm=()=>false;p.next();assert.equal(p.feedbackResets.length,0);
  p.w.confirm=()=>true;p.next();assert.equal(p.feedbackResets.length,1);p.close();
+});
+
+test('canonical native payload alone supplies initial task, stable choice and exact grading packet',async()=>{
+ const records=[record(),record(1)],p=page({records,canonicalPayloadOnly:true});
+ assert.equal(p.element.dataset.pool,undefined);assert.match(p.element.querySelector('.math-exercise-question').textContent,/Find/);
+ assert.equal(p.element.mathExercise.getVariant().n,2);assert.equal(p.requests.length,0);
+ p.next();assert.equal(p.element.mathExercise.getVariant().n,7);assert.deepEqual(p.stored().seen,[2,7]);
+ p.field().value='2/3';await check(p);assert.equal(p.requests.length,1);assert.deepEqual(p.requests[0].request.question_context,records[1].context);p.close();
 });

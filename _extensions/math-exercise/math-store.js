@@ -135,6 +135,7 @@
     handle = store.register({component: 'math-exercise', id: options.id, element: cell,
       source: cell.dataset.ctmSource, save: cell.dataset.ctmSave !== 'false' && !options.graphical,
       variant: options.variant, variants: options.variants, seen: options.seen,
+      numberedVariantResults: typeof options.initializeChoice === 'function',
       allowProposals: options.allowProposals === true, proposal: options.proposal, read: read, write: write,
       forget: forget, clear: function () { clearInputs(); forget(); }, exportItem: exportItem});
     if (options.initializeChoice && typeof handle.restoreChoice === 'function') {
