@@ -68,6 +68,13 @@ function M.generate(raw, question, opts, ctm, language)
   local file = quarto.doc.input_file
   local project = quarto.project.directory or pandoc.path.directory(file)
   local approval, renderMode = ctm.variants.approval(), ctm.variants.renderMode()
+  local reviewCandidate = os.getenv('CTM_VARIANTS_REVIEW_CANDIDATE')
+  local reviewLanguage = os.getenv('CTM_VARIANTS_REVIEW_LANGUAGE')
+  assert(not (reviewCandidate or reviewLanguage) or renderMode == 'review',
+    'Internal review candidate/language selectors require explicit review mode.')
+  assert(not reviewLanguage or reviewLanguage == 'default' or reviewLanguage == 'en'
+    or reviewLanguage == 'de' or reviewLanguage == 'nb', 'Unsupported internal review language.')
+  if reviewLanguage then language = reviewLanguage == 'default' and '' or reviewLanguage end
   local payload = {version=1,action='resolve',source=raw,question=question,options=opts,
     projectRoot=project,file=file,label=label,manifest='_variants/' .. label .. '.yml',
     approval=approval,renderMode=renderMode,solutionTarget=opts['solution-target']}
@@ -87,7 +94,7 @@ function M.generate(raw, question, opts, ctm, language)
   for _, id in ipairs(response.deployableIds) do selected[id] = true end
   local records, unapproved = {}, false
   for _, record in ipairs(response.records) do
-    if selected[record.id] then
+    if selected[record.id] and (not reviewCandidate or record.id == reviewCandidate) then
       local content = record.options.translations and record.options.translations[language]
       local numbered = type(record.context.variant) == 'table'
         and type(record.context.variant.n) == 'number' and record.context.variant.n > 0
@@ -101,6 +108,7 @@ function M.generate(raw, question, opts, ctm, language)
       if record.status ~= 'approved' then unapproved = true end
     end
   end
+  assert(not reviewCandidate or #records == 1, 'The requested review candidate is no longer available; rebuild review.')
   assert(#records > 0, file .. ': ' .. label .. ': no deployable variants; generate and review candidates first.')
   for _, warning in ipairs(response.warnings) do io.stderr:write(file .. ': ' .. label .. ': ' .. warning .. '\n') end
   local studentOptions = {}

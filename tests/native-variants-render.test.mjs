@@ -166,3 +166,56 @@ test('question context IDs are stable and conflicting authored IDs fail clearly'
   }
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
+
+test('connected review renders one exact proposal in each language through the real component',()=>{
+ const dir=mkdtempSync(join(tmpdir(),'math-rendered-review-'));
+ try{
+  cpSync(new URL('../_extensions/math-exercise',import.meta.url),join(dir,'_extensions/math-exercise'),{recursive:true});install(dir);
+  writeFileSync(join(dir,'_quarto.yml'),'project:\n  type: default\n  pre-render: python course-hook.py\nlang: nb\nfilters: [course-filter.lua]\n');
+  writeFileSync(join(dir,'course-hook.py'),"from pathlib import Path\nPath('UNEXPECTED-COURSE-HOOK').write_text('ran')\n");
+  writeFileSync(join(dir,'course-filter.lua'),"assert(false, 'course filter must not run in isolated student preview')\n");
+  writeFileSync(join(dir,'lesson.qmd'),fence+'{math-exercise}\n'+source+'\n'+fence+'\n');
+  const wrapper=join(dir,'_extensions/math-exercise/question-variants.py');
+  const python=process.env.MATH_EXERCISE_PYTHON||'python3';
+  const generated=spawnSync(python,['-I',wrapper,'--project',dir,'--file','lesson.qmd','--label','native-q','generate25more'],{env:renderEnv,encoding:'utf8',timeout:90000});
+  assert.equal(generated.status,0,generated.stdout+generated.stderr);
+  const script=String.raw`
+import importlib.util,json,sys
+from pathlib import Path
+from html.parser import HTMLParser
+root=Path(sys.argv[1]);spec=importlib.util.spec_from_file_location('review',root/'_extensions/math-exercise/variants-review.py')
+module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+class Cell(HTMLParser):
+ def handle_starttag(self,tag,attributes):
+  values=dict(attributes)
+  if 'math-exercise-cell' in values.get('class','').split():self.values=values
+review=module.Review(root,'lesson.qmd','native-q')
+try:
+ response=json.loads(review.run('review').stdout);identifier=response['records'][0]['id'];contexts=[]
+ for language,prefix in [('default','Find'),('nb','Finn')]:
+  output=review.render_student(identifier,language);html=(output/'index.html').read_text();parser=Cell();parser.feed(html)
+  payload=json.loads(parser.values['data-variants']);record,=payload['variants']
+  assert record['id']==identifier and record['n'] is None and record['context']['variant'] is None
+  assert record['question'].startswith(prefix) and '<script' not in record['solution']
+  assert ('Text' if language=='default' else 'Svaret') in record['solution']
+  assert 'math-check-btn' in html and parser.values['data-fields']=='[]'
+  assert '#| variables' not in html and 'notSolutionContent()' not in html
+  contexts.append(record['context'])
+ assert contexts[0]==contexts[1]
+ assert not (root/'UNEXPECTED-COURSE-HOOK').exists()
+ print(json.dumps({'passed':True,'languages':['default','nb'],'id':identifier,'proposal':True}))
+finally:review.preview_directory.cleanup()
+`;
+  const result=spawnSync(python,['-I','-c',script,dir],{env:renderEnv,encoding:'utf8',timeout:120000});
+  assert.equal(result.status,0,result.stdout+result.stderr);assert.equal(JSON.parse(result.stdout).passed,true);
+  const rejected=spawnSync(process.env.QUARTO||'quarto',['render','lesson.qmd'],{cwd:dir,env:{...renderEnv,CTM_VARIANTS:'optional',CTM_VARIANTS_REVIEW_CANDIDATE:'unused'},encoding:'utf8',timeout:30000});
+  // This authored course filter deliberately blocks ordinary rendering; it
+  // proves the isolated preview did not silently execute project filters.
+  assert.notEqual(rejected.status,0);assert.match(rejected.stdout+rejected.stderr,/course filter must not run/);
+  writeFileSync(join(dir,'_quarto.yml'),'project: {type: default}\nfilters: [math-exercise]\nai-feedback: {enabled: false}\nmath-exercise: {feedback: false}\n');
+  for(const [mode,language,message] of [['optional','default',/require explicit review mode/],['review','zz',/Unsupported internal review language/]]){
+   const guarded=spawnSync(process.env.QUARTO||'quarto',['render','lesson.qmd'],{cwd:dir,env:{...renderEnv,CTM_VARIANTS:mode,CTM_VARIANTS_REVIEW_CANDIDATE:'unused',CTM_VARIANTS_REVIEW_LANGUAGE:language},encoding:'utf8',timeout:30000});
+   assert.notEqual(guarded.status,0);assert.match(guarded.stdout+guarded.stderr,message);
+  }
+ }finally{rmSync(dir,{recursive:true,force:true});}
+});

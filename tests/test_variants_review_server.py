@@ -17,12 +17,16 @@ class ServerTests(unittest.TestCase):
         class Backend:
             def __init__(self):
                 self.saved = []
+                self.generated = []
             def page(self, endpoint):
                 return ("review " + endpoint).encode()
             def decide(self, value):
                 if value.get("baseHash") != "current":
                     raise ValueError("stale lease")
                 self.saved.append(value)
+            def generate(self, value):
+                if value.get('baseHash') != 'current':raise ValueError('stale lease')
+                self.generated.append(value)
         self.backend = Backend()
         self.server = review_server.server(self.backend)
         self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
@@ -68,11 +72,21 @@ class ServerTests(unittest.TestCase):
         self.assertEqual(self.call("POST", headers=headers, value=value)[0], 200)
         self.assertEqual(self.backend.saved, [value])
 
+    def test_generate_requires_same_origin_and_original_lease(self):
+        headers={'Origin':self.origin,'Content-Type':'application/json'}
+        value={'action':'generate25more','baseHash':'current'}
+        self.assertEqual(self.call('POST',value=value)[0],403)
+        self.assertEqual(self.call('POST',headers=headers,value=dict(value,baseHash='stale'))[0],409)
+        self.assertEqual(self.backend.generated,[])
+        self.assertEqual(self.call('POST',headers=headers,value=value)[0],200)
+        self.assertEqual(self.backend.generated,[value])
+
     def test_real_backend_only_forwards_lease_and_decisions_to_fixed_manifest(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             (root / "lesson.qmd").write_text("question")
             review = review_server.Review(root, "lesson.qmd", "q")
+            self.addCleanup(review.preview_directory.cleanup)
             captured = []
             def run(*args):
                 self.assertEqual(args[0], "apply")
@@ -84,10 +98,42 @@ class ServerTests(unittest.TestCase):
             for extra in ({"projectRoot": "/tmp"}, {"manifest": "outside.yml"}, {"records": []}):
                 with self.assertRaises(ValueError):
                     review.decide(dict(value, **extra))
+            generated=[]
+            review.run=lambda *args:generated.append(args)
+            review.generate({'action':'generate25more','baseHash':'original'})
+            self.assertEqual(generated,[('generate25more','--base-hash','original')])
+            with self.assertRaises(ValueError):review.generate({'action':'generate25more','baseHash':'original','records':[]})
             with self.assertRaises((ValueError, OSError)):
                 review_server.Review(root, "../outside", "q")
             with self.assertRaises(ValueError):
                 review_server.Review(root, "lesson.qmd", "../q")
+
+class PreviewTests(unittest.TestCase):
+    def test_static_preview_routes_cannot_read_source_or_follow_symlinks(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);(root/'lesson.qmd').write_text('source')
+            review=review_server.Review(root,'lesson.qmd','q')
+            self.addCleanup(review.preview_directory.cleanup)
+            output=root/'generated';output.mkdir();(output/'index.html').write_text('actual student page')
+            (output/'asset.js').write_text('actual script')
+            (output/'escape').symlink_to(root/'lesson.qmd')
+            review.preview_choices={'slug':('actual-id',['default','nb'])}
+            calls=[]
+            review.render_student=lambda identifier,language:(calls.append((identifier,language)) or output)
+            self.assertEqual(review.preview('slug/nb/index.html')[0],b'actual student page')
+            self.assertEqual(review.preview('slug/nb/asset.js')[0],b'actual script')
+            self.assertEqual(calls,[('actual-id','nb')])
+            for route in ('slug/nb/../lesson.qmd','slug/nb/%2e%2e/lesson.qmd','slug/nb/escape','unknown/nb/index.html','slug/en/index.html','slug/default/asset.js'):
+                with self.assertRaises(ValueError,msg=route):review.preview(route)
+
+    def test_render_supervisor_limits_time_and_output(self):
+        import os,sys
+        with tempfile.TemporaryDirectory() as directory:
+            for source,limits,expected in [
+                ('import time;time.sleep(10)',{'timeout':.15},'time budget'),
+                ('import os,time;os.write(2,b"x"*100000);time.sleep(10)',{'output_limit':1024},'output budget')]:
+                with self.assertRaisesRegex(ValueError,expected):
+                    review_server.Review.render_command([sys.executable,'-c',source],directory,os.environ,**limits)
 
 
 if __name__ == "__main__":
