@@ -1080,7 +1080,7 @@
     var catalogReview = false;
     if (nativeVariants && generated.renderMode === 'review') {
       var reviewKeys = new URLSearchParams(location.search).getAll('ctm-review');
-      if (reviewKeys.length) {
+      if (generated.reviewCatalog === true || reviewKeys.length) {
         if (reviewKeys.length !== 1 || !/^[0-9a-f]{64}$/.test(reviewKeys[0])) throw new Error('Invalid review candidate selector.');
         var matches = generated.variants.filter(function (record) {return record.reviewKey === reviewKeys[0];});
         if (matches.length !== 1) throw new Error('Unknown or ambiguous review candidate selector.');

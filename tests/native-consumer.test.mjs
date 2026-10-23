@@ -273,8 +273,8 @@ test('review catalog selects one exact card and never restores or saves learner 
 test('review catalog invalid or ambiguous selectors fail locally while ordinary sibling Check remains usable',async()=>{
  const ordinary='<div id="ordinary" class="math-exercise-cell" data-label="ordinary" data-mode="equivalent" data-fields="[&quot;o-f1&quot;]"><div class="math-exercise-question"><input class="math-input" id="o-f1" data-answer="42"></div><button class="math-check-btn"></button><button class="math-legend-btn"></button><div class="math-legend-panel"></div><div class="math-feedback-area"></div></div>';
  const records=catalogRows(),key=records[0].reviewKey;
- for(const [query,rows] of [['?ctm-review='+ 'f'.repeat(64),records],['?ctm-review=bad',records],['?ctm-review='+key+'&ctm-review='+key,records],['?ctm-review='+key,[records[0],{...records[1],reviewKey:key}]]]){
-  const p=page({records:rows,query,review:true,automatic:true,extra:ordinary});p.start();await assert.rejects(p.tracked[0],/renderer-unavailable/);
+ for(const [query,rows] of [['',records],['?ctm-review='+ 'f'.repeat(64),records],['?ctm-review=bad',records],['?ctm-review='+key+'&ctm-review='+key,records],['?ctm-review='+key,[records[0],{...records[1],reviewKey:key}]]]){
+  const p=page({records:rows,query,review:true,automatic:true,extra:ordinary,beforeSetup(w,element){const payload=JSON.parse(element.dataset.variants);payload.reviewCatalog=true;element.dataset.variants=JSON.stringify(payload);}});p.start();await assert.rejects(p.tracked[0],/renderer-unavailable/);
   assert.equal(p.element.querySelector('.math-check-btn').disabled,true);assert.ok(p.element.querySelector('.math-setup-unavailable'));assert.match(p.errors[0][1].message,/review candidate selector/);
   const good=p.w.document.getElementById('ordinary');good.querySelector('input').value='42';good.querySelector('.math-check-btn').click();
   for(let i=0;i<30&&good.querySelector('.math-check-btn').disabled;i++)await new Promise(resolve=>setTimeout(resolve,0));
