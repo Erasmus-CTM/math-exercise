@@ -85,9 +85,10 @@ test('native Markdown stays text and custom requests carry exact context, never 
 test('cancel does not advance/persist seen; accepted change clears old grades, announces and focuses',async()=>{
  const p=page({lang:'de'});assert.equal(p.element.querySelector('.math-pool-reload').textContent,'Neue Variante');
  p.field().value='2/3';await check(p);const before=p.local();assert.equal(p.stored().result.status,'correct');
+ const accepted=[];p.element.addEventListener('math-exercise:variant-accepted',event=>accepted.push(plain(event.detail)));
  const resets=[];p.w.document.addEventListener('ctm:store-clear',event=>resets.push(plain(event.detail)));
- p.w.confirm=()=>false;p.next();assert.equal(resets.length,0);assert.deepEqual(p.local(),before);assert.equal(p.field().value,'2/3');
- p.w.confirm=()=>true;p.next();assert.equal(resets.length,1);assert.equal(resets[0].reason,'variant');assert.equal(resets[0].id,'q');assert.equal(p.element.mathExercise.getVariant().n,7);assert.equal(p.field().value,'');
+ p.w.confirm=()=>false;p.next();assert.equal(accepted.length,0);assert.equal(resets.length,0);assert.deepEqual(p.local(),before);assert.equal(p.field().value,'2/3');
+ p.w.confirm=()=>true;p.next();assert.equal(accepted.length,1);assert.deepEqual(accepted[0],{label:'q',variant:{n:7,id:'id-7',hash:'b'.repeat(16)}});assert.equal(resets.length,1);assert.equal(resets[0].reason,'variant');assert.equal(resets[0].id,'q');assert.equal(p.element.mathExercise.getVariant().n,7);assert.equal(p.field().value,'');
  assert.equal(p.stored().result,undefined);assert.deepEqual(p.stored().seen,[2,7]);
  assert.match(p.element.querySelector('.math-variant-announcement').textContent,/7.*ausgewählt/);
  assert.equal(p.w.document.activeElement,p.element.querySelector('.math-exercise-question'));
@@ -192,4 +193,15 @@ test('handwritten pool missing shared chooser fails locally rather than changing
  const p=page({pool:true,missingChooser:true,automatic:true});p.start();await assert.rejects(p.tracked[0],/renderer-unavailable/);
  assert.match(p.element.querySelector('.math-setup-unavailable').textContent,/load|reload|unavailable/i);
  assert.equal(p.requests.length,0);assert.match(p.errors[0][1].message,/Shared variant selection/);p.close();
+});
+
+test('external worked solution collapses only on an accepted real change',()=>{
+ const p=page({automatic:true,extra:'<details open><div class="callout"><div class="collapse show"><div id="external-solution"></div></div></div></details>'});
+ const payload=JSON.parse(p.element.dataset.variants);payload.solutionTarget='external-solution';p.element.dataset.variants=JSON.stringify(payload);
+ let hidden=0;const accepted=[];p.w.bootstrap={Collapse:{getOrCreateInstance(){return {hide(){hidden++;}};}}};
+ p.element.addEventListener('math-exercise:variant-accepted',event=>accepted.push(plain(event.detail)));
+ p.w.__mathExerciseTestApi.setupCell(p.element);assert.equal(hidden,0);assert.equal(accepted.length,0);assert.equal(p.w.document.querySelector('details').open,true);
+ p.field().value='answer';p.w.confirm=()=>false;p.next();assert.equal(hidden,0);assert.equal(accepted.length,0);
+ p.w.confirm=()=>true;p.next();assert.equal(hidden,1);assert.equal(accepted.length,1);assert.equal(p.w.document.querySelector('details').open,false);
+ p.element.mathExercise.selectVariant('id-7');assert.equal(hidden,1);assert.equal(accepted.length,1,'same selection does not reset authored work');p.close();
 });

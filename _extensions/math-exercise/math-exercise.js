@@ -1473,6 +1473,7 @@
     // Selection is shared by random reload and author review; always invalidates old feedback.
     function selectTask(next, accepted) {
       if (!poolTasks || !Number.isInteger(next) || next < 0 || next >= poolTasks.length) throw new Error('Invalid variant selection');
+      if (accepted && next === idx) return;
       invalidateFeedback();
       if (feedbackHandle) feedbackHandle.reset();
       idx = next;
@@ -1491,6 +1492,24 @@
       if (storedAnswers) {
         storedAnswers.changed();
         if (accepted && storedAnswers.choiceChanged) storedAnswers.choiceChanged();
+      }
+      if (accepted) {
+        // External worked solutions close only after a real, accepted change.
+        var target = generated && generated.solutionTarget && document.getElementById(generated.solutionTarget);
+        if (target) {
+          var details = target.closest('details');
+          if (details) details.open = false;
+          var collapse = target.closest('.collapse') || target.closest('.callout')?.querySelector('.collapse');
+          if (collapse && window.bootstrap && window.bootstrap.Collapse) {
+            try { window.bootstrap.Collapse.getOrCreateInstance(collapse, {toggle: false}).hide(); }
+            catch (error) { console.warn('math-exercise: optional solution collapse unavailable', error); }
+          }
+        }
+        var identity = chooser ? chooser.state() : {variant: storedVariant() || currentVariant()};
+        var selected = identity.variant;
+        var detail = {label: label, variant: selected ? {n: selected.n, id: selected.id, hash: selected.hash} : null};
+        if (identity.proposal) detail.proposal = identity.proposal;
+        cell.dispatchEvent(new CustomEvent('math-exercise:variant-accepted', {bubbles: true, detail: detail}));
       }
     }
     if (reloadBtn && poolTasks) reloadBtn.addEventListener('click', function () {
