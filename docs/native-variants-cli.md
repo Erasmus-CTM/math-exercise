@@ -47,8 +47,10 @@ Commands return the ordinary JSON result on stdout; diagnostics use stderr.
 failure after a completed native mutation can leave the manifest saved: rerun
 the read-only `review --html` command rather than regenerating a batch blindly.
 The existing timeout/transport uncertainty and source/editor race limits still
-apply. No bot, live comment, merge, tag or deployment is activated by these
-commands.
+apply. The unchanged `--stdin` interface reads inside the supervised worker, so
+a caller that sends no input and never closes its pipe cannot hang before the
+whole-request deadline starts. No bot, live comment, merge, tag or deployment is
+activated by these commands.
 
 Focused installed-CLI checks use a copied canonical native/wheel/component tuple
 from a hostile working directory, generate a two-value synthetic exercise,

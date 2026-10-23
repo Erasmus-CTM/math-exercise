@@ -179,6 +179,28 @@ class WrapperTests(unittest.TestCase):
         self.assertIn(b"total native request time budget exceeded", stderr)
         self.assertFalse((self.root / "_variants/q.yml").exists())
 
+    def test_total_supervisor_includes_a_caller_pipe_without_input_or_eof(self):
+        import importlib.util
+        import io
+        import time
+        from unittest.mock import patch
+        spec = importlib.util.spec_from_file_location("question_variants", WRAPPER)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        read_fd, write_fd = os.pipe()
+        with io.TextIOWrapper(os.fdopen(read_fd, "rb")) as stalled:
+            try:
+                started = time.monotonic()
+                with patch.object(module.sys, "stdin", stalled):
+                    code, stdout, stderr = module.supervised(None, timeout=0.25)
+                self.assertLess(time.monotonic() - started, 3)
+            finally:
+                os.close(write_fd)
+        self.assertEqual(code, 1)
+        self.assertEqual(stdout, b"")
+        self.assertIn(b"total native request time budget exceeded", stderr)
+        self.assertFalse((self.root / "_variants/q.yml").exists())
+
     @unittest.skipIf(os.name == "nt", "POSIX process-group teardown proof")
     def test_supervisor_terminates_descendant_of_stalled_author_checker(self):
         import importlib.util

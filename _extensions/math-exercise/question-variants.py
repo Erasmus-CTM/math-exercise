@@ -334,7 +334,12 @@ def review_html(result, payload):
 
 
 def supervised(raw, *, timeout=300, worker_args=()):
-    """Bound the whole native request, including bootstrap and child teardown."""
+    """Bound the whole request, including stalled input, bootstrap and teardown.
+
+    raw=None passes the real stdin descriptor to the isolated worker, so reading
+    a caller that never closes its pipe is covered by the same outer deadline.
+    Byte requests remain available to component callers and focused contracts.
+    """
     import signal
     import subprocess
     import tempfile
@@ -366,7 +371,8 @@ def supervised(raw, *, timeout=300, worker_args=()):
     # crossing the aggregate output budget; the returned buffers are capped.
     with tempfile.TemporaryFile() as output, tempfile.TemporaryFile() as errors:
         child = subprocess.Popen([sys.executable, "-I", str(Path(__file__).resolve()), "--stdin", "--worker", *worker_args],
-            stdin=subprocess.PIPE, stdout=output, stderr=errors, start_new_session=os.name != "nt")
+            stdin=sys.stdin.buffer if raw is None else subprocess.PIPE,
+            stdout=output, stderr=errors, start_new_session=os.name != "nt")
         def watch():
             while True:
                 if os.fstat(output.fileno()).st_size + os.fstat(errors.fileno()).st_size > output_limit:
@@ -430,15 +436,17 @@ def main(argv=None):
     if args.command not in (None, "apply") and args.request_file is not None:
         parser.error("only apply accepts a downloaded decision JSON file")
     try:
-        if args.stdin:
+        if args.stdin and args.worker:
             raw = sys.stdin.buffer.read(1024 * 1024 + 1)
+        elif args.stdin:
+            raw = None  # The supervised worker owns the potentially stalled read.
         else:
             payload = {"projectRoot": str(args.project.resolve()), "file": args.file,
                        "label": args.label, "manifest": args.manifest}
             if args.request_file is not None:
                 payload["requestFile"] = str(args.request_file.resolve())
             raw = json.dumps(payload, ensure_ascii=True, allow_nan=False).encode()
-        if len(raw) > 1024 * 1024:
+        if raw is not None and len(raw) > 1024 * 1024:
             raise ValueError("component variants request exceeds byte limit")
         if not args.worker:
             worker_args = ["--file-command", args.command] if args.command else []
