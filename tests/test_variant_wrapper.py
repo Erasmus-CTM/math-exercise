@@ -40,6 +40,80 @@ class WrapperTests(unittest.TestCase):
         self.assertEqual(completed.stdout, "")
         return completed.stderr
 
+    def installed_cli(self):
+        """Use an actual installed wrapper/native/wheel tuple from hostile cwd."""
+        import shutil
+        extensions = self.root / "installed pack" / "_extensions"
+        component = extensions / "math-exercise"
+        component.mkdir(parents=True)
+        for name in ("question-variants.py", "variant_resolver.py"):
+            shutil.copy2(ROOT / "_extensions" / "math-exercise" / name, component / name)
+        checker = extensions / "ctm-checkers"
+        checker.mkdir()
+        wheel = Path(os.environ["CTM_CHECKERS_WHEEL"])
+        shutil.copy2(wheel, checker / wheel.name)
+        shutil.copy2(wheel.parent / "checkers.json", checker / "checkers.json")
+        shutil.copytree(Path(os.environ["CTM_VARIANTS_NATIVE"]), checker / "native-authoring")
+        hostile = self.root / "hostile lesson cwd"
+        hostile.mkdir()
+        for name in ("json", "math", "ctm_variants", "ctm_checkers"):
+            (hostile / (name + ".py")).write_text("raise RuntimeError('foreign lesson import')")
+        environment = dict(os.environ)
+        for key in ("CTM_VARIANTS_NATIVE", "CTM_CHECKERS_WHEEL"):
+            environment.pop(key, None)
+        command = [sys.executable, str(component / "question-variants.py"),
+                   "--project", str(self.root), "--file", "lesson.qmd", "--label", "q"]
+        def run(*arguments, ok=True):
+            completed = subprocess.run([*command, *map(str, arguments)], cwd=hostile,
+                capture_output=True, text=True, timeout=120, env=environment)
+            if ok:
+                self.assertEqual(completed.returncode, 0, completed.stderr)
+                return json.loads(completed.stdout)
+            self.assertNotEqual(completed.returncode, 0)
+            self.assertEqual(completed.stdout, "")
+            return completed.stderr
+        return run
+
+    def test_installed_file_cli_generate_html_apply_download_and_current_source_refusal(self):
+        cli = self.installed_cli()
+        page = self.root / "review output" / "q.html"
+        generated = cli("generate25more", "--html", page)
+        self.assertEqual(generated["counters"]["tested"], 2)
+        self.assertTrue(all(row["n"] is None for row in generated["records"]))
+        self.assertIn("Variant review: q", page.read_text())
+        self.assertIn('"path": "_variants/q.yml"', page.read_text())
+        manifest = self.root / "_variants/q.yml"
+        original = manifest.read_bytes()
+        cli("review", "--html", page)
+        self.assertEqual(manifest.read_bytes(), original, "review must remain read-only")
+        selected = generated["records"][0]
+        downloaded = {"version": 1, "action": "decide-many", "label": "q", "manifest": "_variants/q.yml",
+            "baseHash": generated["baseHash"], "projectRoot": "/downloaded-context-is-not-authoritative",
+            "source": "not current source", "options": {}, "records": [{"id": "forged-record-is-ignored"}],
+            "decisions": [{"id": selected["id"], "hash": selected["hash"], "status": "approved"}]}
+        request_file = self.root / "downloaded decisions.json"
+        request_file.write_text(json.dumps(downloaded))
+        decided = cli("apply", request_file)
+        current = next(row for row in decided["records"] if row["id"] == selected["id"])
+        self.assertEqual(current["context"]["variant"]["n"], 1)
+        saved = manifest.read_bytes()
+        self.assertIn("manifest changed", cli("apply", request_file, ok=False))
+        self.assertEqual(manifest.read_bytes(), saved)
+        downloaded["baseHash"] = decided["baseHash"]
+        request_file.write_text(json.dumps(downloaded))
+        self.write_source(self.request["source"].replace("_[{#a#}]", "_[{#a+1#}]"))
+        self.assertIn("differs from current candidate", cli("apply", request_file, ok=False))
+        self.assertEqual(manifest.read_bytes(), saved)
+
+    def test_file_cli_requires_explicit_generation_and_keeps_html_away_from_source_and_history(self):
+        cli = self.installed_cli()
+        source = (self.root / "lesson.qmd").read_bytes()
+        self.assertIn("run generate25more", cli("review", ok=False))
+        for target in (self.root / "lesson.qmd", self.root / "_variants/q.yml"):
+            self.assertIn("must not replace", cli("generate25more", "--html", target, ok=False))
+            self.assertEqual((self.root / "lesson.qmd").read_bytes(), source)
+            self.assertFalse((self.root / "_variants/q.yml").exists())
+
     def test_installed_generate_decide_publish_and_stale_write(self):
         generated = self.call(self.request)
         self.assertEqual(generated["counters"]["tested"], 2)

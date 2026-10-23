@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Component-owned JSON adapter to the installed native variant authoring engine.
 
-Run this file with --stdin. Native-only code and its manifest are installed by
-the canonical CTM producer alongside the checker wheel, never in browser wheels.
+Use --stdin for the version-1 JSON interface, or --project/--file/--label with
+generate25more, review or apply for local authoring. Native-only code and its
+manifest are installed alongside the checker wheel, never in browser wheels.
 """
 import sys
 
@@ -270,7 +271,69 @@ def request(payload):
             "deployableIds": selected["ids"], "warnings": selected["warnings"], "counters": counters}
 
 
-def supervised(raw, *, timeout=300):
+def file_request(payload, command):
+    """Build the same version-1 request from current source and explicit files.
+
+    Downloaded review records, source text and project selectors are never
+    authoritative. Only the original lease and explicit decisions are carried
+    into a fresh component request.
+    """
+    import re
+    from ctm_variants import history
+    from ctm_variants.review import _path
+    project = str(Path(payload["projectRoot"]).resolve())
+    label = payload["label"]
+    manifest = payload.get("manifest")
+    if manifest is None:
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}", label) or ".." in label:
+            raise ValueError("this label needs an explicit --manifest path inside the project")
+        manifest = "_variants/" + label + ".yml"
+    path = _path(project, manifest)
+    manifest = path.relative_to(Path(project)).as_posix()
+    file = _path(project, payload["file"]).relative_to(Path(project)).as_posix()
+    request_payload = current_source({"projectRoot": project, "file": file,
+        "sourceFile": file, "label": label, "manifest": manifest, "version": 1,
+        "approval": "required", "renderMode": "review"})
+    value, lease = history.load(path, label)
+    if command == "generate25more":
+        return dict(request_payload, action="generate", baseHash=lease)
+    if command == "review":
+        if lease is None or not value["proposals"]:
+            raise ValueError("no retained proposals; run generate25more before reviewing decisions")
+        return dict(request_payload, action="resolve")
+    if command != "apply":
+        raise ValueError("unknown file authoring command")
+    downloaded_path = Path(payload["requestFile"])
+    if not downloaded_path.is_file() or downloaded_path.stat().st_size > 1024 * 1024:
+        raise ValueError("downloaded decision request must be a file of at most 1 MiB")
+    downloaded = json.loads(downloaded_path.read_text(encoding="utf-8"))
+    if (type(downloaded) is not dict or type(downloaded.get("version")) is not int
+            or downloaded["version"] != 1 or downloaded.get("label") != label
+            or downloaded.get("action") not in ("decide", "decide-many")
+            or "baseHash" not in downloaded):
+        raise ValueError("downloaded request needs this label, version 1, explicit decisions and its original baseHash")
+    if not isinstance(downloaded.get("manifest"), str) or _path(project, downloaded["manifest"]) != path:
+        raise ValueError("downloaded manifest differs from the selected --manifest")
+    action = downloaded["action"]
+    key = "decision" if action == "decide" else "decisions"
+    return dict(request_payload, action=action, baseHash=downloaded["baseHash"],
+                **{key: downloaded.get(key)})
+
+
+def review_html(result, payload):
+    """Use the shared review UI, prefilled for this explicit local operation."""
+    from ctm_variants.review import document
+    page = document(result)
+    # The existing disconnected UI accepts project/manifest text controls. Keep
+    # its exported decision protocol unchanged; --file supplies source context
+    # when a downloaded request is applied through this component wrapper.
+    defaults = json.dumps({"root": payload["projectRoot"], "path": payload["manifest"]},
+                          ensure_ascii=True).replace("<", "\\u003c")
+    script = "<script>Object.entries(" + defaults + ").forEach(([id,value])=>{document.getElementById(id).value=value;});</script>"
+    return page.rsplit("</html>", 1)[0] + script + "</html>"
+
+
+def supervised(raw, *, timeout=300, worker_args=()):
     """Bound the whole native request, including bootstrap and child teardown."""
     import signal
     import subprocess
@@ -302,7 +365,7 @@ def supervised(raw, *, timeout=300):
     # Files avoid unbounded communicate() buffers. The watcher aborts a worker
     # crossing the aggregate output budget; the returned buffers are capped.
     with tempfile.TemporaryFile() as output, tempfile.TemporaryFile() as errors:
-        child = subprocess.Popen([sys.executable, "-I", str(Path(__file__).resolve()), "--stdin", "--worker"],
+        child = subprocess.Popen([sys.executable, "-I", str(Path(__file__).resolve()), "--stdin", "--worker", *worker_args],
             stdin=subprocess.PIPE, stdout=output, stderr=errors, start_new_session=os.name != "nt")
         def watch():
             while True:
@@ -345,21 +408,69 @@ def main(argv=None):
     import argparse
     import contextlib
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--stdin", action="store_true", required=True)
+    parser.add_argument("command", nargs="?", choices=("generate25more", "review", "apply"))
+    parser.add_argument("request_file", nargs="?", type=Path, help="downloaded decision JSON for apply")
+    parser.add_argument("--stdin", action="store_true", help="read the version-1 JSON request")
+    parser.add_argument("--project", type=Path, help="course project root for file authoring")
+    parser.add_argument("--file", help="authored source file inside the project")
+    parser.add_argument("--label", help="unique authored exercise label")
+    parser.add_argument("--manifest", help="manifest inside the project (default: _variants/LABEL.yml)")
+    parser.add_argument("--html", type=Path, help="write a disconnected review HTML file")
     parser.add_argument("--worker", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--file-command", choices=("generate25more", "review", "apply"), help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
+    if args.stdin:
+        if args.command or args.request_file or any(value is not None for value in (args.project, args.file, args.label, args.manifest)):
+            parser.error("choose --stdin or a file authoring command")
+    elif (args.command is None or args.project is None or not args.file or not args.label
+          or args.worker or args.file_command):
+        parser.error("file authoring needs --project, --file, --label and generate25more, review or apply")
+    if args.command == "apply" and args.request_file is None:
+        parser.error("apply needs a downloaded decision JSON file")
+    if args.command not in (None, "apply") and args.request_file is not None:
+        parser.error("only apply accepts a downloaded decision JSON file")
     try:
-        raw = sys.stdin.buffer.read(1024 * 1024 + 1)
+        if args.stdin:
+            raw = sys.stdin.buffer.read(1024 * 1024 + 1)
+        else:
+            payload = {"projectRoot": str(args.project.resolve()), "file": args.file,
+                       "label": args.label, "manifest": args.manifest}
+            if args.request_file is not None:
+                payload["requestFile"] = str(args.request_file.resolve())
+            raw = json.dumps(payload, ensure_ascii=True, allow_nan=False).encode()
         if len(raw) > 1024 * 1024:
             raise ValueError("component variants request exceeds byte limit")
         if not args.worker:
-            code, stdout, stderr = supervised(raw)
+            worker_args = ["--file-command", args.command] if args.command else []
+            if args.html is not None:
+                worker_args += ["--html", str(args.html.resolve())]
+            code, stdout, stderr = supervised(raw, worker_args=worker_args)
             sys.stdout.buffer.write(stdout)
             sys.stderr.buffer.write(stderr)
             return code
         install_imports()
         with contextlib.redirect_stdout(sys.stderr):
-            result = request(json.loads(raw))
+            payload = json.loads(raw)
+            request_file = payload.get("requestFile") if args.file_command else None
+            if args.file_command:
+                payload = file_request(payload, args.file_command)
+            if args.html is not None:
+                from ctm_variants.review import _path
+                protected = {_path(payload["projectRoot"], payload["manifest"]),
+                             _path(payload["projectRoot"], payload.get("sourceFile", payload["file"]))}
+                if request_file:
+                    protected.add(Path(request_file).resolve())
+                if args.html.resolve() in protected:
+                    raise ValueError("review HTML must not replace source, manifest or downloaded decisions")
+                args.html.parent.mkdir(parents=True, exist_ok=True)
+                if args.html.exists() and not args.html.is_file():
+                    raise ValueError("review HTML output must be a file")
+            result = request(payload)
+            if args.html is not None:
+                try:
+                    args.html.write_text(review_html(result, payload), encoding="utf-8")
+                except OSError as error:
+                    raise ValueError("variant operation completed but review HTML could not be written; run review --html again: " + str(error)) from error
         print(json.dumps(result, ensure_ascii=True, allow_nan=False))
         return 0
     except Exception as error:
