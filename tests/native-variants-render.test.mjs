@@ -127,13 +127,14 @@ test('explicit native board metadata carries plain public values without changin
    '---','format: html','filters: [math-exercise]','ai-feedback:','  enabled: false','math-exercise:','  feedback: false','---','',
    fence+'{math-exercise}','#| label: native-board-values','#| variables: |','#|   a = pick([1,2])',
    '#|   half = 1/2','#|   third = 1/3','#|   large = 2^70','#|   matrix = Matrix([[1/2,1/3]])','#|   optional = None','#|   nested = [None]',
-   '#| field-labels: Answer','#| note: a={#a#}','#| solution-target: worked-answer','#| boards: diagram, second-diagram','Answer _[{@a@}].',fence].join('\n'));
+   '#| field-labels: Answer','#| note: a={#a#}','#| solution-target: worked-answer','#| board-title: A descriptive figure title','#| boards: diagram, second-diagram','Answer _[{@a@}].',fence].join('\n'));
   const result=spawnSync(process.env.QUARTO||'quarto',['render','lesson.qmd'],{
    cwd:dir,env:{...renderEnv,CTM_VARIANTS:'optional'},encoding:'utf8',timeout:30000});
   assert.equal(result.status,0,result.stdout+result.stderr);
   const html=readFileSync(join(dir,'lesson.html'),'utf8');assert.match(html,/math-exercise-variants-board-/);
   const dom=new JSDOM(html),cell=dom.window.document.querySelector('.math-exercise-cell');
   assert.deepEqual(JSON.parse(cell.dataset.variantBoards),['diagram','second-diagram']);
+  assert.equal(cell.dataset.variantBoardTitle,'A descriptive figure title');
   const payload=JSON.parse(cell.dataset.variants);assert.equal(payload.solutionTarget,'worked-answer');
   const records=payload.variants;
   assert.equal(records.length,2);

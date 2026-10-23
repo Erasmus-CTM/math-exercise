@@ -953,6 +953,7 @@ local function buildExercise(el, state)
              .. ' data-vecdir="' .. vecdir .. '"'
              .. ' data-feedback-policy="' .. attrEsc(quarto.json.encode(feedback.selection(el, opts))) .. '"'
              .. ' data-variant-boards="' .. jsonArrAttr(boards) .. '"'
+             .. ' data-variant-board-title="' .. attrEsc(opts['board-title'] or '') .. '"'
              .. ' data-context-mode="' .. fc.mode .. '"'
              .. ' data-context-refs="' .. attrEsc(fc.refs) .. '"'
              .. ' data-context="'      .. attrEsc('"' .. jsonEsc(sectionText) .. '"') .. '"'
