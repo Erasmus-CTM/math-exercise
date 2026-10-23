@@ -28,7 +28,10 @@ It allocates no approval numbers and approves nothing automatically.
 
 The default manifest is `_variants/LABEL.yml`. An unusual label that cannot be
 used as a portable filename needs an explicit `--manifest` path inside the
-project. `review` is read-only and requires saved proposals; run `generate25more`
+project for a matching explicit native integration. The Quarto Lua build reads
+the canonical `_variants/LABEL.yml` path; `--manifest` does not configure that
+build route. Keep the default for ordinary Quarto authoring. `review` is read-only
+and requires saved proposals; run `generate25more`
 first. The optional HTML file uses the shared disconnected native review UI,
 with the selected project and manifest controls prefilled. Its preview is the
 existing resolved Markdown text view, not a live component Check/render route.
