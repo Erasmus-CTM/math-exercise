@@ -957,6 +957,7 @@ local function buildExercise(el, state)
              .. ' data-context-mode="' .. fc.mode .. '"'
              .. ' data-context-refs="' .. attrEsc(fc.refs) .. '"'
              .. ' data-context="'      .. attrEsc('"' .. jsonEsc(sectionText) .. '"') .. '"'
+             .. ' data-context-text="' .. jsonStrAttr(fc.mode ~= 'none' and (opts['context-text'] or '') or '') .. '"'
 
   if ctm.ui and ctm.ui.exercise then
     local saved = ctm.ui.exercise{

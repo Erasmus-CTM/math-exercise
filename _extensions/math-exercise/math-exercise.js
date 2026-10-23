@@ -974,6 +974,11 @@
     var text = '';
     try { text = JSON.parse(cell.dataset.context || '""'); } catch (_) {}
     var materials = window.AIFeedback.contextMaterials({mode:cell.dataset.contextMode || 'auto', refs:cell.dataset.contextRefs || '', text});
+    var authoredContext = '';
+    try { authoredContext = JSON.parse(cell.dataset.contextText || '""'); } catch (_) {}
+    if (cell.dataset.contextMode !== 'none' && authoredContext) {
+      materials.push({id:cell.dataset.label + '-context-text', title:'Authored context', text:authoredContext});
+    }
     var current = cell.mathExercise?.getVariant();
     var variantContext = cell.mathExercise?.getVariantContext
       ? cell.mathExercise.getVariantContext() : current && current.context;

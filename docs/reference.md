@@ -135,6 +135,7 @@ option for ordinary exercises. No page script or MutationObserver is needed.
 | `vecdir` | `col` / `row` | `col` | orientation of every `vec[...]` marker in the exercise |
 | `field-labels` | comma-separated | — | optional human-readable labels for answer fields, e.g. `S, E, M`; missing labels fall back to `Answer` or numbered field names |
 | `context` | comma-separated element IDs, or `none` | — | AI-feedback context: reference explicit `.math-exercise-context` block(s) by id, or `none` to disable the automatic context. See [AI feedback context](#ai-feedback-context) |
+| `context-text` | authored text | — | Adds explicit learning context alongside the rendered question and selected context. `context: none` suppresses it. Generated variants resolve its placeholders per variant. |
 
 ---
 
