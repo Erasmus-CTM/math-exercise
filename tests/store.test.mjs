@@ -36,7 +36,7 @@ function page({meta = {state: 'empty'}, question = '<input class="math-input" id
   w.confirm = () => false;
   w.Math.random = () => 0;
   let registration, changes = 0, runtimeCalls = 0, verdict = {status: 'correct', score: 1};
-  const events = [], copies = [];
+  const events = [], copies = [], initialUI = [];
   w.CTMCopy = {text: (text, options) => {copies.push({text, options});}};
   // Only the shared-store boundary is mocked: revision matching is tested in
   // ctm-libs; this suite verifies the adapter writes solely when asked to.
@@ -48,7 +48,7 @@ function page({meta = {state: 'empty'}, question = '<input class="math-input" id
     }, changed() { changes++; }, result(value) { events.push(plain(value)); }, clear() { options.clear(); }};
   }};
   const py = {loadPackage: async () => {}};
-  w.MathExerciseRuntime = {ensurePyodide: async () => {runtimeCalls++; return py;},
+  w.MathExerciseRuntime = {trackInitialUI: promise => {initialUI.push(promise); return promise;}, ensurePyodide: async () => {runtimeCalls++; return py;},
     ensureGuard: async () => {}, ensureCheckers: async () => {}, stopCount: () => 0,
     whenSlow: () => () => {}, callCheckers: async () => JSON.stringify(verdict)};
   w.eval(source('matrix-input.js'));
@@ -56,7 +56,7 @@ function page({meta = {state: 'empty'}, question = '<input class="math-input" id
   w.eval(source('math-exercise.js'));
   const cell = w.document.getElementById(rootId);
   w.__mathExerciseTestApi.setupCell(cell);
-  return {dom, w, cell, get registration() {return registration;}, get changes() {return changes;},
+  return {dom, w, cell, initialUI, get registration() {return registration;}, get changes() {return changes;},
     get runtimeCalls() {return runtimeCalls;}, events, copies, verdict(value) {verdict = value;},
     field() {return cell.querySelector('input.math-input');}};
 }
@@ -243,4 +243,9 @@ test('explicit clear resets current fields and removes saved history without sch
   assert.equal(p.changes, 0);
   assert.equal(p.runtimeCalls, 0);
   p.dom.window.close();
+});
+
+test('initial question UI registers before DOMContentLoaded and does not start Python during registration',()=>{
+  const p=page(); assert.equal(p.initialUI.length,1); assert.equal(typeof p.initialUI[0].then,'function');
+  assert.equal(p.runtimeCalls,0); p.dom.window.close();
 });
