@@ -258,6 +258,7 @@ def request(payload):
             "question": candidate["data"]["options"]["question"],
             "solution": candidate["data"]["options"].get("solution", ""),
             "options": candidate["data"]["options"], "teacherInputs": candidate["data"]["teacher_inputs"],
+            "values": copy.deepcopy(candidate["data"]["options"].get("board-values", {})),
             "context": question_context(fields, variables, teacher, identity)})
     if mutation:
         # All generation, decision and publication/response validation finishes
