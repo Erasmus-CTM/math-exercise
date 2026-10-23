@@ -297,7 +297,10 @@ def file_request(payload, command):
         "approval": "required", "renderMode": "review"})
     value, lease = history.load(path, label)
     if command == "generate25more":
-        return dict(request_payload, action="generate", baseHash=lease)
+        expected = payload.get("expectedBaseHash", lease)
+        if expected != lease:
+            raise ValueError("manifest changed; rebuild review before generating more proposals")
+        return dict(request_payload, action="generate", baseHash=expected)
     if command == "review":
         if lease is None or not value["proposals"]:
             raise ValueError("no retained proposals; run generate25more before reviewing decisions")
@@ -422,6 +425,7 @@ def main(argv=None):
     parser.add_argument("--file", help="authored source file inside the project")
     parser.add_argument("--label", help="unique authored exercise label")
     parser.add_argument("--manifest", help="manifest inside the project (default: _variants/LABEL.yml)")
+    parser.add_argument("--base-hash", help="expected manifest lease for generate25more (64 hex characters, or null)")
     parser.add_argument("--html", type=Path, help="write a disconnected review HTML file")
     parser.add_argument("--connected-endpoint", help=argparse.SUPPRESS)
     parser.add_argument("--worker", action="store_true", help=argparse.SUPPRESS)
@@ -437,6 +441,10 @@ def main(argv=None):
         parser.error("apply needs a downloaded decision JSON file")
     if args.command not in (None, "apply") and args.request_file is not None:
         parser.error("only apply accepts a downloaded decision JSON file")
+    if args.base_hash is not None:
+        import re
+        if args.command != "generate25more" or (args.base_hash != "null" and not re.fullmatch(r"[0-9a-f]{64}", args.base_hash)):
+            parser.error("--base-hash requires generate25more and a 64-character hex lease or null")
     try:
         if args.stdin and args.worker:
             raw = sys.stdin.buffer.read(1024 * 1024 + 1)
@@ -445,6 +453,8 @@ def main(argv=None):
         else:
             payload = {"projectRoot": str(args.project.resolve()), "file": args.file,
                        "label": args.label, "manifest": args.manifest}
+            if args.base_hash is not None:
+                payload["expectedBaseHash"] = None if args.base_hash == "null" else args.base_hash
             if args.request_file is not None:
                 payload["requestFile"] = str(args.request_file.resolve())
             raw = json.dumps(payload, ensure_ascii=True, allow_nan=False).encode()
