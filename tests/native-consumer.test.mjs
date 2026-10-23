@@ -39,8 +39,8 @@ function cell(records,{id='cell',label='q',mode='custom',initial,legacy=false,po
 function page({records=[record(),record(1)],local={},session={},query='?variant=q:2',lang='en',initial,disabled=false,automatic=false,missingChooser=false,extra='',pool=false,legacy=false,feedback=false,boards=false,review=false}={}) {
  const dom=new JSDOM('<script id="ctm-store-manifest" type="application/json">'+JSON.stringify({course:'course',exercises:[{id:'q',component:'math-exercise'},{id:'ordinary',component:'math-exercise'}]})+'</script>'+cell(records,{initial,pool,legacy})+extra,
  {url:'https://example.test/lesson.html'+query,runScripts:'outside-only'});
- const w=dom.window;w.TextEncoder=TextEncoder;let feedbackOptions;
- if(feedback){w.document.getElementById('cell').insertAdjacentHTML('beforeend','<button class="math-feedback-btn"></button>');w.AIFeedback={questionText:cell=>cell.querySelector('.math-exercise-question').textContent,contextMaterials:()=>[],attach(options){feedbackOptions=options;return {reset(){},cancel(){}};}};}
+ const w=dom.window;w.TextEncoder=TextEncoder;let feedbackOptions;const feedbackResets=[];
+ if(feedback){w.document.getElementById('cell').insertAdjacentHTML('beforeend','<button class="math-feedback-btn"></button>');w.AIFeedback={questionText:cell=>cell.querySelector('.math-exercise-question').textContent,contextMaterials:()=>[],attach(options){feedbackOptions=options;return {reset(){feedbackResets.push(true);},cancel(){}};}};}
  for(const[k,v]of Object.entries(local))w.localStorage.setItem(k,v);
  for(const[k,v]of Object.entries(session))w.sessionStorage.setItem(k,v);
  const original=w.document.addEventListener.bind(w.document);let ready;
@@ -59,7 +59,7 @@ function page({records=[record(),record(1)],local={},session={},query='?variant=
  if(review){const payload=JSON.parse(element.dataset.variants);payload.renderMode='review';element.dataset.variants=JSON.stringify(payload);element.insertAdjacentHTML('afterbegin','<p class="math-variant-unapproved">Review warning</p>');}
  if(boards){element.dataset.variantBoards='["figure"]';element.dataset.variantBoardTitle='Authored descriptive diagram';w.MathExerciseBoards={attach(options){boardTitles.push(options.title);boardCalls.push(plain(options.getVariant()));return {changed(){boardCalls.push(plain(options.getVariant()));}};}};}
  if(!automatic)w.__mathExerciseTestApi.setupCell(element);
- return {w,dom,element,errors,requests,tracked,boardCalls,boardTitles,get runtime(){return runtime;},start:()=>ready(),feedbackRequest:()=>feedbackOptions.getRequest({}),
+ return {w,dom,element,errors,requests,tracked,boardCalls,boardTitles,feedbackResets,get runtime(){return runtime;},start:()=>ready(),feedbackRequest:()=>feedbackOptions.getRequest({}),
  field:()=>element.querySelector('input.math-input'),next:()=>element.querySelector('.math-pool-reload').click(),
  local:()=>Object.fromEntries(Object.entries(w.localStorage)),session:()=>Object.fromEntries(Object.entries(w.sessionStorage)),
  stored:()=>JSON.parse(w.localStorage.getItem(w.CTMStore.key('q'))),close:()=>w.close()};
@@ -211,4 +211,10 @@ test('legacy custom feedback identities omit checker source and parameter bags',
  const row=record();row.parameters={privateTeacher:'secret-value'};row.derived={privateDerived:'hidden-result'};row.checker='def check(response, symbols): return 42 # hidden-checker';
  const p=page({records:[row],legacy:true,feedback:true});p.field().value='learner answer';
  const request=await p.feedbackRequest();assert.doesNotMatch(JSON.stringify(request),/secret-value|hidden-result|hidden-checker|def check|parameters|derived/);p.close();
+});
+
+test('cancelled New variant preserves integrated feedback; accepted change resets it once',()=>{
+ const p=page({feedback:true});p.field().value='answer';
+ p.w.confirm=()=>false;p.next();assert.equal(p.feedbackResets.length,0);
+ p.w.confirm=()=>true;p.next();assert.equal(p.feedbackResets.length,1);p.close();
 });

@@ -1643,7 +1643,6 @@
         }
       });
       questionDiv.addEventListener('input', function () { output.replaceChildren(); });
-      if (reloadBtn) reloadBtn.addEventListener('click', function () { feedbackHandle.reset(); });
     }
     if (reconfigBtn) reconfigBtn.replaceWith(window.AIFeedback.settingsButton(L.outputLanguageCode));
 
