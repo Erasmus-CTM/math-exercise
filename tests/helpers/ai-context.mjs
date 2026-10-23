@@ -19,6 +19,9 @@ export function loadPage(html = '', config = {}, prepare = () => {}) {
   w.TextEncoder = TextEncoder;
   // Exercise extraction and the real request builder, without CDN/Pyodide startup.
   w.document.addEventListener = () => {};
+  // This helper starts from a fully parsed fixture and initializes cells
+  // explicitly. Let canonical shared UI finish before callers close the DOM.
+  Object.defineProperty(w.document, 'readyState', {configurable: true, value: 'interactive'});
   w.__mathExerciseTestMode = true;
   w.__mathExerciseConfig = config;
   const warnings = [];
