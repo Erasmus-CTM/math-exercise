@@ -61,3 +61,10 @@ produce HTML, apply an explicit synthetic decision while ignoring forged
 downloaded records, and reject stale/source-changed requests without altering
 saved history. These checks do not approve real course notes or establish course
 acceptance.
+
+For supervised CI consumers, `resolve` returns the ordinary full tested response
+without writing history, including a bounded initial pool when no retained
+manifest exists. `review` continues to require retained proposals so disconnected
+decisions have a saved lease. Both resolve current source through the canonical
+parser; CI must grade resolved `options`, exact `context` and `teacherInputs`
+rather than executing unresolved native templates as ordinary questions.

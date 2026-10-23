@@ -309,6 +309,8 @@ def file_request(payload, command):
         if expected != lease:
             raise ValueError("manifest changed; rebuild review before generating more proposals")
         return dict(request_payload, action="generate", baseHash=expected)
+    if command == "resolve":
+        return dict(request_payload, action="resolve")
     if command == "review":
         if lease is None or not value["proposals"]:
             raise ValueError("no retained proposals; run generate25more before reviewing decisions")
@@ -426,7 +428,7 @@ def main(argv=None):
     import argparse
     import contextlib
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", nargs="?", choices=("generate25more", "review", "apply"))
+    parser.add_argument("command", nargs="?", choices=("generate25more", "review", "resolve", "apply"))
     parser.add_argument("request_file", nargs="?", type=Path, help="downloaded decision JSON for apply")
     parser.add_argument("--stdin", action="store_true", help="read the version-1 JSON request")
     parser.add_argument("--project", type=Path, help="course project root for file authoring")
@@ -437,14 +439,14 @@ def main(argv=None):
     parser.add_argument("--html", type=Path, help="write a disconnected review HTML file")
     parser.add_argument("--connected-endpoint", help=argparse.SUPPRESS)
     parser.add_argument("--worker", action="store_true", help=argparse.SUPPRESS)
-    parser.add_argument("--file-command", choices=("generate25more", "review", "apply"), help=argparse.SUPPRESS)
+    parser.add_argument("--file-command", choices=("generate25more", "review", "resolve", "apply"), help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
     if args.stdin:
         if args.command or args.request_file or any(value is not None for value in (args.project, args.file, args.label, args.manifest)):
             parser.error("choose --stdin or a file authoring command")
     elif (args.command is None or args.project is None or not args.file or not args.label
           or args.worker or args.file_command):
-        parser.error("file authoring needs --project, --file, --label and generate25more, review or apply")
+        parser.error("file authoring needs --project, --file, --label and generate25more, review, resolve or apply")
     if args.command == "apply" and args.request_file is None:
         parser.error("apply needs a downloaded decision JSON file")
     if args.command not in (None, "apply") and args.request_file is not None:

@@ -1,5 +1,8 @@
 """One small actual tested readonly next-batch fixture, not a broad campaign."""
 import copy
+import json
+import subprocess
+import sys
 from pathlib import Path
 import runpy
 import tempfile
@@ -12,6 +15,31 @@ from ctm_variants import history
 
 
 class ReadonlyMoreTests(unittest.TestCase):
+    def test_file_resolve_exports_exact_tested_context_without_history_write(self):
+        with tempfile.TemporaryDirectory() as directory:
+            project = Path(directory)
+            source = "```{math-exercise}\n#| label: q\n#| variables: |\n#|   a = pick([2, 4])\n#| field-labels: Answer\n#| note: a={#a#}\n#| tests:\n#|   - name: exact authored answer\n#|     answers: [a/2]\n#|     expect: correct\n_[{@a/2@}]\n```\n"
+            path = project / "lesson.qmd"
+            path.write_text(source)
+            result = subprocess.run([sys.executable, "-I", str(ROOT / "_extensions/math-exercise/question-variants.py"),
+                "--project", directory, "--file", "lesson.qmd", "--label", "q", "resolve"],
+                capture_output=True, timeout=60)
+            self.assertEqual(result.returncode, 0, result.stderr.decode())
+            response = json.loads(result.stdout)
+            self.assertEqual(len(response["records"]), 2)
+            self.assertIsNone(response["baseHash"])
+            self.assertFalse((project / "_variants").exists())
+            self.assertEqual(path.read_text(), source)
+            from ctm_checkers.variants import decode_context
+            for record in response["records"]:
+                fields, variables, teacher, identity = decode_context(record["context"])
+                self.assertEqual(fields, ["Answer"])
+                self.assertEqual(teacher["Answer"], variables["a"] / 2)
+                self.assertEqual(record["teacherInputs"]["Answer"], str(teacher["Answer"]))
+                self.assertIsNone(identity)
+                self.assertEqual(record["options"]["tests"][0]["answers"], ["a/2"])
+                self.assertTrue(record["tests"]["passed"])
+
     def test_retained_one_resolves_three_without_changing_disk_or_lease(self):
         with tempfile.TemporaryDirectory() as directory:
             project = Path(directory)
