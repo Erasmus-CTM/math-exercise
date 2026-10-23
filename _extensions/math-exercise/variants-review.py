@@ -74,9 +74,11 @@ class Review:
         previews = {}
         self.preview_choices = {}
         self.preview_outputs = {}
+        source_hash = hashlib.sha256(payload["source"].encode()).hexdigest()
         for record in response["records"]:
-            slug = hashlib.sha256(record["id"].encode()).hexdigest()
-            self.preview_choices[slug] = (record["id"], languages, record["hash"], response["baseHash"])
+            slug = hashlib.sha256(json.dumps([record["id"], record["hash"],
+                response["baseHash"], source_hash]).encode()).hexdigest()
+            self.preview_choices[slug] = (record["id"], languages, record["hash"], response["baseHash"], source_hash)
             previews[record["id"]] = [dict(language=language,
                 url=endpoint + "previews/" + slug + "/" + language + "/index.html")
                 for language in languages]
@@ -108,9 +110,11 @@ class Review:
                 raise ValueError("student review package copy exceeds byte budget")
             shutil.copytree(source, target / "_extensions" / name)
 
-    def render_student(self, identifier, language, expected_hash=None, expected_lease=None):
+    def render_student(self, identifier, language, expected_hash=None, expected_lease=None, expected_source=None):
         """Render one tested candidate with the actual component, on demand."""
         payload = self.source_payload()
+        if expected_source is not None and hashlib.sha256(payload["source"].encode()).hexdigest() != expected_source:
+            raise ValueError("review source changed; rebuild review")
         manifest = (Path(self.project) / self.manifest).read_bytes()
         response = json.loads(self.run("review").stdout)
         candidate = next((record for record in response["records"] if record["id"] == identifier), None)

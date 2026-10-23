@@ -143,6 +143,27 @@ class PreviewTests(unittest.TestCase):
                 review.render_student('candidate','default','current','current-lease')
             self.assertEqual((root/'_variants/q.yml').read_text(),'{}')
 
+    def test_rebuilt_page_cannot_rebind_an_old_tab_preview_url(self):
+        import sys,types
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);(root/'lesson.qmd').write_text('source')
+            review=review_server.Review(root,'lesson.qmd','q');self.addCleanup(review.preview_directory.cleanup)
+            response={'records':[{'id':'same-id','hash':'first-hash'}],'baseHash':'first-lease'}
+            source={'source':'first source','options':{}}
+            review.run=lambda *args:types.SimpleNamespace(stdout=json.dumps(response))
+            review.source_payload=lambda:source
+            package=types.ModuleType('ctm_variants');package.__path__=[]
+            module=types.ModuleType('ctm_variants.review');module.document=lambda *args,**kwargs:'review'
+            with patch.dict(sys.modules,{'ctm_variants':package,'ctm_variants.review':module}):
+                review.page('/'+'t'*44+'/');old=next(iter(review.preview_choices))
+                response['records'][0]['hash']='new-hash';response['baseHash']='new-lease'
+                review.page('/'+'t'*44+'/');new=next(iter(review.preview_choices));self.assertNotEqual(old,new)
+                with self.assertRaisesRegex(ValueError,'unknown student preview'):review.preview(old+'/default/index.html')
+                source['source']='changed prose, same B1 and history'
+                review.page('/'+'t'*44+'/');self.assertNotEqual(new,next(iter(review.preview_choices)))
+                with self.assertRaisesRegex(ValueError,'unknown student preview'):review.preview(new+'/default/index.html')
+
     def test_render_supervisor_limits_time_and_output(self):
         import os,sys
         with tempfile.TemporaryDirectory() as directory:
