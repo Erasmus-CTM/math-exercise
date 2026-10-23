@@ -16,6 +16,7 @@ const matrixInput = await readFile(new URL('../../_extensions/math-exercise/matr
 export function loadPage(html = '', config = {}, prepare = () => {}) {
   const dom = new JSDOM(html, { url: 'https://example.invalid/exercises', runScripts: 'outside-only' });
   const w = dom.window;
+  w.TextEncoder = TextEncoder;
   // Exercise extraction and the real request builder, without CDN/Pyodide startup.
   w.document.addEventListener = () => {};
   w.__mathExerciseTestMode = true;
@@ -34,6 +35,7 @@ export function loadPage(html = '', config = {}, prepare = () => {}) {
   shared.forEach(code => w.eval(code));
   w.AIFeedback.typesetFeedback = async () => {};
   w.eval(runtime);
+  sources(['ui/ctm-layout.js', 'ui/ctm-store.js', 'ui/variants.js']).forEach(code => w.eval(code));
   w.eval(checkersScript);   // ctm-checkers' page script (CTMCheckers), after the runtime in the head
   locale.forEach(code => w.eval(code));
   w.eval(matrixInput);
