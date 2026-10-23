@@ -1166,8 +1166,14 @@ local function Pandoc(doc)
   end
   local function rememberRaw(el)
     if el.format ~= 'html' then return end
-    for quote, id in el.text:gmatch([=[%s[iI][dD]%s*=%s*(["'])(.-)%1]=]) do ids[id] = true end
-    for id in el.text:gmatch([=[%s[iI][dD]%s*=%s*([^%s"'=<>`]+)]=]) do ids[id] = true end
+    local function rememberId(id)
+      -- The HTML reader decodes character references exactly as a DOM ID.
+      local parsed = pandoc.read('<div id="' .. id:gsub('"', '&quot;') .. '">x</div>', 'html')
+      local decoded = parsed.blocks[1] and parsed.blocks[1].identifier
+      ids[decoded or id] = true
+    end
+    for quote, id in el.text:gmatch([=[%s[iI][dD]%s*=%s*(["'])(.-)%1]=]) do rememberId(id) end
+    for id in el.text:gmatch([=[%s[iI][dD]%s*=%s*([^%s"'=<>`]+)]=]) do rememberId(id) end
   end
   doc:walk({Header=remember,Div=remember,Span=remember,CodeBlock=remember,
     Link=remember,Image=remember,Table=remember,Figure=remember,

@@ -160,7 +160,7 @@ test('question context IDs are stable and conflicting authored IDs fail clearly'
   const dom=new JSDOM(readFileSync(join(dir,'lesson.html'),'utf8'));
   for(const id of ['stable-question','pool-context-question']){const node=dom.window.document.getElementById(id);assert.ok(node);assert.ok(node.classList.contains('ai-feedback-context'));}
   dom.window.close();
-  for(const conflict of ['::: {#stable-question}\nAuthored context\n:::','<div id="stable-question">Authored context</div>','<div ID="stable-question">Authored context</div>','<div id=stable-question>Authored context</div>',ordinary]){
+  for(const conflict of ['::: {#stable-question}\nAuthored context\n:::','<div id="stable-question">Authored context</div>','<div ID="stable-question">Authored context</div>','<div id=stable-question>Authored context</div>','<div id="stable&#45;question">Authored context</div>',ordinary]){
    result=render(conflict+'\n\n'+ordinary);assert.notEqual(result.status,0);assert.match(result.stdout+result.stderr,/duplicate question id: stable-question/);
   }
  }finally{rmSync(dir,{recursive:true,force:true});}
