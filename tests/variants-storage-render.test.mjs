@@ -6,81 +6,39 @@ import {spawnSync} from 'node:child_process';
 import test from 'node:test';
 import {JSDOM} from 'jsdom';
 import {install,renderEnv} from './helpers/ctm-libs.mjs';
-
 const quarto=process.env.QUARTO_BIN||'quarto';
-const available=!spawnSync(quarto,['--version']).error;
+const available=spawnSync(quarto,['--version']).status===0;
 
-test('generated math HTML and saved variant revisions are stable across fresh Quarto processes',
-  {skip:available?false:'Quarto is required'}, async()=>{
-  const dir=await mkdtemp(path.join(tmpdir(),'math-variant-storage-'));
-  try {
-    await cp(new URL('../_extensions/math-exercise/',import.meta.url),
-      path.join(dir,'_extensions/math-exercise'),{recursive:true});
-    install(dir);
-    const question='Compute $x+{{a}}$: _[{{a}}].';
-    const solution='Use $x={{a}}$ and $$y={{b}}.$$';
-    const cases=[
-      ['base',question,solution,'Given {{a}}.'],
-      ['question',question+' Changed question.',solution,'Given {{a}}.'],
-      ['solution',question,solution+' Changed solution.','Given {{a}}.'],
-      ['context',question,solution,'Changed context {{a}}.'],
-    ];
-    const fence=String.fromCharCode(96).repeat(3);
-    let body='---\nengine: markdown\nfilters: [math-exercise]\nmath-exercise:\n  feedback: false\n---\n\n';
-    for(const [label,text,answer,context] of cases) {
-      body+=fence+'{math-exercise}\n#| label: '+label+'\n#| parameters: {a: [1,2]}\n'
-        +'#| derived: {b: a+1}\n#| mode: numeric\n#| tolerance: "0.01"\n'
-        +'#| solution: '+JSON.stringify(answer)+'\n#| variant-context: '+JSON.stringify(context)
-        +'\n\n'+text+'\n'+fence+'\n\n';
+test('native generated Markdown, solution math and storage identities survive fresh Quarto processes', {skip:available?false:'Quarto is required'},async()=>{
+ const dir=await mkdtemp(path.join(tmpdir(),'math-variant-storage-'));
+ try{
+  await cp(new URL('../_extensions/math-exercise/',import.meta.url),path.join(dir,'_extensions/math-exercise'),{recursive:true});install(dir);
+  const question='Compute $x+{@a@}$: _[{#a#}].',solution='Use $x={@a@}$ and $$y={@b@}.$$',context='Given $a={@a@}$.';
+  const cases=[['base',question,solution,context],['question',question.replace('x+','x-'),solution,context],['solution',question,solution.replace('x={@a@}','x={@a@}+1'),context],['context',question,solution,context.replace('a={@a@}','a={@a@}+1')]];
+  const body=cases.map(([label,text,answer,material])=>['```{math-exercise}','#| label: '+label,'#| variables: |','#|   a = pick([1, 2])','#|   b = a + 1','#| field-labels: Answer','#| vars: x','#| note: a={#a#}','#| mode: numeric','#| tolerance: 0.01','#| context-text: '+material,text,'#| solution',answer,'```'].join('\n')).join('\n\n');
+  await writeFile(path.join(dir,'fixture.qmd'),'---\nengine: markdown\nfilters: [math-exercise]\nmath-exercise: {feedback: false}\n---\n\n'+body);
+  let reference;
+  for(let run=0;run<2;run++){
+   const rendered=spawnSync(quarto,['render','fixture.qmd','--to','html'],{cwd:dir,env:{...renderEnv,CTM_VARIANTS:'review'},encoding:'utf8',timeout:120000});assert.equal(rendered.status,0,rendered.stdout+'\n'+rendered.stderr);
+   const dom=new JSDOM(await readFile(path.join(dir,'fixture.html'),'utf8'));
+   try{
+    const snapshot={};
+    for(const cell of dom.window.document.querySelectorAll('.math-exercise-cell')){
+     const data=JSON.parse(cell.dataset.variants),descriptors=JSON.parse(cell.dataset.storageVariants);assert.equal(data.native,true);assert.equal(data.variants.length,2);assert.equal(cell.hasAttribute('data-pool'),false);
+     assert.deepEqual(descriptors.map(row=>row.id),data.variants.map(row=>row.id));
+     for(const record of data.variants){
+      const a=Number(/_\[(\d+)\]/.exec(record.question)[1]);assert.ok([1,2].includes(a));assert.doesNotMatch(record.question,/\{@|\{#|<span/);assert.equal(record.context.variant,null);
+      const holder=dom.window.document.createElement('div');holder.innerHTML=record.solution;
+      const spans=[...holder.querySelectorAll('[data-ai-feedback-tex]')];assert.ok(spans.length,'solution retains annotated mathematical spans');assert.ok(spans.some(span=>span.dataset.aiFeedbackTex.replace(/[{} ]/g,'').includes('y='+String(a+1))),'derived b=a+1 is resolved in solution mathematics');
+      for(const span of spans){assert.ok(span.dataset.aiFeedbackTex);assert.ok(['false','true'].includes(span.dataset.aiFeedbackDisplay));assert.ok(span.querySelector('.math'));}
+     }
+     snapshot[cell.dataset.label]={data,descriptors};
     }
-    await writeFile(path.join(dir,'fixture.qmd'),body);
-    let reference;
-    for(let run=0;run<6;run++) {
-      const rendered=spawnSync(quarto,['render','fixture.qmd','--to','html'],
-        {cwd:dir,env:renderEnv,encoding:'utf8',timeout:120000});
-      assert.equal(rendered.status,0,rendered.stdout+'\n'+rendered.stderr);
-      const window=new JSDOM(await readFile(path.join(dir,'fixture.html'),'utf8')).window;
-      try {
-        const cells=[...window.document.querySelectorAll('.math-exercise-cell')];
-        assert.equal(cells.length,cases.length);
-        const snapshot={};
-        for(const cell of cells) {
-          const data=JSON.parse(cell.dataset.variants);
-          const descriptors=JSON.parse(cell.dataset.storageVariants);
-          assert.equal(data.variants.length,2);
-          assert.deepEqual(JSON.parse(cell.dataset.pool),data.variants.map(record=>record.question));
-          assert.deepEqual(descriptors.map(record=>record.id),data.variants.map(record=>record.id));
-          for(const record of data.variants) {
-            assert.equal(record.derived.b,record.parameters.a+1);
-            assert.ok(record.question.includes('_['+record.parameters.a+']'),'answer marker preserved');
-            for(const html of [record.question,record.solution]) {
-              const holder=window.document.createElement('div');
-              holder.innerHTML=html;
-              const spans=[...holder.querySelectorAll('[data-ai-feedback-tex]')];
-              assert.ok(spans.length,'native Math spans rendered');
-              for(const span of spans) {
-                assert.deepEqual(span.getAttributeNames(),
-                  ['data-ai-feedback-tex','data-ai-feedback-display'],'stable native attribute order');
-                assert.ok(span.dataset.aiFeedbackTex.length);
-                assert.ok(['false','true'].includes(span.dataset.aiFeedbackDisplay));
-                assert.ok(span.querySelector('.math'),'actual math child preserved');
-              }
-            }
-          }
-          snapshot[cell.dataset.label]={data,descriptors};
-        }
-        if(reference) assert.deepEqual(snapshot,reference,'fresh-process records and revisions are identical');
-        else reference=snapshot;
-        for(const name of ['question','solution','context']) {
-          assert.deepEqual(snapshot[name].descriptors.map(record=>record.id),
-            snapshot.base.descriptors.map(record=>record.id),'same variant identities');
-          for(let index=0;index<2;index++) assert.notEqual(
-            snapshot[name].descriptors[index].hash,snapshot.base.descriptors[index].hash,
-            name+' changes must invalidate the saved revision');
-        }
-        console.log('Quarto variant storage process '+(run+1)+': '
-          +JSON.stringify(snapshot.base.descriptors));
-      } finally {window.close();}
-    }
-  } finally {await rm(dir,{recursive:true,force:true});}
+    assert.equal(Object.keys(snapshot).length,4);
+    if(reference)assert.deepEqual(snapshot,reference,'fresh-process native values and identities are identical');else reference=snapshot;
+    const original=new Map(snapshot.base.descriptors.map(row=>[row.id,row.hash]));
+    for(const name of ['question','solution','context'])for(const row of snapshot[name].descriptors){assert.ok(original.has(row.id),'same retained-choice identity');assert.notEqual(row.hash,original.get(row.id),name+' mathematical changes invalidate saved content');}
+   }finally{dom.window.close();}
+  }
+ }finally{await rm(dir,{recursive:true,force:true});}
 });

@@ -1,0 +1,46 @@
+// Actual Quarto cell + Chromium UI/storage. The grader is an explicit stub;
+// no native authoring, Pyodide bootstrap or CDN acceptance is claimed.
+import assert from 'node:assert/strict';
+import {cpSync,mkdtempSync,readFileSync,writeFileSync,mkdirSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join,resolve,extname} from 'node:path';
+import {createServer} from 'node:http';
+import {createHash} from 'node:crypto';
+import {spawnSync} from 'node:child_process';
+import {JSDOM} from 'jsdom';
+import {ctmLibs,install,renderEnv} from '../helpers/ctm-libs.mjs';
+const {chromium}=await import(process.env.CTM_PLAYWRIGHT_MODULE||'/workspace/stack-wasm-maxima/node_modules/playwright/index.mjs');
+const own=process.env.MATH_EXERCISE_EXTENSION||resolve(new URL('../../_extensions/math-exercise/',import.meta.url).pathname);
+const katex=resolve(new URL('../../node_modules/katex/',import.meta.url).pathname);
+const directory=mkdtempSync(join(tmpdir(),'ctm-ordinary-pool-'));
+const report={scope:'Actual Quarto ordinary handwritten pool and Chromium local UI/store with explicit grader stub and local KaTeX; no native authoring, Python bootstrap or CDN acceptance',cases:[],hashes:{}};
+let server,browser;
+try {
+ cpSync(own,join(directory,'_extensions/math-exercise'),{recursive:true});install(directory);
+ writeFileSync(join(directory,'lesson.qmd'),'---\nformat: html\nfilters: [math-exercise]\nai-feedback:\n  enabled: false\nmath-exercise:\n  feedback: false\n---\n\n```{math-exercise}\n#| label: pool\n#| pool: true\nQuestion _[2]\n---\nQuestion _[2]\n```\n\n```{math-exercise}\n#| label: ordinary\nAnswer _[42]\n```\n');
+ const rendered=spawnSync(process.env.QUARTO||'quarto',['render','lesson.qmd'],{cwd:directory,env:{...renderEnv,CTM_VARIANTS_NATIVE:'/missing-native-authoring'},encoding:'utf8',timeout:30000});
+ assert.equal(rendered.status,0,rendered.stdout+rendered.stderr);
+ const emitted=readFileSync(join(directory,'lesson.html'),'utf8');assert.match(emitted,/ctm-variants-/);
+ const dom=new JSDOM(emitted),cells=[...dom.window.document.querySelectorAll('.math-exercise-cell')];assert.equal(cells.length,2);
+ const pool=cells[0],variants=JSON.parse(pool.dataset.storageVariants);assert.equal(pool.dataset.variants,undefined);assert.deepEqual(variants.map(v=>v.n),[1,2]);assert.equal(variants[0].hash,variants[1].hash);
+ const markup=cells.map(c=>c.outerHTML).join('');dom.window.close();
+ const libraries=['assets.js','locales/ctm-locale.js','locales/common.js','locales/ui.js','locales/math-exercise.js','ui/ctm-layout.js','ui/ctm-store.js','ui/variants.js'];
+ const components=['matrix-input.js','math-store.js','math-exercise.js'];
+ for(const [base,files] of [[ctmLibs,libraries],[own,components]])for(const name of files)report.hashes[name]=createHash('sha256').update(readFileSync(join(base,name))).digest('hex');
+ const html=missing=>`<!doctype html><meta charset="utf-8"><link rel="icon" href="data:,"><script id="ctm-store-manifest" type="application/json">${JSON.stringify({course:'ordinary-pool',exercises:[{id:'pool',component:'math-exercise'},{id:'ordinary',component:'math-exercise'}]})}</script>${markup}<script>window.CTM_ASSETS={v:1,bases:{katex:'/katex/'}};window.__mathExerciseConfig={lang:'en'};window.requests=[];window.accepted=[];document.addEventListener('math-exercise:variant-accepted',e=>accepted.push(e.detail));window.MathExerciseRuntime={trackInitialUI(p){window.initialUI=p.then(()=>({ok:true}),e=>({ok:false,error:e.message}));},ensurePyodide:async()=>({loadPackage:async()=>{}}),ensureGuard:async()=>{},ensureCheckers:async()=>{},stopCount:()=>0,whenSlow:()=>()=>{},callCheckers:async(p,name,request)=>{requests.push({name,request});return JSON.stringify({status:'correct',score:1});}};</script>${libraries.filter(f=>!missing||f!=='ui/variants.js').map(f=>`<script src="/lib/${f}"></script>`).join('')}${components.map(f=>`<script src="/own/${f}"></script>`).join('')}`;
+ server=createServer((req,res)=>{try{const url=new URL(req.url,'http://local');if(url.pathname==='/pool.html'){res.setHeader('Content-Type','text/html');return res.end(html(url.searchParams.has('missing')));}const [prefix,base]=url.pathname.startsWith('/lib/')?['/lib/',ctmLibs]:url.pathname.startsWith('/own/')?['/own/',own]:['/katex/',katex];const path=resolve(base,url.pathname.slice(prefix.length));assert.ok(path.startsWith(resolve(base)+'/'));res.setHeader('Content-Type',({'.js':'text/javascript','.mjs':'text/javascript','.css':'text/css','.woff2':'font/woff2'})[extname(path)]||'application/octet-stream');res.end(readFileSync(path));}catch{res.statusCode=404;res.end('missing');}});
+ await new Promise(r=>server.listen(0,'127.0.0.1',r));const origin=`http://127.0.0.1:${server.address().port}`;
+ browser=await chromium.launch({executablePath:process.env.CHROMIUM_EXECUTABLE||'/usr/bin/chromium',headless:true});const raw=[];
+ const open=async(context,missing=false)=>{const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(['error','warning'].includes(m.type()))errors.push(m.text());});page.on('requestfailed',r=>errors.push(r.url()+': '+r.failure()?.errorText));await page.goto(origin+'/pool.html?variant=pool:1'+(missing?'&missing':''));await page.waitForFunction(()=>!!window.initialUI);const ready=await page.evaluate(()=>window.initialUI);await page.evaluate(()=>document.fonts.ready);raw.push({missing,ready,errors});return page;};
+ const cell='[data-label="pool"]',input=cell+' input.math-input',next=cell+' .math-pool-reload';
+ const stored=p=>p.evaluate(()=>JSON.parse(localStorage.getItem(CTMStore.key('pool'))));
+ const context=await browser.newContext();let page=await open(context);assert.equal((await stored(page)).variant.n,1);
+ await page.locator(input).fill('2');await page.locator(cell+' .math-check-btn').click();await page.waitForFunction(()=>requests.length===1&&!document.querySelector('[data-label="pool"] .math-check-btn').disabled);assert.equal((await stored(page)).result.status,'correct');const before=await stored(page);
+ page.once('dialog',d=>d.dismiss());await page.locator(next).click();assert.deepEqual(await stored(page),before);assert.equal(await page.evaluate(()=>accepted.length),0);
+ page.once('dialog',d=>d.accept());await page.locator(next).click();assert.equal((await stored(page)).variant.n,2);assert.equal((await stored(page)).result,undefined);assert.equal(await page.locator(input).inputValue(),'');assert.equal(await page.evaluate(()=>accepted.length),1);
+ await page.locator(next).click();assert.equal((await stored(page)).variant.n,1);assert.equal(await page.evaluate(()=>accepted.length),2);await page.close();page=await open(context);assert.equal((await stored(page)).variant.n,1);assert.equal(await page.evaluate(()=>requests.length),0);report.cases.push('actual emitted equal-content pool: cancel unchanged, accepted reset clears grade, no repeat, local restore without Check');
+ await page.evaluate(()=>CTMStore.setEnabled(false));await page.locator(next).click();await page.locator(input).fill('private answer');await page.evaluate(()=>dispatchEvent(new Event('pagehide')));const session=await page.evaluate(()=>JSON.parse(sessionStorage.getItem(CTMStore.key('pool'))));assert.equal(session.variant.n,2);assert.deepEqual(session.inputs,{});assert.equal(session.result,undefined);
+ await page.reload();await page.waitForFunction(()=>!!window.initialUI);await page.evaluate(()=>window.initialUI);assert.equal(await page.locator(input).inputValue(),'');assert.equal(await page.evaluate(()=>JSON.parse(sessionStorage.getItem(CTMStore.key('pool'))).variant.n),2);await page.evaluate(()=>CTMStore.setEnabled(true));assert.equal((await stored(page)).variant.n,2);await context.close();report.cases.push('save disabled preserves session choice only, reopening restores no answers/grade, enable persists accepted choice');
+ const missingContext=await browser.newContext();page=await open(missingContext,true);assert.equal(await page.locator(cell+' .math-check-btn').isDisabled(),true);assert.equal(await page.locator(cell+' .math-setup-unavailable').count(),1);await page.locator('[data-label="ordinary"] input').fill('42');await page.locator('[data-label="ordinary"] .math-check-btn').click();await page.waitForFunction(()=>requests.length===1&&!document.querySelector('[data-label="ordinary"] .math-check-btn').disabled);assert.match(raw.at(-1).ready.error,/Shared variant selection/);await missingContext.close();report.cases.push('missing required chooser fails pool locally while ordinary sibling Check remains usable');
+ for(const row of raw)if(!row.missing){assert.equal(row.ready.ok,true);assert.deepEqual(row.errors,[]);}report.raw=raw;report.browser=await browser.version();report.ok=true;
+}catch(error){report.ok=false;report.failure=error.stack;process.exitCode=1;}finally{await browser?.close();if(server)await new Promise(r=>server.close(r));rmSync(directory,{recursive:true,force:true});const output=process.env.CTM_ORDINARY_POOL_REPORT||'work/ordinary-pool-browser.json';mkdirSync(resolve(output,'..'),{recursive:true});writeFileSync(output,JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify({ok:report.ok,cases:report.cases.length,report:output,failure:report.failure}));}

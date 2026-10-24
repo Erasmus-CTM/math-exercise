@@ -1,0 +1,5 @@
+# Explicit nonstudent authoring artifact; ordinary website approval stays required.
+project:
+  render:
+    - generated-variants.qmd
+  output-dir: _review-examples

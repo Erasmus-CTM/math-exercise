@@ -1,29 +1,26 @@
 ```{math-exercise}
 #| label: variant-coupled
+#| variables: |
+#|   total = pick([3, 5])
+#| field-labels: u,v
+#| note: total={#total#}
 #| mode: custom
 #| context: none
-#| parameters:
-#|   total:
-#|   - 3
-#|   - 5
 #| tests:
-#| - answers:
-#|   - 1
-#|   - '{{total}}-1'
-#|   expected: correct
-#| - answers:
-#|   - 0
-#|   - '{{total}}'
-#|   expected: wrong
-#| - answers:
-#|   - '{{total}}'
-#|   - '{{total}}'
-#|   expected: wrong
+#|   - name: positive split
+#|     answers: [1, total-1]
+#|     expect: correct
+#|   - name: zero is not positive
+#|     answers: [0, total]
+#|     expect: wrong
+#|   - name: wrong sum
+#|     answers: [total, total]
+#|     expect: wrong
 #| checker: |
 #|   def check(response, symbols):
-#|       total = response['variant']['parameters']['total']
-#|       u,v = response['expressions']
-#|       return {'correct': u.is_positive and v.is_positive and simplify(u+v-total)==0}
+#|       total = response['variables']['total']
+#|       u, v = response['answers']['u'], response['answers']['v']
+#|       return {'correct': u.is_positive is True and v.is_positive is True and simplify(u+v-total) == 0}
 
-Give two positive numbers whose sum is ${{total}}$: _[0], _[0].
+Give two positive numbers whose sum is ${@total@}$: _[1], _[{@total-1@}].
 ```

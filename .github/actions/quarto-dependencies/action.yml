@@ -87,6 +87,8 @@ runs:
         test -f _extensions/ctm-libs/lua/checkers.lua || { echo "::error::this ctm-libs has no ctm.checkers (math-exercise 0.11 needs a ctm-libs from consolidation step 2 on)"; exit 1; }
         step quarto add ./_ctm-checkers-source --no-prompt
         test -f _extensions/ctm-checkers/checkers.json || { echo "::error::ctm-checkers was not installed"; find _extensions -maxdepth 3; exit 1; }
+        # Canonical separate native producer; browser wheels stay unchanged.
+        step python3 _ctm-checkers-source/tools/build_authoring.py --install-extension _extensions/ctm-checkers
         # git fetch accepts a tag, a branch or any commit GitHub serves for the
         # repository, including a pull request's commit from a fork (quarto add
         # owner/repo@ref does not find those).
@@ -100,6 +102,8 @@ runs:
         echo "CTM_LIBS_EXTENSION=$GITHUB_WORKSPACE/_ctm-libs-source/_extensions/ctm-libs" >> "$GITHUB_ENV"
         echo "CTM_CHECKERS_EXTENSION=$GITHUB_WORKSPACE/_extensions/ctm-checkers" >> "$GITHUB_ENV"
         echo "CTM_CHECKERS_WHEEL=$GITHUB_WORKSPACE/_extensions/ctm-checkers/$(jq -r .wheel _extensions/ctm-checkers/checkers.json)" >> "$GITHUB_ENV"
+        echo "CTM_VARIANTS_NATIVE=$GITHUB_WORKSPACE/_extensions/ctm-checkers/native-authoring" >> "$GITHUB_ENV"
+        echo "PYTHONPATH=$GITHUB_WORKSPACE/_extensions/ctm-checkers/native-authoring:$GITHUB_WORKSPACE/_extensions/ctm-checkers/$(jq -r .wheel _extensions/ctm-checkers/checkers.json)" >> "$GITHUB_ENV"
         echo "JSXGRAPH_EXTENSION=$GITHUB_WORKSPACE/$(dirname "$(dirname "$lua")")" >> "$GITHUB_ENV"
         # math-exercise stops without the CTM Assessment package unless the
         # build says it is a component development build.

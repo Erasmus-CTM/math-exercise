@@ -1,48 +1,32 @@
 ```{math-exercise}
 #| label: variant-geometry
+#| variables: |
+#|   radius = pick([1, 2])
+#| field-labels: x,y
+#| note: radius={#radius#}
 #| mode: custom
 #| context: none
-#| parameters:
-#|   radius:
-#|   - 1
-#|   - 2
-#| response: jsxgraph:variant-point
 #| tests:
-#| - response:
-#|     point:
-#|       x: '{{radius}}'
-#|       y: 0
-#|   expected: correct
-#| - name: within drawing tolerance
-#|   response:
-#|     point:
-#|       x: '{{radius}}'
-#|       y: 0.04
-#|   expected: correct
-#| - name: visibly off the circle
-#|   response:
-#|     point:
-#|       x: '{{radius}}.1'
-#|       y: 0
-#|   expected: wrong
-#| - response:
-#|     point:
-#|       x: 0
-#|       y: 0
-#|   expected: wrong
-#| - response:
-#|     point:
-#|       x: nan
-#|       y: 0
-#|   expected: wrong
+#|   - name: point on circle
+#|     answers: [radius, 0]
+#|     expect: correct
+#|   - name: within drawing tolerance
+#|     answers: [radius, 1/25]
+#|     expect: correct
+#|   - name: visibly off circle
+#|     answers: [radius+1/10, 0]
+#|     expect: wrong
+#|   - name: origin
+#|     answers: [0, 0]
+#|     expect: wrong
 #| checker: |
 #|   def check(response, symbols):
 #|       import math
-#|       radius = response['variant']['parameters']['radius']
-#|       x,y = float(response['point']['x']), float(response['point']['y'])
-#|       # 0.05 units is four screen pixels on the 480-pixel board: dragging precision.
-#|       good = math.isfinite(x) and math.isfinite(y) and abs(math.hypot(x, y) - radius) <= 0.05
-#|       return {'correct': good}
+#|       radius = float(response['variables']['radius'])
+#|       x, y = float(response['answers']['x']), float(response['answers']['y'])
+#|       return {'correct': math.isfinite(x) and math.isfinite(y) and abs(math.hypot(x,y)-radius) <= 0.05}
 
-Move point $P$ onto the circle $x^2+y^2={{radius}}^2$.
+Choose a point on $x^2+y^2={@radius@}^2$.
+Enter its coordinates: $x=$ _[{@radius@}], $y=$ _[0].
+The drawing above is an illustration; Check grades these coordinate fields.
 ```

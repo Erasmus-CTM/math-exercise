@@ -102,9 +102,15 @@ jobs:
              quarto add ../_ctm-libs-source --no-prompt > /dev/null
              quarto add ../_jsxgraph-source --no-prompt > /dev/null
              # math-exercise 0.11 and later grade with ctm-checkers; 0.10 has its own checker code.
-             if grep -q 'ctm.checkers' _extensions/math-exercise/math-exercise.lua; then quarto add ../_ctm-checkers-source --no-prompt > /dev/null; fi
+             if grep -q 'ctm.checkers' _extensions/math-exercise/math-exercise.lua; then
+               quarto add ../_ctm-checkers-source --no-prompt > /dev/null
+               python ../_ctm-checkers-source/tools/build_authoring.py --install-extension _extensions/ctm-checkers
+             fi
              quarto render)
             test -f "$build/_site/examples.html"
+            # Resolve generated authored questions through the component native
+            # supervisor; the harness grades their exact contexts in Pyodide.
+            python umbrella/integration/pyodide-parity/native-authored.py --root "$PWD/$build"
           done
       - run: npm ci --ignore-scripts
         working-directory: umbrella

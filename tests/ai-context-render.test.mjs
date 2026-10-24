@@ -56,11 +56,12 @@ for (const renderer of ['mathjax', 'katex']) {
         assert.doesNotMatch(captioned, /SECRET_|DO_NOT_SEND_CODE/);
 
         const pool = cell('pool');
-        page.window.Math.random = () => 0;
+        // The shared chooser uses stable identities; select the first record
+        // through its public link contract and keep exact per-draw assertions.
+        page.window.history.replaceState(null, '', '?variant=pool:1');
         page.api.setupCell(pool);
         for (let draw = 0; draw < 2; draw++) {
           if (draw) {
-            page.window.Math.random = () => 0.75;
             pool.querySelector('.math-pool-reload').click();
           }
           pool.querySelector('input').value = 'STUDENT_WORK';
