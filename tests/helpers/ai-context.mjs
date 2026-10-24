@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { JSDOM } from 'jsdom';
 import katex from 'katex';
-import { FEEDBACK, LOCALE, RUNTIME, sources } from './ctm-libs.mjs';
+import { FEEDBACK, LOCALE, RUNTIME, sources, matrixInputSource } from './ctm-libs.mjs';
 import { script as checkersScript } from './ctm-checkers.mjs';
 
 const require = createRequire(import.meta.url);
@@ -11,7 +11,7 @@ const shared = sources(FEEDBACK);
 const [runtime] = sources(RUNTIME);
 const locale = sources(LOCALE);
 const source = await readFile(new URL('../../_extensions/math-exercise/math-exercise.js', import.meta.url), 'utf8');
-const matrixInput = await readFile(new URL('../../_extensions/math-exercise/matrix-input.js', import.meta.url), 'utf8');
+const matrixInput = matrixInputSource;
 
 export function loadPage(html = '', config = {}, prepare = () => {}) {
   const dom = new JSDOM(html, { url: 'https://example.invalid/exercises', runScripts: 'outside-only' });

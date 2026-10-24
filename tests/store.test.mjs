@@ -1,3 +1,4 @@
+import {matrixInputSource} from './helpers/ctm-libs.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -59,7 +60,7 @@ function page({meta = {state: 'empty'}, question = '<input class="math-input" id
     ensureGuard: async () => {}, ensureCheckers: async () => {}, stopCount: () => 0,
     whenSlow: () => () => {}, callCheckers: async () => JSON.stringify(verdict)};
   w.eval(readFileSync(new URL('ui/variants.js', 'file://' + ctmLibs + '/'), 'utf8'));
-  w.eval(source('matrix-input.js'));
+  w.eval(matrixInputSource);
   w.eval(source('math-store.js'));
   w.eval(source('math-exercise.js'));
   const cell = w.document.getElementById(rootId);

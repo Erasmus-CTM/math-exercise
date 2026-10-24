@@ -1,9 +1,10 @@
+import {matrixInputSource} from './helpers/ctm-libs.mjs';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import vm from 'node:vm';
 
-const source = readFileSync(new URL('../_extensions/math-exercise/matrix-input.js', import.meta.url), 'utf8');
+const source = matrixInputSource;
 const context = vm.createContext({});
 vm.runInContext(source, context);
 const API = context.MatrixInput;

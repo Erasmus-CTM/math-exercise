@@ -24,6 +24,7 @@ function locate() {
   return found;
 }
 export const ctmLibs = locate();
+export const matrixInputSource = readFileSync(join(ctmLibs, "ui/ctm-matrix-input.js"), "utf8");
 
 // Browser files of ctm-libs, each list in the order a page loads it.
 export const FEEDBACK = ['feedback/feedback-core.js', 'feedback/feedback-dom.js', 'feedback/ai-feedback.js'];
