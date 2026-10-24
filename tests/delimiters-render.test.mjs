@@ -9,7 +9,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 import test from 'node:test';
-import { install, LOCALE, renderEnv, runInContext } from './helpers/ctm-libs.mjs';
+import { install, LOCALE, RUNTIME, renderEnv, runInContext } from './helpers/ctm-libs.mjs';
 
 const require = createRequire(import.meta.url);
 const quarto = process.env.QUARTO_BIN || 'quarto';
@@ -20,7 +20,9 @@ const dollar = '<span class="math-literal-dollar">$</span>';
 const expected = 'Price ' + dollar + '5 or ' + dollar + String.raw`7, solve \(x+1=2\), show \[a\] and $unclosed: `;
 
 function api() {
-  const context = vm.createContext({ console, document: { addEventListener() {} }, window: { __mathExerciseConfig: { lang: 'en' }, __mathExerciseTestMode: true } });
+  const context = vm.createContext({ console, document: { addEventListener() {} }, window: { addEventListener() {}, __mathExerciseConfig: { lang: 'en' }, __mathExerciseTestMode: true } });
+  context.addEventListener = () => {};
+  runInContext(context, RUNTIME);
   runInContext(context, LOCALE);
   vm.runInContext(source, context);
   return context.window.__mathExerciseTestApi;

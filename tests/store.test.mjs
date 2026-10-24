@@ -17,7 +17,8 @@ const math = new Proxy({legend: [], feedbackFieldSingle: 'Answer', feedbackField
 {get: (object, key) => key in object ? object[key] : String(key)});
 
 function page({meta = {state: 'empty'}, question = '<input class="math-input" id="e-f1" data-answer="42">',
-  labels = [], variants = [], pool = null, mode = 'equivalent', partial = false, graphical = false, rootId = 'e'} = {}) {
+  labels = [], variants = [], pool = null, mode = 'equivalent', partial = false, graphical = false, rootId = 'e',
+  automatic = false, rendererError = null} = {}) {
   question = question.replaceAll('id="e-', 'id="' + rootId + '-');
   const html = '<div class="math-exercise-cell" id="' + rootId + '" data-label="task" data-ctm-id="task" data-ctm-source="0123456789abcdef"'
     + ' data-mode="' + mode + '" data-fields="[]" data-field-labels="' + esc(JSON.stringify(labels)) + '"'
@@ -30,13 +31,17 @@ function page({meta = {state: 'empty'}, question = '<input class="math-input" id
     + '<div class="math-legend-panel"></div><div class="math-feedback-area"></div></div>';
   const dom = new JSDOM(html, {url: 'https://example.invalid/tasks', runScripts: 'outside-only'});
   const w = dom.window;
-  w.document.addEventListener = () => {}; // Exercise setup is explicit; never start CDN preloading.
+  let domReady;
+  w.document.addEventListener = (name, callback) => {
+    if (name === 'DOMContentLoaded') domReady = callback;
+  }; // Start initial UI explicitly; never start CDN preloading.
+  w.CTMAssets = {url() { throw rendererError || new Error('Unexpected renderer request'); }};
   w.__mathExerciseTestMode = true;
   w.CTMLocales = {table: component => component === 'ui' ? ui : math};
   w.confirm = () => false;
   w.Math.random = () => 0;
   let registration, changes = 0, runtimeCalls = 0, verdict = {status: 'correct', score: 1};
-  const events = [], copies = [];
+  const events = [], copies = [], initialUI = [];
   w.CTMCopy = {text: (text, options) => {copies.push({text, options});}};
   // Only the shared-store boundary is mocked: revision matching is tested in
   // ctm-libs; this suite verifies the adapter writes solely when asked to.
@@ -48,15 +53,16 @@ function page({meta = {state: 'empty'}, question = '<input class="math-input" id
     }, changed() { changes++; }, result(value) { events.push(plain(value)); }, clear() { options.clear(); }};
   }};
   const py = {loadPackage: async () => {}};
-  w.MathExerciseRuntime = {ensurePyodide: async () => {runtimeCalls++; return py;},
+  w.MathExerciseRuntime = {trackInitialUI: promise => {initialUI.push(promise); return promise;}, ensurePyodide: async () => {runtimeCalls++; return py;},
     ensureGuard: async () => {}, ensureCheckers: async () => {}, stopCount: () => 0,
     whenSlow: () => () => {}, callCheckers: async () => JSON.stringify(verdict)};
   w.eval(source('matrix-input.js'));
   w.eval(source('math-store.js'));
   w.eval(source('math-exercise.js'));
   const cell = w.document.getElementById(rootId);
-  w.__mathExerciseTestApi.setupCell(cell);
-  return {dom, w, cell, get registration() {return registration;}, get changes() {return changes;},
+  if (!automatic) w.__mathExerciseTestApi.setupCell(cell);
+  return {dom, w, cell, initialUI, get registration() {return registration;}, get changes() {return changes;},
+    start() { domReady(); return initialUI[0]; },
     get runtimeCalls() {return runtimeCalls;}, events, copies, verdict(value) {verdict = value;},
     field() {return cell.querySelector('input.math-input');}};
 }
@@ -242,5 +248,28 @@ test('explicit clear resets current fields and removes saved history without sch
   assert.equal(p.cell.querySelector('.math-saved-result').textContent, '');
   assert.equal(p.changes, 0);
   assert.equal(p.runtimeCalls, 0);
+  p.dom.window.close();
+});
+
+test('initial question UI registers before DOMContentLoaded and does not start Python during registration',()=>{
+  const p=page(); assert.equal(p.initialUI.length,1); assert.equal(typeof p.initialUI[0].then,'function');
+  assert.equal(p.runtimeCalls,0); p.dom.window.close();
+});
+
+test('failed initial renderer retains its error while automatic Check and storage remain functional', async () => {
+  const failure = new Error('KaTeX assets unavailable');
+  const p = page({automatic: true, rendererError: failure});
+  assert.equal(p.registration, undefined);
+  await assert.rejects(p.start(), error => error === failure);
+  assert.equal(p.cell.querySelector('.math-render-unavailable').textContent, 'renderUnavailable');
+  assert.equal(p.cell.querySelector('.math-render-unavailable').getAttribute('role'), 'status');
+  assert.ok(p.registration);
+  p.field().value = '42';
+  p.field().dispatchEvent(new p.w.Event('input', {bubbles: true}));
+  assert.equal(p.changes, 1);
+  await check(p);
+  assert.equal(p.events.length, 1);
+  assert.equal(p.events[0].status, 'correct');
+  assert.deepEqual(plain(p.registration.read()).fields, {f1: '42'});
   p.dom.window.close();
 });

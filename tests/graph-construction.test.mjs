@@ -39,7 +39,7 @@ function loadBundle(loadPackage) {
     mainPyodide: { loadPackage },
     setTimeout,
     clearTimeout,
-    window: {
+    window: { addEventListener() {},
       __mathExerciseConfig: { lang: 'en' },
       __mathExerciseTestMode: true,
     },
@@ -49,6 +49,7 @@ function loadBundle(loadPackage) {
     vm.runInContext(code, context);
     context.window.AIFeedback = context.AIFeedback;
   }
+  context.addEventListener = () => {};
   runInContext(context, RUNTIME);
   runInContext(context, LOCALE);
   vm.runInContext(readFileSync(new URL('../_extensions/math-exercise/matrix-input.js', import.meta.url), 'utf8'), context);

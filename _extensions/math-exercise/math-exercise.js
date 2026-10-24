@@ -60,6 +60,10 @@
     var KATEX = window.CTMAssets.url('katex', '');
     var link = document.createElement('link');
     link.rel = 'stylesheet'; link.href = KATEX + 'dist/katex.min.css';
+    var stylesheet = new Promise(function (resolve, reject) {
+      link.onload = resolve;
+      link.onerror = function () { reject(new Error('Failed to load: ' + link.href)); };
+    });
     document.head.appendChild(link);
     // Load the package's own ES modules in both asset modes, not classic <script>
     // tags. Reason: KaTeX's classic UMD bundles register themselves through
@@ -71,8 +75,12 @@
     // of racing Monaco's own concurrent module loads (a "temporarily hide
     // define.amd" workaround was tried first and broke Monaco's lazily
     // loaded markdown renderer for hover tooltips).
-    var katexMod      = await import(KATEX + 'dist/katex.mjs');
-    var autoRenderMod = await import(KATEX + 'dist/contrib/auto-render.mjs');
+    var modules = await Promise.all([
+      import(KATEX + 'dist/katex.mjs'),
+      import(KATEX + 'dist/contrib/auto-render.mjs'),
+      stylesheet
+    ]);
+    var katexMod = modules[0], autoRenderMod = modules[1];
     katexLib = katexMod.default;
     renderMathInElementFn = autoRenderMod.default;
     katexReady = true;
@@ -171,7 +179,8 @@
   var LEGEND = L.legend;
 
   async function buildLegend(container) {
-    await ensureKatex();
+    try { await ensureKatex(); }
+    catch (error) { console.warn('math-exercise: showing input help without mathematical formatting', error); }
     var rows = LEGEND.map(function (item) {
       var math;
       try { math = katexLib.renderToString(item[0], { throwOnError: false }); }
@@ -1562,22 +1571,35 @@
     };
   }
 
-  document.addEventListener('DOMContentLoaded', async function () {
+  var initialUI = new Promise(function (resolve) {
+    document.addEventListener('DOMContentLoaded', resolve, {once: true});
+  }).then(async function () {
     var cells = document.querySelectorAll('.math-exercise-cell');
     // Exercises shown as text (a build without AI feedback) only need their maths.
     var texts = document.querySelectorAll('.math-exercise-text .math-exercise-question');
     if (!cells.length && !texts.length) return;
-    // KaTeX rendering must not depend on Pyodide: Pyodide is only needed lazily
-    // on the first Check click (ensureSympy()), but if ensurePyodide() rejects
-    // (slow/broken network, no other Pyodide extension on the page), a shared
-    // Promise.all would previously also block/kill math rendering entirely.
-    await ensureKatex();
-    texts.forEach(renderMathInQuestion);
-    if (!cells.length) return;
+    // Install answer, Check and storage handlers independently of the optional
+    // renderer. A slow/broken stylesheet or module must not disable grading.
     cells.forEach(setupCell);
-    ensurePyodide().catch(function (e) {
+    if (cells.length) ensurePyodide().catch(function (e) {
       console.warn('math-exercise: Pyodide preload failed (will retry on the first check):', e);
     });
+    try { await ensureKatex(); }
+    catch (error) {
+      cells.forEach(function (cell) {
+        var warning = document.createElement('p');
+        warning.className = 'math-render-unavailable';
+        warning.setAttribute('role', 'status');
+        warning.textContent = L.renderUnavailable;
+        cell.appendChild(warning);
+      });
+      // Keep the readiness failure visible to the reload decision; the working
+      // controls above remain available in the retained document.
+      throw error;
+    }
+    texts.forEach(renderMathInQuestion);
+    cells.forEach(function (cell) { renderMathInQuestion(cell); });
   });
+  globalThis.MathExerciseRuntime.trackInitialUI(initialUI);
 
 })();

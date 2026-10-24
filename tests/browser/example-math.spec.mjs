@@ -8,7 +8,12 @@ const pages = [...project.split('  render:\n')[1].split('\n\n')[0].matchAll(/- (
 
 for (const name of pages) test(`${name}: all task formulas render, including every pool draw`, async ({page}) => {
   await page.goto(`/${name}.html`, {waitUntil: 'domcontentloaded'});
-  await page.waitForFunction(() => !document.querySelector('.math-reconfig-btn'));
+  // Controls are installed before rendering; their presence is not readiness.
+  await page.evaluate(async () => {
+    if (document.querySelector('.math-exercise-cell, .math-exercise-text .math-exercise-question')) {
+      await MathExerciseRuntime.whenInitialUIReady();
+    }
+  });
   await page.evaluate(async () => { await window.MathJax?.startup?.promise; });
   const report = await page.evaluate(() => {
     const failures = [];
