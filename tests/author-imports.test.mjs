@@ -8,14 +8,18 @@ import {join} from 'node:path';
 import {install, renderEnv} from './helpers/ctm-libs.mjs';
 
 const quarto = process.env.QUARTO_BIN || 'quarto';
-const available = !spawnSync(quarto, ['--version']).error;
+const available = spawnSync(quarto, ['--version']).status === 0;
 const fixture = fileURLToPath(new URL('./fixtures/author-imports-pandoc.lua', import.meta.url));
 const adapter = fileURLToPath(new URL('../_extensions/math-exercise/author-imports.lua', import.meta.url));
 function run(mode, absent = false, malformed = '') {
-  return spawnSync(quarto, ['pandoc', '--from', 'markdown', '--to', 'json', '--lua-filter', fixture], {
-    input: `---\nmode: ${mode}\nabsent: ${absent}\nmalformed: "${malformed}"\n---\n`,
-    env: {...process.env, MATH_IMPORT_ADAPTER: adapter}, encoding: 'utf8', timeout: 30000,
-  });
+  const dir = mkdtempSync(join(tmpdir(), 'math-import-pandoc-'));
+  try {
+    const input = join(dir, 'input.md');
+    writeFileSync(input, `---\nmode: ${mode}\nabsent: ${absent}\nmalformed: "${malformed}"\n---\n`);
+    return spawnSync(quarto, ['pandoc', input, '--from', 'markdown', '--to', 'json', '--lua-filter', fixture], {
+      env: {...process.env, MATH_IMPORT_ADAPTER: adapter}, encoding: 'utf8', timeout: 30000,
+    });
+  } finally { rmSync(dir, {recursive: true, force: true}); }
 }
 test('register actual checker fragments, generated variants and parsed package requirements', {skip: !available && 'Quarto required'}, () => {
   const result = run('local');
@@ -48,10 +52,10 @@ test('the real Quarto handler registers built-in, custom, pool and generated che
     const checker = 'import networkx\ndef check(response, symbols):\n    return {"correct": True}';
     const custom = block('#| label: custom\n#| mode: custom\n#| packages: networkx\n#| checker: |\n' + checker.split('\n').map(line => '#|   ' + line).join('\n'));
     const pool = block('#| label: pool\n#| pool: true\n#| mode: custom\n#| packages: networkx\n#| checker: |\n' + checker.split('\n').map(line => '#|   ' + line).join('\n'), 'Answer: _[]\n---\nAnother: _[]');
-    const generated = block('#| label: generated\n#| mode: custom\n#| parameters: {a: [1, 2]}\n#| packages: [numpy, scipy]\n#| checker: |\n#|   import numpy\n#|   def check(response, symbols):\n#|       return {"score": {{a}} / 2}', 'Answer: _[{{a}}]');
+    const generated = block('#| label: generated\n#| variables: |\n#|   a = pick([1, 2])\n#| field-labels: Answer\n#| note: a={#a#}\n#| mode: custom\n#| packages: numpy, scipy\n#| checker: |\n#|   import fractions\n#|   def check(response, symbols):\n#|       return {"correct": response["answers"]["Answer"] == response["teacher"]["Answer"]}', 'Answer: _[{#a#}]');
     writeFileSync(join(dir, 'lesson.qmd'), '---\nformat: html\nfilters: [capture.lua, math-exercise]\nmath-exercise: {feedback: false}\n---\n\n' + plain + custom + pool + generated);
     const output = join(dir, 'imports.json');
-    const result = spawnSync(quarto, ['render', 'lesson.qmd'], {cwd: dir, env: {...renderEnv, MATH_IMPORT_CAPTURE: output}, encoding: 'utf8', timeout: 120000});
+    const result = spawnSync(quarto, ['render', 'lesson.qmd'], {cwd: dir, env: {...renderEnv, CTM_VARIANTS: 'review', MATH_IMPORT_CAPTURE: output}, encoding: 'utf8', timeout: 120000});
     assert.equal(result.status, 0, result.stdout + result.stderr);
     const fragments = JSON.parse(readFileSync(output, 'utf8'));
     assert.equal(fragments.length, 10);
@@ -67,9 +71,9 @@ test('the real Quarto handler registers built-in, custom, pool and generated che
     }
     const variants = fragments.filter(x => x.origin.startsWith('math-exercise generated variant '));
     assert.equal(variants.length, 2);
-    assert.ok(variants.every(x => /import numpy/.test(x.source) && !x.source.includes('{{')));
-    assert.ok(variants.some(x => x.source.includes('"score": 1 / 2')));
-    assert.ok(variants.some(x => x.source.includes('"score": 2 / 2')));
+    assert.ok(variants.every(x => /import fractions/.test(x.source) && !x.source.includes('{#')));
+    assert.equal(new Set(variants.map(x => x.source)).size, 1, 'native checker reads exact context instead of interpolating code');
+    assert.ok(variants.every(x => x.source.includes('response["teacher"]["Answer"]')));
     assert.ok(variants.every(x => JSON.stringify(x.packages) === '["numpy","scipy"]'));
   } finally {
     rmSync(dir, {recursive: true, force: true});

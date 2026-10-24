@@ -28,11 +28,9 @@ jobs:
         run: npm ci
       - name: Test feedback and provider compatibility
         run: |
-          python -m unittest discover -s tests -p test_variants.py
+          python -m unittest discover -s tests -p "test_*.py"
           node --test tests/*.test.mjs
-      - name: variants.py rounds as math-exercise 0.10 did (ctm-checkers' golden rows, L1)
-        run: python _ctm-checkers-source/tools/golden.py verify --adapter wheel --wheel "$CTM_CHECKERS_WHEEL" --variants . --suite rounding-variants
-      - name: Render the examples website
+      - name: Render the ordinary examples website with required approval
         run: |
           quarto render
           quarto render nb-render.qmd
@@ -108,3 +106,9 @@ jobs:
           test "$(grep -Fc 'class="math-example-source"' _site/graph-theory.html)" -eq 8
           test -f _site/docs/graph-editor.md
           grep -Fq 'Graph editor API reference' _site/docs/graph-editor.md
+
+      # Separate nonstudent output; never part of the ordinary website/publish tree.
+      - name: Render authoring examples as review artifacts only
+        env:
+          CTM_VARIANTS: review
+        run: quarto render generated-variants.qmd --profile variants-review

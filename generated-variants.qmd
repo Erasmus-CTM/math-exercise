@@ -1,14 +1,19 @@
 ---
-title: "Build-time variants"
+title: "Native variant authoring examples"
 engine: markdown
 filters: [_filters/example-source.lua, jsxgraph, math-exercise]
-math-exercise-review: true
 ---
 
-Each problem below is a separate included QMD. Review is enabled **only on
-this author page**. Ordinary course pages can include the same files without
-`math-exercise-review: true`. Use **Run all authored tests**, inspect a variant,
-and **Copy selection** to replace selection options in its source file.
+These five manually migrated examples use native `variables`, exact named
+answers and real teacher/authored checks. No approvals are supplied: ordinary
+publishing must fail until a teacher records decisions. To inspect the examples
+without granting approval, explicitly run
+`CTM_VARIANTS=review quarto render generated-variants.qmd --profile variants-review`.
+
+Use the installed `question-variants.py` and connected review helper for the
+actual include file and stable label; see [the authoring guide](docs/build-time-variants.md).
+Review mode shows proposals with a banner and `variant: null`; it is not a
+student release or an approval write.
 
 ## Expression answers
 
@@ -20,18 +25,24 @@ and **Copy selection** to replace selection options in its source file.
 
 ## Matrix relations
 
+This example deliberately uses four labelled scalar fields and constructs one
+fixed 2×2 matrix in the checker. Native dynamic named-matrix context is not
+implemented. Ordinary named/dynamic matrix examples and tests remain separate.
+
 {{< include _includes/variants/matrix.qmd >}}
 
 ## Coupled answers
 
 {{< include _includes/variants/coupled.qmd >}}
 
-## Geometric construction
+## Geometric coordinates
+
+The board is an illustration. The native question grades typed coordinates;
+this example does not claim native external graphical-response grading.
 
 ```{.jsxgraph assessment_id="variant-point" width="480" height="360"}
 var board=JXG.JSXGraph.initBoard(BOARDID,{boundingbox:[-3,3,3,-3],axis:true,keepaspectratio:true});
-var p=board.create('point',[0.5,0.5],{name:'P',snapToGrid:false});
-JXG.QuartoAssessment.register({board:board,response:function(){return {point:{x:p.X(),y:p.Y()}};}});
+board.create('point',[0.5,0.5],{name:'P',snapToGrid:false});
 ```
 
 {{< include _includes/variants/geometry.qmd >}}

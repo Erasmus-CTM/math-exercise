@@ -31,8 +31,8 @@ The question text is Markdown-like text, not HTML:
   the Markdown above instead: put several answer fields on separate lines
   rather than spacing them with `&nbsp;`.
 
-Generated variants (`#| parameters:`) are rendered by Pandoc, so their text
-supports Markdown in full.
+Native generated variants use `#| variables:` and the exact native authoring API.
+Legacy `parameters` syntax fails explicitly. See [native authoring](build-time-variants.md).
 
 ---
 
@@ -135,6 +135,7 @@ option for ordinary exercises. No page script or MutationObserver is needed.
 | `vecdir` | `col` / `row` | `col` | orientation of every `vec[...]` marker in the exercise |
 | `field-labels` | comma-separated | — | optional human-readable labels for answer fields, e.g. `S, E, M`; missing labels fall back to `Answer` or numbered field names |
 | `context` | comma-separated element IDs, or `none` | — | AI-feedback context: reference explicit `.math-exercise-context` block(s) by id, or `none` to disable the automatic context. See [AI feedback context](#ai-feedback-context) |
+| `context-text` | authored text | — | Adds explicit learning context alongside the rendered question and selected context. `context: none` suppresses it. Generated variants resolve its placeholders per variant. |
 
 ---
 

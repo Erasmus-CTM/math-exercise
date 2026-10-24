@@ -1,0 +1,1873 @@
+{
+  "differences": [
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-108a53c9d3765c068f98|fixture:0",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-108a53c9d3765c068f98|fixture:1",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-108a53c9d3765c068f98|fixture:2",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-108a53c9d3765c068f98|response:0",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-108a53c9d3765c068f98|response:1",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-108a53c9d3765c068f98|response:2",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-108a53c9d3765c068f98|response:3",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-1457b449249e92231d34|fixture:0",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-1457b449249e92231d34|fixture:1",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-1457b449249e92231d34|fixture:2",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-1457b449249e92231d34|response:0",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-1457b449249e92231d34|response:1",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-1457b449249e92231d34|response:2",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-1457b449249e92231d34|response:3",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-15e23091bdd695fcd1ab|fixture:0",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-15e23091bdd695fcd1ab|fixture:1",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-15e23091bdd695fcd1ab|fixture:2",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-15e23091bdd695fcd1ab|response:0",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-15e23091bdd695fcd1ab|response:1",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-15e23091bdd695fcd1ab|response:2",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-15e23091bdd695fcd1ab|response:3",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-15e23091bdd695fcd1ab|response:4",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-15e23091bdd695fcd1ab|response:5",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-74a2f3792fc2204070b1|fixture:0",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-74a2f3792fc2204070b1|fixture:1",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-74a2f3792fc2204070b1|fixture:2",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-74a2f3792fc2204070b1|response:0",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-74a2f3792fc2204070b1|response:1",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-74a2f3792fc2204070b1|response:2",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-74a2f3792fc2204070b1|response:3",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-9670d227095d78145a3f|fixture:0",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-9670d227095d78145a3f|fixture:1",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-9670d227095d78145a3f|fixture:2",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-9670d227095d78145a3f|response:0",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-9670d227095d78145a3f|response:1",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-9670d227095d78145a3f|response:2",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-9670d227095d78145a3f|response:3",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-ed1f26787c60ad37e59f|fixture:0",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-ed1f26787c60ad37e59f|fixture:1",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-ed1f26787c60ad37e59f|fixture:2",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-ed1f26787c60ad37e59f|response:0",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-ed1f26787c60ad37e59f|response:1",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-ed1f26787c60ad37e59f|response:2",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-ed1f26787c60ad37e59f|response:3",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-ed1f26787c60ad37e59f|response:4",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#0:variant-triangle|variant:v-ed1f26787c60ad37e59f|response:5",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-3a974a3f7ea14274f2b8|fixture:0",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-3a974a3f7ea14274f2b8|fixture:1",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-3a974a3f7ea14274f2b8|fixture:2",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-3a974a3f7ea14274f2b8|fixture:3",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-3a974a3f7ea14274f2b8|fixture:4",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-3a974a3f7ea14274f2b8|fixture:5",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-3a974a3f7ea14274f2b8|fixture:6",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-3a974a3f7ea14274f2b8|fixture:7",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-3a974a3f7ea14274f2b8|response:0",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-3a974a3f7ea14274f2b8|response:1",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-3a974a3f7ea14274f2b8|response:10",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-3a974a3f7ea14274f2b8|response:11",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-3a974a3f7ea14274f2b8|response:12",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-3a974a3f7ea14274f2b8|response:13",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-3a974a3f7ea14274f2b8|response:14",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-3a974a3f7ea14274f2b8|response:15",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-3a974a3f7ea14274f2b8|response:16",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-3a974a3f7ea14274f2b8|response:2",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-3a974a3f7ea14274f2b8|response:3",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-3a974a3f7ea14274f2b8|response:4",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-3a974a3f7ea14274f2b8|response:5",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-3a974a3f7ea14274f2b8|response:6",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-3a974a3f7ea14274f2b8|response:7",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-3a974a3f7ea14274f2b8|response:8",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-3a974a3f7ea14274f2b8|response:9",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-6d15d5b9d7596737a147|fixture:0",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-6d15d5b9d7596737a147|fixture:1",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-6d15d5b9d7596737a147|fixture:2",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-6d15d5b9d7596737a147|fixture:3",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-6d15d5b9d7596737a147|fixture:4",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-6d15d5b9d7596737a147|fixture:5",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-6d15d5b9d7596737a147|fixture:6",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-6d15d5b9d7596737a147|fixture:7",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-6d15d5b9d7596737a147|response:0",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-6d15d5b9d7596737a147|response:1",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-6d15d5b9d7596737a147|response:10",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-6d15d5b9d7596737a147|response:11",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-6d15d5b9d7596737a147|response:12",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-6d15d5b9d7596737a147|response:13",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-6d15d5b9d7596737a147|response:14",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-6d15d5b9d7596737a147|response:15",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-6d15d5b9d7596737a147|response:16",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-6d15d5b9d7596737a147|response:2",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-6d15d5b9d7596737a147|response:3",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-6d15d5b9d7596737a147|response:4",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-6d15d5b9d7596737a147|response:5",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-6d15d5b9d7596737a147|response:6",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-6d15d5b9d7596737a147|response:7",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-6d15d5b9d7596737a147|response:8",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-6d15d5b9d7596737a147|response:9",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-ca95e582458cac57a9b1|fixture:0",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-ca95e582458cac57a9b1|fixture:1",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-ca95e582458cac57a9b1|fixture:2",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-ca95e582458cac57a9b1|fixture:3",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-ca95e582458cac57a9b1|fixture:4",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-ca95e582458cac57a9b1|fixture:5",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-ca95e582458cac57a9b1|fixture:6",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-ca95e582458cac57a9b1|fixture:7",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-ca95e582458cac57a9b1|response:0",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-ca95e582458cac57a9b1|response:1",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-ca95e582458cac57a9b1|response:10",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-ca95e582458cac57a9b1|response:11",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-ca95e582458cac57a9b1|response:12",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-ca95e582458cac57a9b1|response:13",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-ca95e582458cac57a9b1|response:14",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-ca95e582458cac57a9b1|response:15",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-ca95e582458cac57a9b1|response:16",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-ca95e582458cac57a9b1|response:2",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-ca95e582458cac57a9b1|response:3",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-ca95e582458cac57a9b1|response:4",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-ca95e582458cac57a9b1|response:5",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-ca95e582458cac57a9b1|response:6",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-ca95e582458cac57a9b1|response:7",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-ca95e582458cac57a9b1|response:8",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-ca95e582458cac57a9b1|response:9",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-d3626ac30a87e6f7a642|fixture:0",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-d3626ac30a87e6f7a642|fixture:1",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-d3626ac30a87e6f7a642|fixture:2",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-d3626ac30a87e6f7a642|fixture:3",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-d3626ac30a87e6f7a642|fixture:4",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-d3626ac30a87e6f7a642|fixture:5",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-d3626ac30a87e6f7a642|fixture:6",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-d3626ac30a87e6f7a642|fixture:7",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-d3626ac30a87e6f7a642|response:0",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-d3626ac30a87e6f7a642|response:1",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-d3626ac30a87e6f7a642|response:10",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-d3626ac30a87e6f7a642|response:11",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-d3626ac30a87e6f7a642|response:12",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-d3626ac30a87e6f7a642|response:13",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-d3626ac30a87e6f7a642|response:14",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-d3626ac30a87e6f7a642|response:15",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-d3626ac30a87e6f7a642|response:16",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-d3626ac30a87e6f7a642|response:2",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-d3626ac30a87e6f7a642|response:3",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-d3626ac30a87e6f7a642|response:4",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-d3626ac30a87e6f7a642|response:5",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-d3626ac30a87e6f7a642|response:6",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-d3626ac30a87e6f7a642|response:7",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-d3626ac30a87e6f7a642|response:8",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#1:variant-perpendicular|variant:v-d3626ac30a87e6f7a642|response:9",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|fixture:0",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|fixture:1",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:0",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:1",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:10",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:11",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:12",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:13",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:14",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:15",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:16",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:17",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:18",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:19",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:2",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:20",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:21",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:22",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:23",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:24",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:25",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:26",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:27",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:28",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:29",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:3",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:30",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:31",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:32",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:33",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:34",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:35",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:4",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:5",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:6",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:7",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:8",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-70778ce01ad8d1a82c80|response:9",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|fixture:0",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|fixture:1",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:0",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:1",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:10",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:11",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:12",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:13",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:14",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:15",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:16",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:17",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:18",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:19",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:2",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:20",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:21",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:22",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:23",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:24",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:25",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:26",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:27",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:28",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:29",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:3",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:30",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:31",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:32",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:33",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:34",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:35",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:4",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:5",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:6",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:7",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:8",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#2:variant-matrix|variant:v-7e8059f495589fcd9812|response:9",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#3:variant-coupled|variant:v-02411c8580becc96ce51|fixture:0",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#3:variant-coupled|variant:v-02411c8580becc96ce51|fixture:1",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#3:variant-coupled|variant:v-02411c8580becc96ce51|fixture:2",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#3:variant-coupled|variant:v-02411c8580becc96ce51|response:0",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#3:variant-coupled|variant:v-02411c8580becc96ce51|response:1",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#3:variant-coupled|variant:v-02411c8580becc96ce51|response:10",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#3:variant-coupled|variant:v-02411c8580becc96ce51|response:11",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#3:variant-coupled|variant:v-02411c8580becc96ce51|response:2",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#3:variant-coupled|variant:v-02411c8580becc96ce51|response:3",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#3:variant-coupled|variant:v-02411c8580becc96ce51|response:4",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#3:variant-coupled|variant:v-02411c8580becc96ce51|response:5",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#3:variant-coupled|variant:v-02411c8580becc96ce51|response:6",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#3:variant-coupled|variant:v-02411c8580becc96ce51|response:7",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#3:variant-coupled|variant:v-02411c8580becc96ce51|response:8",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#3:variant-coupled|variant:v-02411c8580becc96ce51|response:9",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#3:variant-coupled|variant:v-9f827af5202050f264df|fixture:0",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#3:variant-coupled|variant:v-9f827af5202050f264df|fixture:1",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#3:variant-coupled|variant:v-9f827af5202050f264df|fixture:2",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#3:variant-coupled|variant:v-9f827af5202050f264df|response:0",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#3:variant-coupled|variant:v-9f827af5202050f264df|response:1",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#3:variant-coupled|variant:v-9f827af5202050f264df|response:10",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#3:variant-coupled|variant:v-9f827af5202050f264df|response:11",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#3:variant-coupled|variant:v-9f827af5202050f264df|response:2",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#3:variant-coupled|variant:v-9f827af5202050f264df|response:3",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#3:variant-coupled|variant:v-9f827af5202050f264df|response:4",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#3:variant-coupled|variant:v-9f827af5202050f264df|response:5",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#3:variant-coupled|variant:v-9f827af5202050f264df|response:6",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#3:variant-coupled|variant:v-9f827af5202050f264df|response:7",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#3:variant-coupled|variant:v-9f827af5202050f264df|response:8",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#3:variant-coupled|variant:v-9f827af5202050f264df|response:9",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#4:variant-geometry|variant:v-2d7bc339847f36b6dbdc|fixture:0",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#4:variant-geometry|variant:v-2d7bc339847f36b6dbdc|fixture:1",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#4:variant-geometry|variant:v-2d7bc339847f36b6dbdc|fixture:2",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#4:variant-geometry|variant:v-2d7bc339847f36b6dbdc|fixture:3",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#4:variant-geometry|variant:v-2d7bc339847f36b6dbdc|fixture:4",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#4:variant-geometry|variant:v-7773d1f3f4442d274538|fixture:0",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#4:variant-geometry|variant:v-7773d1f3f4442d274538|fixture:1",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#4:variant-geometry|variant:v-7773d1f3f4442d274538|fixture:2",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#4:variant-geometry|variant:v-7773d1f3f4442d274538|fixture:3",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/generated-variants.html",
+      "case": "math-exercise/generated-variants.html#4:variant-geometry|variant:v-7773d1f3f4442d274538|fixture:4",
+      "onlyIn": "base",
+      "reason": "Approved hard break removes this exact legacy parameters page case from ordinary student publishing; the native replacement stays in explicit nonstudent review.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/_includes/variants/coupled.qmd",
+      "case": "authored:math-exercise:_includes/variants/coupled.qmd#variant-coupled",
+      "onlyIn": "head",
+      "reason": "Manually migrated native source now has real Pyodide grading of every resolved context, mandatory teacher vector and authored tests. This declares case addition only; failed authored outcomes still fail independently.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/_includes/variants/geometry.qmd",
+      "case": "authored:math-exercise:_includes/variants/geometry.qmd#variant-geometry",
+      "onlyIn": "head",
+      "reason": "Manually migrated native source now has real Pyodide grading of every resolved context, mandatory teacher vector and authored tests. This declares case addition only; failed authored outcomes still fail independently.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/_includes/variants/matrix.qmd",
+      "case": "authored:math-exercise:_includes/variants/matrix.qmd#variant-matrix",
+      "onlyIn": "head",
+      "reason": "Manually migrated native source now has real Pyodide grading of every resolved context, mandatory teacher vector and authored tests. This declares case addition only; failed authored outcomes still fail independently.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/_includes/variants/perpendicular.qmd",
+      "case": "authored:math-exercise:_includes/variants/perpendicular.qmd#variant-perpendicular",
+      "onlyIn": "head",
+      "reason": "Manually migrated native source now has real Pyodide grading of every resolved context, mandatory teacher vector and authored tests. This declares case addition only; failed authored outcomes still fail independently.",
+      "required": true
+    },
+    {
+      "path": "math-exercise/_includes/variants/triangle.qmd",
+      "case": "authored:math-exercise:_includes/variants/triangle.qmd#variant-triangle",
+      "onlyIn": "head",
+      "reason": "Manually migrated native source now has real Pyodide grading of every resolved context, mandatory teacher vector and authored tests. This declares case addition only; failed authored outcomes still fail independently.",
+      "required": true
+    }
+  ]
+}

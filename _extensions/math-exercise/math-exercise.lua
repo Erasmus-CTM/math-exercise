@@ -207,6 +207,16 @@ end
 ----
 -- Parse #| key: value lines; return opts table + remaining content
 ----
+local boardSetup = false
+local function ensureVariantBoards()
+  if boardSetup then return end
+  boardSetup = true
+  quarto.doc.add_html_dependency({
+    name = 'math-exercise-variants-board', version = extensionVersion(),
+    scripts = {{path='variants-board.js',afterBody=true}},
+  })
+end
+
 local function parseOptions(raw)
   local opts, lines, source = {}, {}, {}
   for line in (raw .. "\n"):gmatch("([^\r\n]*)\n") do
@@ -796,12 +806,17 @@ local function buildExercise(el, state)
   exerciseCount = exerciseCount + 1
   local eid = "math-exercise-" .. exerciseCount
 
+  local native = dofile(quarto.utils.resolve_path('native-variants.lua'))
   local opts, questionText = parseOptions(el.text)
+  if opts['variables'] then opts, questionText = native.parseSource(el.text) end
+  if opts['parameters'] then
+    fail('math-exercise: legacy parameters syntax was removed; use variables and review the generated candidates.')
+  end
 
   -- Tests opt into native build-time checking. They are never sent to the
   -- learner runtime; exercises without tests need no native Python. The
   -- script runs them in ctm-checkers (its wheel on PYTHONPATH).
-  if not opts["parameters"] and opts["tests"] and opts["tests"]:match("%S") then
+  if not opts["variables"] and opts["tests"] and opts["tests"]:match("%S") then
     local script = quarto.utils.resolve_path("question-tests.py")
     local python = os.getenv("MATH_EXERCISE_PYTHON") or (pandoc.system.os == "mingw32" and "python" or "python3")
     opts["tests-base"] = quarto.project.directory or pandoc.path.directory(quarto.doc.input_file)
@@ -816,12 +831,17 @@ local function buildExercise(el, state)
     end
   end
 
-  local variants = dofile(quarto.utils.resolve_path("variants.lua")).generate(el.text, questionText, opts, state.review,
-    function() return ctm.checkers.environment() end)
+  local variants = opts['variables'] and native.generate(el.text, questionText, opts, ctm, lang) or nil
   if variants then opts = variants.options; opts["pool"] = "true" end
 
   local caption   = opts["caption"]   or nil
   local label     = opts["label"]     or eid
+  local questionId = label .. '-question'
+  assert(not questionId:find('%s'), 'math-exercise: question label must not contain whitespace: ' .. label)
+  state.questionIds = state.questionIds or {}
+  assert(not state.questionIds[questionId], 'math-exercise: duplicate question id: ' .. questionId)
+  state.questionIds[questionId] = true
+  local questionAttr = ' id="' .. attrEsc(questionId) .. '" class="math-exercise-question ai-feedback-context"'
   local vars      = opts["vars"]      or ""
   local mode      = opts["mode"]      or "equivalent"
   local reject    = opts["reject"]    or ""
@@ -859,6 +879,20 @@ local function buildExercise(el, state)
     initialValues = values
   end
   local isPool    = (opts["pool"]     == "true")
+  if isPool then
+    assert(ctm.variants and ctm.variants.use, 'math-exercise pools need the shared variant chooser. Update CTM Assessment.')
+    ctm.variants.use()
+  end
+  local boards = splitCsv(opts['boards'] or '')
+  if #boards > 0 then
+    assert(isPool, 'math-exercise: boards requires generated variants or a handwritten pool.')
+    local seen = {}
+    for _, id in ipairs(boards) do
+      assert(not id:find('%s') and not seen[id], 'math-exercise: boards must name distinct iframe IDs without whitespace.')
+      seen[id] = true
+    end
+    ensureVariantBoards()
+  end
   local vecdir    = opts["vecdir"] == "row" and "row" or "col"
 
   -- An exercise without a static check (custom mode without a checker) is
@@ -876,9 +910,9 @@ local function buildExercise(el, state)
       -- The question (a pool's first task, a generated exercise's first
       -- variant) without answer fields and controls, then ctm-libs' note.
       local question = variants and variants.variants[1].question or (isPool and splitTasks(questionText)[1]) or questionText
-      local body = processMarkers(question, eid, vars, vecdir, mode, true, variants ~= nil):gsub("\n", "<br>\n")
+      local body = processMarkers(question, eid, vars, vecdir, mode, true, variants ~= nil and not variants.native):gsub("\n", "<br>\n")
       local html = (caption and ('<div class="math-exercise-caption">' .. caption .. '</div>\n') or '')
-        .. '<div class="math-exercise-question">' .. body .. '</div>'
+        .. '<div' .. questionAttr .. '>' .. body .. '</div>'
       return pandoc.Div({pandoc.RawBlock("html", html), decision.note}, pandoc.Attr(eid, {"math-exercise-text"}))
     end
   end
@@ -918,9 +952,12 @@ local function buildExercise(el, state)
              .. ' data-field-labels="' .. jsonArrAttr(fieldLabels) .. '"'
              .. ' data-vecdir="' .. vecdir .. '"'
              .. ' data-feedback-policy="' .. attrEsc(quarto.json.encode(feedback.selection(el, opts))) .. '"'
+             .. ' data-variant-boards="' .. jsonArrAttr(boards) .. '"'
+             .. ' data-variant-board-title="' .. attrEsc(opts['board-title'] or '') .. '"'
              .. ' data-context-mode="' .. fc.mode .. '"'
              .. ' data-context-refs="' .. attrEsc(fc.refs) .. '"'
              .. ' data-context="'      .. attrEsc('"' .. jsonEsc(sectionText) .. '"') .. '"'
+             .. ' data-context-text="' .. jsonStrAttr(fc.mode ~= 'none' and (opts['context-text'] or '') or '') .. '"'
 
   if ctm.ui and ctm.ui.exercise then
     local saved = ctm.ui.exercise{
@@ -943,7 +980,7 @@ local function buildExercise(el, state)
     if variants then
       tasks = {}
       for _, record in ipairs(variants.variants) do tasks[#tasks+1] = record.question end
-      attrs = attrs .. ' data-variants="' .. attrEsc(quarto.json.encode(variants)) .. '"'
+      attrs = attrs .. ' data-variants="' .. attrEsc(variants.native and pandoc.json.encode(variants) or quarto.json.encode(variants)) .. '"'
     end
     local descriptors = {}
     for index, task in ipairs(tasks) do
@@ -952,7 +989,7 @@ local function buildExercise(el, state)
       -- not appear in the question. Grading options also change the revision.
       -- Keep generated stable ids; omit only the whole-definition fingerprint
       -- so reordering or adding unrelated variants preserves exact matches.
-      local content = storageContent({
+      local content = not (variants and variants.native) and storageContent({
         question = record and record.question or task,
         solution = record and record.solution or "",
         context = record and record["variant-context"] or "",
@@ -964,20 +1001,27 @@ local function buildExercise(el, state)
           checker = record and record.checker or checker, packages = packages,
           response = response, partialCredit = partialCredit, formCredit = formCredit,
           vecdir = vecdir, fieldLabels = fieldLabels}
-      })
-      local hash = pandoc.utils.sha1(content):sub(1, 16)
+      }) or nil
+      local hash = record and variants.native and record.hash or pandoc.utils.sha1(content):sub(1, 16)
       local descriptor = {id = record and record.id or ("pool:" .. hash), hash = hash}
       -- Legacy generated records have stable ids but no stable number. An
       -- invented position would mask an id match after a deployment reorder.
       descriptor.n = record and record.n or (not record and index or nil)
+      if record and variants.native then descriptor.proposal = record.proposal end
       descriptors[#descriptors + 1] = descriptor
     end
-    attrs = attrs .. ' data-storage-variants="' .. attrEsc(quarto.json.encode(descriptors)) .. '"'
-    attrs        = attrs .. ' data-pool="'   .. jsonArrAttr(tasks) .. '"'
-                         .. ' data-fields="[]"'
+    attrs = attrs .. ' data-storage-variants="' .. attrEsc(variants and variants.native and pandoc.json.encode(descriptors) or quarto.json.encode(descriptors)) .. '"'
+    if not (variants and variants.native) then
+      attrs = attrs .. ' data-pool="' .. jsonArrAttr(tasks) .. '"'
+    end
+    attrs        = attrs .. ' data-fields="[]"'
                          .. ' data-structural-field-labels="[]"'
     questionHtml = '<button type="button" class="math-pool-reload" title="' .. attrEsc(uiT("poolReloadTitle")) .. '">&#8635;</button>\n'
-                .. '<div class="math-exercise-question"></div>'
+                .. '<div' .. questionAttr .. '></div>'
+    if variants and variants.native and (variants.unapproved or variants.renderMode == 'review') then
+      local warning = variants.renderMode == 'review' and 'variantReview' or 'variantUnapproved'
+      questionHtml = '<p class="math-variant-unapproved" role="status">' .. attrEsc(uiT(warning)) .. '</p>\n' .. questionHtml
+    end
   else
     local body, fieldIds, structuralLabels = processMarkers(questionText, eid, vars, vecdir, mode)
     body         = body:gsub("\n", "<br>\n"):gsub("{{<", "{&#123;<")   -- not a shortcode
@@ -986,7 +1030,7 @@ local function buildExercise(el, state)
     -- Retain the pre-typesetting HTML, but never copy answer keys into the
     -- AI source. Inputs keep their ids so JS can insert current field labels.
     local source = body:gsub(' data%-answer="[^"]*"', '')
-    questionHtml = '<div class="math-exercise-question" data-math-exercise-source="'
+    questionHtml = '<div' .. questionAttr .. ' data-math-exercise-source="'
       .. attrEsc(source) .. '">' .. body .. '</div>'
   end
 
@@ -1120,7 +1164,25 @@ local function Pandoc(doc)
   if not quarto.doc.is_format("html") then return doc end
   if feedbackForPage then doc = ctm.feedback.prepare(doc) end
   doc.meta = Meta(doc.meta)
-  local state = { sectionCtx = {}, review = doc.meta["math-exercise-review"] == true }
+  local ids = {}
+  local function remember(el)
+    if el.identifier and el.identifier ~= '' then ids[el.identifier] = true end
+  end
+  local function rememberRaw(el)
+    if el.format ~= 'html' then return end
+    local function rememberId(id)
+      -- The HTML reader decodes character references exactly as a DOM ID.
+      local parsed = pandoc.read('<div id="' .. id:gsub('"', '&quot;') .. '">x</div>', 'html')
+      local decoded = parsed.blocks[1] and parsed.blocks[1].identifier
+      ids[decoded or id] = true
+    end
+    for quote, id in el.text:gmatch([=[%s[iI][dD]%s*=%s*(["'])(.-)%1]=]) do rememberId(id) end
+    for id in el.text:gmatch([=[%s[iI][dD]%s*=%s*([^%s"'=<>`]+)]=]) do rememberId(id) end
+  end
+  doc:walk({Header=remember,Div=remember,Span=remember,CodeBlock=remember,
+    Link=remember,Image=remember,Table=remember,Figure=remember,
+    RawBlock=rememberRaw,RawInline=rememberRaw})
+  local state = { sectionCtx = {}, review = doc.meta["math-exercise-review"] == true, questionIds=ids }
   doc.blocks = walkBlocks(doc.blocks, state)
   checkDiagramReferences(doc, state.jsxgraphRefs)
   return doc
