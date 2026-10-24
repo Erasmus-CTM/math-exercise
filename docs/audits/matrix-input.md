@@ -1,3 +1,7 @@
+> Current location (step 6): the editor now lives in ctm-libs at
+> `ui/ctm-matrix-input.{js,css}` and is registered by `ctm.matrix.use()`.
+> This audit retains its original paths as historical evidence.
+
 # Reusable matrix input audit
 
 Base: `4eaca0577249f88b9a712d4b553d92d7fedddf83`.
