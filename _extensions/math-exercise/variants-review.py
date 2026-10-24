@@ -190,7 +190,7 @@ class Review:
 
     def export_students(self, response, destination, url_prefix):
         """Export generated review sites from a tested transient history snapshot."""
-        self.component()
+        component = self.component()
         from ctm_variants import history
         from ctm_variants.model import digest
         if url_prefix != "students/" + self.label:
@@ -218,16 +218,32 @@ class Review:
         identities = [(record["id"], record["hash"]) for record in records]
         if len(set(identities)) != len(identities):
             raise ValueError("duplicate student review identity")
-        retained = {(item["record"]["id"], item["record"]["hash"]): item["record"]
-                    for item in staged["proposals"]}
-        for record in records:
-            neutral = {key: record[key] for key in ("id", "hash", "note", "snapshot", "data", "tests")}
-            if retained.get((record["id"], record["hash"])) != neutral:
-                raise ValueError("student export requires tested retained proposal records")
         def fresh():
             current = manifest_path.read_bytes() if manifest_path.exists() else None
             if source_path.read_bytes() != source_bytes or current != original_bytes:
                 raise ValueError("student export source or history changed")
+        fresh()
+        # Retained history is immutable, while reconciliation may refresh prose
+        # and presentation data without changing its mathematical identity.
+        # Validate the supplied transient response against a NEW trusted native
+        # resolution, never against old presentation bytes or tests.passed alone.
+        action = "resolve-more" if len(staged["proposals"]) > len(original["proposals"]) else "resolve"
+        request = dict(payload, version=1, action=action, projectRoot=self.project,
+            file=self.source, sourceFile=self.source, label=self.label,
+            manifest=self.manifest, approval="required", renderMode="review")
+        code, output, errors = component.supervised(
+            json.dumps(request, ensure_ascii=True, allow_nan=False).encode("utf-8"))
+        if code:
+            raise ValueError("student export current-source validation failed: "
+                + errors.decode("utf-8", "replace")[-8000:])
+        fresh()
+        trusted = json.loads(output)
+        keys = ("id", "hash", "note", "snapshot", "data", "tests")
+        neutral = lambda rows: [{key: record[key] for key in keys} for record in rows]
+        if (trusted.get("version") != 1 or trusted.get("baseHash") != lease
+                or history.validate(trusted["manifest"]) != staged
+                or neutral(trusted["records"]) != neutral(records)):
+            raise ValueError("student export records differ from fresh tested current source")
         languages = ["default"] + list(payload["options"].get("translations", {}))
         if any(language not in ("default", "en", "de", "nb") for language in languages):
             raise ValueError("unsupported student export language")
