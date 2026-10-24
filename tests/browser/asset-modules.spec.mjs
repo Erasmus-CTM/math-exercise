@@ -8,6 +8,7 @@ import {ctmLibs} from '../helpers/ctm-libs.mjs';
 // The ordinary example-site browser audit separately uses the exact CDN build.
 const assetTable = JSON.parse(readFileSync(path.join(ctmLibs, 'assets.json'), 'utf8'));
 const assetSource = readFileSync(path.join(ctmLibs, 'assets.js'), 'utf8');
+const runtimeSource = readFileSync(path.join(ctmLibs, 'runtime/pyodide-runtime.js'), 'utf8');
 const localeSource = ['ctm-locale.js', 'common.js', 'math-exercise.js']
   .map(file => readFileSync(path.join(ctmLibs, 'locales', file), 'utf8')).join('\n');
 const source = readFileSync(new URL('../../_extensions/math-exercise/math-exercise.js', import.meta.url), 'utf8');
@@ -30,7 +31,7 @@ for (const mode of ['cdn', 'local']) test(mode + ': nested-page KaTeX uses canon
   const html = '<!doctype html><link rel="icon" href="data:,"><div class="math-exercise-text"><div class="math-exercise-question">\\(a^2+b^2\\)</div></div>'
     + '<script>window.define=function(){throw Error("AMD intercepted KaTeX")};window.define.amd={};'
     + 'globalThis.CTM_ASSETS=' + JSON.stringify({v: 1, mode, bases: {katex: base}}) + ';</script>'
-    + '<script>' + escape(assetSource) + '</script><script>' + escape(localeSource) + '</script>'
+    + '<script>' + escape(assetSource) + '</script><script>' + escape(runtimeSource) + '</script><script>' + escape(localeSource) + '</script>'
     + '<script>' + escape(source) + '</script>';
   await context.route('**/*', async route => {
     const url = route.request().url();
@@ -48,6 +49,7 @@ for (const mode of ['cdn', 'local']) test(mode + ': nested-page KaTeX uses canon
   });
   try {
     await page.goto(pageURL);
+    await page.evaluate(() => MathExerciseRuntime.whenInitialUIReady());
     await expect(page.locator('.math-exercise-question .katex')).toHaveCount(1);
     await page.evaluate(async () => { await document.fonts.ready; });
     expect(await page.evaluate(() => CTMAssets.url('katex', 'dist/katex.mjs'))).toBe(absolute + 'dist/katex.mjs');

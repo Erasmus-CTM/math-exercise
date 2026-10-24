@@ -14,8 +14,8 @@ local function html(source, markers)
   end
   local doc = pandoc.read(source, 'markdown'):walk({Math = function(m)
     return pandoc.Span({m}, pandoc.Attr('', {}, {
-      ['data-ai-feedback-tex'] = m.text,
-      ['data-ai-feedback-display'] = m.mathtype == 'DisplayMath' and 'true' or 'false'
+      {'data-ai-feedback-tex', m.text},
+      {'data-ai-feedback-display', m.mathtype == 'DisplayMath' and 'true' or 'false'}
     }))
   end})
   local result = pandoc.write(doc, 'html', {html_math_method='mathjax', wrap_text='none'}):gsub('\n', ' ')
