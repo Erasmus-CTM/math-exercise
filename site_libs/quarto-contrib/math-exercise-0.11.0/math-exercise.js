@@ -55,14 +55,17 @@
   var katexReady = false;
   var katexLib = null;
   var renderMathInElementFn = null;
-  var KATEX = 'https://cdn.jsdelivr.net/npm/katex@0.16/';
-
   async function ensureKatex() {
     if (katexReady) return;
+    var KATEX = window.CTMAssets.url('katex', '');
     var link = document.createElement('link');
     link.rel = 'stylesheet'; link.href = KATEX + 'dist/katex.min.css';
+    var stylesheet = new Promise(function (resolve, reject) {
+      link.onload = resolve;
+      link.onerror = function () { reject(new Error('Failed to load: ' + link.href)); };
+    });
     document.head.appendChild(link);
-    // Loaded as ES modules (jsDelivr's `+esm` build), not classic <script>
+    // Load the package's own ES modules in both asset modes, not classic <script>
     // tags. Reason: KaTeX's classic UMD bundles register themselves through
     // Monaco's global AMD loader (vs/loader.js, injected here for the code
     // editor) instead of setting window.katex / window.renderMathInElement,
@@ -72,8 +75,12 @@
     // of racing Monaco's own concurrent module loads (a "temporarily hide
     // define.amd" workaround was tried first and broke Monaco's lazily
     // loaded markdown renderer for hover tooltips).
-    var katexMod      = await import(KATEX + '+esm');
-    var autoRenderMod = await import(KATEX + 'contrib/auto-render/+esm');
+    var modules = await Promise.all([
+      import(KATEX + 'dist/katex.mjs'),
+      import(KATEX + 'dist/contrib/auto-render.mjs'),
+      stylesheet
+    ]);
+    var katexMod = modules[0], autoRenderMod = modules[1];
     katexLib = katexMod.default;
     renderMathInElementFn = autoRenderMod.default;
     katexReady = true;
@@ -172,7 +179,8 @@
   var LEGEND = L.legend;
 
   async function buildLegend(container) {
-    await ensureKatex();
+    try { await ensureKatex(); }
+    catch (error) { console.warn('math-exercise: showing input help without mathematical formatting', error); }
     var rows = LEGEND.map(function (item) {
       var math;
       try { math = katexLib.renderToString(item[0], { throwOnError: false }); }
@@ -1053,6 +1061,9 @@
       }
     }
 
+    var storedAnswers = null;
+    var storageVariants = JSON.parse(cell.dataset.storageVariants || '[]');
+    function storedVariant() { return storageVariants[idx] || null; }
     var generated = cell.dataset.variants ? JSON.parse(cell.dataset.variants) : null;
     function currentVariant() {
       if (!generated) return null;
@@ -1195,6 +1206,7 @@
         input.classList.remove('math-input-ok', 'math-input-dependent', 'math-input-partial', 'math-input-wrong', 'math-input-err');
       });
       fbDiv.innerHTML = '';
+      if (storedAnswers) storedAnswers.changed();
     }
 
     function setupDynamicMatrices() {
@@ -1323,6 +1335,7 @@
           else
             parts.push('<div class="math-fb-err">&#9888;&nbsp;' + friendlyError(custom.message) + '</div>');
           fbDiv.innerHTML = parts.join('');
+          publishStoredResult([safeResult(custom)]);
           return;
         }
         var totalScore = 0;
@@ -1350,8 +1363,10 @@
         }
         checkedEvidence = { snapshot: checkSnapshot, results: results };
         fbDiv.innerHTML = parts.join('');
+        publishStoredResult(results.map(function (item) { return item.result; }));
       } catch (err) {
         fbDiv.innerHTML = '<div class="math-fb-err">&#9888;&nbsp;' + friendlyError(String(err)) + '</div>';
+        if (storedAnswers) storedAnswers.result({status: 'invalid', score: 0});
       } finally {
         reloadHooks.delete(onReload);
         cancelSlow();
@@ -1360,6 +1375,20 @@
         checkBtn.disabled = false;
         if (feedbackBtn) feedbackBtn.disabled = !feedbackHandle;
       }
+    }
+
+    function publishStoredResult(results) {
+      if (!storedAnswers) return;
+      var invalid = !results.length || results.some(function (result) {
+        return !/^(correct|partial|incorrect)$/.test(result.status);
+      });
+      var score = invalid ? 0 : results.reduce(function (sum, result) {
+        return sum + (typeof result.score === 'number' ? result.score : result.status === 'correct' ? 1 : 0);
+      }, 0) / results.length;
+      if (!checkOpts.partialCredit && mode !== 'custom' && score < 1) score = 0;
+      var status = invalid ? 'invalid' : score >= 1 ? 'correct' : score > 0 ? 'partial' : 'wrong';
+      if (!invalid && mode === 'custom') status = results[0].status === 'incorrect' ? 'wrong' : results[0].status;
+      storedAnswers.result({status: status, score: score});
     }
 
     function attachKeyListeners() {
@@ -1403,8 +1432,10 @@
       rememberCurrentLabels(); setupDynamicMatrices(); fillInitialValues(); warnExtraFieldLabels();
       renderMathInQuestion(questionDiv); attachKeyListeners(); fbDiv.innerHTML = '';
       publishVariant();
+      if (storedAnswers) storedAnswers.changed();
     }
     if (reloadBtn && poolTasks) reloadBtn.addEventListener('click', function () {
+      if (storedAnswers && !storedAnswers.beforeVariant()) return;
       var next = idx;
       if (poolTasks.length > 1) next = (idx + 1 + Math.floor(Math.random() * (poolTasks.length - 1))) % poolTasks.length;
       selectTask(next);
@@ -1429,6 +1460,26 @@
       };
       publishVariant();
       if(generated.review) setupVariantReview(cell, generated);
+    }
+
+    if (window.MathExerciseStore) {
+      storedAnswers = window.MathExerciseStore.attach({
+        element: cell, question: questionDiv, id: cell.dataset.ctmId || label, lang: ME_CFG.lang,
+        graphical: !!checkOpts.responseSource, variant: storedVariant,
+        variants: function () { return storageVariants; },
+        fields: function () {
+          refreshFields();
+          return fieldIds.map(function (id, index) {
+            return {element: document.getElementById(id), label: fieldLabel(index),
+              key: typeof configuredFieldLabels[index] === 'string' ? configuredFieldLabels[index].trim() : ''};
+          });
+        },
+        select: function (variant) {
+          var next = storageVariants.findIndex(function (item) { return item.hash === variant.hash; });
+          if (next >= 0 && next !== idx) selectTask(next);
+        },
+        invalidate: clearAssessmentAfterResize
+      });
     }
 
     // ---- Shared AI Feedback adapter: collection never invokes Python ----
@@ -1520,22 +1571,35 @@
     };
   }
 
-  document.addEventListener('DOMContentLoaded', async function () {
+  var initialUI = new Promise(function (resolve) {
+    document.addEventListener('DOMContentLoaded', resolve, {once: true});
+  }).then(async function () {
     var cells = document.querySelectorAll('.math-exercise-cell');
     // Exercises shown as text (a build without AI feedback) only need their maths.
     var texts = document.querySelectorAll('.math-exercise-text .math-exercise-question');
     if (!cells.length && !texts.length) return;
-    // KaTeX rendering must not depend on Pyodide: Pyodide is only needed lazily
-    // on the first Check click (ensureSympy()), but if ensurePyodide() rejects
-    // (slow/broken network, no other Pyodide extension on the page), a shared
-    // Promise.all would previously also block/kill math rendering entirely.
-    await ensureKatex();
-    texts.forEach(renderMathInQuestion);
-    if (!cells.length) return;
+    // Install answer, Check and storage handlers independently of the optional
+    // renderer. A slow/broken stylesheet or module must not disable grading.
     cells.forEach(setupCell);
-    ensurePyodide().catch(function (e) {
+    if (cells.length) ensurePyodide().catch(function (e) {
       console.warn('math-exercise: Pyodide preload failed (will retry on the first check):', e);
     });
+    try { await ensureKatex(); }
+    catch (error) {
+      cells.forEach(function (cell) {
+        var warning = document.createElement('p');
+        warning.className = 'math-render-unavailable';
+        warning.setAttribute('role', 'status');
+        warning.textContent = L.renderUnavailable;
+        cell.appendChild(warning);
+      });
+      // Keep the readiness failure visible to the reload decision; the working
+      // controls above remain available in the retained document.
+      throw error;
+    }
+    texts.forEach(renderMathInQuestion);
+    cells.forEach(function (cell) { renderMathInQuestion(cell); });
   });
+  globalThis.MathExerciseRuntime.trackInitialUI(initialUI);
 
 })();

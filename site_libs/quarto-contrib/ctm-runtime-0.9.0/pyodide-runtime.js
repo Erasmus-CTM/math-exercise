@@ -5,9 +5,57 @@
 (function (root) {
   'use strict';
 
-  // An older copy (another component's release) may have loaded first; a
-  // copy with the current interface replaces it (shared state lives on root).
-  if (root.MathExerciseRuntime && typeof root.MathExerciseRuntime.ensureCheckers === 'function') return;
+  // Register initial component UI work synchronously, before window.load.
+  // The work must not wait for Python or authored startup cells: the COI
+  // decision can hold Python startup until this UI is safe to leave.
+  var initialUI = [], initialUIClosed = false, initialUIReady = null;
+  if (typeof document !== 'undefined') {
+    initialUIClosed = document.readyState === 'complete';
+    if (!initialUIClosed) root.addEventListener('load', function () { initialUIClosed = true; }, {once: true});
+  }
+  function trackInitialUI(promise) {
+    if (initialUIClosed) throw new Error('Initial UI work must be registered before window.load');
+    // Observe failures immediately, before load, without an unhandled race.
+    // Keep them visible even when no COI reload is needed, and make the
+    // barrier reject with the original error rather than call failed UI ready.
+    initialUI.push(Promise.resolve(promise).then(function () { return null; }, function (error) {
+      console.error('CTM: initial UI failed', error);
+      return {error: error};
+    }));
+    return promise;
+  }
+  function whenInitialUIReady() {
+    if (initialUIReady) return initialUIReady;
+    initialUIReady = (async function () {
+      if (typeof document === 'undefined') return;
+      if (document.readyState !== 'complete') {
+        await new Promise(function (resolve) { root.addEventListener('load', resolve, {once: true}); });
+      }
+      // load dispatch finishes before this continuation. Initial component
+      // modules have registered all their asynchronous UI work by then.
+      initialUIClosed = true;
+      var results = await Promise.all(initialUI);
+      var failed = results.find(function (result) { return result; });
+      if (failed) throw failed.error;
+      if (root.MathJax && root.MathJax.startup && root.MathJax.startup.promise) {
+        await root.MathJax.startup.promise;
+      }
+      // Typesetting/editor construction can discover fonts after load.
+      if (document.fonts) await document.fonts.ready;
+    })();
+    return initialUIReady;
+  }
+
+  // Preserve an already-loaded runtime's live state; add only the readiness
+  // contract when an older component copy did not provide it.
+  if (root.MathExerciseRuntime && typeof root.MathExerciseRuntime.ensureCheckers === 'function') {
+    if (typeof root.MathExerciseRuntime.trackInitialUI !== 'function' ||
+        typeof root.MathExerciseRuntime.whenInitialUIReady !== 'function') {
+      root.MathExerciseRuntime.trackInitialUI = trackInitialUI;
+      root.MathExerciseRuntime.whenInitialUIReady = whenInitialUIReady;
+    }
+    return;
+  }
 
   // This script's own URL (on a page), for workers that load the runtime
   // themselves with importScripts.
@@ -15,10 +63,15 @@
     ? document.currentScript.src : undefined;
 
   var indexURL = 'https://cdn.jsdelivr.net/pyodide/v0.28.3/full/';
+  // Keep the line above as the single version source for Lua and the builder.
+  // Resolve lazily: Quarto can emit the page configuration after dependency tags.
+  function selectedIndexURL() {
+    return root.CTMAssets && typeof root.CTMAssets.url === 'function' ? root.CTMAssets.url('pyodide') : indexURL;
+  }
   var LOAD_TIMEOUT = root.__qExercisePyodideTimeout || 180000; // override for tests
 
   function loadScript(src) {
-    if (src === indexURL + 'pyodide.js' && typeof root.loadPyodide === 'function') {
+    if (src === selectedIndexURL() + 'pyodide.js' && typeof root.loadPyodide === 'function') {
       return Promise.resolve();
     }
 
@@ -98,10 +151,11 @@
     // worker. Install the promise before either extension can start another.
     if (!root.__qExercisePyodide) {
       root.__qExercisePyodide = (async function () {
-        await loadScript(indexURL + 'pyodide.js');
+        var selected = selectedIndexURL();
+        await loadScript(selected + 'pyodide.js');
         // A failed WebAssembly download leaves loadPyodide() pending forever;
         // give up after LOAD_TIMEOUT so that a later attempt can start again.
-        return withLoadLimit(root.loadPyodide({ indexURL: indexURL }));
+        return withLoadLimit(root.loadPyodide({ indexURL: selected }));
       })();
     }
     var pending = root.__qExercisePyodide;
@@ -435,10 +489,12 @@
   }
 
   root.MathExerciseRuntime = {
-    indexURL: indexURL,
+    get indexURL() { return selectedIndexURL(); },
     loadTimeout: LOAD_TIMEOUT,
     loadScript: loadScript,
     ensurePyodide: ensurePyodide,
+    trackInitialUI: trackInitialUI,
+    whenInitialUIReady: whenInitialUIReady,
     scriptURL: scriptURL,
     installModule: installModule,
     forgetModules: forgetModules,

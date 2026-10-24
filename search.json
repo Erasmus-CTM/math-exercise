@@ -4,7 +4,7 @@
     "href": "generated-variants.html",
     "title": "Build-time variants",
     "section": "",
-    "text": "Each problem below is a separate included QMD. Review is enabled only on this author page. Ordinary course pages can include the same files without math-exercise-review: true. Use Run all authored tests, inspect a variant, and Copy selection to replace selection options in its source file."
+    "text": "Your answers are saved only in this browser.Delete answers on this page\nDelete all your answers in this course\nDo not save on this device\nExport my answers\nEach problem below is a separate included QMD. Review is enabled only on this author page. Ordinary course pages can include the same files without math-exercise-review: true. Use Run all authored tests, inspect a variant, and Copy selection to replace selection options in its source file."
   },
   {
     "objectID": "generated-variants.html#expression-answers",
@@ -46,7 +46,7 @@
     "href": "examples.html",
     "title": "math-exercise – Overview of All Check Modes",
     "section": "",
-    "text": "This page briefly introduces and lets you try out every check mode of the math-exercise extension. See the README for full option details."
+    "text": "Your answers are saved only in this browser.Delete answers on this page\nDelete all your answers in this course\nDo not save on this device\nExport my answers\nThis page briefly introduces and lets you try out every check mode of the math-exercise extension. See the README for full option details."
   },
   {
     "objectID": "examples.html#mode-equivalent-default",
@@ -200,7 +200,7 @@
     "href": "dynamic-matrix-tests.html",
     "title": "Dynamic matrix input",
     "section": "",
-    "text": "A dynamic matrix lets the student decide how many rows or columns the answer needs. This is useful when finding the size is part of the mathematics—for example, when the dimension of a subspace is not given in advance."
+    "text": "Your answers are saved only in this browser.Delete answers on this page\nDelete all your answers in this course\nDo not save on this device\nExport my answers\nA dynamic matrix lets the student decide how many rows or columns the answer needs. This is useful when finding the size is part of the mathematics—for example, when the dimension of a subspace is not given in advance."
   },
   {
     "objectID": "dynamic-matrix-tests.html#bases-with-an-unknown-number-of-vectors",
@@ -228,7 +228,7 @@
     "href": "sympy-examples.html",
     "title": "Expressions and equivalence",
     "section": "",
-    "text": "TipEntering answers\n\n\n\nType answers in the empty fields, then select Check. Use * for multiplication, ^ for powers, and parentheses to make grouping clear. Common forms include sqrt(2), sin(x), exp(x), and pi. Enter an exact value unless the question asks for a decimal approximation. Algebraically equivalent expressions are normally accepted; when a particular form is required, the question says so. Input help shows the full notation reference.\nThese exercises show how mathematical equivalence and answer-format requirements work. Unless the question requests a particular form or a numerical approximation, any algebraically equivalent expression is accepted. For example, 2*(x+1) and 2*x+2 represent the same answer."
+    "text": "Your answers are saved only in this browser.Delete answers on this page\nDelete all your answers in this course\nDo not save on this device\nExport my answers\nThese exercises show how mathematical equivalence and answer-format requirements work. Unless the question requests a particular form or a numerical approximation, any algebraically equivalent expression is accepted. For example, 2*(x+1) and 2*x+2 represent the same answer."
   },
   {
     "objectID": "sympy-examples.html#polynomial-algebra",
@@ -298,7 +298,7 @@
     "href": "custom-assessment.html",
     "title": "Open-ended and custom assessment",
     "section": "",
-    "text": "TipEntering answers\n\n\n\nType answers in the empty fields, then select Check. Use * for multiplication, ^ for powers, and parentheses to make grouping clear. Common forms include sqrt(2), sin(x), exp(x), and pi. Enter an exact value unless the question asks for a decimal approximation. Algebraically equivalent expressions are normally accepted; when a particular form is required, the question says so. Input help shows the full notation reference.\nThese tasks accept a family of valid answers rather than one predetermined expression. A trusted, instructor-authored checker evaluates the complete response and can award partial credit.\nFor authors, mode: custom provides the checker with the parsed expressions and declared symbols. The collapsed source below each example shows the complete Python/SymPy checker and its feedback rules."
+    "text": "Your answers are saved only in this browser.Delete answers on this page\nDelete all your answers in this course\nDo not save on this device\nExport my answers\nThese tasks accept a family of valid answers rather than one predetermined expression. A trusted, instructor-authored checker evaluates the complete response and can award partial credit.\nFor authors, mode: custom provides the checker with the parsed expressions and declared symbols. The collapsed source below each example shows the complete Python/SymPy checker and its feedback rules."
   },
   {
     "objectID": "custom-assessment.html#assess-a-mathematical-property",
@@ -340,7 +340,7 @@
     "href": "basic-features.html",
     "title": "Basic exercise features",
     "section": "",
-    "text": "TipEntering answers\n\n\n\nType answers in the empty fields, then select Check. Use * for multiplication, ^ for powers, and parentheses to make grouping clear. Common forms include sqrt(2), sin(x), exp(x), and pi. Enter an exact value unless the question asks for a decimal approximation. Algebraically equivalent expressions are normally accepted; when a particular form is required, the question says so. Input help shows the full notation reference.\nThese examples introduce the main exercise controls: one or several answer fields, required answer forms, text answers, partial credit, collapsible tasks, and pools of alternative questions."
+    "text": "Your answers are saved only in this browser.Delete answers on this page\nDelete all your answers in this course\nDo not save on this device\nExport my answers\nThese examples introduce the main exercise controls: one or several answer fields, required answer forms, text answers, partial credit, collapsible tasks, and pools of alternative questions."
   },
   {
     "objectID": "basic-features.html#a-single-answer-field",
@@ -410,7 +410,7 @@
     "href": "ai-feedback.html",
     "title": "AI feedback",
     "section": "",
-    "text": "TipEntering answers\n\n\n\nType answers in the empty fields, then select Check. Use * for multiplication, ^ for powers, and parentheses to make grouping clear. Common forms include sqrt(2), sin(x), exp(x), and pi. Enter an exact value unless the question asks for a decimal approximation. Algebraically equivalent expressions are normally accepted; when a particular form is required, the question says so. Input help shows the full notation reference.\nA useful hint connects a student’s attempt to the idea you have just taught. Try these activities to see how a lesson explanation can guide the advice. Check tests the answer; Feedback helps the student decide what to try next."
+    "text": "Your answers are saved only in this browser.Delete answers on this page\nDelete all your answers in this course\nDo not save on this device\nExport my answers\nA useful hint connects a student’s attempt to the idea you have just taught. Try these activities to see how a lesson explanation can guide the advice. Check tests the answer; Feedback helps the student decide what to try next."
   },
   {
     "objectID": "ai-feedback.html#automatic-section-context",
@@ -459,7 +459,7 @@
     "href": "graphics-examples.html",
     "title": "Graphical answers with JSXGraph",
     "section": "",
-    "text": "These exercises are answered directly in the plots. After placing points, moving handles, or drawing a curve, open the exercise heading below the plot and select Check. The collapsed source panels show authors how each JSXGraph plot and its answer checker are defined."
+    "text": "Your answers are saved only in this browser.Delete answers on this page\nDelete all your answers in this course\nDo not save on this device\nExport my answers\nThese exercises are answered directly in the plots. After placing points, moving handles, or drawing a curve, open the exercise heading below the plot and select Check. The collapsed source panels show authors how each JSXGraph plot and its answer checker are defined."
   },
   {
     "objectID": "graphics-examples.html#click-every-local-maximum",
@@ -515,7 +515,7 @@
     "href": "vector-matrix-tests.html",
     "title": "Vektorer og matriser",
     "section": "",
-    "text": "Her skriver du vektorer og matriser direkte i ferdig oppstilte svarfelt. Hver komponent eller matriseinngang har sitt eget felt. Fyll inn alle feltene og trykk Sjekk."
+    "text": "Svarene dine lagres bare i denne nettleseren.Slett svarene på denne siden\nSlett alle svarene dine i dette emnet\nIkke lagre på denne enheten\nEksporter svarene mine\nHer skriver du vektorer og matriser direkte i ferdig oppstilte svarfelt. Hver komponent eller matriseinngang har sitt eget felt. Fyll inn alle feltene og trykk Sjekk."
   },
   {
     "objectID": "vector-matrix-tests.html#grunnleggende-vektorer",
@@ -557,7 +557,7 @@
     "href": "graph-theory.html",
     "title": "Graph theory constructions",
     "section": "",
-    "text": "These exercises use the shared JXG.QuartoGraphEditor API. Click Show controls on any canvas for a reminder of the interactions. Every graph is converted from the editor’s JSON response into a validated NetworkX graph by the shared graph_from_response(...) checker helper. See the graph-editor API reference for authoring details."
+    "text": "Your answers are saved only in this browser.Delete answers on this page\nDelete all your answers in this course\nDo not save on this device\nExport my answers\nThese exercises use the shared JXG.QuartoGraphEditor API. Click Show controls on any canvas for a reminder of the interactions. Every graph is converted from the editor’s JSON response into a validated NetworkX graph by the shared graph_from_response(...) checker helper. See the graph-editor API reference for authoring details."
   },
   {
     "objectID": "graph-theory.html#construct-a-tree",
@@ -592,7 +592,7 @@
     "href": "example.html",
     "title": "Practise keeping an equation balanced",
     "section": "",
-    "text": "Try an answer, choose Check, and use Feedback if you need a next step. Open the source beneath the activity to change the equation for your students.\nFeedback prepares a message to paste into an AI chat. If your course has feedback set up on the page, you can receive the reply here instead."
+    "text": "Your answers are saved only in this browser.Delete answers on this page\nDelete all your answers in this course\nDo not save on this device\nExport my answers\nTry an answer, choose Check, and use Feedback if you need a next step. Open the source beneath the activity to change the equation for your students.\nFeedback prepares a message to paste into an AI chat. If your course has feedback set up on the page, you can receive the reply here instead."
   },
   {
     "objectID": "example.html#solve-an-equation",
