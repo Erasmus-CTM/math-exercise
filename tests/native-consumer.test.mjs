@@ -1,3 +1,4 @@
+import {matrixInputSource} from './helpers/ctm-libs.mjs';
 // Actual component DOM/store/transport; the grader boundary is explicitly a
 // stub. One bounded captured-packet test calls the canonical installed native
 // wheel; this does not claim Pyodide bootstrap or browser-engine acceptance.
@@ -55,7 +56,7 @@ function page({records=[record(),record(1)],local={},session={},query='?variant=
  let runtime=0;const requests=[],tracked=[];const py={loadPackage:async()=>{}};
  w.MathExerciseRuntime={trackInitialUI(p){tracked.push(p);p.catch(()=>{});},ensurePyodide:async()=>{runtime++;return py;},ensureGuard:async()=>{},ensureCheckers:async()=>{},stopCount:()=>0,whenSlow:()=>()=>{},
  callCheckers:async(_py,name,request)=>{requests.push({name,request:plain(request)});return JSON.stringify({status:'correct',score:1});}};
- w.eval(own('matrix-input.js'));w.eval(own('math-store.js'));w.eval(own('math-exercise.js'));
+ w.eval(matrixInputSource);w.eval(own('math-store.js'));w.eval(own('math-exercise.js'));
  const element=w.document.getElementById('cell');const boardCalls=[],boardTitles=[];
  if(canonicalPayloadOnly)delete element.dataset.pool;
  if(review){const payload=JSON.parse(element.dataset.variants);payload.renderMode='review';element.dataset.variants=JSON.stringify(payload);element.insertAdjacentHTML('afterbegin','<p class="math-variant-unapproved">Review warning</p>');}

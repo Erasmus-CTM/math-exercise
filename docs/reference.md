@@ -1012,7 +1012,10 @@ inherit; `steps` replaces the entire list. See the
 [shared policy guide](https://github.com/Erasmus-CTM/ctm-libs/blob/main/docs/feedback-policies.md).
 # Reusable matrix-input API
 
-`_extensions/math-exercise/matrix-input.js` and `matrix-input.css` expose the
+The editor has one shared home in ctm-libs. The Lua filter calls
+`ctm.matrix.use()` to register its scripts and styles once per page.
+
+`_extensions/ctm-libs/ui/ctm-matrix-input.js` and `ctm-matrix-input.css` expose the
 existing dynamic editor independently of the exercise runtime, Python checker,
 and AI feedback. Include both assets and use the classic browser global:
 

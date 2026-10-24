@@ -1,9 +1,10 @@
+import {matrixInputSource} from './helpers/ctm-libs.mjs';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import { JSDOM } from 'jsdom';
 
-const source = readFileSync(new URL('../_extensions/math-exercise/matrix-input.js', import.meta.url), 'utf8');
+const source = matrixInputSource;
 const spec = {name:'A',rows:{auto:true,initial:2,min:1,max:3},cols:{auto:true,initial:2,min:1,max:3}};
 function editor() {
   const dom = new JSDOM('<body></body>', {runScripts:'outside-only'});

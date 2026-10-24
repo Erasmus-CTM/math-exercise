@@ -199,7 +199,7 @@ test('scripts and styles are cacheable dependencies: once per page, the runtime 
     const page = html(dir);
     const order = ['ctm-runtime-[\\d.]+/pyodide-runtime\\.js', 'ctm-checkers-[\\w.+]+/ctm-checkers\\.js', 'ctm-locale-[\\d.]+/ctm-locale\\.js',
       'ctm-locale-math-exercise-[\\d.]+/math-exercise\\.js',
-      'math-exercise-[\\d.]+/matrix-input\\.js', 'math-exercise-[\\d.]+/math-exercise\\.js'].map(file => {
+      'ctm-matrix-input-[\\d.]+/ctm-matrix-input\\.js', 'math-exercise-[\\d.]+/math-exercise\\.js'].map(file => {
       const found = [...page.matchAll(new RegExp('<script src="[^"]*/' + file + '"></script>', 'g'))];
       assert.equal(found.length, 1, file);
       return found[0].index;
@@ -211,6 +211,18 @@ test('scripts and styles are cacheable dependencies: once per page, the runtime 
     assert.match(page, /math-check-btn">✓&nbsp;Sjekk</);
     for (const src of page.matchAll(/<(?:script src|link href)="([^"]*quarto-contrib[^"]*)"/g)) assert.ok(existsSync(join(dir, src[1])), src[1]);
   } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('an older library without the shared matrix editor stops with its update command', {skip}, () => {
+  const dir = project();
+  try {
+    rmSync(join(dir, '_extensions/ctm-libs/lua/matrix.lua'));
+    const result = render(dir, 'filters: [math-exercise]\nmath-exercise:\n  feedback: false\n', plain);
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /math-exercise needs the shared matrix editor/);
+    assert.match(result.stderr, /Update CTM Assessment: quarto add https:\/\/erasmus-ctm.github.io\/ctm-assessment\/ctm-assessment.tar.gz/);
+    assert.doesNotMatch(result.stderr, /attempt to index/);
+  } finally { rmSync(dir, {recursive: true, force: true}); }
 });
 
 test('graphical answers name the missing JSXGraph extension or diagram', { skip }, () => {

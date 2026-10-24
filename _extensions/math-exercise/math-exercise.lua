@@ -192,12 +192,15 @@ local function ensureSetup()
   ctm.runtime.use()
   ctm.checkers.use()
   ctm.locale.use("math-exercise")
+  if not ctm.matrix or type(ctm.matrix.use) ~= "function" then
+    ctm.fail("math-exercise needs the shared matrix editor. Update CTM Assessment: " .. INSTALL)
+  end
+  ctm.matrix.use()
   quarto.doc.add_html_dependency({
     name = "math-exercise",
     version = extensionVersion(),
-    stylesheets = {"matrix-input.css", "math-exercise.css"},
+    stylesheets = {"math-exercise.css"},
     scripts = {
-      {path = "matrix-input.js", afterBody = true},
       {path = "math-store.js", afterBody = true},
       {path = "math-exercise.js", afterBody = true},
     },

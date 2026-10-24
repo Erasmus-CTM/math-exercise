@@ -18,8 +18,8 @@ print(json.dumps([question_context(['Answer'],{'a':Rational(1,3)},{'Answer':Rati
 assert.equal(result.status,0,result.stderr);const contexts=JSON.parse(result.stdout);
 const esc=v=>String(v).replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;');
 const record=i=>{const context=structuredClone(contexts[i]),v=context.variant;return {n:v?.n??null,id:v?.id||'proposal-one',hash:v?.hash||'c'.repeat(16),proposal:!v,status:v?'approved':'undecided',context,question:'**Find** <b>literal</b>: _[2/3]',checker:'def check(response, symbols): return True',solution:'Teacher solution','variant-context':'Authored context only'};};
-const libs=['assets.js','locales/ctm-locale.js','locales/common.js','locales/ui.js','locales/math-exercise.js','ui/ctm-layout.js','ui/ctm-store.js','ui/variants.js'];
-const components=['matrix-input.js','math-store.js','math-exercise.js'];
+const libs=['assets.js','locales/ctm-locale.js','locales/common.js','locales/ui.js','locales/math-exercise.js','ui/ctm-layout.js','ui/ctm-store.js','ui/variants.js','ui/ctm-matrix-input.js'];
+const components=['math-store.js','math-exercise.js'];
 const hashes={};for(const [base,files]of [[ctmLibs,libs],[own,components]])for(const f of files)hashes[f]=createHash('sha256').update(readFileSync(join(base,f))).digest('hex');
 function html(which){let records=which==='proposal'?[record(2)]:which==='withdrawn'?[record(1)]:[record(0),record(1)];if(which==='changed'){records[0].hash='d'.repeat(16);records[0].context.variant.hash=records[0].hash;}
 const generated={native:true,version:1,variants:records,approval:'required',renderMode:which==='proposal'?'review':'publish'};

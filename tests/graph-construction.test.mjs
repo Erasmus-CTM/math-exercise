@@ -1,3 +1,4 @@
+import {matrixInputSource} from './helpers/ctm-libs.mjs';
 import { sharedTestApi } from './helpers/shared-client.mjs';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
@@ -52,7 +53,7 @@ function loadBundle(loadPackage) {
   context.addEventListener = () => {};
   runInContext(context, RUNTIME);
   runInContext(context, LOCALE);
-  vm.runInContext(readFileSync(new URL('../_extensions/math-exercise/matrix-input.js', import.meta.url), 'utf8'), context);
+  vm.runInContext(matrixInputSource, context);
   vm.runInContext(source, context);
   return {...context.window.__mathExerciseTestApi, ...sharedTestApi(context.AIFeedback, context.window.__mathExerciseConfig.lang, context.localStorage)};
 }
