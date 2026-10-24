@@ -171,6 +171,13 @@ local function requireCheckers()
   ctm.checkers.require("math-exercise", 1)
 end
 
+local function requireAssets()
+  if type(ctm.assets) ~= "table" or type(ctm.assets.use) ~= "function"
+      or type(ctm.assets.mode) ~= "function" or type(ctm.assets.url) ~= "function" then
+    ctm.fail("math-exercise needs the shared assets API. Update CTM Assessment: " .. INSTALL)
+  end
+end
+
 -- Scripts and styles as cacheable HTML dependencies, once per page: ctm-libs'
 -- Python runtime (MathExerciseRuntime), ctm-checkers' page script and the
 -- message catalogue (CTMLocales) in the head, then this extension's styles,
@@ -180,6 +187,8 @@ local function ensureSetup()
   if hasSetup then return end
   hasSetup = true
   requireCheckers()
+  requireAssets()
+  ctm.assets.use()
   ctm.runtime.use()
   ctm.checkers.use()
   ctm.locale.use("math-exercise")
@@ -822,6 +831,7 @@ local function buildExercise(el, state)
   local form      = opts["form"]      or ""
   local checker   = opts["checker"]   or ""
   local packages  = splitCsv(opts["packages"] or "")
+  dofile(quarto.utils.resolve_path("author-imports.lua"))(ctm, checker, packages, label, variants)
   local response  = opts["response"]  or ""
   local diagramRefs = {}
   for ref in ((response .. "," .. (opts["context"] or "") .. "," .. (opts["feedback-context"] or "")):gmatch("jsxgraph:([^,%s\"']+)")) do
@@ -1085,11 +1095,14 @@ end
 -- without the extension, and decide whether the page needs AI feedback.
 local function preparePage(doc)
   if not quarto.doc.is_format("html") then return doc end
+  local exercises = false
+  doc.blocks:walk({ CodeBlock = function(b) if b.classes:includes("{math-exercise}") then exercises = true end end })
+  -- A partial/older API3 library must name the missing capability before a
+  -- local settings preflight can obscure the package update diagnostic.
+  if exercises then requireAssets() end
   ctm.settings.load(doc.meta)
   local setting, origin = ctm.settings.choice("math-exercise", "feedback", {"auto", "true", "false"}, {default = "auto"})
   ctm.deps.requireUsed(doc, "math-exercise")
-  local exercises = false
-  doc.blocks:walk({ CodeBlock = function(b) if b.classes:includes("{math-exercise}") then exercises = true end end })
   feedbackWanted = setting ~= "false"
   local wanted = exercises and feedbackWanted
   if setting == "true" then

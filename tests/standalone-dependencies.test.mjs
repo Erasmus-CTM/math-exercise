@@ -168,6 +168,29 @@ test('a build without AI feedback has no Feedback button; feedback: true is name
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
+test('an API3 library without the assets capability stops with its update command in either mode', { skip }, () => {
+  for (const mode of ['cdn', 'local']) for (const capability of ['missing', 'boolean', 'invalid']) {
+    const dir = project();
+    try {
+      const library = join(dir, '_extensions/ctm-libs');
+      assert.match(readFileSync(join(library, 'lua/ctm.lua'), 'utf8'), /api = 3/);
+      // Reproduce an API3 installation without the new capability, using its
+      // actual module loader and the real component's Quarto filter passes.
+      if (capability === 'missing') rmSync(join(library, 'lua/assets.lua'));
+      else writeFileSync(join(library, 'lua/assets.lua'), capability === 'boolean' ? 'return function() return true end\n' : 'return function() return {use = true} end\n');
+      const settings = join(library, 'lua/settings.lua');
+      writeFileSync(settings, readFileSync(settings, 'utf8').replace('function M.load(meta)', 'function M.load(meta)\nerror("META SETTINGS TRIPWIRE")'));
+      const result = render(dir, 'filters: [math-exercise]\nctm-assessment:\n  assets: ' + mode + '\nmath-exercise:\n  feedback: false\n', plain);
+      assert.notEqual(result.status, 0, mode + ': an absent capability must stop the render');
+      assert.match(result.stderr, /math-exercise needs the shared assets API/);
+      assert.match(result.stderr, /Update CTM Assessment: quarto add https:\/\/erasmus-ctm.github.io\/ctm-assessment\/ctm-assessment.tar.gz/);
+      assert.doesNotMatch(result.stderr, /attempt to index|local asset manifest is missing|META SETTINGS TRIPWIRE/);
+    } finally {
+      rmSync(dir, {recursive: true, force: true});
+    }
+  }
+});
+
 test('scripts and styles are cacheable dependencies: once per page, the runtime and catalogue before the exercise scripts', { skip }, () => {
   const dir = project();
   try {
@@ -234,8 +257,12 @@ test('Check grades with the page\'s own scripts and no AI feedback on the page (
     // ctm-checkers' install, the check (ctm-libs' call text) and the request's removal all get this answer.
     w.mainPyodide = { loadPackage: async () => {}, globals: { set() {} },
       runPythonAsync: async () => JSON.stringify({ status: 'correct', score: 1 }) };
-    // KaTeX is imported from a CDN as an ES module; jsdom cannot, so the legend gets a stub.
+    // Dynamic ES modules are outside jsdom; the legend gets a stub.
     w.__katexStub = { default: { render() {}, renderToString: () => '' } };
+    // Evaluate the real rendered asset configuration before its resolver.
+    const assetConfig = [...w.document.querySelectorAll("script:not([src])")].find(script => script.textContent.includes("globalThis.CTM_ASSETS="));
+    assert.ok(assetConfig, "the rendered page must provide its asset configuration");
+    w.eval(assetConfig.textContent);
     // The page's dependencies (ctm-libs' runtime, ctm-checkers' page script
     // and the catalogue, then this extension's scripts), in document order.
     const scripts = [...w.document.querySelectorAll('script[src*="quarto-contrib/"]')].map(script => script.getAttribute('src'));
