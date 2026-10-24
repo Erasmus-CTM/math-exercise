@@ -275,3 +275,7 @@
 .math-exercise-controls .ai-feedback-gear {
   margin: 0;
 }
+
+/* A saved check is historical evidence, never a fresh assessment. */
+.math-saved-result { color: var(--bs-secondary-color, #6c757d); margin-top: .5rem; }
+.math-saved-answer pre { white-space: pre-wrap; overflow-wrap: anywhere; }

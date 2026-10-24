@@ -189,6 +189,7 @@ local function ensureSetup()
     stylesheets = {"matrix-input.css", "math-exercise.css"},
     scripts = {
       {path = "matrix-input.js", afterBody = true},
+      {path = "math-store.js", afterBody = true},
       {path = "math-exercise.js", afterBody = true},
     },
   })
@@ -764,6 +765,23 @@ end
 -- Exercise cell builder (called from the document-order block walk below so
 -- it can read the auto-collected section context).
 ----
+-- A storage revision follows deployed content and checker inputs, not the
+-- page's exercise order or a whole generator-definition fingerprint. Sort
+-- nested map keys so equivalent generated data hashes the same on every build.
+local function storageContent(value)
+  if type(value) ~= "table" then return quarto.json.encode(value) end
+  local keys, parts = {}, {}
+  for key in pairs(value) do keys[#keys + 1] = key end
+  table.sort(keys, function(a, b)
+    return type(a) .. ":" .. tostring(a) < type(b) .. ":" .. tostring(b)
+  end)
+  for _, key in ipairs(keys) do
+    parts[#parts + 1] = "[" .. quarto.json.encode(type(key) .. ":" .. tostring(key))
+      .. "," .. storageContent(value[key]) .. "]"
+  end
+  return "[" .. table.concat(parts, ",") .. "]"
+end
+
 local function buildExercise(el, state)
   ensureSetup()
   exerciseCount = exerciseCount + 1
@@ -894,6 +912,16 @@ local function buildExercise(el, state)
              .. ' data-context-refs="' .. attrEsc(fc.refs) .. '"'
              .. ' data-context="'      .. attrEsc('"' .. jsonEsc(sectionText) .. '"') .. '"'
 
+  if ctm.ui and ctm.ui.exercise then
+    local saved = ctm.ui.exercise{
+      component = "math-exercise", id = opts["label"], block = el,
+      source = pandoc.utils.sha1(el.text):sub(1, 16), save = opts["save"]
+    }
+    for key, value in pairs(saved.attributes or {}) do
+      attrs = attrs .. ' ' .. key .. '="' .. attrEsc(tostring(value)) .. '"'
+    end
+  end
+
   if opts["initial-values"] then
     attrs = attrs .. ' data-initial-values="' .. jsonArrAttr(initialValues) .. '"'
   end
@@ -907,6 +935,34 @@ local function buildExercise(el, state)
       for _, record in ipairs(variants.variants) do tasks[#tasks+1] = record.question end
       attrs = attrs .. ' data-variants="' .. attrEsc(quarto.json.encode(variants)) .. '"'
     end
+    local descriptors = {}
+    for index, task in ipairs(tasks) do
+      local record = variants and variants.variants[index] or nil
+      -- Parameters and derived values reach custom checkers even when they do
+      -- not appear in the question. Grading options also change the revision.
+      -- Keep generated stable ids; omit only the whole-definition fingerprint
+      -- so reordering or adding unrelated variants preserves exact matches.
+      local content = storageContent({
+        question = record and record.question or task,
+        solution = record and record.solution or "",
+        context = record and record["variant-context"] or "",
+        parameters = record and record.parameters or false,
+        derived = record and record.derived or false,
+        variantId = record and record.id or false,
+        grading = {mode = mode, reject = reject, tolerance = tolerance,
+          decplaces = decplaces, sigfigs = sigfigs, form = form, vars = vars,
+          checker = record and record.checker or checker, packages = packages,
+          response = response, partialCredit = partialCredit, formCredit = formCredit,
+          vecdir = vecdir, fieldLabels = fieldLabels}
+      })
+      local hash = pandoc.utils.sha1(content):sub(1, 16)
+      local descriptor = {id = record and record.id or ("pool:" .. hash), hash = hash}
+      -- Legacy generated records have stable ids but no stable number. An
+      -- invented position would mask an id match after a deployment reorder.
+      descriptor.n = record and record.n or (not record and index or nil)
+      descriptors[#descriptors + 1] = descriptor
+    end
+    attrs = attrs .. ' data-storage-variants="' .. attrEsc(quarto.json.encode(descriptors)) .. '"'
     attrs        = attrs .. ' data-pool="'   .. jsonArrAttr(tasks) .. '"'
                          .. ' data-fields="[]"'
                          .. ' data-structural-field-labels="[]"'
@@ -1059,6 +1115,12 @@ end
 
 return {
   { Pandoc = preparePage },
+  { Pandoc = function(doc)
+      if quarto.doc.is_format("html") and ctm.progress and ctm.progress.prepare then
+        return ctm.progress.prepare(doc)
+      end
+      return doc
+    end },
   { Callout = function(c)
       if feedbackForPage and quarto.doc.is_format("html") then
         return ctm.feedback.markCallout(c)
@@ -1066,4 +1128,10 @@ return {
       return c
     end },
   { Pandoc = Pandoc },
+  { Pandoc = function(doc)
+      if quarto.doc.is_format("html") and ctm.ui and ctm.ui.finalize then
+        return ctm.ui.finalize(doc)
+      end
+      return doc
+    end },
 }
