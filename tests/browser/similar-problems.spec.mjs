@@ -926,3 +926,41 @@ test("copy-mode explanation is visible inside practice and mobile controls stay 
     );
   expect(boxes.every((box) => box.left >= 0 && box.right <= 375)).toBe(true);
 });
+
+test('shared Settings stack keeps original navigation credit during practice-only saves',async({page})=>{
+ const {original}=await open(page);
+ await original.locator('.math-exercise-question .math-input').fill('2*x');
+ await original.locator('.math-check-btn').first().click();
+ await expect(original.locator('.math-feedback-area').first()).toContainText('Correct');
+ const tile=page.locator('.ctm-question-tile').first();
+ await expect(tile).toHaveAttribute('data-status','correct');
+ await original.getByRole('button',{name:'Harder',exact:true}).click();
+ const child=original.locator('.math-generated-problem');await expect(child).toHaveCount(1);
+ await expect(tile).toHaveAttribute('data-status','correct');
+ await child.locator('.math-input').fill('0');await child.locator('.math-check-btn').click();
+ await expect(child.locator('.math-generated-saved')).toHaveText('wrong');
+ await expect(tile).toHaveAttribute('data-status','correct');
+ await page.reload({waitUntil:'domcontentloaded'});await expect(tile).toHaveAttribute('data-status','correct');
+});
+
+test('restoring practice-only work leaves the original navigation unattempted',async({page})=>{
+ const {original}=await open(page);const tile=page.locator('.ctm-question-tile').first();
+ await expect(tile).toHaveAttribute('data-status','unattempted');
+ await original.getByRole('button',{name:'Harder',exact:true}).click();
+ await expect(original.locator('.math-generated-problem')).toHaveCount(1);
+ await expect(tile).toHaveAttribute('data-status','unattempted');
+ await page.reload({waitUntil:'domcontentloaded'});await expect(tile).toHaveAttribute('data-status','unattempted');
+});
+
+test('combined preview puts saved answers inside the shared Settings dialog',async({page})=>{
+ await open(page,{expand:false});
+ await expect(page.locator('.ctm-save-bar')).toBeHidden();
+ await expect(page.locator('.ctm-settings-toolbar')).toBeVisible();
+ await page.locator('.ctm-settings-toolbar .ctm-icon-button').first().click();
+ await expect(page.locator('#ctm-settings')).toBeVisible();
+ await expect(page.locator('#ctm-settings .ctm-save-bar')).toBeVisible();
+ await expect(page.locator('#ctm-settings #ai-feedback-settings')).toBeVisible();
+ await expect(page.locator('dialog#ai-feedback-settings')).toHaveCount(0);
+ await page.locator('#ctm-settings .ctm-settings-close').click();
+ await expect(page.locator('.ctm-save-bar')).toBeHidden();
+});

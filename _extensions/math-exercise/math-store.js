@@ -146,7 +146,15 @@
       });
       (cell.querySelector('.math-exercise-controls') || cell).append(copy);
     }
-    handle = store.register({component: 'math-exercise', id: options.id, element: cell,
+    function hasOriginalAnswer(inputs) {
+      function filled(value) {
+        if (value === null || value === undefined) return false;
+        if (typeof value === 'string') return !!value.trim();
+        return typeof value === 'object' ? Object.keys(value).some(function (key) { return filled(value[key]); }) : true;
+      }
+      return Object.keys(inputs || {}).some(function (key) { return key !== 'generated' && filled(inputs[key]); });
+    }
+    handle = store.register({hasAnswer: hasOriginalAnswer, component: 'math-exercise', id: options.id, element: cell,
       source: cell.dataset.ctmSource, save: cell.dataset.ctmSave !== 'false' && !options.graphical,
       variant: options.variant, variants: options.variants, seen: options.seen,
       numberedVariantResults: typeof options.initializeChoice === 'function',
@@ -162,7 +170,7 @@
     persistChoice();
     document.addEventListener('ctm:store-enabled', persistChoice);
     return {
-      generatedChanged: function () {if (!restoring) handle.flush();},
+      generatedChanged: function () {if (!restoring) handle.flush({notify: false});},
       changed: function () {
         if (restoring) return;
         deferChoice = false;

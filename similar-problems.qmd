@@ -2,6 +2,7 @@
 title: "Similar problems — practice testbox"
 filters: [math-exercise]
 ctm-assessment:
+  progress: true
   variants:
     approval: optional
 ai-feedback:

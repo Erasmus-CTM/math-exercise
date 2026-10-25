@@ -1131,3 +1131,8 @@ inside it; saved practice reopens it without a request. Input help and Copy answ
 are quiet utilities. Generated cards place reporting and removal in More, expose
 reporting beside a mismatch, and show Create another problem when disputed.
 Creating another problem keeps the reported record and its local flag.
+
+The reviewed generation stack includes the shared Settings/saved-answer panel
+from ctm-libs PR48. Practice-only writes use the adapter's auxiliary-save path;
+they retain the original question's score and do not mark it answered. Pending
+ordinary edits still notify and invalidate credit normally.
