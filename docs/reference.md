@@ -1110,3 +1110,11 @@ Reload restores without requesting AI, computing keys or grading. Copy/export
 include practice questions, answers and report state. Key looks wrong starts one
 independent solve. Disagreement marks the key disputed and suppresses wrong-answer
 verdicts; agreement retains the flag. No reports go to GitHub or a central service.
+
+Generation accepts a complete JSON code fence, finite numeric JSON answers, and
+variable-name arrays, normalizing them to the same stored mathematical strings.
+Omitted mode/variables inherit the original exercise contract. These conveniences
+do not bypass recipe admission, computed-key agreement, the original checker, or
+independent solving. A rejected candidate receives the concrete validation reason
+for repair within the existing two-candidate limit. The panel's **Details** shows
+the final rejection reason locally; no report is sent elsewhere.

@@ -665,9 +665,140 @@ test("restored practice retains its own grading options after the original chang
   await expect(child.locator(".math-feedback-area")).toContainText("Correct");
 });
 
-test('clearing practice during an in-flight check cannot restore saved work',async({page})=>{
- const {original}=await open(page);await original.getByRole('button',{name:'Harder',exact:true}).click();const child=original.locator('.math-generated-problem');await expect(child).toHaveCount(1);
- await page.evaluate(()=>{const check=window.__ctmCheck;window.__ctmCheck=async(name,request)=>{if(name==='math_exercise.check'&&request.student==='0'){const result=await new Promise(resolve=>window.__finishCheck=resolve);window.__checkSettled=true;return result;}return check(name,request);};});
- await child.locator('.math-input').fill('0');await child.locator('.math-check-btn').click();await page.waitForFunction(()=>!!window.__finishCheck);await page.evaluate(()=>{window.CTMStore.clearPage();window.__finishCheck(JSON.stringify({status:'wrong',score:0}));});await page.waitForFunction(()=>window.__checkSettled);await expect(original.locator('.math-generated-problem')).toHaveCount(0);
- const saved=await page.evaluate(()=>Object.keys(localStorage).flatMap(key=>{try{const value=JSON.parse(localStorage.getItem(key));return value?.component==='math-exercise'?[value]:[];}catch{return [];}}));expect(saved).toHaveLength(0);
+test("clearing practice during an in-flight check cannot restore saved work", async ({
+  page,
+}) => {
+  const { original } = await open(page);
+  await original.getByRole("button", { name: "Harder", exact: true }).click();
+  const child = original.locator(".math-generated-problem");
+  await expect(child).toHaveCount(1);
+  await page.evaluate(() => {
+    const check = window.__ctmCheck;
+    window.__ctmCheck = async (name, request) => {
+      if (name === "math_exercise.check" && request.student === "0") {
+        const result = await new Promise(
+          (resolve) => (window.__finishCheck = resolve),
+        );
+        window.__checkSettled = true;
+        return result;
+      }
+      return check(name, request);
+    };
+  });
+  await child.locator(".math-input").fill("0");
+  await child.locator(".math-check-btn").click();
+  await page.waitForFunction(() => !!window.__finishCheck);
+  await page.evaluate(() => {
+    window.CTMStore.clearPage();
+    window.__finishCheck(JSON.stringify({ status: "wrong", score: 0 }));
+  });
+  await page.waitForFunction(() => window.__checkSettled);
+  await expect(original.locator(".math-generated-problem")).toHaveCount(0);
+  const saved = await page.evaluate(() =>
+    Object.keys(localStorage).flatMap((key) => {
+      try {
+        const value = JSON.parse(localStorage.getItem(key));
+        return value?.component === "math-exercise" ? [value] : [];
+      } catch {
+        return [];
+      }
+    }),
+  );
+  expect(saved).toHaveLength(0);
+});
+
+test("JSON code fences and harmless variable formatting retain computed-key checking", async ({
+  page,
+}) => {
+  const { original } = await open(page, {
+    generate: () => {
+      const spec = derivative();
+      delete spec.mode;
+      spec.vars = ["x"];
+      return "```json\n" + JSON.stringify(spec) + "\n```";
+    },
+  });
+  await original.getByRole("button", { name: "Harder", exact: true }).click();
+  await expect(original.locator(".math-generated-problem")).toHaveCount(1);
+  await expect(original.locator(".math-generated-label")).not.toContainText(
+    "unverified",
+  );
+  expect(await page.evaluate(() => window.__pythonCalls)).toBeGreaterThan(0);
+});
+
+test("format repair names the failed contract and offers concrete scalar and matrix schemas", async ({
+  page,
+}) => {
+  const { original, traffic } = await open(page, {
+    generate: (n) =>
+      JSON.stringify({
+        ...derivative(),
+        ...(n === 1 ? { mode: "matrix" } : {}),
+      }),
+  });
+  await original.getByRole("button", { name: "Harder", exact: true }).click();
+  await expect(original.locator(".math-generated-problem")).toHaveCount(1);
+  expect(traffic).toHaveLength(2);
+  expect(traffic[1].messages[0].content).toContain(
+    "Unsupported problem mode or fields",
+  );
+  const prompt = JSON.parse(traffic[0].messages[1].content);
+  expect(prompt.outputExamples).toHaveLength(2);
+  expect(prompt.outputExamples[1].fields[3].recipe.select).toEqual([1, 1]);
+});
+
+test("persistent format failures show their reason without calling Python or admitting a problem", async ({
+  page,
+}) => {
+  const { original, traffic } = await open(page, {
+    generate: () => JSON.stringify({ ...derivative(), mode: "matrix" }),
+  });
+  await original.getByRole("button", { name: "Harder", exact: true }).click();
+  await expect(original.locator(".math-similar-status")).toContainText(
+    "Could not create",
+  );
+  await original.locator(".math-similar-status summary").click();
+  await expect(original.locator(".math-similar-status pre")).toHaveText(
+    "Unsupported problem mode or fields",
+  );
+  await expect(original.locator(".math-generated-problem")).toHaveCount(0);
+  expect(traffic).toHaveLength(4);
+  expect(
+    traffic[2].messages.some(
+      (m) => m.role === "assistant" && m.content.includes("matrix"),
+    ),
+  ).toBe(true);
+  expect(await page.evaluate(() => window.__pythonCalls)).toBe(0);
+});
+
+test("finite JSON numeric answers still require computed agreement", async ({
+  page,
+}) => {
+  const { original } = await open(page, {
+    generate: () =>
+      JSON.stringify({
+        question: "Differentiate $f(x)=3x$. _[1]",
+        fields: [{ answer: 3, recipe: { op: "diff", expr: "3*x", var: "x" } }],
+        vars: ["x"],
+      }),
+  });
+  await original.getByRole("button", { name: "Harder", exact: true }).click();
+  await expect(original.locator(".math-generated-problem")).toHaveCount(1);
+  await expect(original.locator(".math-generated-label")).not.toContainText(
+    "unverified",
+  );
+});
+
+test("independent re-solve accepts a JSON fence without weakening answer comparison", async ({
+  page,
+}) => {
+  const { original } = await open(page, {
+    generate: () => JSON.stringify(derivative(3, false)),
+    solve: () => '```json\n{"answers":["3*x^2"]}\n```',
+  });
+  await original.getByRole("button", { name: "Harder", exact: true }).click();
+  await expect(original.locator(".math-generated-problem")).toHaveCount(1);
+  await expect(original.locator(".math-generated-label")).toContainText(
+    "unverified",
+  );
 });
