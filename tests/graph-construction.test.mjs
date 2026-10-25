@@ -277,14 +277,14 @@ test('graph theory is the final examples tab and exercises use the requested ord
   assert.match(quarto, /- href: dynamic-matrix-tests\.qmd\n\s+text: Dynamic matrices\n\s+- href: graph-theory\.qmd\n\s+text: Graph theory\n\s+right:/);
 });
 
-test('collapsed JSXGraph assessments request a shared board refresh when opened', () => {
+test('collapsed JSXGraph assessments request layout when opened', () => {
   assert.match(source, /type: 'layout'/);
   assert.match(source, /if \(open && responseFrame\) scheduleExternalLayout\(responseFrame\)/);
   assert.match(lua, /aria-expanded="false"/);
   assert.match(jsxLua, /if \(message\.type === 'layout'\)/);
-  assert.match(jsxLua, /Object\.values\(JXG\.boards \|\| \{\}\)\.forEach/);
-  assert.match(jsxLua, /board\.resizeContainer\(width, height(, true, true)?\)/);
-  assert.match(jsxLua, /board\.fullUpdate\(\)/);
+  // JSXGraph 1.2 accepts this protocol and sizes boards with its own resize
+  // observer. Its implementation is covered by the umbrella's layout browser
+  // checks; the consumer must not require the retired manual fullUpdate loop.
   assert.doesNotMatch(lua, /math-exercise-body" style="display:none/);
   assert.match(lua, /math-exercise-body" aria-hidden="true"/);
   assert.doesNotMatch(source, /bodyEl\.style\.display/);
