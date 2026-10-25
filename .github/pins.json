@@ -2,7 +2,7 @@
   "comment": "Exact reviewed dependencies for the Similar problems stacked set. No CTM-Review-Refs trailer is used; AC merges with merge commits.",
   "ctm-libs": {
     "repository": "Erasmus-CTM/ctm-libs",
-    "commit": "06a44d9148d6d1b1f9258ce501a7aea6ca15e872"
+    "commit": "4e585998948564062ad333798764f367dfc33801"
   },
   "ctm-checkers": {
     "repository": "Erasmus-CTM/ctm-checkers",

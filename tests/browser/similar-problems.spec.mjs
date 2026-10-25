@@ -26,6 +26,17 @@ const derivative = (power = 3, recipe = true) => ({
   vars: "x",
   change: "A fresh power function.",
 });
+async function report(child) {
+  if (!(await child.locator(".math-generated-report").isVisible()))
+    await child.locator(".math-generated-more summary").click();
+  await child
+    .getByRole("button", {
+      name: "I think the expected answer is wrong",
+      exact: true,
+    })
+    .filter({ visible: true })
+    .click();
+}
 async function open(page, provider = {}) {
   const traffic = [];
   let generated = 0,
@@ -166,6 +177,10 @@ async function open(page, provider = {}) {
   await page.waitForFunction(() => !!window.MathExercise?.setupCell);
   if (!provider.realPython)
     await page.waitForFunction(() => !!window.__mathReady);
+  if (provider.expand !== false)
+    for (const toggle of await page.locator(".math-similar-toggle").all())
+      if ((await toggle.getAttribute("aria-expanded")) === "false")
+        await toggle.click();
   return {
     traffic,
     original: page
@@ -211,7 +226,7 @@ test("independent solve labels an unverified key and preserves author guidance",
   });
   await original.getByRole("button", { name: "Harder", exact: true }).click();
   await expect(original.locator(".math-generated-label")).toContainText(
-    "unverified",
+    /unverified/i,
   );
   expect(traffic).toHaveLength(2);
   expect(traffic[0].messages[0].content).toContain("Keep problems");
@@ -277,9 +292,7 @@ test("local flag re-check disputes a computed key, changes wrong verdict and sur
   await expect(child.locator(".math-feedback-area")).toContainText(
     "Not correct",
   );
-  await child
-    .getByRole("button", { name: "Key looks wrong", exact: true })
-    .click();
+  await report(child);
   await expect(child.locator(".math-generated-label")).toContainText(
     "disputed",
   );
@@ -287,7 +300,7 @@ test("local flag re-check disputes a computed key, changes wrong verdict and sur
     "Can’t confirm",
   );
   await expect(
-    child.getByRole("button", { name: "Create a replacement" }),
+    child.getByRole("button", { name: "Create another problem" }),
   ).toBeVisible();
   expect(traffic).toHaveLength(2);
   expect(JSON.stringify(traffic[1].messages)).not.toContain('"response"');
@@ -317,12 +330,9 @@ test("same direction uses the same checked flow; copy mode disables actions", as
   await expect(
     original.getByRole("button", { name: "Harder", exact: true }),
   ).toBeDisabled();
-  await original
-    .locator(".math-generated-problem")
-    .getByRole("button", { name: "Key looks wrong", exact: true })
-    .click();
+  await report(original.locator(".math-generated-problem"));
   await expect(original.locator(".math-generated-label")).toContainText(
-    "could not be re-checked",
+    "could not be checked again",
   );
   expect(traffic).toHaveLength(1);
 });
@@ -528,13 +538,13 @@ test("an agreeing re-check retains the flag, including in copy/export, without a
   await original.getByRole("button", { name: "Harder", exact: true }).click();
   const child = original.locator(".math-generated-problem");
   await expect(child).toHaveCount(1);
-  await child
-    .getByRole("button", { name: "Key looks wrong", exact: true })
-    .click();
+  await report(child);
   await expect(child.locator(".math-generated-label")).toContainText(
-    "re-checked",
+    "independent solution matched",
   );
-  await expect(child.locator(".math-generated-label")).toContainText("Flagged");
+  await expect(child.locator(".math-generated-label")).toContainText(
+    "Reported by you",
+  );
   await page.evaluate(() => {
     window.__copied = "";
     window.CTMCopy.text = (text) => (window.__copied = text);
@@ -554,7 +564,7 @@ test("an agreeing re-check retains the flag, including in copy/export, without a
   const calls = traffic.length;
   await page.reload({ waitUntil: "domcontentloaded" });
   await expect(original.locator(".math-generated-label")).toContainText(
-    "re-checked",
+    "independent solution matched",
   );
   expect(traffic.length).toBe(calls);
 });
@@ -721,7 +731,7 @@ test("JSON code fences and harmless variable formatting retain computed-key chec
   await original.getByRole("button", { name: "Harder", exact: true }).click();
   await expect(original.locator(".math-generated-problem")).toHaveCount(1);
   await expect(original.locator(".math-generated-label")).not.toContainText(
-    "unverified",
+    /unverified/i,
   );
   expect(await page.evaluate(() => window.__pythonCalls)).toBeGreaterThan(0);
 });
@@ -785,7 +795,7 @@ test("finite JSON numeric answers still require computed agreement", async ({
   await original.getByRole("button", { name: "Harder", exact: true }).click();
   await expect(original.locator(".math-generated-problem")).toHaveCount(1);
   await expect(original.locator(".math-generated-label")).not.toContainText(
-    "unverified",
+    /unverified/i,
   );
 });
 
@@ -799,33 +809,120 @@ test("independent re-solve accepts a JSON fence without weakening answer compari
   await original.getByRole("button", { name: "Harder", exact: true }).click();
   await expect(original.locator(".math-generated-problem")).toHaveCount(1);
   await expect(original.locator(".math-generated-label")).toContainText(
-    "unverified",
+    /unverified/i,
   );
 });
 
-test('implicit multiplication remains a mathematical answer after Check and AI feedback', async ({page})=>{
- const {original}=await open(page,{realPython:true});
- await original.getByRole('button',{name:'Harder',exact:true}).click();
- const child=original.locator('.math-generated-problem');
- await expect(child).toHaveCount(1,{timeout:90000});
- await child.locator('.math-input').fill('21x');
- await child.locator('.math-check-btn').click();
- await expect(child.locator('.math-feedback-area')).toContainText('Not correct');
- await expect(child.locator('.math-generated-saved')).toHaveText('wrong');
- await child.locator('.math-feedback-btn').click();
- await expect(child.locator('.ai-feedback-output')).toContainText('power rule');
- await expect(child.locator('.math-generated-saved')).toHaveText('wrong');
- await child.locator('.math-input').fill('3x^2');
- await child.locator('.math-check-btn').click();
- await expect(child.locator('.math-feedback-area')).toContainText('Correct');
- await expect(child.locator('.math-generated-saved')).toHaveText('correct');
- expect(await page.evaluate(()=>window.__resultEvents)).toEqual([]);
+test("implicit multiplication remains a mathematical answer after Check and AI feedback", async ({
+  page,
+}) => {
+  const { original } = await open(page, { realPython: true });
+  await original.getByRole("button", { name: "Harder", exact: true }).click();
+  const child = original.locator(".math-generated-problem");
+  await expect(child).toHaveCount(1, { timeout: 90000 });
+  await child.locator(".math-input").fill("21x");
+  await child.locator(".math-check-btn").click();
+  await expect(child.locator(".math-feedback-area")).toContainText(
+    "Not correct",
+  );
+  await expect(child.locator(".math-generated-saved")).toHaveText("wrong");
+  await child.locator(".math-feedback-btn").click();
+  await expect(child.locator(".ai-feedback-output")).toContainText(
+    "power rule",
+  );
+  await expect(child.locator(".math-generated-saved")).toHaveText("wrong");
+  await child.locator(".math-input").fill("3x^2");
+  await child.locator(".math-check-btn").click();
+  await expect(child.locator(".math-feedback-area")).toContainText("Correct");
+  await expect(child.locator(".math-generated-saved")).toHaveText("correct");
+  expect(await page.evaluate(() => window.__resultEvents)).toEqual([]);
 });
 
-test('generated grading inherits the original mode rather than the model preference',async({page})=>{
- const {original}=await open(page,{generate:()=>JSON.stringify({...derivative(),mode:'numeric'})});
- await original.getByRole('button',{name:'Harder',exact:true}).click();
- const child=original.locator('.math-generated-problem');
- await expect(child).toHaveCount(1);
- await expect(child).toHaveAttribute('data-mode','equivalent');
+test("generated grading inherits the original mode rather than the model preference", async ({
+  page,
+}) => {
+  const { original } = await open(page, {
+    generate: () => JSON.stringify({ ...derivative(), mode: "numeric" }),
+  });
+  await original.getByRole("button", { name: "Harder", exact: true }).click();
+  const child = original.locator(".math-generated-problem");
+  await expect(child).toHaveCount(1);
+  await expect(child).toHaveAttribute("data-mode", "equivalent");
+});
+
+test("compact practice disclosure preserves work and exposes maintenance with keyboard focus", async ({
+  page,
+}) => {
+  const { original } = await open(page, { expand: false });
+  const trigger = original.locator(".math-similar-toggle"),
+    panel = original.locator(".math-similar-panel");
+  await expect(trigger).toHaveAttribute("aria-expanded", "false");
+  await expect(panel).toBeHidden();
+  await expect(original.locator(".ai-feedback-gear")).toHaveCount(1);
+  await expect(original.locator(".math-copy-answer")).toHaveAccessibleName(
+    "Copy answers including generated practice",
+  );
+  await trigger.focus();
+  await page.keyboard.press("Enter");
+  await expect(panel).toBeVisible();
+  expect(
+    await panel.locator(".math-similar-controls button").allTextContents(),
+  ).toEqual(["Easier", "Another one like this", "Harder"]);
+  await original.getByRole("button", { name: "Harder", exact: true }).click();
+  const child = original.locator(".math-generated-problem");
+  await expect(child).toHaveCount(1);
+  await expect(child.locator(".math-input")).toBeFocused();
+  await expect(
+    child.getByRole("button", {
+      name: "I think the expected answer is wrong",
+      exact: true,
+    }),
+  ).toBeHidden();
+  await child.locator(".math-input").fill("42");
+  await trigger.click();
+  await expect(panel).toBeHidden();
+  await trigger.click();
+  await expect(child.locator(".math-input")).toHaveValue("42");
+  await child.locator(".math-generated-more summary").focus();
+  await page.keyboard.press("Enter");
+  await expect(
+    child.getByRole("button", {
+      name: "I think the expected answer is wrong",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await child.getByRole("button", { name: "Remove", exact: true }).click();
+  await expect(child).toHaveCount(0);
+  await expect(trigger).toBeFocused();
+});
+
+test("copy-mode explanation is visible inside practice and mobile controls stay within the viewport", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 375, height: 850 });
+  const { original } = await open(page, { expand: false });
+  await page.evaluate(() =>
+    window.AIFeedback.saveConfig({
+      ...window.AIFeedback.loadConfig(),
+      mode: "copy",
+    }),
+  );
+  await original.locator(".math-similar-toggle").click();
+  await expect(original.locator(".math-similar-copy-notice")).toContainText(
+    "Generating problems requires Direct API",
+  );
+  await expect(
+    original.getByRole("button", { name: "Harder", exact: true }),
+  ).toBeDisabled();
+  const boxes = await original
+    .locator(".math-exercise-controls button,.math-similar-controls button")
+    .evaluateAll((nodes) =>
+      nodes
+        .filter((n) => n.getClientRects().length)
+        .map((n) => ({
+          left: n.getBoundingClientRect().left,
+          right: n.getBoundingClientRect().right,
+        })),
+    );
+  expect(boxes.every((box) => box.left >= 0 && box.right <= 375)).toBe(true);
 });

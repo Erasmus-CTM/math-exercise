@@ -1107,7 +1107,7 @@ Resizable matrices, graphical responses and model-written checkers are excluded.
 Practice specifications, answers, results and local key flags are nested in the
 original exercise's saved record, with a maximum of ten and a UTF-8 byte budget.
 Reload restores without requesting AI, computing keys or grading. Copy/export
-include practice questions, answers and report state. Key looks wrong starts one
+include practice questions, answers and report state. “I think the expected answer is wrong” starts one
 independent solve. Disagreement marks the key disputed and suppresses wrong-answer
 verdicts; agreement retains the flag. No reports go to GitHub or a central service.
 
@@ -1125,3 +1125,9 @@ application and factorial notation. The original mode, form restrictions,
 precision/tolerance, rejection rules and partial-credit settings are inherited;
 the model cannot select a less restrictive grading mode. Model keys and recipes
 remain separately admitted before a generated problem is shown.
+
+The original toolbar has one Similar problem disclosure. Difficulty choices appear
+inside it; saved practice reopens it without a request. Input help and Copy answers
+are quiet utilities. Generated cards place reporting and removal in More, expose
+reporting beside a mismatch, and show Create another problem when disputed.
+Creating another problem keeps the reported record and its local flag.

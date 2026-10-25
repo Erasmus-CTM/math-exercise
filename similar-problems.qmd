@@ -14,7 +14,7 @@ ai-feedback:
 Use **Feedback settings** to choose Direct API and a reasoning model for generating
 problems. The three examples exercise symbolic keys, fixed matrix inputs and a
 trusted authored checker. Generated work is practice and does not count toward
-course scores. Reload to check saved answers; use **Key looks wrong** to test the
+course scores. Reload to check saved answers; use **More → I think the expected answer is wrong** to test the
 local report and independent re-check.
 
 ## 1. A derivative

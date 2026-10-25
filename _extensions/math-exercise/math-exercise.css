@@ -285,3 +285,30 @@
 .math-generated-problem { margin-block: 1rem; }
 .math-generated-label { font-size: .85em; }
 .math-generated-problem[data-key-disputed="true"] .math-fb-wrong { color: inherit; }
+
+/* Practice actions are disclosed; primary checking stays in the first row. */
+.math-has-similar > .math-exercise-controls { align-items: center; }
+.math-has-similar > .math-exercise-controls .math-check-btn { order: 0; }
+.math-has-similar > .math-exercise-controls .math-feedback-btn { order: 1; }
+.math-has-similar > .math-exercise-controls .ai-feedback-gear { order: 2; }
+.math-has-similar > .math-exercise-controls .math-similar-toggle { order: 3; }
+.math-has-similar > .math-exercise-controls .math-legend-btn { order: 4; }
+.math-has-similar > .math-exercise-controls .math-copy-answer { order: 5; }
+.math-has-similar > .math-exercise-controls .math-legend-btn,
+.math-has-similar > .math-exercise-controls .math-copy-answer,
+.math-quiet-action { background: transparent; border-color: transparent; text-decoration: underline; }
+.math-has-similar button, .math-generated-more summary { min-height: 44px; }
+.math-generated-heading { display: flex; align-items: start; justify-content: space-between; gap: .75rem; flex-wrap: wrap; }
+.math-generated-heading .math-generated-label { flex: 1 1 14rem; }
+.math-generated-more { flex: 0 1 auto; max-width: 100%; }
+.math-generated-more summary { cursor: pointer; padding: .5rem; }
+.math-generated-more[open] { display: flex; flex-direction: column; }
+.math-generated-more button { display: block; max-width: 100%; white-space: normal; text-align: start; }
+.math-generated-notice { border-inline-start: .2rem solid currentColor; padding: .5rem .75rem; margin-block: .5rem; }
+.math-similar-copy-notice, .math-similar-heading { font-size: .9em; }
+.math-generated-problem .math-check-btn { background: var(--bs-primary, #0d6efd); color: white; }
+@media (max-width: 480px) {
+ .math-similar-controls > button { flex: 1 1 8rem; }
+ .math-generated-more { flex-basis: auto; }
+ .math-has-similar > .math-exercise-controls { gap: .35rem; }
+}

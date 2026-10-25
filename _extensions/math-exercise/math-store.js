@@ -138,8 +138,8 @@
       var copy = document.createElement('button');
       copy.type = 'button';
       copy.className = 'btn btn-light math-copy-answer';
-      copy.textContent = L.copyAnswer;
-      copy.setAttribute('aria-label', L.copyAnswerLabel(options.id));
+      copy.textContent = options.generated ? L.similarCopyAnswers : L.copyAnswer;
+      copy.setAttribute('aria-label', options.generated ? L.similarCopyAnswersLabel : L.copyAnswerLabel(options.id));
       copy.addEventListener('click', function () {
         var text = exportItem().parts.map(function (part) { return part.label + ': ' + part.text; }).join('\n');
         root.CTMCopy.text(text, {label: L.copyAnswerLabel(options.id)});

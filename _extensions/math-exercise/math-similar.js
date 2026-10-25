@@ -124,10 +124,28 @@
         () => generate(direction),
       ),
     );
-    controls.append(node("span", L.similarButton), ...choices);
-    const settings = button(L.similarSettings, () => F.openSettings());
-    controls.append(settings);
-    cell.querySelector(".math-exercise-controls").append(controls);
+    const trigger = button(L.similarButton + " ▾", () => setOpen(panel.hidden));
+    trigger.classList.add("math-similar-toggle");
+    panel.id = cell.id + "-similar-practice";
+    trigger.setAttribute("aria-controls", panel.id);
+    trigger.setAttribute("aria-expanded", "false");
+    trigger.setAttribute("aria-label", L.similarButton);
+    const copyNotice = node("p", L.similarCopyMode, "math-similar-copy-notice");
+    controls.append(...[choices[0], choices[2], choices[1]]);
+    panel.prepend(
+      node("p", L.similarPractice, "math-similar-heading"),
+      controls,
+      copyNotice,
+    );
+    cell.classList.add("math-has-similar");
+    const originalBar = cell.querySelector(".math-exercise-controls");
+    originalBar.append(trigger);
+    const originalHelp = originalBar.querySelector(".math-legend-btn");
+    if (originalHelp) originalBar.append(originalHelp);
+    function setOpen(open) {
+      panel.hidden = !open;
+      trigger.setAttribute("aria-expanded", String(open));
+    }
     let records = [],
       next = 1,
       active = null;
@@ -143,7 +161,7 @@
         choice.title = copy ? L.similarCopyMode : "";
       }
       controls.dataset.copyMode = String(copy);
-      settings.title = copy ? L.similarCopyMode : L.similarSettings;
+      copyNotice.hidden = !copy;
     }
     function cancelActive() {
       if (active) active.abort();
@@ -403,7 +421,8 @@
     function parseCandidate(text) {
       const spec = parseJSON(text);
       if (spec && typeof spec === "object" && !Array.isArray(spec)) {
-        if (spec.mode === undefined || modes.includes(spec.mode)) spec.mode = o.mode || "equivalent";
+        if (spec.mode === undefined || modes.includes(spec.mode))
+          spec.mode = o.mode || "equivalent";
         if (spec.vars === undefined) spec.vars = cell.dataset.vars || "";
         if (
           Array.isArray(spec.vars) &&
@@ -531,7 +550,8 @@
         mode: o.mode,
         vars: cell.dataset.vars || "",
         fields: JSON.parse(cell.dataset.fields || "[]").length,
-        gradingRule: "Keep the original grading mode and authored restrictions; do not choose a more lenient mode.",
+        gradingRule:
+          "Keep the original grading mode and authored restrictions; do not choose a more lenient mode.",
         direction,
         previous: records[0]
           ? {
@@ -568,10 +588,11 @@
     }
     async function generate(direction) {
       if (active || F.loadConfig().mode !== "api") return;
+      const requestingControl = document.activeElement;
       const controller = new AbortController();
       active = controller;
       availability();
-      panel.hidden = false;
+      setOpen(true);
       status.replaceChildren(
         node("span", L.similarBusy),
         button(L.similarCancel, () => {
@@ -677,7 +698,16 @@
               );
               return;
             }
-            status.replaceChildren();
+            status.replaceChildren(
+              node("span", L.similarGenerated, "visually-hidden"),
+            );
+            if (
+              choices.includes(requestingControl) &&
+              !panel.hidden &&
+              (document.activeElement === requestingControl ||
+                document.activeElement === document.body)
+            )
+              mounted.get(record.n)?.cell.querySelector(".math-input")?.focus();
             return;
           } catch (error) {
             assertActive(controller.signal);
@@ -747,6 +777,9 @@
         );
       entry.label.textContent = labels.join(" · ");
       entry.flag.disabled = !!record.flag?.flagged;
+      entry.report.hidden =
+        record.result?.status !== "wrong" || !!record.flag?.flagged;
+      entry.notice.hidden = !disputed;
       if (record.result) {
         entry.saved.textContent =
           record.result.status === "wrong"
@@ -767,6 +800,13 @@
         entry.replace.hidden = false;
       }
     }
+    function entryFlagFocus(record) {
+      const entry = mounted.get(record.n);
+      if (entry) {
+        entry.more.open = false;
+        entry.label.focus();
+      }
+    }
     async function flag(record) {
       if (record.flag?.flagged) return;
       const controller = new AbortController();
@@ -777,6 +817,7 @@
         at: new Date().toISOString(),
         recheck: { status: "pending", at: null, model: null },
       };
+      entryFlagFocus(record);
       updateStatus(record);
       notify();
       try {
@@ -865,31 +906,43 @@
         () => {},
       );
       legend.classList.add("math-legend-btn");
-      bar.append(legend);
+      legend.classList.add("math-quiet-action");
       const feedback = button(
         root.CTMLocales.table("math-exercise", o.language).feedbackButton,
         () => {},
       );
       feedback.classList.add("math-feedback-btn");
-      bar.append(feedback);
+      bar.append(feedback, legend);
       const flagged = button(L.similarFlag, () => flag(record));
       const replace = button(L.similarRegenerate, () =>
         generate(record.direction),
       );
       replace.hidden = true;
-      bar.append(
+      const more = node("details", undefined, "math-generated-more");
+      more.append(
+        node("summary", L.similarMore),
         flagged,
-        replace,
         button(L.similarRemove, () => remove(record.n)),
       );
+      label.tabIndex = -1;
+      const heading = node("div", undefined, "math-generated-heading");
+      heading.append(label, more);
+      const report = button(L.similarFlag, () => flag(record));
+      report.classList.add("math-quiet-action", "math-generated-report");
+      report.hidden = true;
+      const notice = node("div", undefined, "math-generated-notice");
+      notice.append(node("p", L.similarKeepFlagged), replace);
+      notice.hidden = true;
       const saved = node("p", undefined, "math-generated-saved");
       child.append(
-        label,
+        heading,
         question,
         bar,
+        notice,
         node("div", undefined, "math-legend-panel"),
         node("div", undefined, "math-feedback-area"),
         saved,
+        report,
       );
       child.querySelector(".math-legend-panel").style.display = "none";
       if (custom) child._similarContext = context(spec);
@@ -925,6 +978,9 @@
         cell: child,
         label,
         flag: flagged,
+        more,
+        report,
+        notice,
         replace,
         saved,
         readInputs,
@@ -944,11 +1000,20 @@
       if (index < 0) return;
       records.splice(index, 1);
       rechecks.get(n)?.abort();
-      mounted.get(n)?.cell._mathExerciseDispose?.();
-      mounted.get(n)?.cell.remove();
+      const removed = mounted.get(n)?.cell,
+        restoreFocus = removed?.contains(document.activeElement);
+      removed?._mathExerciseDispose?.();
+      removed?.remove();
       mounted.delete(n);
+      if (restoreFocus)
+        (
+          mounted
+            .values()
+            .next()
+            .value?.cell.querySelector(".math-check-btn") || trigger
+        ).focus();
       if (persist) notify();
-      panel.hidden = !records.length && !active;
+      setOpen(!panel.hidden || !!records.length || !!active);
     }
     function clear() {
       if (active) active.abort();
@@ -962,7 +1027,7 @@
       mounted.clear();
       records = [];
       status.replaceChildren();
-      panel.hidden = true;
+      setOpen(false);
       availability();
     }
     return {
@@ -975,7 +1040,7 @@
           removed = records.filter((record) => !ids.has(record.n));
         for (const record of removed) remove(record.n, false);
         if (removed.length) {
-          panel.hidden = false;
+          setOpen(true);
           status.replaceChildren(node("span", L.similarLimit));
           if (removed.some((record) => record.flag?.flagged))
             status.append(
@@ -1011,7 +1076,7 @@
             );
           }
         }
-        panel.hidden = !records.length;
+        setOpen(!!records.length);
       },
       clear,
       exportParts: () =>
