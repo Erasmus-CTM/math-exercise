@@ -872,7 +872,7 @@
     opts = opts || {};
     return runOnCurrentRuntime(async function (py) {
       return JSON.parse(await callCheckers(py, 'check', {
-        ...(opts.generated ? {generated: true} : {}),
+        ...(opts.generated ? {generated: true, learner: true} : {}),
         student:   val,
         correct:   el.dataset.answer || '',
         vars:      el.dataset.vars   || '',
@@ -951,7 +951,7 @@
       await ensurePackages(opts.packages);
       var request = {
         response: response,
-        ...(opts.generated ? {generated: true} : {}),
+        ...(opts.generated ? {generated: true, learner: true} : {}),
         vars:     opts.vars || '',
         checker:  opts.checker || '',
       };

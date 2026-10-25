@@ -1118,3 +1118,10 @@ do not bypass recipe admission, computed-key agreement, the original checker, or
 independent solving. A rejected candidate receives the concrete validation reason
 for repair within the existing two-candidate limit. The panel's **Details** shows
 the final rejection reason locally; no report is sent elsewhere.
+
+Generated learner responses use the original checker's notation and grading
+options, including implicit multiplication (`21x`, `3x^2`), implicit function
+application and factorial notation. The original mode, form restrictions,
+precision/tolerance, rejection rules and partial-credit settings are inherited;
+the model cannot select a less restrictive grading mode. Model keys and recipes
+remain separately admitted before a generated problem is shown.

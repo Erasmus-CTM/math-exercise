@@ -403,7 +403,7 @@
     function parseCandidate(text) {
       const spec = parseJSON(text);
       if (spec && typeof spec === "object" && !Array.isArray(spec)) {
-        if (spec.mode === undefined) spec.mode = o.mode || "equivalent";
+        if (spec.mode === undefined || modes.includes(spec.mode)) spec.mode = o.mode || "equivalent";
         if (spec.vars === undefined) spec.vars = cell.dataset.vars || "";
         if (
           Array.isArray(spec.vars) &&
@@ -531,6 +531,7 @@
         mode: o.mode,
         vars: cell.dataset.vars || "",
         fields: JSON.parse(cell.dataset.fields || "[]").length,
+        gradingRule: "Keep the original grading mode and authored restrictions; do not choose a more lenient mode.",
         direction,
         previous: records[0]
           ? {

@@ -802,3 +802,30 @@ test("independent re-solve accepts a JSON fence without weakening answer compari
     "unverified",
   );
 });
+
+test('implicit multiplication remains a mathematical answer after Check and AI feedback', async ({page})=>{
+ const {original}=await open(page,{realPython:true});
+ await original.getByRole('button',{name:'Harder',exact:true}).click();
+ const child=original.locator('.math-generated-problem');
+ await expect(child).toHaveCount(1,{timeout:90000});
+ await child.locator('.math-input').fill('21x');
+ await child.locator('.math-check-btn').click();
+ await expect(child.locator('.math-feedback-area')).toContainText('Not correct');
+ await expect(child.locator('.math-generated-saved')).toHaveText('wrong');
+ await child.locator('.math-feedback-btn').click();
+ await expect(child.locator('.ai-feedback-output')).toContainText('power rule');
+ await expect(child.locator('.math-generated-saved')).toHaveText('wrong');
+ await child.locator('.math-input').fill('3x^2');
+ await child.locator('.math-check-btn').click();
+ await expect(child.locator('.math-feedback-area')).toContainText('Correct');
+ await expect(child.locator('.math-generated-saved')).toHaveText('correct');
+ expect(await page.evaluate(()=>window.__resultEvents)).toEqual([]);
+});
+
+test('generated grading inherits the original mode rather than the model preference',async({page})=>{
+ const {original}=await open(page,{generate:()=>JSON.stringify({...derivative(),mode:'numeric'})});
+ await original.getByRole('button',{name:'Harder',exact:true}).click();
+ const child=original.locator('.math-generated-problem');
+ await expect(child).toHaveCount(1);
+ await expect(child).toHaveAttribute('data-mode','equivalent');
+});
