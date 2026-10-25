@@ -1136,3 +1136,10 @@ The reviewed generation stack includes the shared Settings/saved-answer panel
 from ctm-libs PR48. Practice-only writes use the adapter's auxiliary-save path;
 they retain the original question's score and do not mark it answered. Pending
 ordinary edits still notify and invalidate credit normally.
+
+When the original response is a fixed matrix, generated responses must use
+`mat[...]` with one answer field per cell in row-major order. Separate scalar
+blanks are not accepted as a new matrix response. Flat numbered slots can be
+normalized to a grid when the recipe selectors identify every cell unambiguously;
+that same upgrade preserves saved cell answers during restore without AI/Python.
+Older ambiguous saved layouts remain readable rather than discarding work.

@@ -927,40 +927,153 @@ test("copy-mode explanation is visible inside practice and mobile controls stay 
   expect(boxes.every((box) => box.left >= 0 && box.right <= 375)).toBe(true);
 });
 
-test('shared Settings stack keeps original navigation credit during practice-only saves',async({page})=>{
- const {original}=await open(page);
- await original.locator('.math-exercise-question .math-input').fill('2*x');
- await original.locator('.math-check-btn').first().click();
- await expect(original.locator('.math-feedback-area').first()).toContainText('Correct');
- const tile=page.locator('.ctm-question-tile').first();
- await expect(tile).toHaveAttribute('data-status','correct');
- await original.getByRole('button',{name:'Harder',exact:true}).click();
- const child=original.locator('.math-generated-problem');await expect(child).toHaveCount(1);
- await expect(tile).toHaveAttribute('data-status','correct');
- await child.locator('.math-input').fill('0');await child.locator('.math-check-btn').click();
- await expect(child.locator('.math-generated-saved')).toHaveText('wrong');
- await expect(tile).toHaveAttribute('data-status','correct');
- await page.reload({waitUntil:'domcontentloaded'});await expect(tile).toHaveAttribute('data-status','correct');
+test("shared Settings stack keeps original navigation credit during practice-only saves", async ({
+  page,
+}) => {
+  const { original } = await open(page);
+  await original.locator(".math-exercise-question .math-input").fill("2*x");
+  await original.locator(".math-check-btn").first().click();
+  await expect(original.locator(".math-feedback-area").first()).toContainText(
+    "Correct",
+  );
+  const tile = page.locator(".ctm-question-tile").first();
+  await expect(tile).toHaveAttribute("data-status", "correct");
+  await original.getByRole("button", { name: "Harder", exact: true }).click();
+  const child = original.locator(".math-generated-problem");
+  await expect(child).toHaveCount(1);
+  await expect(tile).toHaveAttribute("data-status", "correct");
+  await child.locator(".math-input").fill("0");
+  await child.locator(".math-check-btn").click();
+  await expect(child.locator(".math-generated-saved")).toHaveText("wrong");
+  await expect(tile).toHaveAttribute("data-status", "correct");
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(tile).toHaveAttribute("data-status", "correct");
 });
 
-test('restoring practice-only work leaves the original navigation unattempted',async({page})=>{
- const {original}=await open(page);const tile=page.locator('.ctm-question-tile').first();
- await expect(tile).toHaveAttribute('data-status','unattempted');
- await original.getByRole('button',{name:'Harder',exact:true}).click();
- await expect(original.locator('.math-generated-problem')).toHaveCount(1);
- await expect(tile).toHaveAttribute('data-status','unattempted');
- await page.reload({waitUntil:'domcontentloaded'});await expect(tile).toHaveAttribute('data-status','unattempted');
+test("restoring practice-only work leaves the original navigation unattempted", async ({
+  page,
+}) => {
+  const { original } = await open(page);
+  const tile = page.locator(".ctm-question-tile").first();
+  await expect(tile).toHaveAttribute("data-status", "unattempted");
+  await original.getByRole("button", { name: "Harder", exact: true }).click();
+  await expect(original.locator(".math-generated-problem")).toHaveCount(1);
+  await expect(tile).toHaveAttribute("data-status", "unattempted");
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(tile).toHaveAttribute("data-status", "unattempted");
 });
 
-test('combined preview puts saved answers inside the shared Settings dialog',async({page})=>{
- await open(page,{expand:false});
- await expect(page.locator('.ctm-save-bar')).toBeHidden();
- await expect(page.locator('.ctm-settings-toolbar')).toBeVisible();
- await page.locator('.ctm-settings-toolbar .ctm-icon-button').first().click();
- await expect(page.locator('#ctm-settings')).toBeVisible();
- await expect(page.locator('#ctm-settings .ctm-save-bar')).toBeVisible();
- await expect(page.locator('#ctm-settings #ai-feedback-settings')).toBeVisible();
- await expect(page.locator('dialog#ai-feedback-settings')).toHaveCount(0);
- await page.locator('#ctm-settings .ctm-settings-close').click();
- await expect(page.locator('.ctm-save-bar')).toBeHidden();
+test("combined preview puts saved answers inside the shared Settings dialog", async ({
+  page,
+}) => {
+  await open(page, { expand: false });
+  await expect(page.locator(".ctm-save-bar")).toBeHidden();
+  await expect(page.locator(".ctm-settings-toolbar")).toBeVisible();
+  await page.locator(".ctm-settings-toolbar .ctm-icon-button").first().click();
+  await expect(page.locator("#ctm-settings")).toBeVisible();
+  await expect(page.locator("#ctm-settings .ctm-save-bar")).toBeVisible();
+  await expect(
+    page.locator("#ctm-settings #ai-feedback-settings"),
+  ).toBeVisible();
+  await expect(page.locator("dialog#ai-feedback-settings")).toHaveCount(0);
+  await page.locator("#ctm-settings .ctm-settings-close").click();
+  await expect(page.locator(".ctm-save-bar")).toBeHidden();
+});
+
+test("flat matrix slots with explicit cell recipes render as a proper grid and restore without AI or Python", async ({
+  page,
+}) => {
+  const flat =
+    "Find the inverse of $A=\\operatorname{diag}(2,3,4)$. $A^{-1}=$ " +
+    Array.from({ length: 9 }, (_, i) => `_[${i + 1}]`).join(" ") +
+    ".";
+  const answers = ["1/2", "0", "0", "0", "1/3", "0", "0", "0", "1/4"];
+  const { traffic } = await open(page, {
+    generate: () =>
+      JSON.stringify({
+        question: flat,
+        mode: "equivalent",
+        vars: "",
+        fields: answers.map((answer, i) => ({
+          answer,
+          recipe: {
+            op: "inv",
+            expr: "Matrix([[2,0,0],[0,3,0],[0,0,4]])",
+            select: [Math.floor(i / 3), i % 3],
+          },
+        })),
+      }),
+  });
+  const original = page
+    .locator('.math-exercise-cell[data-label="similar-matrix"]')
+    .first();
+  await original.getByRole("button", { name: "Harder", exact: true }).click();
+  const child = original.locator(".math-generated-problem"),
+    grid = child.locator(".math-mat");
+  await expect(grid).toHaveCount(1);
+  await expect(grid.locator(".math-input")).toHaveCount(9);
+  expect(await grid.evaluate((el) => el.style.getPropertyValue("--cols"))).toBe(
+    "3",
+  );
+  await expect(
+    child.locator(".math-input:not(.math-mat .math-input)"),
+  ).toHaveCount(0);
+  const count = traffic.length;
+  await page.evaluate((flat) => {
+    for (const key of Object.keys(localStorage)) {
+      if (!key.startsWith("ctm|1|") || key.includes("|~")) continue;
+      const r = JSON.parse(localStorage.getItem(key));
+      if (!r?.inputs?.generated?.length) continue;
+      r.inputs.generated[0].spec.question = flat;
+      r.inputs.generated[0].inputs.fields["1"] = "1/2";
+      localStorage.setItem(key, JSON.stringify(r));
+    }
+  }, flat);
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(grid.locator(".math-input")).toHaveCount(9);
+  await expect(grid.locator(".math-input").first()).toHaveValue("1/2");
+  expect(traffic).toHaveLength(count);
+  expect(await page.evaluate(() => window.__pythonCalls)).toBe(0);
+});
+
+test("a matrix response with ambiguous scalar blanks is repaired into the required fixed widget", async ({
+  page,
+}) => {
+  const good = {
+    question: "Find the inverse of $I_2$. mat[1,2;3,4]",
+    mode: "equivalent",
+    vars: "",
+    fields: ["1", "0", "0", "1"].map((answer, i) => ({
+      answer,
+      recipe: {
+        op: "inv",
+        expr: "Matrix([[1,0],[0,1]])",
+        select: [Math.floor(i / 2), i % 2],
+      },
+    })),
+  };
+  const { traffic } = await open(page, {
+    generate: (n) =>
+      JSON.stringify(
+        n === 1
+          ? {
+              ...good,
+              question: "Find the inverse of $I_2$. _[1] _[2] _[3] _[4]",
+              fields: good.fields.map(({ answer }) => ({ answer })),
+            }
+          : good,
+      ),
+  });
+  const original = page
+    .locator('.math-exercise-cell[data-label="similar-matrix"]')
+    .first();
+  await original.getByRole("button", { name: "Harder", exact: true }).click();
+  await expect(
+    original.locator(".math-generated-problem .math-mat .math-input"),
+  ).toHaveCount(4);
+  expect(traffic).toHaveLength(2);
+  expect(traffic[1].messages[0].content).toContain("fixed mat[...] grid");
+  expect(JSON.parse(traffic[0].messages[1].content).answerInput.kind).toBe(
+    "matrix",
+  );
 });
