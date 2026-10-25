@@ -221,7 +221,10 @@ def request(payload):
     variables = {name: value for name, value in build_locals(options.get("vars", "")).items()
                  if isinstance(value, Symbol)}
     common = {"variables": variables, "file": file, "label": label, "elapsed_limit": 120}
-    reconciled = orchestration.reconcile(value, source, resolve, max_records=1000, **common)
+    # Retained trig batches can exceed two minutes while each individual
+    # candidate remains cheap. Keep the outer 300 s and per-candidate limits.
+    reconciled = orchestration.reconcile(value, source, resolve, max_records=1000,
+                                        **dict(common, elapsed_limit=240))
     value, records = reconciled["manifest"], reconciled["records"]
     counters = {key: reconciled[key] for key in ("replayed", "gone")}
     mutation = False
