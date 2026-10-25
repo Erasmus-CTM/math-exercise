@@ -40,7 +40,7 @@ function cell(records,{id='cell',label='q',mode='custom',initial,legacy=false,po
 }
 function page({records=[record(),record(1)],local={},session={},query='?variant=q:2',lang='en',initial,disabled=false,automatic=false,missingChooser=false,extra='',pool=false,legacy=false,feedback=false,boards=false,review=false,mode='custom',canonicalPayloadOnly=false,beforeSetup}={}) {
  const dom=new JSDOM('<script id="ctm-store-manifest" type="application/json">'+JSON.stringify({course:'course',exercises:[{id:'q',component:'math-exercise'},{id:'ordinary',component:'math-exercise'}]})+'</script>'+cell(records,{initial,pool,legacy,mode})+extra,
- {url:'https://example.test/lesson.html'+query,runScripts:'outside-only'});
+ {url:'https://example.test/lesson.html'+query,runScripts:'outside-only',pretendToBeVisual:true});
  const w=dom.window;w.TextEncoder=TextEncoder;let feedbackOptions;const feedbackResets=[];
  if(feedback){w.document.getElementById('cell').insertAdjacentHTML('beforeend','<button class="math-feedback-btn"></button>');w.AIFeedback={questionText:cell=>cell.querySelector('.math-exercise-question').textContent,contextMaterials:()=>[],attach(options){feedbackOptions=options;return {reset(){feedbackResets.push(true);},cancel(){}};}};}
  for(const[k,v]of Object.entries(local))w.localStorage.setItem(k,v);
@@ -73,7 +73,8 @@ async function check(p){const button=p.element.querySelector('.math-check-btn');
 
 test('shared chooser result events expose numbers while P17 and progress keep their identities',async()=>{
  const p=page();const node=p.w.document.getElementById('ctm-store-manifest'),manifest=JSON.parse(node.textContent);manifest.progress=true;node.textContent=JSON.stringify(manifest);
- p.w.CTMLayout.ready=fn=>fn();p.w.eval(lib('ui/ctm-progress.js'));
+ delete p.w.CTMLayout;p.w.eval(lib('ui/ctm-layout.js'));p.w.eval(lib('ui/ctm-progress.js'));
+ await new Promise(resolve=>setImmediate(resolve));
  const events=[];p.w.document.addEventListener('ctm:result',event=>events.push(plain(event.detail)));
  p.field().value='2/3';await check(p);
  assert.equal(events[0].variant,2);assert.deepEqual(events[0].variantIdentity,contexts[0].variant);assert.deepEqual(p.stored().variant,contexts[0].variant);
