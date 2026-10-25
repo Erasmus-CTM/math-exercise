@@ -39,13 +39,24 @@
         var value = wrap.matrixInput.read();
         sizes[wrap.dataset.matrixName] = {rows: value.rows, cols: value.cols};
       });
-      if (!filled && !options.variants().length && !Object.keys(sizes).length) return null;
-      return {fields: values, matrices: sizes};
+      var generated = options.generated ? options.generated.read() : [];
+      var inputs = {fields: values, matrices: sizes};
+      if (generated.length) inputs.generated = generated;
+      if (options.generated) {
+        var envelope = {v:1,component:'math-exercise',saved:new Date().toISOString(),inputs:inputs,
+          source:cell.dataset.ctmSource,variant:options.variant(),seen:options.seen ? options.seen() : []};
+        // Leave room for the store-owned timestamp/result/proposal envelope.
+        while (inputs.generated && inputs.generated.length && new TextEncoder().encode(JSON.stringify(envelope)).length > 63 * 1024) inputs.generated.pop();
+        options.generated.retain(inputs.generated || []);
+      }
+      if (!filled && !options.variants().length && !Object.keys(sizes).length && !(inputs.generated && inputs.generated.length)) return null;
+      return inputs;
     }
     function forget() {
       note.replaceChildren();
       last.replaceChildren();
       deferChoice = false;
+      if (options.generated) options.generated.clear();
     }
     function clearInputs() {
       restoring = true;
@@ -60,6 +71,7 @@
       restoring = true;
       try {
         choose(meta.variant);
+        if (options.generated) options.generated.restore(inputs.generated || []);
         matrices().forEach(function (wrap) {
           var name = wrap.dataset.matrixName, size = inputs.matrices && inputs.matrices[name];
           if (size) wrap.matrixInput.resize(size.rows, size.cols, true);
@@ -90,6 +102,7 @@
       note.replaceChildren();
       savedResult(meta);
       if (meta.state !== 'changed' && meta.state !== 'withdrawn') return;
+      if (options.generated) options.generated.restore(meta.record && meta.record.inputs.generated || []);
       deferChoice = true;
       restoring = true;
       try { choose(meta.variant); clearInputs(); } finally { restoring = false; }
@@ -117,6 +130,7 @@
         for (var i = 0; cols > 0 && i < values.length; i += cols) rows.push('[' + values.slice(i, i + cols).join(', ') + ']');
         parts.push({kind: 'answer', label: element.dataset.matrixName || '[' + matrixIndex + ']', text: '[' + rows.join(', ') + ']'});
       });
+      if (options.generated) parts = parts.concat(options.generated.exportParts());
       var caption = cell.querySelector('.math-exercise-caption');
       return {title: caption ? caption.textContent.trim() : options.id, parts: parts};
     }
@@ -148,6 +162,7 @@
     persistChoice();
     document.addEventListener('ctm:store-enabled', persistChoice);
     return {
+      generatedChanged: function () {if (!restoring) handle.flush();},
       changed: function () {
         if (restoring) return;
         deferChoice = false;

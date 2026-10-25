@@ -7,6 +7,7 @@ project:
     - index.qmd
     - basic-features.qmd
     - ai-feedback.qmd
+    - similar-problems.qmd
     - custom-assessment.qmd
     - graphics-examples.qmd
     - sympy-examples.qmd

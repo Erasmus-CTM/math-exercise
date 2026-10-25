@@ -264,6 +264,7 @@ test('Check grades with the page\'s own scripts and no AI feedback on the page (
     assert.equal(r.status, 0, r.stderr);
     const dom = new JSDOM(html(dir), { url: 'https://example.invalid/', runScripts: 'outside-only' });
     const w = dom.window;
+    w.TextEncoder = TextEncoder; // Browser API used by the real shared store.
     assert.equal(w.AIFeedback, undefined);
     w.__mathExerciseTestMode = true;
     // ctm-checkers' install, the check (ctm-libs' call text) and the request's removal all get this answer.

@@ -1,0 +1,73 @@
+---
+title: "Similar problems — practice testbox"
+filters: [math-exercise]
+ctm-assessment:
+  variants:
+    approval: optional
+ai-feedback:
+  similar: true
+  policy-files: similar-problems-policy.yml
+  policy: {default: similar-practice}
+  generation-policy: {default: similar-practice}
+---
+
+Use **Feedback settings** to choose Direct API and a reasoning model for generating
+problems. The three examples exercise symbolic keys, fixed matrix inputs and a
+trusted authored checker. Generated work is practice and does not count toward
+course scores. Reload to check saved answers; use **Key looks wrong** to test the
+local report and independent re-check.
+
+## 1. A derivative
+
+```{math-exercise}
+#| label: similar-derivative
+#| vars: x
+#| context: none
+#| harder: Introduce a product or chain rule while keeping the function manageable.
+#| simpler: Use a single power function.
+Differentiate $f(x)=x^2$. $f'(x)=$ _[2*x].
+```
+
+## 2. A fixed matrix calculation
+
+```{math-exercise}
+#| label: similar-matrix
+#| context: none
+#| harder: Use a different invertible 2 by 2 matrix with small exact entries.
+#| simpler: Use a diagonal 2 by 2 matrix.
+Find the inverse of $A=\begin{pmatrix}1&2\\0&1\end{pmatrix}$.
+$A^{-1}=$ mat[1,-2;0,1].
+```
+
+## 3. Linear independence with an authored check
+
+The vectors are the columns of $A$. Enter **1** for independent and **0** for
+dependent. This fixed scalar response permits different vector families without
+resizable answer inputs. The checker also rejects vectors longer than five
+coordinates, even if a candidate's independence answer happens to be correct.
+
+```{math-exercise}
+#| label: similar-independence
+#| variables: |
+#|   A = Matrix([[1, 0, 1], [0, 1, 1], [0, 0, 1]])
+#| mode: custom
+#| field-labels: Independent
+#| context: none
+#| harder: Give more vectors or less obvious dependencies. Never exceed five coordinates per vector.
+#| simpler: Give fewer vectors with an obvious relation or clear independence.
+#| checker: |
+#|   def check(response, symbols):
+#|       A = response['variables']['A']
+#|       if not 1 <= A.rows <= 5 or A.cols < 1:
+#|           return {'score': 0, 'feedback': 'Vector length must be between one and five.'}
+#|       answer = response['expressions'][0]
+#|       return {'correct': answer == Integer(A.rank() == A.cols)}
+#| tests:
+#|   - name: independent columns
+#|     answers: [1]
+#|     expect: correct
+#|   - name: incorrect dependence answer
+#|     answers: [0]
+#|     expect: wrong
+Are the columns of $A={@A@}$ linearly independent? _[1]
+```

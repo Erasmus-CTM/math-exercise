@@ -10,6 +10,7 @@
     "jsdom": "^26.1.0",
     "katex": "^0.16.11",
     "mathjax-full": "^3.2.2",
-    "playwright": "^1.55.1"
+    "playwright": "^1.55.1",
+    "pyodide": "0.28.3"
   }
 }

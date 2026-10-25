@@ -1,15 +1,15 @@
 {
- "comment": "Commits CI uses (.github/actions/quarto-dependencies and parity.yml; a head commit's CTM-Review-Refs trailer names others for review). ctm-libs: the library of CTM Assessment (settings, languages, the Python runtime, AI feedback). ctm-checkers: the Python checker library math-exercise grades with, installed with quarto add. ctm-assessment: the umbrella, for tools/ci/review-dependencies.py (the one copy of every CTM repository) and its parity harness (integration/pyodide-parity), which compares math-exercise's example site built at a pull request's base and at its head (parity.yml, L2).",
- "ctm-libs": {
-  "repository": "Erasmus-CTM/ctm-libs",
-  "commit": "81ccee0ec772c8e4869e57a23a048ba9b4e1ab3d"
- },
- "ctm-checkers": {
-  "repository": "Erasmus-CTM/ctm-checkers",
-  "commit": "5976f1a97b78bd81d4d7a3a954ff2102df8c6e37"
- },
- "ctm-assessment": {
-  "repository": "Erasmus-CTM/ctm-assessment",
-  "commit": "60c2b4df30a91b97e689494af49baf5ee47f73c3"
- }
+  "comment": "Exact reviewed dependencies for the Similar problems stacked set. No CTM-Review-Refs trailer is used; AC merges with merge commits.",
+  "ctm-libs": {
+    "repository": "Erasmus-CTM/ctm-libs",
+    "commit": "055b5978c6cb407e0334efc377b87ebe8199e7f1"
+  },
+  "ctm-checkers": {
+    "repository": "Erasmus-CTM/ctm-checkers",
+    "commit": "d3b1f5b887e0eb1b50b4558f32a66520536c368d"
+  },
+  "ctm-assessment": {
+    "repository": "Erasmus-CTM/ctm-assessment",
+    "commit": "60c2b4df30a91b97e689494af49baf5ee47f73c3"
+  }
 }

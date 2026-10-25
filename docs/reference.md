@@ -1078,3 +1078,35 @@ The source of this editor is math-exercise. Independent consumers may vendor
 these two files under their licenses, recording the upstream repository,
 commit and file hashes. Updates should replace the pinned files together;
 consumer parsing and grading remain outside the component.
+
+### Similar practice problems
+
+Authors opt in with `ai-feedback: similar: true` (course/page) or
+`#| similar: true`; an exercise's `#| similar: false` overrides course opt-in.
+AI-off/exam builds keep generation off. In Feedback settings choose Direct API
+and a reasoning generation model (`generator-model` supplies a course default).
+Copy mode shows disabled generation actions. Easier, Harder and Another one like
+this share the same checks and saved practice panel, without course score events.
+
+Use existing policy files and `generation-policy` to select generation guidance
+from the same named dictionary as teaching policies. A common mapping such as
+`generation-policy: {default: practice}` retains the shipped generation base.
+Policies may define `harder`, `easier` and `same`; exercises append short
+`#| harder: ...`, `#| simpler: ...` and `#| same: ...` directives. Generation
+ignores teaching hint steps. See `similar-problems.qmd` for three working kinds.
+
+SymPy computes admitted fixed-operation recipes; model answers must agree through
+the checker. Where no recipe fits, an independent solve is required and the key
+is labelled unverified. Only compatible trusted checkers from the original can
+be reused; the model never supplies Python, imports or new response contracts.
+The current inherited-data contract permits the original's declared matrix `A`
+as exact rational entries and the same fixed scalar response fields. The checker
+must enforce any hard task bounds, such as coordinate count at most five.
+Resizable matrices, graphical responses and model-written checkers are excluded.
+
+Practice specifications, answers, results and local key flags are nested in the
+original exercise's saved record, with a maximum of ten and a UTF-8 byte budget.
+Reload restores without requesting AI, computing keys or grading. Copy/export
+include practice questions, answers and report state. Key looks wrong starts one
+independent solve. Disagreement marks the key disputed and suppresses wrong-answer
+verdicts; agreement retains the flag. No reports go to GitHub or a central service.

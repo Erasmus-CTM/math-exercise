@@ -279,3 +279,9 @@
 /* A saved check is historical evidence, never a fresh assessment. */
 .math-saved-result { color: var(--bs-secondary-color, #6c757d); margin-top: .5rem; }
 .math-saved-answer pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.math-similar-controls { display: flex; flex-wrap: wrap; gap: .35rem; align-items: center; }
+.math-similar-panel { margin-top: 1rem; border-inline-start: .2rem solid var(--bs-border-color, #bbb); padding-inline-start: 1rem; }
+.math-generated-problem { margin-block: 1rem; }
+.math-generated-label { font-size: .85em; }
+.math-generated-problem[data-key-disputed="true"] .math-fb-wrong { color: inherit; }
