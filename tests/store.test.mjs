@@ -56,9 +56,10 @@ function page({meta = {state: 'empty'}, question = '<input class="math-input" id
     }, changed() { changes++; }, result(value) { events.push(plain(value)); }, clear() { options.clear(); }};
   }};
   const py = {loadPackage: async () => {}};
-  w.MathExerciseRuntime = {trackInitialUI: promise => {initialUI.push(promise); return promise;}, ensurePyodide: async () => {runtimeCalls++; return py;},
+  w.eval(readFileSync(new URL('runtime/pyodide-runtime.js', 'file://' + ctmLibs + '/'), 'utf8'));
+  Object.assign(w.MathExerciseRuntime, {trackInitialUI: promise => {initialUI.push(promise); return promise;}, ensurePyodide: async () => {runtimeCalls++; return py;},
     ensureGuard: async () => {}, ensureCheckers: async () => {}, stopCount: () => 0,
-    whenSlow: () => () => {}, callCheckers: async () => JSON.stringify(verdict)};
+    whenSlow: () => () => {}, callCheckers: async () => JSON.stringify(verdict)});
   w.eval(readFileSync(new URL('ui/variants.js', 'file://' + ctmLibs + '/'), 'utf8'));
   w.eval(matrixInputSource);
   w.eval(source('math-store.js'));

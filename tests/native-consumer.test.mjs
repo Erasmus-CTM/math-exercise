@@ -54,8 +54,9 @@ function page({records=[record(),record(1)],local={},session={},query='?variant=
  if(!missingChooser)w.eval(lib('ui/variants.js'));
  if(disabled)w.CTMStore.setEnabled(false);
  let runtime=0;const requests=[],tracked=[];const py={loadPackage:async()=>{}};
- w.MathExerciseRuntime={trackInitialUI(p){tracked.push(p);p.catch(()=>{});},ensurePyodide:async()=>{runtime++;return py;},ensureGuard:async()=>{},ensureCheckers:async()=>{},stopCount:()=>0,whenSlow:()=>()=>{},
- callCheckers:async(_py,name,request)=>{requests.push({name,request:plain(request)});return JSON.stringify({status:'correct',score:1});}};
+ w.eval(lib('runtime/pyodide-runtime.js'));
+ Object.assign(w.MathExerciseRuntime,{trackInitialUI(p){tracked.push(p);p.catch(()=>{});},ensurePyodide:async()=>{runtime++;return py;},ensureGuard:async()=>{},ensureCheckers:async()=>{},stopCount:()=>0,whenSlow:()=>()=>{},
+ callCheckers:async(_py,name,request)=>{requests.push({name,request:plain(request)});return JSON.stringify({status:'correct',score:1});}});
  w.eval(matrixInputSource);w.eval(own('math-store.js'));w.eval(own('math-exercise.js'));
  const element=w.document.getElementById('cell');const boardCalls=[],boardTitles=[];
  if(canonicalPayloadOnly)delete element.dataset.pool;
