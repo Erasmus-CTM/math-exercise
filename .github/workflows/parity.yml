@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 150
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           path: head
@@ -41,7 +41,7 @@ jobs:
         id: pins
         run: jq -r 'to_entries[] | select(.value | type == "object") | "\(.key)=\(.value.commit)"' head/.github/pins.json >> "$GITHUB_OUTPUT"
       - name: The umbrella (its parity harness and review-dependencies script)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: Erasmus-CTM/ctm-assessment
           ref: ${{ steps.pins.outputs['ctm-assessment'] }}
@@ -54,27 +54,27 @@ jobs:
           REVIEW_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
         run: python3 ../umbrella/tools/ci/review-dependencies.py
       - name: Fetch ctm-libs
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: Erasmus-CTM/ctm-libs
           ref: ${{ steps.review.outputs['ctm-libs'] || steps.pins.outputs['ctm-libs'] }}
           path: _ctm-libs-source
           persist-credentials: false
       - name: Fetch ctm-checkers
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: Erasmus-CTM/ctm-checkers
           ref: ${{ steps.review.outputs['ctm-checkers'] || steps.pins.outputs['ctm-checkers'] }}
           path: _ctm-checkers-source
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
-          node-version: '22'
+          node-version: '24'
           cache: npm
           cache-dependency-path: |
             umbrella/package-lock.json
             umbrella/integration/pyodide-parity/package-lock.json
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       # SymPy: the version Pyodide 0.28.3 ships (authored tests at build time); PyYAML: the variant generator.
@@ -130,7 +130,7 @@ jobs:
           if [ -f "$RUNNER_TEMP/parity/report.md" ]; then text=$(head -c 6000 "$RUNNER_TEMP/parity/report.md"); else text=$(tail -40 "$RUNNER_TEMP/parity.log" 2>/dev/null || echo 'no output'); fi
           level=notice; [ "${{ job.status }}" = success ] || level=error
           printf '::%s title=Grading parity (L2)::%s\n' "$level" "$(printf '%s' "$text" | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\n/%0A/g')"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: grading-parity
