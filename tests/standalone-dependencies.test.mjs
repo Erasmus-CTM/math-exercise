@@ -197,15 +197,16 @@ test('scripts and styles are cacheable dependencies: once per page, the runtime 
     const r = render(dir, 'filters: [math-exercise]\nlang: nb\n', plain + '\n\n' + plain.replace('two', 'three'));
     assert.equal(r.status, 0, r.stderr);
     const page = html(dir);
-    const order = ['ctm-runtime-[\\d.]+/pyodide-runtime\\.js', 'ctm-checkers-[\\w.+]+/ctm-checkers\\.js', 'ctm-locale-[\\d.]+/ctm-locale\\.js',
-      'ctm-locale-math-exercise-[\\d.]+/math-exercise\\.js',
+    const order = ['ctm-locale-[\\d.]+/ctm-locale\\.js', 'ctm-locale-[\\d.]+/common\\.js',
+      'ctm-locale-ui-[\\d.]+/ui\\.js', 'ctm-runtime-[\\d.]+/pyodide-runtime\\.js',
+      'ctm-checkers-[\\w.+]+/ctm-checkers\\.js', 'ctm-locale-math-exercise-[\\d.]+/math-exercise\\.js',
       'ctm-matrix-input-[\\d.]+/ctm-matrix-input\\.js', 'math-exercise-[\\d.]+/math-exercise\\.js'].map(file => {
       const found = [...page.matchAll(new RegExp('<script src="[^"]*/' + file + '"></script>', 'g'))];
       assert.equal(found.length, 1, file);
       return found[0].index;
     });
     assert.deepEqual([...order].sort((a, b) => a - b), order);
-    assert.ok(page.indexOf('window.__mathExerciseConfig = {"lang":"nb"') < order[4]);
+    assert.ok(page.indexOf('window.__mathExerciseConfig = {"lang":"nb"') < order[6]);
     assert.equal((page.match(/<link href="[^"]*\/math-exercise-[\d.]+\/math-exercise\.css" rel="stylesheet">/g) || []).length, 1);
     assert.doesNotMatch(page, /MathExerciseRuntime = |var LOCALES|<style type="text\/css">/);
     assert.match(page, /math-check-btn">✓&nbsp;Sjekk</);
@@ -264,6 +265,7 @@ test('Check grades with the page\'s own scripts and no AI feedback on the page (
     assert.equal(r.status, 0, r.stderr);
     const dom = new JSDOM(html(dir), { url: 'https://example.invalid/', runScripts: 'outside-only' });
     const w = dom.window;
+    w.TextEncoder = TextEncoder; // Browser API used by the real shared store.
     assert.equal(w.AIFeedback, undefined);
     w.__mathExerciseTestMode = true;
     // ctm-checkers' install, the check (ctm-libs' call text) and the request's removal all get this answer.

@@ -1,0 +1,11 @@
+ai-feedback:
+  policies:
+    similar-practice:
+      base-prompt: >-
+        Use the notation and methods in the original exercise. Keep problems
+        self-contained and nontrivial. Use exact rational or integer givens.
+        For vector problems keep the coordinate count at most five; change
+        the number of vectors or their dependencies to change difficulty.
+      harder: Increase the reasoning required by one natural step.
+      easier: Reduce the number of steps or provide more guidance.
+      same: Give a fresh problem requiring the same method and effort.

@@ -192,6 +192,7 @@ local function ensureSetup()
   ctm.runtime.use()
   ctm.checkers.use()
   ctm.locale.use("math-exercise")
+  ctm.locale.use("ui")
   if not ctm.matrix or type(ctm.matrix.use) ~= "function" then
     ctm.fail("math-exercise needs the shared matrix editor. Update CTM Assessment: " .. INSTALL)
   end
@@ -203,6 +204,7 @@ local function ensureSetup()
     scripts = {
       {path = "math-store.js", afterBody = true},
       {path = "math-exercise.js", afterBody = true},
+      feedbackForExercises and {path = "math-similar.js", afterBody = true} or nil,
     },
   })
 end
@@ -936,8 +938,18 @@ local function buildExercise(el, state)
   local fc = feedback.context(el, opts)
   local sectionText = ctm.feedback.context(el, opts).text
 
+  local similar = feedbackForExercises and ctm.settings.bool("ai-feedback", "similar", {default = false})
+  if opts["similar"] ~= nil then
+    if opts["similar"] ~= "true" and opts["similar"] ~= "false" then ctm.fail("math-exercise: similar must be true or false") end
+    similar = feedbackForExercises and opts["similar"] == "true"
+  end
+  local generationPolicy = {exercise = label, name = ""}
+  if feedbackForExercises then generationPolicy = ctm.feedback.selection(el, opts, "generation-policy") end
   -- Base data attributes shared by both modes
-  local attrs = 'id="'             .. eid                .. '"'
+  local attrs = ' data-similar="' .. tostring(similar) .. '"'
+             .. ' data-similar-guidance="' .. attrEsc(quarto.json.encode(similar and {harder = opts.harder or "", easier = opts.simpler or "", same = opts.same or ""} or {})) .. '"'
+             .. ' data-generation-policy="' .. attrEsc(quarto.json.encode(similar and generationPolicy or {})) .. '"'
+             .. ' id="'             .. eid                .. '"'
              .. ' data-label="'     .. attrEsc(label)     .. '"'
              .. ' data-mode="'      .. attrEsc(mode)      .. '"'
              .. ' data-reject="'    .. attrEsc(reject)    .. '"'

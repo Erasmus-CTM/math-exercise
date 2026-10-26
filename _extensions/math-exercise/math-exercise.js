@@ -872,6 +872,7 @@
     opts = opts || {};
     return runOnCurrentRuntime(async function (py) {
       return JSON.parse(await callCheckers(py, 'check', {
+        ...(opts.generated ? {generated: true, learner: true} : {}),
         student:   val,
         correct:   el.dataset.answer || '',
         vars:      el.dataset.vars   || '',
@@ -950,6 +951,7 @@
       await ensurePackages(opts.packages);
       var request = {
         response: response,
+        ...(opts.generated ? {generated: true, learner: true} : {}),
         vars:     opts.vars || '',
         checker:  opts.checker || '',
       };
@@ -1029,6 +1031,7 @@
   }
 
   function setupCell(cell) {
+    if (cell._mathExerciseSetup) return;
     var vars   = cell.dataset.vars   || '';
     var mode   = cell.dataset.mode   || 'equivalent';
     var reject = cell.dataset.reject || '';
@@ -1044,6 +1047,7 @@
     try { packages = JSON.parse(cell.dataset.packages || '[]'); } catch (e) {}
     var formCredit = finiteCredit(cell.dataset.formCredit || '0.5');
     var checkOpts = {
+      generated: cell.dataset.similarGenerated === "true",
       reject:    reject,
       tolerance: cell.dataset.tolerance || '',
       decplaces: cell.dataset.decplaces || '',
@@ -1071,7 +1075,8 @@
       }
     }
 
-    var storedAnswers = null, variantBoards = null;
+    if (cell._similarContext) checkOpts.questionContext = cell._similarContext;
+    var storedAnswers = cell._generatedStore || null, variantBoards = null;
     var storageVariants = JSON.parse(cell.dataset.storageVariants || '[]');
     function storedVariant() { return storageVariants[idx] || null; }
     var generated = cell.dataset.variants ? JSON.parse(cell.dataset.variants) : null;
@@ -1429,7 +1434,7 @@
           if      (res.status === 'empty')    { parts.push('<div class="math-fb-empty">'  + prefix + L.resEmpty + '</div>'); }
           else if (res.status === 'correct')  { el.classList.add('math-input-ok');    parts.push('<div class="math-fb-ok">&#10003;&nbsp;'  + prefix + L.resCorrect + '</div>'); }
           else if (res.status === 'partial')  { el.classList.add('math-input-partial'); parts.push('<div class="math-fb-partial">' + prefix + L.resPartial(Math.round(res.score * 100)) + '</div>'); }
-          else if (res.status === 'wrong')    { el.classList.add('math-input-wrong'); parts.push('<div class="math-fb-wrong">&#10007;&nbsp;' + prefix + L.resWrong + '</div>'); }
+          else if (res.status === 'wrong')    { el.classList.add('math-input-wrong'); parts.push('<div class="math-fb-wrong">&#10007;&nbsp;' + prefix + (cell._similarVerdict ? cell._similarVerdict(L.resWrong) : L.resWrong) + '</div>'); }
           else if (res.status === 'rejected') { el.classList.add('math-input-wrong'); parts.push('<div class="math-fb-wrong">&#10007;&nbsp;' + prefix + L.resRejected + '</div>'); }
           else if (res.status === 'not_exact'){ el.classList.add(res.score > 0 ? 'math-input-partial' : 'math-input-wrong'); parts.push('<div class="' + (res.score > 0 ? 'math-fb-partial' : 'math-fb-wrong') + '">' + prefix + L.resNotExact + (res.score > 0 ? ' ' + L.resPartial(Math.round(res.score * 100)) : '') + '</div>'); }
           else if (res.status === 'not_form') { el.classList.add(res.score > 0 ? 'math-input-partial' : 'math-input-wrong'); parts.push('<div class="' + (res.score > 0 ? 'math-fb-partial' : 'math-fb-wrong') + '">' + prefix + L.resNotForm(checkOpts.form) + (res.score > 0 ? ' ' + L.resPartial(Math.round(res.score * 100)) : '') + '</div>'); }
@@ -1455,6 +1460,9 @@
     }
 
     function publishStoredResult(results) {
+      if (cell._similarVerdict && results.some(function (r) {return r.status === "incorrect";})) {
+        if (mode === "custom") fbDiv.textContent = cell._similarVerdict(L.resWrong);
+      }
       if (!storedAnswers) return;
       var invalid = !results.length || results.some(function (result) {
         return !/^(correct|partial|incorrect)$/.test(result.status);
@@ -1577,10 +1585,19 @@
       if(generated.review) setupVariantReview(cell, generated);
     }
 
-    if (window.MathExerciseStore && !catalogReview) {
+    var similar = window.MathSimilar && !checkOpts.generated && window.MathSimilar.attach({
+      cell: cell, mode: mode, language: ME_CFG.lang,
+      task: function () {return questionText(cell, fieldIds, fieldLabel);},
+      contexts: function () {return resolveContexts(cell);},
+      options: function () {return JSON.parse(JSON.stringify(checkOpts));},
+      render: renderTaskText, typeset: renderMathInQuestion, setup: setupCell,
+      call: function (name, request) {return runOnCurrentRuntime(async function (py) {return JSON.parse(await callCheckers(py, name, request));});},
+      changed: function () {if (storedAnswers && storedAnswers.generatedChanged) storedAnswers.generatedChanged();}
+    });
+    if (window.MathExerciseStore && !catalogReview && !checkOpts.generated) {
       storedAnswers = window.MathExerciseStore.attach({
         element: cell, question: questionDiv, id: cell.dataset.ctmId || label, lang: ME_CFG.lang,
-        graphical: !!checkOpts.responseSource,
+        graphical: !!checkOpts.responseSource, generated: similar,
         variant: function () {return chooser ? chooser.state().variant : storedVariant();},
         proposal: function () {return chooser ? chooser.state().proposal : undefined;},
         allowProposals: nativeVariants,
@@ -1629,7 +1646,7 @@
       output.setAttribute('aria-live', 'polite');
       feedbackHandle = F.attach({
         contextRefs: function () { return cell.dataset.contextMode === 'none' ? '' : cell.dataset.contextRefs; },
-        integration: 'math-exercise', policySelection: JSON.parse(cell.dataset.feedbackPolicy || '{}'), requestOptions: {imageFallback:'text'}, id: 'math-' + label, button: feedbackBtn, output: output,
+        integration: 'math-exercise', policySelection: JSON.parse(cell.dataset.feedbackPolicy || '{}'), requestOptions: {imageFallback:'text'}, id: checkOpts.generated ? '' : 'math-' + label, button: feedbackBtn, output: output,
         uiLanguage: L.outputLanguageCode,
         getRequest: async function (state) {
           var before = localSnapshot();
@@ -1657,7 +1674,7 @@
               ? (externalAISummary(ai) || 'Interactive graphical response submitted; no textual summary is available.')
               : expressionAnswersXml(responses, structuredInputs) }],
 
-            evidence: evidence.map(function (result) { return { label: 'Private check assessment', text: JSON.stringify(result) }; }),
+            evidence: (cell._similarTrust ? [{label: 'Generated answer-key trust', text: cell._similarTrust()}] : []).concat(evidence.map(function (result) { return { label: 'Private check assessment', text: JSON.stringify(result) }; })),
             attachments: ai && ai.image && /^data:image\/(?:png|jpeg|jpg|webp);base64,/i.test(ai.image)
               ? [{ id: 'graph', role: 'response', label: 'Current graph', dataUrl: ai.image }] : [],
             feedback: {language: L.outputLanguageCode}
@@ -1667,12 +1684,16 @@
       questionDiv.addEventListener('input', function () { output.replaceChildren(); });
     }
     if (reconfigBtn) reconfigBtn.replaceWith(window.AIFeedback.settingsButton(L.outputLanguageCode));
+    cell._mathExerciseDispose = function () { if (feedbackHandle) feedbackHandle.dispose(); };
+    cell._mathExerciseSetup = true;
 
   }
 
   // ---------------------------------------------------------------------------
   // Init
   // ---------------------------------------------------------------------------
+
+  window.MathExercise = Object.assign(window.MathExercise || {}, {setupCell: setupCell});
 
   // Deliberately absent in normal pages.  The repository's Node regression
   // test enables this flag before loading the bundle so it can exercise the

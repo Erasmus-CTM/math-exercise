@@ -1,9 +1,9 @@
 name: Browser interactions
 on:
   pull_request:
-    paths: ['_extensions/**', '_includes/**', '*.qmd', 'tests/browser/**', 'playwright.config.mjs', 'package*.json', '.github/workflows/browser.yml', '.github/pins.json', '.github/actions/**']
+    paths: ['_extensions/**', '_includes/**', '*.qmd', 'tests/browser/**', 'tests/build-similar-profiles.py', 'playwright.config.mjs', 'package*.json', '.github/workflows/browser.yml', '.github/pins.json', '.github/actions/**']
   push:
-    paths: ['_extensions/**', '_includes/**', '*.qmd', 'tests/browser/**', 'playwright.config.mjs', 'package*.json', '.github/workflows/browser.yml', '.github/pins.json', '.github/actions/**']
+    paths: ['_extensions/**', '_includes/**', '*.qmd', 'tests/browser/**', 'tests/build-similar-profiles.py', 'playwright.config.mjs', 'package*.json', '.github/workflows/browser.yml', '.github/pins.json', '.github/actions/**']
   workflow_dispatch:
 permissions:
   contents: read
@@ -31,6 +31,7 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npx playwright install --with-deps chromium
       - run: quarto render
+      - run: python tests/build-similar-profiles.py
       - run: npm run test:browser
       - uses: actions/upload-artifact@v4
         if: always()
