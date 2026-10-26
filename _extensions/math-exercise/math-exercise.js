@@ -1766,7 +1766,7 @@
       }
     });
     if (cells.length) ensurePyodide().catch(function (e) {
-      console.warn('math-exercise: Pyodide preload failed (will retry on the first check):', e);
+      console.warn('math-exercise: Pyodide preload failed (use Retry to restart Python):', e);
     });
     try { await ensureKatex(); }
     catch (error) {
