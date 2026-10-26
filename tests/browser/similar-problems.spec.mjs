@@ -3,6 +3,9 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { existsSync, readFileSync } from "node:fs";
+// These cases control provider/grader boundaries. COI activation/reload is
+// exercised by P13's real worker acceptance, not by this structural fixture.
+test.use({ serviceWorkers: "block" });
 const repoRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "../..",
@@ -41,7 +44,7 @@ async function open(page, provider = {}) {
   const traffic = [];
   let generated = 0,
     solved = 0;
-  await page.route("https://cdn.jsdelivr.net/npm/katex@*/**", async (route) => {
+  await page.context().route("https://cdn.jsdelivr.net/npm/katex@*/**", async (route) => {
     const relative = new URL(route.request().url()).pathname.replace(
       /^\/npm\/katex@[^/]+\//,
       "",
@@ -54,7 +57,7 @@ async function open(page, provider = {}) {
         : "application/octet-stream";
     await route.fulfill({ body: readFileSync(file), contentType: type });
   });
-  await page.route(
+  await page.context().route(
     "https://cdn.jsdelivr.net/pyodide/v0.28.3/full/**",
     async (route) => {
       const name = path.basename(new URL(route.request().url()).pathname),
@@ -124,7 +127,7 @@ async function open(page, provider = {}) {
           throw Error("Unexpected Python source execution");
         },
       };
-      const runtime = {
+      const stubs = {
         ensurePyodide: async () => py,
         ensureGuard: async () => {},
         ensureCheckers: async () => {},
@@ -140,10 +143,11 @@ async function open(page, provider = {}) {
         whenInitialUIReady: () => Promise.resolve(),
         canStop: () => false,
       };
+      let runtime;
       Object.defineProperty(window, "MathExerciseRuntime", {
         configurable: true,
         get: () => runtime,
-        set: () => {},
+        set: (value) => { runtime = Object.assign(value, stubs); },
       });
     },
     { realPython: provider.realPython === true },
