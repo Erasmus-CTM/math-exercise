@@ -3,6 +3,7 @@ on:
   pull_request:
     paths: ['_extensions/**', '_includes/**', '*.qmd', 'tests/browser/**', 'tests/build-similar-profiles.py', 'playwright.config.mjs', 'package*.json', '.github/workflows/browser.yml', '.github/pins.json', '.github/actions/**']
   push:
+    branches: [main]
     paths: ['_extensions/**', '_includes/**', '*.qmd', 'tests/browser/**', 'tests/build-similar-profiles.py', 'playwright.config.mjs', 'package*.json', '.github/workflows/browser.yml', '.github/pins.json', '.github/actions/**']
   workflow_dispatch:
 permissions:

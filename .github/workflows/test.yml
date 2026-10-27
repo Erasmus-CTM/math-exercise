@@ -1,7 +1,10 @@
 name: Test math-exercise
 
 on:
+  # Pull requests and main; a branch push without a pull request runs nothing,
+  # so no commit is tested twice.
   push:
+    branches: [main]
   pull_request:
 
 jobs:
