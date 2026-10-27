@@ -1,5 +1,10 @@
 name: Build standalone example
-on: [push, pull_request, workflow_dispatch]
+on:
+  # Pull requests and main; a branch push without a pull request runs nothing.
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
