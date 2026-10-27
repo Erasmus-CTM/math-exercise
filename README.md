@@ -59,3 +59,11 @@ Developed by the **CTM team** for the Erasmus+ project
 ## Generated variants
 
 Author one template instead of repeated pools. See [build-time generation and optional review](docs/build-time-variants.md) and [the examples](generated-variants.qmd). Generated templates require Python 3 and PyYAML at build time.
+# Standalone Python worker
+
+Mathematics checkers and custom checkers use the page's shared `CTMWorker`.
+Logical operations are serialized with other Python consumers on that page;
+the check's stop-after clock starts when it acquires the interpreter. Stop
+cancels queued checks and interrupts active work, with a bounded worker restart
+when isolation is unavailable or the interrupt is ignored. Cancelled work is
+never replayed and does not overwrite a completed grade.
