@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Math that spans several lines, and a bare `\begin{...}...\end{...}` without
+  `$`, are typeset. Before, the line break became `<br>` inside the formula, and
+  KaTeX's auto-render left such math (and bare environments) as raw TeX. This
+  was common in AI-generated similar problems, especially matrices. Lua and JS
+  rendering stay identical.
+- The independent solve of a generated problem (and of a reported key) may take
+  three minutes instead of ordinary feedback's 60 seconds.
+
 - Declarative question tests run through the real grader in every mode at
   build time and through the direct question-tests.py command. Named fields,
   raw student strings and score/partial expectations share ctm-checkers'

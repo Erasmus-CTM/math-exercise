@@ -20,7 +20,10 @@ Question text with an input field: _[correct_answer]
 The question text is Markdown-like text, not HTML:
 
 - Math in `$...$`, `$$...$$`, `\(...\)`, `\[...\]` or `\begin{...}...\end{...}`
-  is passed to the math renderer unchanged, so `$a<b<c$` works.
+  is passed to the math renderer unchanged, so `$a<b<c$` works. Math may span
+  several lines (a line break inside math is a space). A bare
+  `\begin{...}...\end{...}` gets its own delimiters: inline for matrices,
+  `array`, `cases`, `aligned`, `gathered` and `split`, display for the others.
 - Outside math, `***bold italic***`, `**bold**`, `*italic*` and `` `code` `` are
   formatted, also around math (`**Part $a$:**`); `$` inside a code span is a
   dollar. `\*` and `` \` `` give a literal `*` and `` ` ``.
@@ -1117,7 +1120,9 @@ Omitted mode/variables inherit the original exercise contract. These convenience
 do not bypass recipe admission, computed-key agreement, the original checker, or
 independent solving. A rejected candidate receives the concrete validation reason
 for repair within the existing two-candidate limit. The panel's **Details** shows
-the final rejection reason locally; no report is sent elsewhere.
+the final rejection reason locally; no report is sent elsewhere. Each generation
+request to the provider may take five minutes (ctm-libs' generation budget; a
+corrective retry gets a fresh budget), and the independent solve three minutes.
 
 Generated learner responses use the original checker's notation and grading
 options, including implicit multiplication (`21x`, `3x^2`), implicit function
