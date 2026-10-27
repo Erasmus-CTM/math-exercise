@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Similar problems — practice testbox – math-exercise</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-f53186b9ac0866246e638800b9d808a6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="site_libs/quarto-contrib/ctm-locale-0.9.0/ctm-locale.js"></script>
+<script src="site_libs/quarto-contrib/ctm-locale-0.9.0/common.js"></script>
+<script src="site_libs/quarto-contrib/ctm-locale-ui-0.9.0/ui.js"></script>
+<script src="site_libs/quarto-contrib/ctm-layout-0.9.0/ctm-layout.js"></script>
+<script src="site_libs/quarto-contrib/ctm-layout-0.9.0/ctm-settings.js"></script>
+<link href="site_libs/quarto-contrib/ctm-layout-0.9.0/ctm-ui.css" rel="stylesheet">
+<script src="site_libs/quarto-contrib/ai-feedback-0.9.0/feedback-core.js"></script>
+<script src="site_libs/quarto-contrib/ai-feedback-0.9.0/feedback-dom.js"></script>
+<script src="site_libs/quarto-contrib/ai-feedback-0.9.0/ai-feedback.js"></script>
+<link href="site_libs/quarto-contrib/ai-feedback-0.9.0/ai-feedback.css" rel="stylesheet">
+<script src="site_libs/quarto-contrib/ctm-assets-0.9.0/assets.js"></script>
+<script src="site_libs/quarto-contrib/ctm-runtime-0.9.0/pyodide-runtime.js"></script>
+<script src="site_libs/quarto-contrib/ctm-worker-0.9.0/pyodide-worker.js"></script>
+<script src="site_libs/quarto-contrib/ctm-checkers-0.12.0.dev0+21ac0fe7/ctm-checkers.js"></script>
+<script src="site_libs/quarto-contrib/ctm-locale-math-exercise-0.9.0/math-exercise.js"></script>
+<link href="site_libs/quarto-contrib/ctm-matrix-input-0.9.0/ctm-matrix-input.css" rel="stylesheet">
+<link href="site_libs/quarto-contrib/math-exercise-0.11.0/math-exercise.css" rel="stylesheet">
+<link href="site_libs/quarto-contrib/ctm-ui-0.9.0/ctm-ui.css" rel="stylesheet">
+<script src="site_libs/quarto-contrib/ctm-copy-0.9.0/ctm-copy.js"></script>
+<script src="site_libs/quarto-contrib/ctm-store-0.9.0/ctm-store.js"></script>
+<script src="site_libs/quarto-contrib/ctm-variants-0.9.0/variants.js"></script>
+<script src="site_libs/quarto-contrib/ctm-export-0.9.0/ctm-export.js"></script>
+<script src="site_libs/quarto-contrib/ctm-nav-0.9.0/ctm-nav.js"></script>
+<script src="site_libs/quarto-contrib/ctm-progress-0.9.0/ctm-progress.js"></script>
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script>globalThis.CTM_ASSETS={"bases":{"font-awesome":"https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/","katex":"https://cdn.jsdelivr.net/npm/katex@0.16.47/","mathjax3":"https://cdn.jsdelivr.net/npm/mathjax@3.2.2/","monaco-editor":"https://cdn.jsdelivr.net/npm/monaco-editor@0.46.0/","pyodide":"https://cdn.jsdelivr.net/pyodide/v0.28.3/full/","source-sans-pro":"https://cdn.jsdelivr.net/npm/@fontsource/source-sans-pro@5.3.0/"},"mode":"cdn","v":1};</script>
+<script src="./coi-serviceworker.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="example-site.css">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">math-exercise</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">Overview</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./examples.html"> 
+<span class="menu-text">All check modes</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./example.html"> 
+<span class="menu-text">Minimal feedback example</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./basic-features.html"> 
+<span class="menu-text">Basic features</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./sympy-examples.html"> 
+<span class="menu-text">Expressions and equivalence</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./ai-feedback.html"> 
+<span class="menu-text">AI feedback</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./custom-assessment.html"> 
+<span class="menu-text">Open-ended assessment</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./graphics-examples.html"> 
+<span class="menu-text">Graphical answers</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./vector-matrix-tests.html"> 
+<span class="menu-text">Vektorer og matriser (NB)</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./dynamic-matrix-tests.html"> 
+<span class="menu-text">Dynamic matrices</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./graph-theory.html"> 
+<span class="menu-text">Graph theory</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="https://github.com/Erasmus-CTM/math-exercise"> 
+<span class="menu-text">GitHub</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#a-derivative" id="toc-a-derivative" class="nav-link active" data-scroll-target="#a-derivative">1. A derivative</a></li>
+  <li><a href="#a-fixed-matrix-calculation" id="toc-a-fixed-matrix-calculation" class="nav-link" data-scroll-target="#a-fixed-matrix-calculation">2. A fixed matrix calculation</a></li>
+  <li><a href="#linear-independence-with-an-authored-check" id="toc-linear-independence-with-an-authored-check" class="nav-link" data-scroll-target="#linear-independence-with-an-authored-check">3. Linear independence with an authored check</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+<script>window.__aiFeedbackPolicies = {"layers":[{"policies":{"similar-practice":{"base-prompt":"Use the notation and methods in the original exercise. Keep problems self-contained and nontrivial. Use exact rational or integer givens. For vector problems keep the coordinate count at most five; change the number of vectors or their dependencies to change difficulty.","harder":"Increase the reasoning required by one natural step.","easier":"Reduce the number of steps or provide more guidance.","same":"Give a fresh problem requiring the same method and effort."}}}],"pageLayers":[],"projectPolicy":{"default":"similar-practice"},"generationPolicy":{"default":"similar-practice"}};</script>
+<script>window.__aiFeedbackConfig = {"baseUrl":"","mode":"copy","model":"","similar":true};</script>
+<script>window.__mathExerciseConfig = {"lang":"en","stopAfter":20};</script>
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Similar problems — practice testbox</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!--ctm-save-generated--><div class="ctm-save-bar" role="region" aria-label="Saved answers" hidden=""><p class="ctm-save-notice">Your answers are saved only in this browser.</p><div class="ctm-save-actions"><button type="button" data-ctm-save-toggle="">Do not save on this device</button>
+<button type="button" data-ctm-export="">Export my answers</button>
+<button type="button" data-ctm-clear-page="">Delete answers on this page</button>
+<button type="button" data-ctm-clear-course="">Delete all your answers in this course</button></div><span class="ctm-save-status" role="status" aria-live="polite"></span></div>
+<p>Use <strong>Feedback settings</strong> to choose Direct API and a reasoning model for generating problems. The three examples exercise symbolic keys, fixed matrix inputs and a trusted authored checker. Generated work is practice and does not count toward course scores. Reload to check saved answers; use <strong>More → I think the expected answer is wrong</strong> to test the local report and independent re-check.</p>
+<section id="a-derivative" class="level2">
+<h2 class="anchored" data-anchor-id="a-derivative">1. A derivative</h2>
+<div class="math-exercise-cell" data-similar="true" data-similar-guidance="{&quot;easier&quot;:&quot;Use a single power function.&quot;,&quot;harder&quot;:&quot;Introduce a product or chain rule while keeping the function manageable.&quot;,&quot;same&quot;:&quot;&quot;}" data-generation-policy="{&quot;exercise&quot;:&quot;similar-derivative&quot;,&quot;name&quot;:&quot;&quot;}" id="math-exercise-1" data-label="similar-derivative" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;similar-derivative&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="none" data-context-refs="none" data-context="&quot;1. A derivative&quot;" data-context-text="&quot;&quot;" data-ctm-source="37e99553f3736ce1" data-ctm-runtime-id="ctm-block-1" data-ctm-id="similar-derivative" data-ctm-component="math-exercise" data-ctm-save="true" data-fields="[&quot;math-exercise-1-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div id="similar-derivative-question" class="math-exercise-question ai-feedback-context" data-math-exercise-source="Differentiate \(f(x)=x^2\). \(f'(x)=\) <input type=&quot;text&quot; id=&quot;math-exercise-1-f1&quot; data-vars=&quot;x&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>.">Differentiate \(f(x)=x^2\). \(f'(x)=\) <input type="text" id="math-exercise-1-f1" data-answer="2*x" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">.</div>
+
+<div class="math-exercise-controls">
+  <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
+  <button type="button" class="btn btn-light math-legend-btn">ⓘ&nbsp;Input help</button>
+  <div class="btn-group">
+    <button type="button" class="btn btn-light math-feedback-btn">💬&nbsp;Feedback</button>
+    <button type="button" class="btn btn-light math-reconfig-btn" title="Change AI configuration">⚙</button>
+  </div>
+</div>
+<div class="math-legend-panel" style="display:none;"></div>
+<div class="math-feedback-area"></div>
+</div>
+</section>
+<section id="a-fixed-matrix-calculation" class="level2">
+<h2 class="anchored" data-anchor-id="a-fixed-matrix-calculation">2. A fixed matrix calculation</h2>
+<div class="math-exercise-cell" data-similar="true" data-similar-guidance="{&quot;easier&quot;:&quot;Use a diagonal 2 by 2 matrix.&quot;,&quot;harder&quot;:&quot;Use a different invertible 2 by 2 matrix with small exact entries.&quot;,&quot;same&quot;:&quot;&quot;}" data-generation-policy="{&quot;exercise&quot;:&quot;similar-matrix&quot;,&quot;name&quot;:&quot;&quot;}" id="math-exercise-2" data-label="similar-matrix" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;similar-matrix&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="none" data-context-refs="none" data-context="&quot;2. A fixed matrix calculation&quot;" data-context-text="&quot;&quot;" data-ctm-source="8f8a782fb32af57c" data-ctm-runtime-id="ctm-block-2" data-ctm-id="similar-matrix" data-ctm-component="math-exercise" data-ctm-save="true" data-fields="[&quot;math-exercise-2-f1&quot;,&quot;math-exercise-2-f2&quot;,&quot;math-exercise-2-f3&quot;,&quot;math-exercise-2-f4&quot;]" data-structural-field-labels="[&quot;m1,1&quot;,&quot;m1,2&quot;,&quot;m2,1&quot;,&quot;m2,2&quot;]">
+<div id="similar-matrix-question" class="math-exercise-question ai-feedback-context" data-math-exercise-source="Find the inverse of \(A=\begin{pmatrix}1&amp;amp;2\\0&amp;amp;1\end{pmatrix}\).<br>
+\(A^{-1}=\) <span class=&quot;math-mat&quot; style=&quot;--cols:2&quot;><input type=&quot;text&quot; id=&quot;math-exercise-2-f1&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-mat-cell&quot;><input type=&quot;text&quot; id=&quot;math-exercise-2-f2&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-mat-cell&quot;><input type=&quot;text&quot; id=&quot;math-exercise-2-f3&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-mat-cell&quot;><input type=&quot;text&quot; id=&quot;math-exercise-2-f4&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-mat-cell&quot;></span>.">Find the inverse of \(A=\begin{pmatrix}1&amp;2\\0&amp;1\end{pmatrix}\).<br>
+\(A^{-1}=\) <span class="math-mat" style="--cols:2"><input type="text" id="math-exercise-2-f1" data-answer="1" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-2-f2" data-answer="-2" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-2-f3" data-answer="0" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"><input type="text" id="math-exercise-2-f4" data-answer="1" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-mat-cell"></span>.</div>
+
+<div class="math-exercise-controls">
+  <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
+  <button type="button" class="btn btn-light math-legend-btn">ⓘ&nbsp;Input help</button>
+  <div class="btn-group">
+    <button type="button" class="btn btn-light math-feedback-btn">💬&nbsp;Feedback</button>
+    <button type="button" class="btn btn-light math-reconfig-btn" title="Change AI configuration">⚙</button>
+  </div>
+</div>
+<div class="math-legend-panel" style="display:none;"></div>
+<div class="math-feedback-area"></div>
+</div>
+</section>
+<section id="linear-independence-with-an-authored-check" class="level2">
+<h2 class="anchored" data-anchor-id="linear-independence-with-an-authored-check">3. Linear independence with an authored check</h2>
+<p>The vectors are the columns of <span class="math inline">\(A\)</span>. Enter <strong>1</strong> for independent and <strong>0</strong> for dependent. This fixed scalar response permits different vector families without resizable answer inputs. The checker also rejects vectors longer than five coordinates, even if a candidate’s independence answer happens to be correct.</p>
+<div class="math-exercise-cell" data-similar="true" data-similar-guidance="{&quot;easier&quot;:&quot;Give fewer vectors with an obvious relation or clear independence.&quot;,&quot;harder&quot;:&quot;Give more vectors or less obvious dependencies. Never exceed five coordinates per vector.&quot;,&quot;same&quot;:&quot;&quot;}" data-generation-policy="{&quot;exercise&quot;:&quot;similar-independence&quot;,&quot;name&quot;:&quot;&quot;}" id="math-exercise-3" data-label="similar-independence" data-mode="custom" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    A = response['variables']['A']\n    if not 1 <= A.rows <= 5 or A.cols < 1:\n        return {'score': 0, 'feedback': 'Vector length must be between one and five.'}\n    answer = response['expressions'][0]\n    return {'correct': answer == Integer(A.rank() == A.cols)}&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[&quot;Independent&quot;]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;similar-independence&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="none" data-context-refs="none" data-context="&quot;3. Linear independence with an authored check\nThe vectors are the columns of \\(A\\). Enter 1 for independent and 0 for dependent. This fixed scalar response permits different vector families without resizable answer inputs. The checker also rejects vectors longer than five coordinates, even if a candidate’s independence answer happens to be correct.&quot;" data-context-text="&quot;&quot;" data-ctm-source="aa80d42b9539df76" data-ctm-runtime-id="ctm-block-3" data-ctm-id="similar-independence" data-ctm-component="math-exercise" data-ctm-save="true" data-variants="{&quot;approval&quot;:&quot;optional&quot;,&quot;native&quot;:true,&quot;options&quot;:{&quot;checker&quot;:&quot;def check(response, symbols):\n    A = response['variables']['A']\n    if not 1 <= A.rows <= 5 or A.cols < 1:\n        return {'score': 0, 'feedback': 'Vector length must be between one and five.'}\n    answer = response['expressions'][0]\n    return {'correct': answer == Integer(A.rank() == A.cols)}&quot;,&quot;context&quot;:&quot;none&quot;,&quot;field-labels&quot;:&quot;Independent&quot;,&quot;harder&quot;:&quot;Give more vectors or less obvious dependencies. Never exceed five coordinates per vector.&quot;,&quot;label&quot;:&quot;similar-independence&quot;,&quot;mode&quot;:&quot;custom&quot;,&quot;pool&quot;:&quot;true&quot;,&quot;simpler&quot;:&quot;Give fewer vectors with an obvious relation or clear independence.&quot;},&quot;renderMode&quot;:&quot;publish&quot;,&quot;unapproved&quot;:true,&quot;variants&quot;:[{&quot;checker&quot;:&quot;def check(response, symbols):\n    A = response['variables']['A']\n    if not 1 <= A.rows <= 5 or A.cols < 1:\n        return {'score': 0, 'feedback': 'Vector length must be between one and five.'}\n    answer = response['expressions'][0]\n    return {'correct': answer == Integer(A.rank() == A.cols)}&quot;,&quot;context&quot;:{&quot;fields&quot;:[&quot;Independent&quot;],&quot;teacher&quot;:{&quot;value&quot;:[&quot;dict&quot;,[[&quot;Independent&quot;,[&quot;integer&quot;,&quot;1&quot;]]]],&quot;version&quot;:1},&quot;variables&quot;:{&quot;value&quot;:[&quot;dict&quot;,[[&quot;A&quot;,[&quot;matrix&quot;,3,3,[[&quot;integer&quot;,&quot;1&quot;],[&quot;integer&quot;,&quot;0&quot;],[&quot;integer&quot;,&quot;1&quot;],[&quot;integer&quot;,&quot;0&quot;],[&quot;integer&quot;,&quot;1&quot;],[&quot;integer&quot;,&quot;1&quot;],[&quot;integer&quot;,&quot;0&quot;],[&quot;integer&quot;,&quot;0&quot;],[&quot;integer&quot;,&quot;1&quot;]]]]]],&quot;version&quot;:1},&quot;variant&quot;:null,&quot;version&quot;:1},&quot;fingerprint&quot;:&quot;20d3d64c880fdc18&quot;,&quot;hash&quot;:&quot;20d3d64c880fdc18&quot;,&quot;id&quot;:&quot;{\&quot;value\&quot;:[\&quot;list\&quot;,[]],\&quot;version\&quot;:1}&quot;,&quot;n&quot;:null,&quot;proposal&quot;:true,&quot;question&quot;:&quot;Are the columns of $A={\\left[\\begin{matrix}1 &amp; 0 &amp; 1\\\\0 &amp; 1 &amp; 1\\\\0 &amp; 0 &amp; 1\\end{matrix}\\right]}$ linearly independent? _[1]&quot;,&quot;solution&quot;:&quot;&quot;,&quot;state&quot;:&quot;new&quot;,&quot;status&quot;:&quot;undecided&quot;,&quot;values&quot;:{},&quot;variant-context&quot;:&quot;&quot;}],&quot;version&quot;:1}" data-storage-variants="[{&quot;hash&quot;:&quot;20d3d64c880fdc18&quot;,&quot;id&quot;:&quot;{\&quot;value\&quot;:[\&quot;list\&quot;,[]],\&quot;version\&quot;:1}&quot;,&quot;n&quot;:null,&quot;proposal&quot;:true}]" data-fields="[]" data-structural-field-labels="[]">
+<p class="math-variant-unapproved" role="status">Not approved for students.</p>
+<button type="button" class="math-pool-reload" title="Load a new random task">↻</button>
+<div id="similar-independence-question" class="math-exercise-question ai-feedback-context"></div>
+
+<div class="math-exercise-controls">
+  <button type="button" class="btn btn-primary math-check-btn">✓&nbsp;Check</button>
+  <button type="button" class="btn btn-light math-legend-btn">ⓘ&nbsp;Input help</button>
+  <div class="btn-group">
+    <button type="button" class="btn btn-light math-feedback-btn">💬&nbsp;Feedback</button>
+    <button type="button" class="btn btn-light math-reconfig-btn" title="Change AI configuration">⚙</button>
+  </div>
+</div>
+<div class="math-legend-panel" style="display:none;"></div>
+<div class="math-feedback-area"></div>
+</div>
+
+
+<!--ctm-save-generated--><script type="application/json" id="ctm-store-manifest">{"exercises":[{"component":"math-exercise","id":"similar-derivative","order":1,"runtimeId":"ctm-block-1","save":true,"source":"37e99553f3736ce1"},{"component":"math-exercise","id":"similar-matrix","order":2,"runtimeId":"ctm-block-2","save":true,"source":"8f8a782fb32af57c"},{"component":"math-exercise","id":"similar-independence","order":3,"runtimeId":"ctm-block-3","save":true,"source":"aa80d42b9539df76"}],"export":true,"messages":{"answered":"Answered, not graded","answersStorage":"Answers \u0026 storage","clearFailed":"Browser storage could not be cleared or updated. Use your browser settings to remove this course data.","confirmClearCourse":"Delete all your saved answers in this course?","confirmClearPage":"Delete all saved answers on this page?","confirmNewVariant":"Replace your filled answers with a new variant?","confirmSaveOff":"This deletes all saved answers in this course and stops saving.","copyAll":"Copy all","correct":"✓ correct","downloadHTML":"Download .html","downloadMarkdown":"Download .md","exercise":"Exercise","exportClose":"Close","exportTitle":"Export my answers","lastResult":"Last result","locale":"en","notSaving":"Answers aren’t being saved","outdated":"Outdated","partial":"½ partly correct","progressTitle":"Page progress","recordTooLarge":"This answer is too large to save. Copy it before leaving the page.","saveOff":"Do not save on this device","saveOn":"Save again","savedLocal":"Saved in this browser","savingDisabled":"Saving is off for this page.","savingLocal":"Saving in this browser","savingNotice":"Your answers are saved only in this browser.","savingOffNotice":"Saving is off on this device for this course.","settings":"Settings","showSaved":"Show your saved answer","sourceChanged":"The exercise has changed since you answered.","statusCorrect":"correct","statusInvalid":"invalid","statusPartial":"partly correct","statusWrong":"wrong","storageUnavailable":"Saving is unavailable. Your answers are kept in memory for this page only.","total":"{score} of {count}","unattempted":"– not attempted","variantChanged":"This variant has changed.","variantWithdrawn":"This variant has been withdrawn.","wrong":"✗ wrong"},"progress":true,"quizzes":[],"save":true,"v":1}</script>
+<!--ctm-layout-generated--><span id="ctm-layout-ready" hidden=""></span>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<script src="site_libs/quarto-contrib/ctm-matrix-input-0.9.0/ctm-matrix-input.js"></script>
+<script src="site_libs/quarto-contrib/math-exercise-0.11.0/math-store.js"></script>
+<script src="site_libs/quarto-contrib/math-exercise-0.11.0/math-exercise.js"></script>
+<script src="site_libs/quarto-contrib/math-exercise-0.11.0/math-similar.js"></script>
+</body></html>

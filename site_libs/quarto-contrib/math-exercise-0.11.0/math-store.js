@@ -39,13 +39,24 @@
         var value = wrap.matrixInput.read();
         sizes[wrap.dataset.matrixName] = {rows: value.rows, cols: value.cols};
       });
-      if (!filled && !options.variants().length && !Object.keys(sizes).length) return null;
-      return {fields: values, matrices: sizes};
+      var generated = options.generated ? options.generated.read() : [];
+      var inputs = {fields: values, matrices: sizes};
+      if (generated.length) inputs.generated = generated;
+      if (options.generated) {
+        var envelope = {v:1,component:'math-exercise',saved:new Date().toISOString(),inputs:inputs,
+          source:cell.dataset.ctmSource,variant:options.variant(),seen:options.seen ? options.seen() : []};
+        // Leave room for the store-owned timestamp/result/proposal envelope.
+        while (inputs.generated && inputs.generated.length && new TextEncoder().encode(JSON.stringify(envelope)).length > 63 * 1024) inputs.generated.pop();
+        options.generated.retain(inputs.generated || []);
+      }
+      if (!filled && !options.variants().length && !Object.keys(sizes).length && !(inputs.generated && inputs.generated.length)) return null;
+      return inputs;
     }
     function forget() {
       note.replaceChildren();
       last.replaceChildren();
       deferChoice = false;
+      if (options.generated) options.generated.clear();
     }
     function clearInputs() {
       restoring = true;
@@ -60,6 +71,7 @@
       restoring = true;
       try {
         choose(meta.variant);
+        if (options.generated) options.generated.restore(inputs.generated || []);
         matrices().forEach(function (wrap) {
           var name = wrap.dataset.matrixName, size = inputs.matrices && inputs.matrices[name];
           if (size) wrap.matrixInput.resize(size.rows, size.cols, true);
@@ -90,6 +102,7 @@
       note.replaceChildren();
       savedResult(meta);
       if (meta.state !== 'changed' && meta.state !== 'withdrawn') return;
+      if (options.generated) options.generated.restore(meta.record && meta.record.inputs.generated || []);
       deferChoice = true;
       restoring = true;
       try { choose(meta.variant); clearInputs(); } finally { restoring = false; }
@@ -117,6 +130,7 @@
         for (var i = 0; cols > 0 && i < values.length; i += cols) rows.push('[' + values.slice(i, i + cols).join(', ') + ']');
         parts.push({kind: 'answer', label: element.dataset.matrixName || '[' + matrixIndex + ']', text: '[' + rows.join(', ') + ']'});
       });
+      if (options.generated) parts = parts.concat(options.generated.exportParts());
       var caption = cell.querySelector('.math-exercise-caption');
       return {title: caption ? caption.textContent.trim() : options.id, parts: parts};
     }
@@ -124,15 +138,23 @@
       var copy = document.createElement('button');
       copy.type = 'button';
       copy.className = 'btn btn-light math-copy-answer';
-      copy.textContent = L.copyAnswer;
-      copy.setAttribute('aria-label', L.copyAnswerLabel(options.id));
+      copy.textContent = options.generated ? L.similarCopyAnswers : L.copyAnswer;
+      copy.setAttribute('aria-label', options.generated ? L.similarCopyAnswersLabel : L.copyAnswerLabel(options.id));
       copy.addEventListener('click', function () {
         var text = exportItem().parts.map(function (part) { return part.label + ': ' + part.text; }).join('\n');
         root.CTMCopy.text(text, {label: L.copyAnswerLabel(options.id)});
       });
       (cell.querySelector('.math-exercise-controls') || cell).append(copy);
     }
-    handle = store.register({component: 'math-exercise', id: options.id, element: cell,
+    function hasOriginalAnswer(inputs) {
+      function filled(value) {
+        if (value === null || value === undefined) return false;
+        if (typeof value === 'string') return !!value.trim();
+        return typeof value === 'object' ? Object.keys(value).some(function (key) { return filled(value[key]); }) : true;
+      }
+      return Object.keys(inputs || {}).some(function (key) { return key !== 'generated' && filled(inputs[key]); });
+    }
+    handle = store.register({hasAnswer: hasOriginalAnswer, component: 'math-exercise', id: options.id, element: cell,
       source: cell.dataset.ctmSource, save: cell.dataset.ctmSave !== 'false' && !options.graphical,
       variant: options.variant, variants: options.variants, seen: options.seen,
       numberedVariantResults: typeof options.initializeChoice === 'function',
@@ -148,6 +170,7 @@
     persistChoice();
     document.addEventListener('ctm:store-enabled', persistChoice);
     return {
+      generatedChanged: function () {if (!restoring) handle.flush({notify: false});},
       changed: function () {
         if (restoring) return;
         deferChoice = false;

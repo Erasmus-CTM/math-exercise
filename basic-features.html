@@ -41,20 +41,23 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="site_libs/bootstrap/bootstrap-f53186b9ac0866246e638800b9d808a6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="site_libs/quarto-contrib/ctm-locale-0.9.0/ctm-locale.js"></script>
+<script src="site_libs/quarto-contrib/ctm-locale-0.9.0/common.js"></script>
+<script src="site_libs/quarto-contrib/ctm-locale-ui-0.9.0/ui.js"></script>
+<script src="site_libs/quarto-contrib/ctm-layout-0.9.0/ctm-layout.js"></script>
+<script src="site_libs/quarto-contrib/ctm-layout-0.9.0/ctm-settings.js"></script>
+<link href="site_libs/quarto-contrib/ctm-layout-0.9.0/ctm-ui.css" rel="stylesheet">
 <script src="site_libs/quarto-contrib/ai-feedback-0.9.0/feedback-core.js"></script>
 <script src="site_libs/quarto-contrib/ai-feedback-0.9.0/feedback-dom.js"></script>
 <script src="site_libs/quarto-contrib/ai-feedback-0.9.0/ai-feedback.js"></script>
 <link href="site_libs/quarto-contrib/ai-feedback-0.9.0/ai-feedback.css" rel="stylesheet">
 <script src="site_libs/quarto-contrib/ctm-assets-0.9.0/assets.js"></script>
 <script src="site_libs/quarto-contrib/ctm-runtime-0.9.0/pyodide-runtime.js"></script>
-<script src="site_libs/quarto-contrib/ctm-checkers-0.6.1.dev0+2c9935c6/ctm-checkers.js"></script>
-<script src="site_libs/quarto-contrib/ctm-locale-0.9.0/ctm-locale.js"></script>
-<script src="site_libs/quarto-contrib/ctm-locale-0.9.0/common.js"></script>
+<script src="site_libs/quarto-contrib/ctm-worker-0.9.0/pyodide-worker.js"></script>
+<script src="site_libs/quarto-contrib/ctm-checkers-0.12.0.dev0+21ac0fe7/ctm-checkers.js"></script>
 <script src="site_libs/quarto-contrib/ctm-locale-math-exercise-0.9.0/math-exercise.js"></script>
 <link href="site_libs/quarto-contrib/ctm-matrix-input-0.9.0/ctm-matrix-input.css" rel="stylesheet">
 <link href="site_libs/quarto-contrib/math-exercise-0.11.0/math-exercise.css" rel="stylesheet">
-<script src="site_libs/quarto-contrib/ctm-layout-0.9.0/ctm-layout.js"></script>
-<script src="site_libs/quarto-contrib/ctm-locale-ui-0.9.0/ui.js"></script>
 <link href="site_libs/quarto-contrib/ctm-ui-0.9.0/ctm-ui.css" rel="stylesheet">
 <script src="site_libs/quarto-contrib/ctm-copy-0.9.0/ctm-copy.js"></script>
 <script src="site_libs/quarto-contrib/ctm-store-0.9.0/ctm-store.js"></script>
@@ -88,6 +91,7 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 <script>globalThis.CTM_ASSETS={"bases":{"font-awesome":"https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/","katex":"https://cdn.jsdelivr.net/npm/katex@0.16.47/","mathjax3":"https://cdn.jsdelivr.net/npm/mathjax@3.2.2/","monaco-editor":"https://cdn.jsdelivr.net/npm/monaco-editor@0.46.0/","pyodide":"https://cdn.jsdelivr.net/pyodide/v0.28.3/full/","source-sans-pro":"https://cdn.jsdelivr.net/npm/@fontsource/source-sans-pro@5.3.0/"},"mode":"cdn","v":1};</script>
+<script src="./coi-serviceworker.js"></script>
 
 
 <link rel="stylesheet" href="example-site.css">
@@ -212,10 +216,10 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<!--ctm-save-generated--><div class="ctm-save-bar" role="region" aria-label="Saved answers" hidden=""><p class="ctm-save-notice">Your answers are saved only in this browser.</p><div class="ctm-save-actions"><button type="button" data-ctm-clear-page="">Delete answers on this page</button>
-<button type="button" data-ctm-clear-course="">Delete all your answers in this course</button>
-<button type="button" data-ctm-save-toggle="">Do not save on this device</button>
-<button type="button" data-ctm-export="">Export my answers</button></div><span class="ctm-save-status" role="status" aria-live="polite"></span></div>
+<!--ctm-save-generated--><div class="ctm-save-bar" role="region" aria-label="Saved answers" hidden=""><p class="ctm-save-notice">Your answers are saved only in this browser.</p><div class="ctm-save-actions"><button type="button" data-ctm-save-toggle="">Do not save on this device</button>
+<button type="button" data-ctm-export="">Export my answers</button>
+<button type="button" data-ctm-clear-page="">Delete answers on this page</button>
+<button type="button" data-ctm-clear-course="">Delete all your answers in this course</button></div><span class="ctm-save-status" role="status" aria-live="polite"></span></div>
 <div class="callout callout-style-default callout-tip callout-titled" title="Entering answers">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -232,7 +236,7 @@ ul.task-list li input[type="checkbox"] {
 <p>These examples introduce the main exercise controls: one or several answer fields, required answer forms, text answers, partial credit, collapsible tasks, and pools of alternative questions.</p>
 <section id="a-single-answer-field" class="level2">
 <h2 class="anchored" data-anchor-id="a-single-answer-field">A single answer field</h2>
-<div class="math-exercise-cell" id="math-exercise-1" data-label="basic-single" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;basic-single&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;A single answer field&quot;" data-context-text="&quot;&quot;" data-ctm-id="basic-single" data-ctm-component="math-exercise" data-ctm-source="5df86af2a2f1fdc0" data-ctm-save="true" data-ctm-runtime-id="ctm-block-1" data-fields="[&quot;math-exercise-1-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" data-similar="false" data-similar-guidance="[]" data-generation-policy="[]" id="math-exercise-1" data-label="basic-single" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;basic-single&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;A single answer field&quot;" data-context-text="&quot;&quot;" data-ctm-runtime-id="ctm-block-1" data-ctm-save="true" data-ctm-component="math-exercise" data-ctm-source="5df86af2a2f1fdc0" data-ctm-id="basic-single" data-fields="[&quot;math-exercise-1-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div id="basic-single-question" class="math-exercise-question ai-feedback-context" data-math-exercise-source="What is \(7\cdot 6\)? <input type=&quot;text&quot; id=&quot;math-exercise-1-f1&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>">What is \(7\cdot 6\)? <input type="text" id="math-exercise-1-f1" data-answer="42" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
@@ -253,6 +257,15 @@ What is $7\cdot 6$? _[42]
 </details>
 <details class="math-example-policy" data-source-kind="policy"><summary>Show policy YAML</summary><div class="ai-feedback-policy-summary" data-max-issues="" data-integration="math-exercise" data-exercise="basic-single" data-policy=""></div>
 <p><strong>AI Feedback defaults (feedback-defaults.yml)</strong></p><pre><code class="language-yaml">ai-feedback:
+  generation:
+    base-prompt: &gt;-
+      Create one self-contained, well-posed, nontrivial practice problem on the original topic
+      and method, at the requested difficulty. Follow the authored restrictions and the supplied
+      checker contracts. Do not copy a context example. Return the requested JSON only, with
+      explicit mathematical answers and fixed-operation SymPy recipes wherever applicable.
+      Never generate Python checker code, HTML, external responses or resizable inputs.
+      A matching answer is not proof of a worthwhile problem: check givens and nontriviality.
+    steps: []
   defaults:
     max-words: 250
     max-issues: 3
@@ -354,7 +367,7 @@ What is $7\cdot 6$? _[42]
 </section>
 <section id="answer-fields-of-different-widths" class="level2">
 <h2 class="anchored" data-anchor-id="answer-fields-of-different-widths">Answer fields of different widths</h2>
-<div class="math-exercise-cell" id="math-exercise-2" data-label="basic-widths" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[&quot;Short answer&quot;,&quot;Medium answer&quot;,&quot;Long answer&quot;]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;basic-widths&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Answer fields of different widths&quot;" data-context-text="&quot;&quot;" data-ctm-id="basic-widths" data-ctm-component="math-exercise" data-ctm-source="418d238c4b7322ac" data-ctm-save="true" data-ctm-runtime-id="ctm-block-2" data-fields="[&quot;math-exercise-2-f1&quot;,&quot;math-exercise-2-f2&quot;,&quot;math-exercise-2-f3&quot;]" data-structural-field-labels="[&quot;&quot;,&quot;&quot;,&quot;&quot;]">
+<div class="math-exercise-cell" data-similar="false" data-similar-guidance="[]" data-generation-policy="[]" id="math-exercise-2" data-label="basic-widths" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[&quot;Short answer&quot;,&quot;Medium answer&quot;,&quot;Long answer&quot;]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;basic-widths&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Answer fields of different widths&quot;" data-context-text="&quot;&quot;" data-ctm-runtime-id="ctm-block-2" data-ctm-save="true" data-ctm-component="math-exercise" data-ctm-source="418d238c4b7322ac" data-ctm-id="basic-widths" data-fields="[&quot;math-exercise-2-f1&quot;,&quot;math-exercise-2-f2&quot;,&quot;math-exercise-2-f3&quot;]" data-structural-field-labels="[&quot;&quot;,&quot;&quot;,&quot;&quot;]">
 <div id="basic-widths-question" class="math-exercise-question ai-feedback-context" data-math-exercise-source="Enter \(2\): <input type=&quot;text&quot; id=&quot;math-exercise-2-f1&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;><br>
 <br>
 Enter the six-digit number \(123456\): <input type=&quot;text&quot; id=&quot;math-exercise-2-f2&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-medium&quot;><br>
@@ -388,6 +401,15 @@ Enter the expression $(1+2+3+4+5)^2$: ___[(1+2+3+4+5)^2]
 </details>
 <details class="math-example-policy" data-source-kind="policy"><summary>Show policy YAML</summary><div class="ai-feedback-policy-summary" data-max-issues="" data-integration="math-exercise" data-exercise="basic-widths" data-policy=""></div>
 <p><strong>AI Feedback defaults (feedback-defaults.yml)</strong></p><pre><code class="language-yaml">ai-feedback:
+  generation:
+    base-prompt: &gt;-
+      Create one self-contained, well-posed, nontrivial practice problem on the original topic
+      and method, at the requested difficulty. Follow the authored restrictions and the supplied
+      checker contracts. Do not copy a context example. Return the requested JSON only, with
+      explicit mathematical answers and fixed-operation SymPy recipes wherever applicable.
+      Never generate Python checker code, HTML, external responses or resizable inputs.
+      A matching answer is not proof of a worthwhile problem: check givens and nontriviality.
+    steps: []
   defaults:
     max-words: 250
     max-issues: 3
@@ -488,7 +510,7 @@ Enter the expression $(1+2+3+4+5)^2$: ___[(1+2+3+4+5)^2]
 </section>
 <section id="a-collapsible-exercise" class="level2">
 <h2 class="anchored" data-anchor-id="a-collapsible-exercise">A collapsible exercise</h2>
-<div class="math-exercise-cell" id="math-exercise-3" data-label="basic-caption" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;basic-caption&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;A collapsible exercise&quot;" data-context-text="&quot;&quot;" data-ctm-id="basic-caption" data-ctm-component="math-exercise" data-ctm-source="b8089b174c70c10e" data-ctm-save="true" data-ctm-runtime-id="ctm-block-3" data-fields="[&quot;math-exercise-3-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" data-similar="false" data-similar-guidance="[]" data-generation-policy="[]" id="math-exercise-3" data-label="basic-caption" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;basic-caption&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;A collapsible exercise&quot;" data-context-text="&quot;&quot;" data-ctm-runtime-id="ctm-block-3" data-ctm-save="true" data-ctm-component="math-exercise" data-ctm-source="b8089b174c70c10e" data-ctm-id="basic-caption" data-fields="[&quot;math-exercise-3-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div class="math-exercise-caption math-exercise-toggle" data-math-exercise-source="Click this heading to open the exercise" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>Click this heading to open the exercise</div>
 
 <div class="math-exercise-body" aria-hidden="true">
@@ -514,6 +536,15 @@ Compute $5^2$: _[25]
 </details>
 <details class="math-example-policy" data-source-kind="policy"><summary>Show policy YAML</summary><div class="ai-feedback-policy-summary" data-max-issues="" data-integration="math-exercise" data-exercise="basic-caption" data-policy=""></div>
 <p><strong>AI Feedback defaults (feedback-defaults.yml)</strong></p><pre><code class="language-yaml">ai-feedback:
+  generation:
+    base-prompt: &gt;-
+      Create one self-contained, well-posed, nontrivial practice problem on the original topic
+      and method, at the requested difficulty. Follow the authored restrictions and the supplied
+      checker contracts. Do not copy a context example. Return the requested JSON only, with
+      explicit mathematical answers and fixed-operation SymPy recipes wherever applicable.
+      Never generate Python checker code, HTML, external responses or resizable inputs.
+      A matching answer is not proof of a worthwhile problem: check givens and nontriviality.
+    steps: []
   defaults:
     max-words: 250
     max-issues: 3
@@ -614,7 +645,7 @@ Compute $5^2$: _[25]
 </section>
 <section id="multiple-fields-and-meaningful-labels" class="level2">
 <h2 class="anchored" data-anchor-id="multiple-fields-and-meaningful-labels">Multiple fields and meaningful labels</h2>
-<div class="math-exercise-cell" id="math-exercise-4" data-label="basic-labels" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="true" data-form-credit="0.5" data-field-labels="[&quot;Sum&quot;,&quot;Product&quot;,&quot;Difference&quot;]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;basic-labels&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Multiple fields and meaningful labels&quot;" data-context-text="&quot;&quot;" data-ctm-id="basic-labels" data-ctm-component="math-exercise" data-ctm-source="50b8bb3c2ff6ae83" data-ctm-save="true" data-ctm-runtime-id="ctm-block-4" data-fields="[&quot;math-exercise-4-f1&quot;,&quot;math-exercise-4-f2&quot;,&quot;math-exercise-4-f3&quot;]" data-structural-field-labels="[&quot;&quot;,&quot;&quot;,&quot;&quot;]">
+<div class="math-exercise-cell" data-similar="false" data-similar-guidance="[]" data-generation-policy="[]" id="math-exercise-4" data-label="basic-labels" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="true" data-form-credit="0.5" data-field-labels="[&quot;Sum&quot;,&quot;Product&quot;,&quot;Difference&quot;]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;basic-labels&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Multiple fields and meaningful labels&quot;" data-context-text="&quot;&quot;" data-ctm-runtime-id="ctm-block-4" data-ctm-save="true" data-ctm-component="math-exercise" data-ctm-source="50b8bb3c2ff6ae83" data-ctm-id="basic-labels" data-fields="[&quot;math-exercise-4-f1&quot;,&quot;math-exercise-4-f2&quot;,&quot;math-exercise-4-f3&quot;]" data-structural-field-labels="[&quot;&quot;,&quot;&quot;,&quot;&quot;]">
 <div id="basic-labels-question" class="math-exercise-question ai-feedback-context" data-math-exercise-source="For the numbers \(7\) and \(3\), enter their sum <input type=&quot;text&quot; id=&quot;math-exercise-4-f1&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>, product <input type=&quot;text&quot; id=&quot;math-exercise-4-f2&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>, and<br>
 difference \(7-3\): <input type=&quot;text&quot; id=&quot;math-exercise-4-f3&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>.">For the numbers \(7\) and \(3\), enter their sum <input type="text" id="math-exercise-4-f1" data-answer="10" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">, product <input type="text" id="math-exercise-4-f2" data-answer="21" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">, and<br>
 difference \(7-3\): <input type="text" id="math-exercise-4-f3" data-answer="4" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small">.</div>
@@ -640,6 +671,15 @@ difference $7-3$: _[4].
 </details>
 <details class="math-example-policy" data-source-kind="policy"><summary>Show policy YAML</summary><div class="ai-feedback-policy-summary" data-max-issues="" data-integration="math-exercise" data-exercise="basic-labels" data-policy=""></div>
 <p><strong>AI Feedback defaults (feedback-defaults.yml)</strong></p><pre><code class="language-yaml">ai-feedback:
+  generation:
+    base-prompt: &gt;-
+      Create one self-contained, well-posed, nontrivial practice problem on the original topic
+      and method, at the requested difficulty. Follow the authored restrictions and the supplied
+      checker contracts. Do not copy a context example. Return the requested JSON only, with
+      explicit mathematical answers and fixed-operation SymPy recipes wherever applicable.
+      Never generate Python checker code, HTML, external responses or resizable inputs.
+      A matching answer is not proof of a worthwhile problem: check givens and nontriviality.
+    steps: []
   defaults:
     max-words: 250
     max-issues: 3
@@ -740,7 +780,7 @@ difference $7-3$: _[4].
 </section>
 <section id="requiring-a-particular-form" class="level2">
 <h2 class="anchored" data-anchor-id="requiring-a-particular-form">Requiring a particular form</h2>
-<div class="math-exercise-cell" id="math-exercise-5" data-label="basic-factored" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="factored" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;basic-factored&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Requiring a particular form&quot;" data-context-text="&quot;&quot;" data-ctm-id="basic-factored" data-ctm-component="math-exercise" data-ctm-source="198e3d8a54116e09" data-ctm-save="true" data-ctm-runtime-id="ctm-block-5" data-fields="[&quot;math-exercise-5-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" data-similar="false" data-similar-guidance="[]" data-generation-policy="[]" id="math-exercise-5" data-label="basic-factored" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="factored" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;basic-factored&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Requiring a particular form&quot;" data-context-text="&quot;&quot;" data-ctm-runtime-id="ctm-block-5" data-ctm-save="true" data-ctm-component="math-exercise" data-ctm-source="198e3d8a54116e09" data-ctm-id="basic-factored" data-fields="[&quot;math-exercise-5-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div class="math-exercise-caption math-exercise-toggle" data-math-exercise-source="Equivalent is not enough when a form is requested" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>Equivalent is not enough when a form is requested</div>
 
 <div class="math-exercise-body" aria-hidden="true">
@@ -768,6 +808,15 @@ Factor $x^2+5x+6$: __[(x+2)*(x+3)]
 </details>
 <details class="math-example-policy" data-source-kind="policy"><summary>Show policy YAML</summary><div class="ai-feedback-policy-summary" data-max-issues="" data-integration="math-exercise" data-exercise="basic-factored" data-policy=""></div>
 <p><strong>AI Feedback defaults (feedback-defaults.yml)</strong></p><pre><code class="language-yaml">ai-feedback:
+  generation:
+    base-prompt: &gt;-
+      Create one self-contained, well-posed, nontrivial practice problem on the original topic
+      and method, at the requested difficulty. Follow the authored restrictions and the supplied
+      checker contracts. Do not copy a context example. Return the requested JSON only, with
+      explicit mathematical answers and fixed-operation SymPy recipes wherever applicable.
+      Never generate Python checker code, HTML, external responses or resizable inputs.
+      A matching answer is not proof of a worthwhile problem: check givens and nontriviality.
+    steps: []
   defaults:
     max-words: 250
     max-issues: 3
@@ -868,7 +917,7 @@ Factor $x^2+5x+6$: __[(x+2)*(x+3)]
 </section>
 <section id="case-insensitive-text" class="level2">
 <h2 class="anchored" data-anchor-id="case-insensitive-text">Case-insensitive text</h2>
-<div class="math-exercise-cell" id="math-exercise-6" data-label="basic-text" data-mode="string_ci" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;basic-text&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Case-insensitive text&quot;" data-context-text="&quot;&quot;" data-ctm-id="basic-text" data-ctm-component="math-exercise" data-ctm-source="a96c2c975ae0ac0c" data-ctm-save="true" data-ctm-runtime-id="ctm-block-6" data-fields="[&quot;math-exercise-6-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" data-similar="false" data-similar-guidance="[]" data-generation-policy="[]" id="math-exercise-6" data-label="basic-text" data-mode="string_ci" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;basic-text&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Case-insensitive text&quot;" data-context-text="&quot;&quot;" data-ctm-runtime-id="ctm-block-6" data-ctm-save="true" data-ctm-component="math-exercise" data-ctm-source="a96c2c975ae0ac0c" data-ctm-id="basic-text" data-fields="[&quot;math-exercise-6-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div id="basic-text-question" class="math-exercise-question ai-feedback-context" data-math-exercise-source="Write the conventional name of the constant \(\pi\): <input type=&quot;text&quot; id=&quot;math-exercise-6-f1&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-medium&quot;>">Write the conventional name of the constant \(\pi\): <input type="text" id="math-exercise-6-f1" data-answer="pi" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
 
 <div class="math-exercise-controls">
@@ -890,6 +939,15 @@ Write the conventional name of the constant $\pi$: __[pi]
 </details>
 <details class="math-example-policy" data-source-kind="policy"><summary>Show policy YAML</summary><div class="ai-feedback-policy-summary" data-max-issues="" data-integration="math-exercise" data-exercise="basic-text" data-policy=""></div>
 <p><strong>AI Feedback defaults (feedback-defaults.yml)</strong></p><pre><code class="language-yaml">ai-feedback:
+  generation:
+    base-prompt: &gt;-
+      Create one self-contained, well-posed, nontrivial practice problem on the original topic
+      and method, at the requested difficulty. Follow the authored restrictions and the supplied
+      checker contracts. Do not copy a context example. Return the requested JSON only, with
+      explicit mathematical answers and fixed-operation SymPy recipes wherever applicable.
+      Never generate Python checker code, HTML, external responses or resizable inputs.
+      A matching answer is not proof of a worthwhile problem: check givens and nontriviality.
+    steps: []
   defaults:
     max-words: 250
     max-issues: 3
@@ -991,7 +1049,7 @@ Write the conventional name of the constant $\pi$: __[pi]
 <section id="a-random-task-pool" class="level2">
 <h2 class="anchored" data-anchor-id="a-random-task-pool">A random task pool</h2>
 <p>The selected task is stable during a browser session. Use the reload button in the corner to request another variant.</p>
-<div class="math-exercise-cell" id="math-exercise-7" data-label="basic-pool" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;basic-pool&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;A random task pool\nThe selected task is stable during a browser session. Use the reload button in the corner to request another variant.&quot;" data-context-text="&quot;&quot;" data-ctm-id="basic-pool" data-ctm-component="math-exercise" data-ctm-source="e69070fdd8a9174d" data-ctm-save="true" data-ctm-runtime-id="ctm-block-7" data-storage-variants="[{&quot;hash&quot;:&quot;b5ac1b8384854c9b&quot;,&quot;id&quot;:&quot;pool:b5ac1b8384854c9b&quot;,&quot;n&quot;:1},{&quot;hash&quot;:&quot;95e6d6c7847f2c7b&quot;,&quot;id&quot;:&quot;pool:95e6d6c7847f2c7b&quot;,&quot;n&quot;:2},{&quot;hash&quot;:&quot;bb82ab3ba00e1d9f&quot;,&quot;id&quot;:&quot;pool:bb82ab3ba00e1d9f&quot;,&quot;n&quot;:3}]" data-pool="[&quot;$8+7=$ _[15]&quot;,&quot;$9\\cdot6=$ _[54]&quot;,&quot;$2^8=$ _[256]&quot;]" data-fields="[]" data-structural-field-labels="[]">
+<div class="math-exercise-cell" data-similar="false" data-similar-guidance="[]" data-generation-policy="[]" id="math-exercise-7" data-label="basic-pool" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;basic-pool&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;A random task pool\nThe selected task is stable during a browser session. Use the reload button in the corner to request another variant.&quot;" data-context-text="&quot;&quot;" data-ctm-runtime-id="ctm-block-7" data-ctm-save="true" data-ctm-component="math-exercise" data-ctm-source="e69070fdd8a9174d" data-ctm-id="basic-pool" data-storage-variants="[{&quot;hash&quot;:&quot;b5ac1b8384854c9b&quot;,&quot;id&quot;:&quot;pool:b5ac1b8384854c9b&quot;,&quot;n&quot;:1},{&quot;hash&quot;:&quot;95e6d6c7847f2c7b&quot;,&quot;id&quot;:&quot;pool:95e6d6c7847f2c7b&quot;,&quot;n&quot;:2},{&quot;hash&quot;:&quot;bb82ab3ba00e1d9f&quot;,&quot;id&quot;:&quot;pool:bb82ab3ba00e1d9f&quot;,&quot;n&quot;:3}]" data-pool="[&quot;$8+7=$ _[15]&quot;,&quot;$9\\cdot6=$ _[54]&quot;,&quot;$2^8=$ _[256]&quot;]" data-fields="[]" data-structural-field-labels="[]">
 <div class="math-exercise-caption math-exercise-toggle" data-math-exercise-source="Random arithmetic task" role="button" tabindex="0" aria-expanded="false"><span class="math-chevron" aria-hidden="true"></span>Random arithmetic task</div>
 
 <div class="math-exercise-body" aria-hidden="true">
@@ -1028,6 +1086,15 @@ $2^8=$ _[256]
 </details>
 <details class="math-example-policy" data-source-kind="policy"><summary>Show policy YAML</summary><div class="ai-feedback-policy-summary" data-max-issues="" data-integration="math-exercise" data-exercise="basic-pool" data-policy=""></div>
 <p><strong>AI Feedback defaults (feedback-defaults.yml)</strong></p><pre><code class="language-yaml">ai-feedback:
+  generation:
+    base-prompt: &gt;-
+      Create one self-contained, well-posed, nontrivial practice problem on the original topic
+      and method, at the requested difficulty. Follow the authored restrictions and the supplied
+      checker contracts. Do not copy a context example. Return the requested JSON only, with
+      explicit mathematical answers and fixed-operation SymPy recipes wherever applicable.
+      Never generate Python checker code, HTML, external responses or resizable inputs.
+      A matching answer is not proof of a worthwhile problem: check givens and nontriviality.
+    steps: []
   defaults:
     max-words: 250
     max-issues: 3
@@ -1128,7 +1195,7 @@ $2^8=$ _[256]
 </section>
 <section id="rejecting-a-specific-unfinished-form" class="level2">
 <h2 class="anchored" data-anchor-id="rejecting-a-specific-unfinished-form">Rejecting a specific unfinished form</h2>
-<div class="math-exercise-cell" id="math-exercise-8" data-label="basic-reject" data-mode="equivalent" data-reject="(x+1)^2" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;basic-reject&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Rejecting a specific unfinished form&quot;" data-context-text="&quot;&quot;" data-ctm-id="basic-reject" data-ctm-component="math-exercise" data-ctm-source="021e2b9e945de846" data-ctm-save="true" data-ctm-runtime-id="ctm-block-8" data-fields="[&quot;math-exercise-8-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" data-similar="false" data-similar-guidance="[]" data-generation-policy="[]" id="math-exercise-8" data-label="basic-reject" data-mode="equivalent" data-reject="(x+1)^2" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;basic-reject&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Rejecting a specific unfinished form&quot;" data-context-text="&quot;&quot;" data-ctm-runtime-id="ctm-block-8" data-ctm-save="true" data-ctm-component="math-exercise" data-ctm-source="021e2b9e945de846" data-ctm-id="basic-reject" data-fields="[&quot;math-exercise-8-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div id="basic-reject-question" class="math-exercise-question ai-feedback-context" data-math-exercise-source="Expand \((x+1)^2\): <input type=&quot;text&quot; id=&quot;math-exercise-8-f1&quot; data-vars=&quot;x&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-medium&quot;>">Expand \((x+1)^2\): <input type="text" id="math-exercise-8-f1" data-answer="x^2+2*x+1" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
 
 <div class="math-exercise-controls">
@@ -1151,6 +1218,15 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
 </details>
 <details class="math-example-policy" data-source-kind="policy"><summary>Show policy YAML</summary><div class="ai-feedback-policy-summary" data-max-issues="" data-integration="math-exercise" data-exercise="basic-reject" data-policy=""></div>
 <p><strong>AI Feedback defaults (feedback-defaults.yml)</strong></p><pre><code class="language-yaml">ai-feedback:
+  generation:
+    base-prompt: &gt;-
+      Create one self-contained, well-posed, nontrivial practice problem on the original topic
+      and method, at the requested difficulty. Follow the authored restrictions and the supplied
+      checker contracts. Do not copy a context example. Return the requested JSON only, with
+      explicit mathematical answers and fixed-operation SymPy recipes wherever applicable.
+      Never generate Python checker code, HTML, external responses or resizable inputs.
+      A matching answer is not proof of a worthwhile problem: check givens and nontriviality.
+    steps: []
   defaults:
     max-words: 250
     max-issues: 3
@@ -1251,7 +1327,7 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
 <p><code>reject</code> catches only the stated expression after SymPy’s own normalisation: <code>(x+1)^2</code> and <code>(1+x)*(1+x)</code> are reported as unfinished, but other unexpanded forms such as <code>(-x-1)^2</code> or <code>x*(x+2)+1</code> are still accepted. When the task really requires full expansion, use <code>form: expanded</code> instead.</p>
 
 
-<!--ctm-save-generated--><script type="application/json" id="ctm-store-manifest">{"exercises":[{"component":"math-exercise","id":"basic-single","order":1,"runtimeId":"ctm-block-1","save":true,"source":"5df86af2a2f1fdc0"},{"component":"math-exercise","id":"basic-widths","order":2,"runtimeId":"ctm-block-2","save":true,"source":"418d238c4b7322ac"},{"component":"math-exercise","id":"basic-caption","order":3,"runtimeId":"ctm-block-3","save":true,"source":"b8089b174c70c10e"},{"component":"math-exercise","id":"basic-labels","order":4,"runtimeId":"ctm-block-4","save":true,"source":"50b8bb3c2ff6ae83"},{"component":"math-exercise","id":"basic-factored","order":5,"runtimeId":"ctm-block-5","save":true,"source":"198e3d8a54116e09"},{"component":"math-exercise","id":"basic-text","order":6,"runtimeId":"ctm-block-6","save":true,"source":"a96c2c975ae0ac0c"},{"component":"math-exercise","id":"basic-pool","order":7,"runtimeId":"ctm-block-7","save":true,"source":"e69070fdd8a9174d"},{"component":"math-exercise","id":"basic-reject","order":8,"runtimeId":"ctm-block-8","save":true,"source":"021e2b9e945de846"}],"export":true,"messages":{"clearFailed":"Browser storage could not be cleared or updated. Use your browser settings to remove this course data.","confirmClearCourse":"Delete all your saved answers in this course?","confirmNewVariant":"Replace your filled answers with a new variant?","confirmSaveOff":"This deletes all saved answers in this course and stops saving.","copyAll":"Copy all","correct":"✓ correct","downloadHTML":"Download .html","downloadMarkdown":"Download .md","exercise":"Exercise","exportClose":"Close","exportTitle":"Export my answers","lastResult":"Last result","locale":"en","outdated":"Outdated","partial":"½ partly correct","progressTitle":"Page progress","recordTooLarge":"This answer is too large to save. Copy it before leaving the page.","saveOff":"Do not save on this device","saveOn":"Save again","savingDisabled":"Saving is off for this page.","savingNotice":"Your answers are saved only in this browser.","savingOffNotice":"Saving is off on this device for this course.","showSaved":"Show your saved answer","sourceChanged":"The exercise has changed since you answered.","statusCorrect":"correct","statusInvalid":"invalid","statusPartial":"partly correct","statusWrong":"wrong","storageUnavailable":"Saving is unavailable. Your answers are kept in memory for this page only.","total":"{score} of {count}","unattempted":"– not attempted","variantChanged":"This variant has changed.","variantWithdrawn":"This variant has been withdrawn.","wrong":"✗ wrong"},"progress":false,"quizzes":[],"save":true,"v":1}</script>
+<!--ctm-save-generated--><script type="application/json" id="ctm-store-manifest">{"exercises":[{"component":"math-exercise","id":"basic-single","order":1,"runtimeId":"ctm-block-1","save":true,"source":"5df86af2a2f1fdc0"},{"component":"math-exercise","id":"basic-widths","order":2,"runtimeId":"ctm-block-2","save":true,"source":"418d238c4b7322ac"},{"component":"math-exercise","id":"basic-caption","order":3,"runtimeId":"ctm-block-3","save":true,"source":"b8089b174c70c10e"},{"component":"math-exercise","id":"basic-labels","order":4,"runtimeId":"ctm-block-4","save":true,"source":"50b8bb3c2ff6ae83"},{"component":"math-exercise","id":"basic-factored","order":5,"runtimeId":"ctm-block-5","save":true,"source":"198e3d8a54116e09"},{"component":"math-exercise","id":"basic-text","order":6,"runtimeId":"ctm-block-6","save":true,"source":"a96c2c975ae0ac0c"},{"component":"math-exercise","id":"basic-pool","order":7,"runtimeId":"ctm-block-7","save":true,"source":"e69070fdd8a9174d"},{"component":"math-exercise","id":"basic-reject","order":8,"runtimeId":"ctm-block-8","save":true,"source":"021e2b9e945de846"}],"export":true,"messages":{"answered":"Answered, not graded","answersStorage":"Answers \u0026 storage","clearFailed":"Browser storage could not be cleared or updated. Use your browser settings to remove this course data.","confirmClearCourse":"Delete all your saved answers in this course?","confirmClearPage":"Delete all saved answers on this page?","confirmNewVariant":"Replace your filled answers with a new variant?","confirmSaveOff":"This deletes all saved answers in this course and stops saving.","copyAll":"Copy all","correct":"✓ correct","downloadHTML":"Download .html","downloadMarkdown":"Download .md","exercise":"Exercise","exportClose":"Close","exportTitle":"Export my answers","lastResult":"Last result","locale":"en","notSaving":"Answers aren’t being saved","outdated":"Outdated","partial":"½ partly correct","progressTitle":"Page progress","recordTooLarge":"This answer is too large to save. Copy it before leaving the page.","saveOff":"Do not save on this device","saveOn":"Save again","savedLocal":"Saved in this browser","savingDisabled":"Saving is off for this page.","savingLocal":"Saving in this browser","savingNotice":"Your answers are saved only in this browser.","savingOffNotice":"Saving is off on this device for this course.","settings":"Settings","showSaved":"Show your saved answer","sourceChanged":"The exercise has changed since you answered.","statusCorrect":"correct","statusInvalid":"invalid","statusPartial":"partly correct","statusWrong":"wrong","storageUnavailable":"Saving is unavailable. Your answers are kept in memory for this page only.","total":"{score} of {count}","unattempted":"– not attempted","variantChanged":"This variant has changed.","variantWithdrawn":"This variant has been withdrawn.","wrong":"✗ wrong"},"progress":false,"quizzes":[],"save":true,"v":1}</script>
 <!--ctm-layout-generated--><span id="ctm-layout-ready" hidden=""></span>
 </section>
 
@@ -1664,4 +1740,5 @@ Expand $(x+1)^2$: __[x^2+2*x+1]
 <script src="site_libs/quarto-contrib/ctm-matrix-input-0.9.0/ctm-matrix-input.js"></script>
 <script src="site_libs/quarto-contrib/math-exercise-0.11.0/math-store.js"></script>
 <script src="site_libs/quarto-contrib/math-exercise-0.11.0/math-exercise.js"></script>
+<script src="site_libs/quarto-contrib/math-exercise-0.11.0/math-similar.js"></script>
 </body></html>

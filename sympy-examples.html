@@ -41,20 +41,23 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="site_libs/bootstrap/bootstrap-f53186b9ac0866246e638800b9d808a6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="site_libs/quarto-contrib/ctm-locale-0.9.0/ctm-locale.js"></script>
+<script src="site_libs/quarto-contrib/ctm-locale-0.9.0/common.js"></script>
+<script src="site_libs/quarto-contrib/ctm-locale-ui-0.9.0/ui.js"></script>
+<script src="site_libs/quarto-contrib/ctm-layout-0.9.0/ctm-layout.js"></script>
+<script src="site_libs/quarto-contrib/ctm-layout-0.9.0/ctm-settings.js"></script>
+<link href="site_libs/quarto-contrib/ctm-layout-0.9.0/ctm-ui.css" rel="stylesheet">
 <script src="site_libs/quarto-contrib/ai-feedback-0.9.0/feedback-core.js"></script>
 <script src="site_libs/quarto-contrib/ai-feedback-0.9.0/feedback-dom.js"></script>
 <script src="site_libs/quarto-contrib/ai-feedback-0.9.0/ai-feedback.js"></script>
 <link href="site_libs/quarto-contrib/ai-feedback-0.9.0/ai-feedback.css" rel="stylesheet">
 <script src="site_libs/quarto-contrib/ctm-assets-0.9.0/assets.js"></script>
 <script src="site_libs/quarto-contrib/ctm-runtime-0.9.0/pyodide-runtime.js"></script>
-<script src="site_libs/quarto-contrib/ctm-checkers-0.6.1.dev0+2c9935c6/ctm-checkers.js"></script>
-<script src="site_libs/quarto-contrib/ctm-locale-0.9.0/ctm-locale.js"></script>
-<script src="site_libs/quarto-contrib/ctm-locale-0.9.0/common.js"></script>
+<script src="site_libs/quarto-contrib/ctm-worker-0.9.0/pyodide-worker.js"></script>
+<script src="site_libs/quarto-contrib/ctm-checkers-0.12.0.dev0+21ac0fe7/ctm-checkers.js"></script>
 <script src="site_libs/quarto-contrib/ctm-locale-math-exercise-0.9.0/math-exercise.js"></script>
 <link href="site_libs/quarto-contrib/ctm-matrix-input-0.9.0/ctm-matrix-input.css" rel="stylesheet">
 <link href="site_libs/quarto-contrib/math-exercise-0.11.0/math-exercise.css" rel="stylesheet">
-<script src="site_libs/quarto-contrib/ctm-layout-0.9.0/ctm-layout.js"></script>
-<script src="site_libs/quarto-contrib/ctm-locale-ui-0.9.0/ui.js"></script>
 <link href="site_libs/quarto-contrib/ctm-ui-0.9.0/ctm-ui.css" rel="stylesheet">
 <script src="site_libs/quarto-contrib/ctm-copy-0.9.0/ctm-copy.js"></script>
 <script src="site_libs/quarto-contrib/ctm-store-0.9.0/ctm-store.js"></script>
@@ -87,6 +90,7 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 <script>globalThis.CTM_ASSETS={"bases":{"font-awesome":"https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/","katex":"https://cdn.jsdelivr.net/npm/katex@0.16.47/","mathjax3":"https://cdn.jsdelivr.net/npm/mathjax@3.2.2/","monaco-editor":"https://cdn.jsdelivr.net/npm/monaco-editor@0.46.0/","pyodide":"https://cdn.jsdelivr.net/pyodide/v0.28.3/full/","source-sans-pro":"https://cdn.jsdelivr.net/npm/@fontsource/source-sans-pro@5.3.0/"},"mode":"cdn","v":1};</script>
+<script src="./coi-serviceworker.js"></script>
 
 
 <link rel="stylesheet" href="example-site.css">
@@ -212,10 +216,10 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<!--ctm-save-generated--><div class="ctm-save-bar" role="region" aria-label="Saved answers" hidden=""><p class="ctm-save-notice">Your answers are saved only in this browser.</p><div class="ctm-save-actions"><button type="button" data-ctm-clear-page="">Delete answers on this page</button>
-<button type="button" data-ctm-clear-course="">Delete all your answers in this course</button>
-<button type="button" data-ctm-save-toggle="">Do not save on this device</button>
-<button type="button" data-ctm-export="">Export my answers</button></div><span class="ctm-save-status" role="status" aria-live="polite"></span></div>
+<!--ctm-save-generated--><div class="ctm-save-bar" role="region" aria-label="Saved answers" hidden=""><p class="ctm-save-notice">Your answers are saved only in this browser.</p><div class="ctm-save-actions"><button type="button" data-ctm-save-toggle="">Do not save on this device</button>
+<button type="button" data-ctm-export="">Export my answers</button>
+<button type="button" data-ctm-clear-page="">Delete answers on this page</button>
+<button type="button" data-ctm-clear-course="">Delete all your answers in this course</button></div><span class="ctm-save-status" role="status" aria-live="polite"></span></div>
 <div class="callout callout-style-default callout-tip callout-titled" title="Entering answers">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -232,7 +236,7 @@ ul.task-list li input[type="checkbox"] {
 <p>These exercises show how mathematical equivalence and answer-format requirements work. Unless the question requests a particular form or a numerical approximation, any algebraically equivalent expression is accepted. For example, <code>2*(x+1)</code> and <code>2*x+2</code> represent the same answer.</p>
 <section id="polynomial-algebra" class="level2">
 <h2 class="anchored" data-anchor-id="polynomial-algebra">Polynomial algebra</h2>
-<div class="math-exercise-cell" id="math-exercise-1" data-label="sympy-expand" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="expanded" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-expand&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Polynomial algebra&quot;" data-context-text="&quot;&quot;" data-ctm-runtime-id="ctm-block-1" data-ctm-component="math-exercise" data-ctm-source="0c87de86d296dbaf" data-ctm-save="true" data-ctm-id="sympy-expand" data-fields="[&quot;math-exercise-1-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" data-similar="false" data-similar-guidance="[]" data-generation-policy="[]" id="math-exercise-1" data-label="sympy-expand" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="expanded" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-expand&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Polynomial algebra&quot;" data-context-text="&quot;&quot;" data-ctm-id="sympy-expand" data-ctm-source="0c87de86d296dbaf" data-ctm-runtime-id="ctm-block-1" data-ctm-save="true" data-ctm-component="math-exercise" data-fields="[&quot;math-exercise-1-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div id="sympy-expand-question" class="math-exercise-question ai-feedback-context" data-math-exercise-source="Expand \((2x-3)(x+4)\): <input type=&quot;text&quot; id=&quot;math-exercise-1-f1&quot; data-vars=&quot;x&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-medium&quot;>">Expand \((2x-3)(x+4)\): <input type="text" id="math-exercise-1-f1" data-answer="2*x^2+5*x-12" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
 
 <div class="math-exercise-controls">
@@ -255,6 +259,15 @@ Expand $(2x-3)(x+4)$: __[2*x^2+5*x-12]
 </details>
 <details class="math-example-policy" data-source-kind="policy"><summary>Show policy YAML</summary><div class="ai-feedback-policy-summary" data-max-issues="" data-integration="math-exercise" data-exercise="sympy-expand" data-policy=""></div>
 <p><strong>AI Feedback defaults (feedback-defaults.yml)</strong></p><pre><code class="language-yaml">ai-feedback:
+  generation:
+    base-prompt: &gt;-
+      Create one self-contained, well-posed, nontrivial practice problem on the original topic
+      and method, at the requested difficulty. Follow the authored restrictions and the supplied
+      checker contracts. Do not copy a context example. Return the requested JSON only, with
+      explicit mathematical answers and fixed-operation SymPy recipes wherever applicable.
+      Never generate Python checker code, HTML, external responses or resizable inputs.
+      A matching answer is not proof of a worthwhile problem: check givens and nontriviality.
+    steps: []
   defaults:
     max-words: 250
     max-issues: 3
@@ -352,7 +365,7 @@ Expand $(2x-3)(x+4)$: __[2*x^2+5*x-12]
 </code></pre>
 </details>
 </div>
-<div class="math-exercise-cell" id="math-exercise-2" data-label="sympy-factor" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="factored" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-factor&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Polynomial algebra&quot;" data-context-text="&quot;&quot;" data-ctm-runtime-id="ctm-block-2" data-ctm-component="math-exercise" data-ctm-source="be9804924d0c17ed" data-ctm-save="true" data-ctm-id="sympy-factor" data-fields="[&quot;math-exercise-2-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" data-similar="false" data-similar-guidance="[]" data-generation-policy="[]" id="math-exercise-2" data-label="sympy-factor" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="factored" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-factor&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Polynomial algebra&quot;" data-context-text="&quot;&quot;" data-ctm-id="sympy-factor" data-ctm-source="be9804924d0c17ed" data-ctm-runtime-id="ctm-block-2" data-ctm-save="true" data-ctm-component="math-exercise" data-fields="[&quot;math-exercise-2-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div id="sympy-factor-question" class="math-exercise-question ai-feedback-context" data-math-exercise-source="Factor \(x^3-4x\): <input type=&quot;text&quot; id=&quot;math-exercise-2-f1&quot; data-vars=&quot;x&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-medium&quot;>">Factor \(x^3-4x\): <input type="text" id="math-exercise-2-f1" data-answer="x*(x-2)*(x+2)" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
 
 <div class="math-exercise-controls">
@@ -375,6 +388,15 @@ Factor $x^3-4x$: __[x*(x-2)*(x+2)]
 </details>
 <details class="math-example-policy" data-source-kind="policy"><summary>Show policy YAML</summary><div class="ai-feedback-policy-summary" data-max-issues="" data-integration="math-exercise" data-exercise="sympy-factor" data-policy=""></div>
 <p><strong>AI Feedback defaults (feedback-defaults.yml)</strong></p><pre><code class="language-yaml">ai-feedback:
+  generation:
+    base-prompt: &gt;-
+      Create one self-contained, well-posed, nontrivial practice problem on the original topic
+      and method, at the requested difficulty. Follow the authored restrictions and the supplied
+      checker contracts. Do not copy a context example. Return the requested JSON only, with
+      explicit mathematical answers and fixed-operation SymPy recipes wherever applicable.
+      Never generate Python checker code, HTML, external responses or resizable inputs.
+      A matching answer is not proof of a worthwhile problem: check givens and nontriviality.
+    steps: []
   defaults:
     max-words: 250
     max-issues: 3
@@ -475,7 +497,7 @@ Factor $x^3-4x$: __[x*(x-2)*(x+2)]
 </section>
 <section id="rational-expressions" class="level2">
 <h2 class="anchored" data-anchor-id="rational-expressions">Rational expressions</h2>
-<div class="math-exercise-cell" id="math-exercise-3" data-label="sympy-rational" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="single_fraction" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-rational&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Rational expressions&quot;" data-context-text="&quot;&quot;" data-ctm-runtime-id="ctm-block-3" data-ctm-component="math-exercise" data-ctm-source="3c24caaed98afafd" data-ctm-save="true" data-ctm-id="sympy-rational" data-fields="[&quot;math-exercise-3-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" data-similar="false" data-similar-guidance="[]" data-generation-policy="[]" id="math-exercise-3" data-label="sympy-rational" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="single_fraction" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-rational&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Rational expressions&quot;" data-context-text="&quot;&quot;" data-ctm-id="sympy-rational" data-ctm-source="3c24caaed98afafd" data-ctm-runtime-id="ctm-block-3" data-ctm-save="true" data-ctm-component="math-exercise" data-fields="[&quot;math-exercise-3-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div id="sympy-rational-question" class="math-exercise-question ai-feedback-context" data-math-exercise-source="Write \(\frac{1}{x} + \frac{1}{x+1}\) as one fraction, leaving its denominator<br>
 factored:<br>
 <input type=&quot;text&quot; id=&quot;math-exercise-3-f1&quot; data-vars=&quot;x&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-medium&quot;>">Write \(\frac{1}{x} + \frac{1}{x+1}\) as one fraction, leaving its denominator<br>
@@ -504,6 +526,15 @@ __[(2*x+1)/(x*(x+1))]
 </details>
 <details class="math-example-policy" data-source-kind="policy"><summary>Show policy YAML</summary><div class="ai-feedback-policy-summary" data-max-issues="" data-integration="math-exercise" data-exercise="sympy-rational" data-policy=""></div>
 <p><strong>AI Feedback defaults (feedback-defaults.yml)</strong></p><pre><code class="language-yaml">ai-feedback:
+  generation:
+    base-prompt: &gt;-
+      Create one self-contained, well-posed, nontrivial practice problem on the original topic
+      and method, at the requested difficulty. Follow the authored restrictions and the supplied
+      checker contracts. Do not copy a context example. Return the requested JSON only, with
+      explicit mathematical answers and fixed-operation SymPy recipes wherever applicable.
+      Never generate Python checker code, HTML, external responses or resizable inputs.
+      A matching answer is not proof of a worthwhile problem: check givens and nontriviality.
+    steps: []
   defaults:
     max-words: 250
     max-issues: 3
@@ -601,7 +632,7 @@ __[(2*x+1)/(x*(x+1))]
 </code></pre>
 </details>
 </div>
-<div class="math-exercise-cell" id="math-exercise-4" data-label="sympy-lowest-terms" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="lowest_terms" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-lowest-terms&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Rational expressions&quot;" data-context-text="&quot;&quot;" data-ctm-runtime-id="ctm-block-4" data-ctm-component="math-exercise" data-ctm-source="e4470323146c6abf" data-ctm-save="true" data-ctm-id="sympy-lowest-terms" data-fields="[&quot;math-exercise-4-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" data-similar="false" data-similar-guidance="[]" data-generation-policy="[]" id="math-exercise-4" data-label="sympy-lowest-terms" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="lowest_terms" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-lowest-terms&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Rational expressions&quot;" data-context-text="&quot;&quot;" data-ctm-id="sympy-lowest-terms" data-ctm-source="e4470323146c6abf" data-ctm-runtime-id="ctm-block-4" data-ctm-save="true" data-ctm-component="math-exercise" data-fields="[&quot;math-exercise-4-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div id="sympy-lowest-terms-question" class="math-exercise-question ai-feedback-context" data-math-exercise-source="Reduce \(84/126\) fully: <input type=&quot;text&quot; id=&quot;math-exercise-4-f1&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>">Reduce \(84/126\) fully: <input type="text" id="math-exercise-4-f1" data-answer="2/3" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
@@ -623,6 +654,15 @@ Reduce $84/126$ fully: _[2/3]
 </details>
 <details class="math-example-policy" data-source-kind="policy"><summary>Show policy YAML</summary><div class="ai-feedback-policy-summary" data-max-issues="" data-integration="math-exercise" data-exercise="sympy-lowest-terms" data-policy=""></div>
 <p><strong>AI Feedback defaults (feedback-defaults.yml)</strong></p><pre><code class="language-yaml">ai-feedback:
+  generation:
+    base-prompt: &gt;-
+      Create one self-contained, well-posed, nontrivial practice problem on the original topic
+      and method, at the requested difficulty. Follow the authored restrictions and the supplied
+      checker contracts. Do not copy a context example. Return the requested JSON only, with
+      explicit mathematical answers and fixed-operation SymPy recipes wherever applicable.
+      Never generate Python checker code, HTML, external responses or resizable inputs.
+      A matching answer is not proof of a worthwhile problem: check givens and nontriviality.
+    steps: []
   defaults:
     max-words: 250
     max-issues: 3
@@ -723,7 +763,7 @@ Reduce $84/126$ fully: _[2/3]
 </section>
 <section id="powers-roots-and-constants" class="level2">
 <h2 class="anchored" data-anchor-id="powers-roots-and-constants">Powers, roots, and constants</h2>
-<div class="math-exercise-cell" id="math-exercise-5" data-label="sympy-radicals" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-radicals&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Powers, roots, and constants&quot;" data-context-text="&quot;&quot;" data-ctm-runtime-id="ctm-block-5" data-ctm-component="math-exercise" data-ctm-source="59ade66903559167" data-ctm-save="true" data-ctm-id="sympy-radicals" data-fields="[&quot;math-exercise-5-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" data-similar="false" data-similar-guidance="[]" data-generation-policy="[]" id="math-exercise-5" data-label="sympy-radicals" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-radicals&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Powers, roots, and constants&quot;" data-context-text="&quot;&quot;" data-ctm-id="sympy-radicals" data-ctm-source="59ade66903559167" data-ctm-runtime-id="ctm-block-5" data-ctm-save="true" data-ctm-component="math-exercise" data-fields="[&quot;math-exercise-5-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div id="sympy-radicals-question" class="math-exercise-question ai-feedback-context" data-math-exercise-source="Simplify \(\sqrt{72}\): <input type=&quot;text&quot; id=&quot;math-exercise-5-f1&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>">Simplify \(\sqrt{72}\): <input type="text" id="math-exercise-5-f1" data-answer="6*sqrt(2)" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
@@ -744,6 +784,15 @@ Simplify $\sqrt{72}$: _[6*sqrt(2)]
 </details>
 <details class="math-example-policy" data-source-kind="policy"><summary>Show policy YAML</summary><div class="ai-feedback-policy-summary" data-max-issues="" data-integration="math-exercise" data-exercise="sympy-radicals" data-policy=""></div>
 <p><strong>AI Feedback defaults (feedback-defaults.yml)</strong></p><pre><code class="language-yaml">ai-feedback:
+  generation:
+    base-prompt: &gt;-
+      Create one self-contained, well-posed, nontrivial practice problem on the original topic
+      and method, at the requested difficulty. Follow the authored restrictions and the supplied
+      checker contracts. Do not copy a context example. Return the requested JSON only, with
+      explicit mathematical answers and fixed-operation SymPy recipes wherever applicable.
+      Never generate Python checker code, HTML, external responses or resizable inputs.
+      A matching answer is not proof of a worthwhile problem: check givens and nontriviality.
+    steps: []
   defaults:
     max-words: 250
     max-issues: 3
@@ -841,7 +890,7 @@ Simplify $\sqrt{72}$: _[6*sqrt(2)]
 </code></pre>
 </details>
 </div>
-<div class="math-exercise-cell" id="math-exercise-6" data-label="sympy-logarithm" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-logarithm&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Powers, roots, and constants&quot;" data-context-text="&quot;&quot;" data-ctm-runtime-id="ctm-block-6" data-ctm-component="math-exercise" data-ctm-source="2724441bc41f1515" data-ctm-save="true" data-ctm-id="sympy-logarithm" data-fields="[&quot;math-exercise-6-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" data-similar="false" data-similar-guidance="[]" data-generation-policy="[]" id="math-exercise-6" data-label="sympy-logarithm" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-logarithm&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Powers, roots, and constants&quot;" data-context-text="&quot;&quot;" data-ctm-id="sympy-logarithm" data-ctm-source="2724441bc41f1515" data-ctm-runtime-id="ctm-block-6" data-ctm-save="true" data-ctm-component="math-exercise" data-fields="[&quot;math-exercise-6-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div id="sympy-logarithm-question" class="math-exercise-question ai-feedback-context" data-math-exercise-source="For \(x\ne0\), differentiate \(\log(x^2)\): <input type=&quot;text&quot; id=&quot;math-exercise-6-f1&quot; data-vars=&quot;x&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-medium&quot;>">For \(x\ne0\), differentiate \(\log(x^2)\): <input type="text" id="math-exercise-6-f1" data-answer="2/x" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
 
 <div class="math-exercise-controls">
@@ -863,6 +912,15 @@ For $x\ne0$, differentiate $\log(x^2)$: __[2/x]
 </details>
 <details class="math-example-policy" data-source-kind="policy"><summary>Show policy YAML</summary><div class="ai-feedback-policy-summary" data-max-issues="" data-integration="math-exercise" data-exercise="sympy-logarithm" data-policy=""></div>
 <p><strong>AI Feedback defaults (feedback-defaults.yml)</strong></p><pre><code class="language-yaml">ai-feedback:
+  generation:
+    base-prompt: &gt;-
+      Create one self-contained, well-posed, nontrivial practice problem on the original topic
+      and method, at the requested difficulty. Follow the authored restrictions and the supplied
+      checker contracts. Do not copy a context example. Return the requested JSON only, with
+      explicit mathematical answers and fixed-operation SymPy recipes wherever applicable.
+      Never generate Python checker code, HTML, external responses or resizable inputs.
+      A matching answer is not proof of a worthwhile problem: check givens and nontriviality.
+    steps: []
   defaults:
     max-words: 250
     max-issues: 3
@@ -960,7 +1018,7 @@ For $x\ne0$, differentiate $\log(x^2)$: __[2/x]
 </code></pre>
 </details>
 </div>
-<div class="math-exercise-cell" id="math-exercise-7" data-label="sympy-exponential" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-exponential&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Powers, roots, and constants&quot;" data-context-text="&quot;&quot;" data-ctm-runtime-id="ctm-block-7" data-ctm-component="math-exercise" data-ctm-source="b2b5ee3f182ea99f" data-ctm-save="true" data-ctm-id="sympy-exponential" data-fields="[&quot;math-exercise-7-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" data-similar="false" data-similar-guidance="[]" data-generation-policy="[]" id="math-exercise-7" data-label="sympy-exponential" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-exponential&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Powers, roots, and constants&quot;" data-context-text="&quot;&quot;" data-ctm-id="sympy-exponential" data-ctm-source="b2b5ee3f182ea99f" data-ctm-runtime-id="ctm-block-7" data-ctm-save="true" data-ctm-component="math-exercise" data-fields="[&quot;math-exercise-7-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div id="sympy-exponential-question" class="math-exercise-question ai-feedback-context" data-math-exercise-source="Differentiate \(e^{3x}\): <input type=&quot;text&quot; id=&quot;math-exercise-7-f1&quot; data-vars=&quot;x&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-medium&quot;>">Differentiate \(e^{3x}\): <input type="text" id="math-exercise-7-f1" data-answer="3*exp(3*x)" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
 
 <div class="math-exercise-controls">
@@ -982,6 +1040,15 @@ Differentiate $e^{3x}$: __[3*exp(3*x)]
 </details>
 <details class="math-example-policy" data-source-kind="policy"><summary>Show policy YAML</summary><div class="ai-feedback-policy-summary" data-max-issues="" data-integration="math-exercise" data-exercise="sympy-exponential" data-policy=""></div>
 <p><strong>AI Feedback defaults (feedback-defaults.yml)</strong></p><pre><code class="language-yaml">ai-feedback:
+  generation:
+    base-prompt: &gt;-
+      Create one self-contained, well-posed, nontrivial practice problem on the original topic
+      and method, at the requested difficulty. Follow the authored restrictions and the supplied
+      checker contracts. Do not copy a context example. Return the requested JSON only, with
+      explicit mathematical answers and fixed-operation SymPy recipes wherever applicable.
+      Never generate Python checker code, HTML, external responses or resizable inputs.
+      A matching answer is not proof of a worthwhile problem: check givens and nontriviality.
+    steps: []
   defaults:
     max-words: 250
     max-issues: 3
@@ -1082,7 +1149,7 @@ Differentiate $e^{3x}$: __[3*exp(3*x)]
 </section>
 <section id="trigonometry" class="level2">
 <h2 class="anchored" data-anchor-id="trigonometry">Trigonometry</h2>
-<div class="math-exercise-cell" id="math-exercise-8" data-label="sympy-trig-identity" data-mode="equivalent" data-reject="sin(x)^2+cos(x)^2" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-trig-identity&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Trigonometry&quot;" data-context-text="&quot;&quot;" data-ctm-runtime-id="ctm-block-8" data-ctm-component="math-exercise" data-ctm-source="39d520e82502efe5" data-ctm-save="true" data-ctm-id="sympy-trig-identity" data-fields="[&quot;math-exercise-8-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" data-similar="false" data-similar-guidance="[]" data-generation-policy="[]" id="math-exercise-8" data-label="sympy-trig-identity" data-mode="equivalent" data-reject="sin(x)^2+cos(x)^2" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-trig-identity&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Trigonometry&quot;" data-context-text="&quot;&quot;" data-ctm-id="sympy-trig-identity" data-ctm-source="39d520e82502efe5" data-ctm-runtime-id="ctm-block-8" data-ctm-save="true" data-ctm-component="math-exercise" data-fields="[&quot;math-exercise-8-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div id="sympy-trig-identity-question" class="math-exercise-question ai-feedback-context" data-math-exercise-source="Simplify \(\sin^2(x)+\cos^2(x)\): <input type=&quot;text&quot; id=&quot;math-exercise-8-f1&quot; data-vars=&quot;x&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>">Simplify \(\sin^2(x)+\cos^2(x)\): <input type="text" id="math-exercise-8-f1" data-answer="1" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
@@ -1105,6 +1172,15 @@ Simplify $\sin^2(x)+\cos^2(x)$: _[1]
 </details>
 <details class="math-example-policy" data-source-kind="policy"><summary>Show policy YAML</summary><div class="ai-feedback-policy-summary" data-max-issues="" data-integration="math-exercise" data-exercise="sympy-trig-identity" data-policy=""></div>
 <p><strong>AI Feedback defaults (feedback-defaults.yml)</strong></p><pre><code class="language-yaml">ai-feedback:
+  generation:
+    base-prompt: &gt;-
+      Create one self-contained, well-posed, nontrivial practice problem on the original topic
+      and method, at the requested difficulty. Follow the authored restrictions and the supplied
+      checker contracts. Do not copy a context example. Return the requested JSON only, with
+      explicit mathematical answers and fixed-operation SymPy recipes wherever applicable.
+      Never generate Python checker code, HTML, external responses or resizable inputs.
+      A matching answer is not proof of a worthwhile problem: check givens and nontriviality.
+    steps: []
   defaults:
     max-words: 250
     max-issues: 3
@@ -1202,7 +1278,7 @@ Simplify $\sin^2(x)+\cos^2(x)$: _[1]
 </code></pre>
 </details>
 </div>
-<div class="math-exercise-cell" id="math-exercise-9" data-label="sympy-trig-value" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-trig-value&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Trigonometry&quot;" data-context-text="&quot;&quot;" data-ctm-runtime-id="ctm-block-9" data-ctm-component="math-exercise" data-ctm-source="adb56517e58c69fe" data-ctm-save="true" data-ctm-id="sympy-trig-value" data-fields="[&quot;math-exercise-9-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" data-similar="false" data-similar-guidance="[]" data-generation-policy="[]" id="math-exercise-9" data-label="sympy-trig-value" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-trig-value&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Trigonometry&quot;" data-context-text="&quot;&quot;" data-ctm-id="sympy-trig-value" data-ctm-source="adb56517e58c69fe" data-ctm-runtime-id="ctm-block-9" data-ctm-save="true" data-ctm-component="math-exercise" data-fields="[&quot;math-exercise-9-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div id="sympy-trig-value-question" class="math-exercise-question ai-feedback-context" data-math-exercise-source="Give the exact value of \(\sin(\pi/6)\): <input type=&quot;text&quot; id=&quot;math-exercise-9-f1&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>">Give the exact value of \(\sin(\pi/6)\): <input type="text" id="math-exercise-9-f1" data-answer="1/2" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
@@ -1223,6 +1299,15 @@ Give the exact value of $\sin(\pi/6)$: _[1/2]
 </details>
 <details class="math-example-policy" data-source-kind="policy"><summary>Show policy YAML</summary><div class="ai-feedback-policy-summary" data-max-issues="" data-integration="math-exercise" data-exercise="sympy-trig-value" data-policy=""></div>
 <p><strong>AI Feedback defaults (feedback-defaults.yml)</strong></p><pre><code class="language-yaml">ai-feedback:
+  generation:
+    base-prompt: &gt;-
+      Create one self-contained, well-posed, nontrivial practice problem on the original topic
+      and method, at the requested difficulty. Follow the authored restrictions and the supplied
+      checker contracts. Do not copy a context example. Return the requested JSON only, with
+      explicit mathematical answers and fixed-operation SymPy recipes wherever applicable.
+      Never generate Python checker code, HTML, external responses or resizable inputs.
+      A matching answer is not proof of a worthwhile problem: check givens and nontriviality.
+    steps: []
   defaults:
     max-words: 250
     max-issues: 3
@@ -1323,7 +1408,7 @@ Give the exact value of $\sin(\pi/6)$: _[1/2]
 </section>
 <section id="derivatives-and-integrals" class="level2">
 <h2 class="anchored" data-anchor-id="derivatives-and-integrals">Derivatives and integrals</h2>
-<div class="math-exercise-cell" id="math-exercise-10" data-label="sympy-derivative" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-derivative&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Derivatives and integrals&quot;" data-context-text="&quot;&quot;" data-ctm-runtime-id="ctm-block-10" data-ctm-component="math-exercise" data-ctm-source="cf72e9fe725dcdc1" data-ctm-save="true" data-ctm-id="sympy-derivative" data-fields="[&quot;math-exercise-10-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" data-similar="false" data-similar-guidance="[]" data-generation-policy="[]" id="math-exercise-10" data-label="sympy-derivative" data-mode="equivalent" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-derivative&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Derivatives and integrals&quot;" data-context-text="&quot;&quot;" data-ctm-id="sympy-derivative" data-ctm-source="cf72e9fe725dcdc1" data-ctm-runtime-id="ctm-block-10" data-ctm-save="true" data-ctm-component="math-exercise" data-fields="[&quot;math-exercise-10-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div id="sympy-derivative-question" class="math-exercise-question ai-feedback-context" data-math-exercise-source="Differentiate \(x^2\sin(x)\):<br>
 <input type=&quot;text&quot; id=&quot;math-exercise-10-f1&quot; data-vars=&quot;x&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-medium&quot;>">Differentiate \(x^2\sin(x)\):<br>
 <input type="text" id="math-exercise-10-f1" data-answer="2*x*sin(x)+x^2*cos(x)" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
@@ -1348,6 +1433,15 @@ __[2*x*sin(x)+x^2*cos(x)]
 </details>
 <details class="math-example-policy" data-source-kind="policy"><summary>Show policy YAML</summary><div class="ai-feedback-policy-summary" data-max-issues="" data-integration="math-exercise" data-exercise="sympy-derivative" data-policy=""></div>
 <p><strong>AI Feedback defaults (feedback-defaults.yml)</strong></p><pre><code class="language-yaml">ai-feedback:
+  generation:
+    base-prompt: &gt;-
+      Create one self-contained, well-posed, nontrivial practice problem on the original topic
+      and method, at the requested difficulty. Follow the authored restrictions and the supplied
+      checker contracts. Do not copy a context example. Return the requested JSON only, with
+      explicit mathematical answers and fixed-operation SymPy recipes wherever applicable.
+      Never generate Python checker code, HTML, external responses or resizable inputs.
+      A matching answer is not proof of a worthwhile problem: check givens and nontriviality.
+    steps: []
   defaults:
     max-words: 250
     max-issues: 3
@@ -1445,7 +1539,7 @@ __[2*x*sin(x)+x^2*cos(x)]
 </code></pre>
 </details>
 </div>
-<div class="math-exercise-cell" id="math-exercise-11" data-label="sympy-antiderivative" data-mode="custom" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    x = symbols[\&quot;x\&quot;]\n    constant = simplify(response[\&quot;expressions\&quot;][0] - (x**3 - 4*x))\n    valid = not constant.free_symbols and constant.is_real is True and constant.is_finite is True\n    return {\&quot;correct\&quot;: valid, \&quot;feedback\&quot;: \&quot;The derivative must be 3*x^2 - 4. Any real number may be added as the constant of integration (for example 0 or 5); write a number, not a symbol such as C.\&quot;}&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-antiderivative&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Derivatives and integrals&quot;" data-context-text="&quot;&quot;" data-ctm-runtime-id="ctm-block-11" data-ctm-component="math-exercise" data-ctm-source="2022970d480261e5" data-ctm-save="true" data-ctm-id="sympy-antiderivative" data-fields="[&quot;math-exercise-11-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" data-similar="false" data-similar-guidance="[]" data-generation-policy="[]" id="math-exercise-11" data-label="sympy-antiderivative" data-mode="custom" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;def check(response, symbols):\n    x = symbols[\&quot;x\&quot;]\n    constant = simplify(response[\&quot;expressions\&quot;][0] - (x**3 - 4*x))\n    valid = not constant.free_symbols and constant.is_real is True and constant.is_finite is True\n    return {\&quot;correct\&quot;: valid, \&quot;feedback\&quot;: \&quot;The derivative must be 3*x^2 - 4. Any real number may be added as the constant of integration (for example 0 or 5); write a number, not a symbol such as C.\&quot;}&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-antiderivative&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Derivatives and integrals&quot;" data-context-text="&quot;&quot;" data-ctm-id="sympy-antiderivative" data-ctm-source="2022970d480261e5" data-ctm-runtime-id="ctm-block-11" data-ctm-save="true" data-ctm-component="math-exercise" data-fields="[&quot;math-exercise-11-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div id="sympy-antiderivative-question" class="math-exercise-question ai-feedback-context" data-math-exercise-source="Give one real antiderivative of \(3x^2-4\) (any numerical real constant is allowed): <input type=&quot;text&quot; id=&quot;math-exercise-11-f1&quot; data-vars=&quot;x&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-medium&quot;>">Give one real antiderivative of \(3x^2-4\) (any numerical real constant is allowed): <input type="text" id="math-exercise-11-f1" data-answer="" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
 
 <div class="math-exercise-controls">
@@ -1481,6 +1575,15 @@ Give one real antiderivative of $3x^2-4$ (any numerical real constant is allowed
 </details>
 <details class="math-example-policy" data-source-kind="policy"><summary>Show policy YAML</summary><div class="ai-feedback-policy-summary" data-max-issues="" data-integration="math-exercise" data-exercise="sympy-antiderivative" data-policy=""></div>
 <p><strong>AI Feedback defaults (feedback-defaults.yml)</strong></p><pre><code class="language-yaml">ai-feedback:
+  generation:
+    base-prompt: &gt;-
+      Create one self-contained, well-posed, nontrivial practice problem on the original topic
+      and method, at the requested difficulty. Follow the authored restrictions and the supplied
+      checker contracts. Do not copy a context example. Return the requested JSON only, with
+      explicit mathematical answers and fixed-operation SymPy recipes wherever applicable.
+      Never generate Python checker code, HTML, external responses or resizable inputs.
+      A matching answer is not proof of a worthwhile problem: check givens and nontriviality.
+    steps: []
   defaults:
     max-words: 250
     max-issues: 3
@@ -1581,7 +1684,7 @@ Give one real antiderivative of $3x^2-4$ (any numerical real constant is allowed
 </section>
 <section id="complex-numbers" class="level2">
 <h2 class="anchored" data-anchor-id="complex-numbers">Complex numbers</h2>
-<div class="math-exercise-cell" id="math-exercise-12" data-label="sympy-complex" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-complex&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Complex numbers&quot;" data-context-text="&quot;&quot;" data-ctm-runtime-id="ctm-block-12" data-ctm-component="math-exercise" data-ctm-source="c321197ef2d9cf81" data-ctm-save="true" data-ctm-id="sympy-complex" data-fields="[&quot;math-exercise-12-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" data-similar="false" data-similar-guidance="[]" data-generation-policy="[]" id="math-exercise-12" data-label="sympy-complex" data-mode="equivalent" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-complex&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Complex numbers&quot;" data-context-text="&quot;&quot;" data-ctm-id="sympy-complex" data-ctm-source="c321197ef2d9cf81" data-ctm-runtime-id="ctm-block-12" data-ctm-save="true" data-ctm-component="math-exercise" data-fields="[&quot;math-exercise-12-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div id="sympy-complex-question" class="math-exercise-question ai-feedback-context" data-math-exercise-source="Compute \((1+2i)(3-i)\). Enter the imaginary unit \(i\) as a capital I:<br>
 <input type=&quot;text&quot; id=&quot;math-exercise-12-f1&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-medium&quot;>">Compute \((1+2i)(3-i)\). Enter the imaginary unit \(i\) as a capital I:<br>
 <input type="text" id="math-exercise-12-f1" data-answer="5+5*I" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
@@ -1605,6 +1708,15 @@ __[5+5*I]
 </details>
 <details class="math-example-policy" data-source-kind="policy"><summary>Show policy YAML</summary><div class="ai-feedback-policy-summary" data-max-issues="" data-integration="math-exercise" data-exercise="sympy-complex" data-policy=""></div>
 <p><strong>AI Feedback defaults (feedback-defaults.yml)</strong></p><pre><code class="language-yaml">ai-feedback:
+  generation:
+    base-prompt: &gt;-
+      Create one self-contained, well-posed, nontrivial practice problem on the original topic
+      and method, at the requested difficulty. Follow the authored restrictions and the supplied
+      checker contracts. Do not copy a context example. Return the requested JSON only, with
+      explicit mathematical answers and fixed-operation SymPy recipes wherever applicable.
+      Never generate Python checker code, HTML, external responses or resizable inputs.
+      A matching answer is not proof of a worthwhile problem: check givens and nontriviality.
+    steps: []
   defaults:
     max-words: 250
     max-issues: 3
@@ -1706,7 +1818,7 @@ __[5+5*I]
 <section id="solution-sets" class="level2">
 <h2 class="anchored" data-anchor-id="solution-sets">Solution sets</h2>
 <p>Enter the roots separated by commas. Their order does not matter; repeated values are counted.</p>
-<div class="math-exercise-cell" id="math-exercise-13" data-label="sympy-roots-set" data-mode="set" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-roots-set&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Solution sets\nEnter the roots separated by commas. Their order does not matter; repeated values are counted.&quot;" data-context-text="&quot;&quot;" data-ctm-runtime-id="ctm-block-13" data-ctm-component="math-exercise" data-ctm-source="01fad7dc603834f9" data-ctm-save="true" data-ctm-id="sympy-roots-set" data-fields="[&quot;math-exercise-13-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" data-similar="false" data-similar-guidance="[]" data-generation-policy="[]" id="math-exercise-13" data-label="sympy-roots-set" data-mode="set" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-roots-set&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Solution sets\nEnter the roots separated by commas. Their order does not matter; repeated values are counted.&quot;" data-context-text="&quot;&quot;" data-ctm-id="sympy-roots-set" data-ctm-source="01fad7dc603834f9" data-ctm-runtime-id="ctm-block-13" data-ctm-save="true" data-ctm-component="math-exercise" data-fields="[&quot;math-exercise-13-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div id="sympy-roots-set-question" class="math-exercise-question ai-feedback-context" data-math-exercise-source="List all roots of \(x^3-x=0\): <input type=&quot;text&quot; id=&quot;math-exercise-13-f1&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-medium&quot;>">List all roots of \(x^3-x=0\): <input type="text" id="math-exercise-13-f1" data-answer="-1,0,1" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
 
 <div class="math-exercise-controls">
@@ -1728,6 +1840,15 @@ List all roots of $x^3-x=0$: __[-1,0,1]
 </details>
 <details class="math-example-policy" data-source-kind="policy"><summary>Show policy YAML</summary><div class="ai-feedback-policy-summary" data-max-issues="" data-integration="math-exercise" data-exercise="sympy-roots-set" data-policy=""></div>
 <p><strong>AI Feedback defaults (feedback-defaults.yml)</strong></p><pre><code class="language-yaml">ai-feedback:
+  generation:
+    base-prompt: &gt;-
+      Create one self-contained, well-posed, nontrivial practice problem on the original topic
+      and method, at the requested difficulty. Follow the authored restrictions and the supplied
+      checker contracts. Do not copy a context example. Return the requested JSON only, with
+      explicit mathematical answers and fixed-operation SymPy recipes wherever applicable.
+      Never generate Python checker code, HTML, external responses or resizable inputs.
+      A matching answer is not proof of a worthwhile problem: check givens and nontriviality.
+    steps: []
   defaults:
     max-words: 250
     max-issues: 3
@@ -1829,7 +1950,7 @@ List all roots of $x^3-x=0$: __[-1,0,1]
 <section id="numerical-checking" class="level2">
 <h2 class="anchored" data-anchor-id="numerical-checking">Numerical checking</h2>
 <p>The first task accepts answers within a fixed absolute distance of the target; the second uses a percentage of the target value. The last two compare values after rounding to the stated number of decimal places or significant figures; they do not enforce the number of digits typed.</p>
-<div class="math-exercise-cell" id="math-exercise-14" data-label="sympy-absolute-tolerance" data-mode="numeric" data-reject="" data-vars="" data-tolerance="0.001" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-absolute-tolerance&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Numerical checking\nThe first task accepts answers within a fixed absolute distance of the target; the second uses a percentage of the target value. The last two compare values after rounding to the stated number of decimal places or significant figures; they do not enforce the number of digits typed.&quot;" data-context-text="&quot;&quot;" data-ctm-runtime-id="ctm-block-14" data-ctm-component="math-exercise" data-ctm-source="6326f71df3293f6a" data-ctm-save="true" data-ctm-id="sympy-absolute-tolerance" data-fields="[&quot;math-exercise-14-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" data-similar="false" data-similar-guidance="[]" data-generation-policy="[]" id="math-exercise-14" data-label="sympy-absolute-tolerance" data-mode="numeric" data-reject="" data-vars="" data-tolerance="0.001" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-absolute-tolerance&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Numerical checking\nThe first task accepts answers within a fixed absolute distance of the target; the second uses a percentage of the target value. The last two compare values after rounding to the stated number of decimal places or significant figures; they do not enforce the number of digits typed.&quot;" data-context-text="&quot;&quot;" data-ctm-id="sympy-absolute-tolerance" data-ctm-source="6326f71df3293f6a" data-ctm-runtime-id="ctm-block-14" data-ctm-save="true" data-ctm-component="math-exercise" data-fields="[&quot;math-exercise-14-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div id="sympy-absolute-tolerance-question" class="math-exercise-question ai-feedback-context" data-math-exercise-source="Approximate \(\sqrt{2}\): <input type=&quot;text&quot; id=&quot;math-exercise-14-f1&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>">Approximate \(\sqrt{2}\): <input type="text" id="math-exercise-14-f1" data-answer="sqrt(2)" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
@@ -1852,6 +1973,15 @@ Approximate $\sqrt{2}$: _[sqrt(2)]
 </details>
 <details class="math-example-policy" data-source-kind="policy"><summary>Show policy YAML</summary><div class="ai-feedback-policy-summary" data-max-issues="" data-integration="math-exercise" data-exercise="sympy-absolute-tolerance" data-policy=""></div>
 <p><strong>AI Feedback defaults (feedback-defaults.yml)</strong></p><pre><code class="language-yaml">ai-feedback:
+  generation:
+    base-prompt: &gt;-
+      Create one self-contained, well-posed, nontrivial practice problem on the original topic
+      and method, at the requested difficulty. Follow the authored restrictions and the supplied
+      checker contracts. Do not copy a context example. Return the requested JSON only, with
+      explicit mathematical answers and fixed-operation SymPy recipes wherever applicable.
+      Never generate Python checker code, HTML, external responses or resizable inputs.
+      A matching answer is not proof of a worthwhile problem: check givens and nontriviality.
+    steps: []
   defaults:
     max-words: 250
     max-issues: 3
@@ -1949,7 +2079,7 @@ Approximate $\sqrt{2}$: _[sqrt(2)]
 </code></pre>
 </details>
 </div>
-<div class="math-exercise-cell" id="math-exercise-15" data-label="sympy-relative-tolerance" data-mode="numeric" data-reject="" data-vars="" data-tolerance="1%" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-relative-tolerance&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Numerical checking\nThe first task accepts answers within a fixed absolute distance of the target; the second uses a percentage of the target value. The last two compare values after rounding to the stated number of decimal places or significant figures; they do not enforce the number of digits typed.&quot;" data-context-text="&quot;&quot;" data-ctm-runtime-id="ctm-block-15" data-ctm-component="math-exercise" data-ctm-source="073203862f7d7097" data-ctm-save="true" data-ctm-id="sympy-relative-tolerance" data-fields="[&quot;math-exercise-15-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" data-similar="false" data-similar-guidance="[]" data-generation-policy="[]" id="math-exercise-15" data-label="sympy-relative-tolerance" data-mode="numeric" data-reject="" data-vars="" data-tolerance="1%" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-relative-tolerance&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Numerical checking\nThe first task accepts answers within a fixed absolute distance of the target; the second uses a percentage of the target value. The last two compare values after rounding to the stated number of decimal places or significant figures; they do not enforce the number of digits typed.&quot;" data-context-text="&quot;&quot;" data-ctm-id="sympy-relative-tolerance" data-ctm-source="073203862f7d7097" data-ctm-runtime-id="ctm-block-15" data-ctm-save="true" data-ctm-component="math-exercise" data-fields="[&quot;math-exercise-15-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div id="sympy-relative-tolerance-question" class="math-exercise-question ai-feedback-context" data-math-exercise-source="Approximate \(e^5\): <input type=&quot;text&quot; id=&quot;math-exercise-15-f1&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>">Approximate \(e^5\): <input type="text" id="math-exercise-15-f1" data-answer="exp(5)" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
@@ -1972,6 +2102,15 @@ Approximate $e^5$: _[exp(5)]
 </details>
 <details class="math-example-policy" data-source-kind="policy"><summary>Show policy YAML</summary><div class="ai-feedback-policy-summary" data-max-issues="" data-integration="math-exercise" data-exercise="sympy-relative-tolerance" data-policy=""></div>
 <p><strong>AI Feedback defaults (feedback-defaults.yml)</strong></p><pre><code class="language-yaml">ai-feedback:
+  generation:
+    base-prompt: &gt;-
+      Create one self-contained, well-posed, nontrivial practice problem on the original topic
+      and method, at the requested difficulty. Follow the authored restrictions and the supplied
+      checker contracts. Do not copy a context example. Return the requested JSON only, with
+      explicit mathematical answers and fixed-operation SymPy recipes wherever applicable.
+      Never generate Python checker code, HTML, external responses or resizable inputs.
+      A matching answer is not proof of a worthwhile problem: check givens and nontriviality.
+    steps: []
   defaults:
     max-words: 250
     max-issues: 3
@@ -2069,7 +2208,7 @@ Approximate $e^5$: _[exp(5)]
 </code></pre>
 </details>
 </div>
-<div class="math-exercise-cell" id="math-exercise-16" data-label="sympy-decimal-places" data-mode="numeric" data-reject="" data-vars="" data-tolerance="" data-decplaces="3" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-decimal-places&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Numerical checking\nThe first task accepts answers within a fixed absolute distance of the target; the second uses a percentage of the target value. The last two compare values after rounding to the stated number of decimal places or significant figures; they do not enforce the number of digits typed.&quot;" data-context-text="&quot;&quot;" data-ctm-runtime-id="ctm-block-16" data-ctm-component="math-exercise" data-ctm-source="2d052455d7f0c1b3" data-ctm-save="true" data-ctm-id="sympy-decimal-places" data-fields="[&quot;math-exercise-16-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" data-similar="false" data-similar-guidance="[]" data-generation-policy="[]" id="math-exercise-16" data-label="sympy-decimal-places" data-mode="numeric" data-reject="" data-vars="" data-tolerance="" data-decplaces="3" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-decimal-places&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Numerical checking\nThe first task accepts answers within a fixed absolute distance of the target; the second uses a percentage of the target value. The last two compare values after rounding to the stated number of decimal places or significant figures; they do not enforce the number of digits typed.&quot;" data-context-text="&quot;&quot;" data-ctm-id="sympy-decimal-places" data-ctm-source="2d052455d7f0c1b3" data-ctm-runtime-id="ctm-block-16" data-ctm-save="true" data-ctm-component="math-exercise" data-fields="[&quot;math-exercise-16-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div id="sympy-decimal-places-question" class="math-exercise-question ai-feedback-context" data-math-exercise-source="Give \(\pi\) to three decimal places: <input type=&quot;text&quot; id=&quot;math-exercise-16-f1&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>">Give \(\pi\) to three decimal places: <input type="text" id="math-exercise-16-f1" data-answer="pi" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
@@ -2092,6 +2231,15 @@ Give $\pi$ to three decimal places: _[pi]
 </details>
 <details class="math-example-policy" data-source-kind="policy"><summary>Show policy YAML</summary><div class="ai-feedback-policy-summary" data-max-issues="" data-integration="math-exercise" data-exercise="sympy-decimal-places" data-policy=""></div>
 <p><strong>AI Feedback defaults (feedback-defaults.yml)</strong></p><pre><code class="language-yaml">ai-feedback:
+  generation:
+    base-prompt: &gt;-
+      Create one self-contained, well-posed, nontrivial practice problem on the original topic
+      and method, at the requested difficulty. Follow the authored restrictions and the supplied
+      checker contracts. Do not copy a context example. Return the requested JSON only, with
+      explicit mathematical answers and fixed-operation SymPy recipes wherever applicable.
+      Never generate Python checker code, HTML, external responses or resizable inputs.
+      A matching answer is not proof of a worthwhile problem: check givens and nontriviality.
+    steps: []
   defaults:
     max-words: 250
     max-issues: 3
@@ -2189,7 +2337,7 @@ Give $\pi$ to three decimal places: _[pi]
 </code></pre>
 </details>
 </div>
-<div class="math-exercise-cell" id="math-exercise-17" data-label="sympy-significant-figures" data-mode="numeric" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="4" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-significant-figures&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Numerical checking\nThe first task accepts answers within a fixed absolute distance of the target; the second uses a percentage of the target value. The last two compare values after rounding to the stated number of decimal places or significant figures; they do not enforce the number of digits typed.&quot;" data-context-text="&quot;&quot;" data-ctm-runtime-id="ctm-block-17" data-ctm-component="math-exercise" data-ctm-source="818bf9ec96610fb7" data-ctm-save="true" data-ctm-id="sympy-significant-figures" data-fields="[&quot;math-exercise-17-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" data-similar="false" data-similar-guidance="[]" data-generation-policy="[]" id="math-exercise-17" data-label="sympy-significant-figures" data-mode="numeric" data-reject="" data-vars="" data-tolerance="" data-decplaces="" data-sigfigs="4" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-significant-figures&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Numerical checking\nThe first task accepts answers within a fixed absolute distance of the target; the second uses a percentage of the target value. The last two compare values after rounding to the stated number of decimal places or significant figures; they do not enforce the number of digits typed.&quot;" data-context-text="&quot;&quot;" data-ctm-id="sympy-significant-figures" data-ctm-source="818bf9ec96610fb7" data-ctm-runtime-id="ctm-block-17" data-ctm-save="true" data-ctm-component="math-exercise" data-fields="[&quot;math-exercise-17-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div id="sympy-significant-figures-question" class="math-exercise-question ai-feedback-context" data-math-exercise-source="Give \(1/7\) to four significant figures: <input type=&quot;text&quot; id=&quot;math-exercise-17-f1&quot; data-vars=&quot;&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-small&quot;>">Give \(1/7\) to four significant figures: <input type="text" id="math-exercise-17-f1" data-answer="1/7" data-vars="" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-small"></div>
 
 <div class="math-exercise-controls">
@@ -2212,6 +2360,15 @@ Give $1/7$ to four significant figures: _[1/7]
 </details>
 <details class="math-example-policy" data-source-kind="policy"><summary>Show policy YAML</summary><div class="ai-feedback-policy-summary" data-max-issues="" data-integration="math-exercise" data-exercise="sympy-significant-figures" data-policy=""></div>
 <p><strong>AI Feedback defaults (feedback-defaults.yml)</strong></p><pre><code class="language-yaml">ai-feedback:
+  generation:
+    base-prompt: &gt;-
+      Create one self-contained, well-posed, nontrivial practice problem on the original topic
+      and method, at the requested difficulty. Follow the authored restrictions and the supplied
+      checker contracts. Do not copy a context example. Return the requested JSON only, with
+      explicit mathematical answers and fixed-operation SymPy recipes wherever applicable.
+      Never generate Python checker code, HTML, external responses or resizable inputs.
+      A matching answer is not proof of a worthwhile problem: check givens and nontriviality.
+    steps: []
   defaults:
     max-words: 250
     max-issues: 3
@@ -2312,7 +2469,7 @@ Give $1/7$ to four significant figures: _[1/7]
 </section>
 <section id="requiring-an-exact-representation" class="level2">
 <h2 class="anchored" data-anchor-id="requiring-an-exact-representation">Requiring an exact representation</h2>
-<div class="math-exercise-cell" id="math-exercise-18" data-label="sympy-exact" data-mode="exact" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-exact&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Requiring an exact representation&quot;" data-context-text="&quot;&quot;" data-ctm-runtime-id="ctm-block-18" data-ctm-component="math-exercise" data-ctm-source="1fc095fb4e45f215" data-ctm-save="true" data-ctm-id="sympy-exact" data-fields="[&quot;math-exercise-18-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
+<div class="math-exercise-cell" data-similar="false" data-similar-guidance="[]" data-generation-policy="[]" id="math-exercise-18" data-label="sympy-exact" data-mode="exact" data-reject="" data-vars="x" data-tolerance="" data-decplaces="" data-sigfigs="" data-form="" data-checker="&quot;&quot;" data-packages="[]" data-response="" data-embed-response="false" data-partial-credit="false" data-form-credit="0.5" data-field-labels="[]" data-vecdir="col" data-feedback-policy="{&quot;exercise&quot;:&quot;sympy-exact&quot;,&quot;name&quot;:&quot;&quot;}" data-variant-boards="[]" data-variant-board-title="" data-context-mode="auto" data-context-refs="auto" data-context="&quot;Requiring an exact representation&quot;" data-context-text="&quot;&quot;" data-ctm-id="sympy-exact" data-ctm-source="1fc095fb4e45f215" data-ctm-runtime-id="ctm-block-18" data-ctm-save="true" data-ctm-component="math-exercise" data-fields="[&quot;math-exercise-18-f1&quot;]" data-structural-field-labels="[&quot;&quot;]">
 <div id="sympy-exact-question" class="math-exercise-question ai-feedback-context" data-math-exercise-source="Enter the canonical expanded expression \(x^2+2x+1\):<br>
 <input type=&quot;text&quot; id=&quot;math-exercise-18-f1&quot; data-vars=&quot;x&quot; autocomplete=&quot;off&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; class=&quot;math-input math-input-medium&quot;>">Enter the canonical expanded expression \(x^2+2x+1\):<br>
 <input type="text" id="math-exercise-18-f1" data-answer="x^2+2*x+1" data-vars="x" autocomplete="off" autocorrect="off" spellcheck="false" class="math-input math-input-medium"></div>
@@ -2338,6 +2495,15 @@ __[x^2+2*x+1]
 </details>
 <details class="math-example-policy" data-source-kind="policy"><summary>Show policy YAML</summary><div class="ai-feedback-policy-summary" data-max-issues="" data-integration="math-exercise" data-exercise="sympy-exact" data-policy=""></div>
 <p><strong>AI Feedback defaults (feedback-defaults.yml)</strong></p><pre><code class="language-yaml">ai-feedback:
+  generation:
+    base-prompt: &gt;-
+      Create one self-contained, well-posed, nontrivial practice problem on the original topic
+      and method, at the requested difficulty. Follow the authored restrictions and the supplied
+      checker contracts. Do not copy a context example. Return the requested JSON only, with
+      explicit mathematical answers and fixed-operation SymPy recipes wherever applicable.
+      Never generate Python checker code, HTML, external responses or resizable inputs.
+      A matching answer is not proof of a worthwhile problem: check givens and nontriviality.
+    steps: []
   defaults:
     max-words: 250
     max-issues: 3
@@ -2437,7 +2603,7 @@ __[x^2+2*x+1]
 </div>
 
 
-<!--ctm-save-generated--><script type="application/json" id="ctm-store-manifest">{"exercises":[{"component":"math-exercise","id":"sympy-expand","order":1,"runtimeId":"ctm-block-1","save":true,"source":"0c87de86d296dbaf"},{"component":"math-exercise","id":"sympy-factor","order":2,"runtimeId":"ctm-block-2","save":true,"source":"be9804924d0c17ed"},{"component":"math-exercise","id":"sympy-rational","order":3,"runtimeId":"ctm-block-3","save":true,"source":"3c24caaed98afafd"},{"component":"math-exercise","id":"sympy-lowest-terms","order":4,"runtimeId":"ctm-block-4","save":true,"source":"e4470323146c6abf"},{"component":"math-exercise","id":"sympy-radicals","order":5,"runtimeId":"ctm-block-5","save":true,"source":"59ade66903559167"},{"component":"math-exercise","id":"sympy-logarithm","order":6,"runtimeId":"ctm-block-6","save":true,"source":"2724441bc41f1515"},{"component":"math-exercise","id":"sympy-exponential","order":7,"runtimeId":"ctm-block-7","save":true,"source":"b2b5ee3f182ea99f"},{"component":"math-exercise","id":"sympy-trig-identity","order":8,"runtimeId":"ctm-block-8","save":true,"source":"39d520e82502efe5"},{"component":"math-exercise","id":"sympy-trig-value","order":9,"runtimeId":"ctm-block-9","save":true,"source":"adb56517e58c69fe"},{"component":"math-exercise","id":"sympy-derivative","order":10,"runtimeId":"ctm-block-10","save":true,"source":"cf72e9fe725dcdc1"},{"component":"math-exercise","id":"sympy-antiderivative","order":11,"runtimeId":"ctm-block-11","save":true,"source":"2022970d480261e5"},{"component":"math-exercise","id":"sympy-complex","order":12,"runtimeId":"ctm-block-12","save":true,"source":"c321197ef2d9cf81"},{"component":"math-exercise","id":"sympy-roots-set","order":13,"runtimeId":"ctm-block-13","save":true,"source":"01fad7dc603834f9"},{"component":"math-exercise","id":"sympy-absolute-tolerance","order":14,"runtimeId":"ctm-block-14","save":true,"source":"6326f71df3293f6a"},{"component":"math-exercise","id":"sympy-relative-tolerance","order":15,"runtimeId":"ctm-block-15","save":true,"source":"073203862f7d7097"},{"component":"math-exercise","id":"sympy-decimal-places","order":16,"runtimeId":"ctm-block-16","save":true,"source":"2d052455d7f0c1b3"},{"component":"math-exercise","id":"sympy-significant-figures","order":17,"runtimeId":"ctm-block-17","save":true,"source":"818bf9ec96610fb7"},{"component":"math-exercise","id":"sympy-exact","order":18,"runtimeId":"ctm-block-18","save":true,"source":"1fc095fb4e45f215"}],"export":true,"messages":{"clearFailed":"Browser storage could not be cleared or updated. Use your browser settings to remove this course data.","confirmClearCourse":"Delete all your saved answers in this course?","confirmNewVariant":"Replace your filled answers with a new variant?","confirmSaveOff":"This deletes all saved answers in this course and stops saving.","copyAll":"Copy all","correct":"✓ correct","downloadHTML":"Download .html","downloadMarkdown":"Download .md","exercise":"Exercise","exportClose":"Close","exportTitle":"Export my answers","lastResult":"Last result","locale":"en","outdated":"Outdated","partial":"½ partly correct","progressTitle":"Page progress","recordTooLarge":"This answer is too large to save. Copy it before leaving the page.","saveOff":"Do not save on this device","saveOn":"Save again","savingDisabled":"Saving is off for this page.","savingNotice":"Your answers are saved only in this browser.","savingOffNotice":"Saving is off on this device for this course.","showSaved":"Show your saved answer","sourceChanged":"The exercise has changed since you answered.","statusCorrect":"correct","statusInvalid":"invalid","statusPartial":"partly correct","statusWrong":"wrong","storageUnavailable":"Saving is unavailable. Your answers are kept in memory for this page only.","total":"{score} of {count}","unattempted":"– not attempted","variantChanged":"This variant has changed.","variantWithdrawn":"This variant has been withdrawn.","wrong":"✗ wrong"},"progress":false,"quizzes":[],"save":true,"v":1}</script>
+<!--ctm-save-generated--><script type="application/json" id="ctm-store-manifest">{"exercises":[{"component":"math-exercise","id":"sympy-expand","order":1,"runtimeId":"ctm-block-1","save":true,"source":"0c87de86d296dbaf"},{"component":"math-exercise","id":"sympy-factor","order":2,"runtimeId":"ctm-block-2","save":true,"source":"be9804924d0c17ed"},{"component":"math-exercise","id":"sympy-rational","order":3,"runtimeId":"ctm-block-3","save":true,"source":"3c24caaed98afafd"},{"component":"math-exercise","id":"sympy-lowest-terms","order":4,"runtimeId":"ctm-block-4","save":true,"source":"e4470323146c6abf"},{"component":"math-exercise","id":"sympy-radicals","order":5,"runtimeId":"ctm-block-5","save":true,"source":"59ade66903559167"},{"component":"math-exercise","id":"sympy-logarithm","order":6,"runtimeId":"ctm-block-6","save":true,"source":"2724441bc41f1515"},{"component":"math-exercise","id":"sympy-exponential","order":7,"runtimeId":"ctm-block-7","save":true,"source":"b2b5ee3f182ea99f"},{"component":"math-exercise","id":"sympy-trig-identity","order":8,"runtimeId":"ctm-block-8","save":true,"source":"39d520e82502efe5"},{"component":"math-exercise","id":"sympy-trig-value","order":9,"runtimeId":"ctm-block-9","save":true,"source":"adb56517e58c69fe"},{"component":"math-exercise","id":"sympy-derivative","order":10,"runtimeId":"ctm-block-10","save":true,"source":"cf72e9fe725dcdc1"},{"component":"math-exercise","id":"sympy-antiderivative","order":11,"runtimeId":"ctm-block-11","save":true,"source":"2022970d480261e5"},{"component":"math-exercise","id":"sympy-complex","order":12,"runtimeId":"ctm-block-12","save":true,"source":"c321197ef2d9cf81"},{"component":"math-exercise","id":"sympy-roots-set","order":13,"runtimeId":"ctm-block-13","save":true,"source":"01fad7dc603834f9"},{"component":"math-exercise","id":"sympy-absolute-tolerance","order":14,"runtimeId":"ctm-block-14","save":true,"source":"6326f71df3293f6a"},{"component":"math-exercise","id":"sympy-relative-tolerance","order":15,"runtimeId":"ctm-block-15","save":true,"source":"073203862f7d7097"},{"component":"math-exercise","id":"sympy-decimal-places","order":16,"runtimeId":"ctm-block-16","save":true,"source":"2d052455d7f0c1b3"},{"component":"math-exercise","id":"sympy-significant-figures","order":17,"runtimeId":"ctm-block-17","save":true,"source":"818bf9ec96610fb7"},{"component":"math-exercise","id":"sympy-exact","order":18,"runtimeId":"ctm-block-18","save":true,"source":"1fc095fb4e45f215"}],"export":true,"messages":{"answered":"Answered, not graded","answersStorage":"Answers \u0026 storage","clearFailed":"Browser storage could not be cleared or updated. Use your browser settings to remove this course data.","confirmClearCourse":"Delete all your saved answers in this course?","confirmClearPage":"Delete all saved answers on this page?","confirmNewVariant":"Replace your filled answers with a new variant?","confirmSaveOff":"This deletes all saved answers in this course and stops saving.","copyAll":"Copy all","correct":"✓ correct","downloadHTML":"Download .html","downloadMarkdown":"Download .md","exercise":"Exercise","exportClose":"Close","exportTitle":"Export my answers","lastResult":"Last result","locale":"en","notSaving":"Answers aren’t being saved","outdated":"Outdated","partial":"½ partly correct","progressTitle":"Page progress","recordTooLarge":"This answer is too large to save. Copy it before leaving the page.","saveOff":"Do not save on this device","saveOn":"Save again","savedLocal":"Saved in this browser","savingDisabled":"Saving is off for this page.","savingLocal":"Saving in this browser","savingNotice":"Your answers are saved only in this browser.","savingOffNotice":"Saving is off on this device for this course.","settings":"Settings","showSaved":"Show your saved answer","sourceChanged":"The exercise has changed since you answered.","statusCorrect":"correct","statusInvalid":"invalid","statusPartial":"partly correct","statusWrong":"wrong","storageUnavailable":"Saving is unavailable. Your answers are kept in memory for this page only.","total":"{score} of {count}","unattempted":"– not attempted","variantChanged":"This variant has changed.","variantWithdrawn":"This variant has been withdrawn.","wrong":"✗ wrong"},"progress":false,"quizzes":[],"save":true,"v":1}</script>
 <!--ctm-layout-generated--><span id="ctm-layout-ready" hidden=""></span>
 </section>
 
@@ -2850,4 +3016,5 @@ __[x^2+2*x+1]
 <script src="site_libs/quarto-contrib/ctm-matrix-input-0.9.0/ctm-matrix-input.js"></script>
 <script src="site_libs/quarto-contrib/math-exercise-0.11.0/math-store.js"></script>
 <script src="site_libs/quarto-contrib/math-exercise-0.11.0/math-exercise.js"></script>
+<script src="site_libs/quarto-contrib/math-exercise-0.11.0/math-similar.js"></script>
 </body></html>
