@@ -1,5 +1,7 @@
 import {readFileSync} from 'node:fs';
 import {test, expect} from 'playwright/test';
+// Audit the settled rendering without a COI navigation replacing the DOM.
+test.use({serviceWorkers:'block'});
 
 // Keep the audit tied to the complete published site, including the legacy
 // all-in-one page and generated variants, rather than a few chosen examples.

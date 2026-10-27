@@ -172,6 +172,9 @@ local function requireCheckers()
 end
 
 local function requireAssets()
+  if type(ctm.runtime.page) ~= "function" then
+    ctm.fail("P13 requires an updated CTM Assessment page-worker runtime. Reinstall CTM Assessment: " .. INSTALL)
+  end
   if type(ctm.assets) ~= "table" or type(ctm.assets.use) ~= "function"
       or type(ctm.assets.mode) ~= "function" or type(ctm.assets.url) ~= "function" then
     ctm.fail("math-exercise needs the shared assets API. Update CTM Assessment: " .. INSTALL)
@@ -189,7 +192,7 @@ local function ensureSetup()
   requireCheckers()
   requireAssets()
   ctm.assets.use()
-  ctm.runtime.use()
+  ctm.runtime.page()
   ctm.checkers.use()
   ctm.locale.use("math-exercise")
   ctm.locale.use("ui")

@@ -10,7 +10,7 @@ permissions:
   contents: read
 jobs:
   browser:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
@@ -30,7 +30,11 @@ jobs:
         uses: ./.github/actions/quarto-dependencies
       - run: python -m pip install sympy==1.13.3 'networkx>=3.4' 'PyYAML>=6'  # SymPy: the version Pyodide 0.28.3 ships
       - run: npm ci --ignore-scripts
-      - run: npx playwright install --with-deps chromium
+      - name: Install the supported browser with the mainline mirror fix
+        timeout-minutes: 5
+        run: |
+          sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' /etc/apt/apt-mirrors.txt
+          npx playwright install --with-deps chromium
       - run: quarto render
       - run: python tests/build-similar-profiles.py
       - run: npm run test:browser

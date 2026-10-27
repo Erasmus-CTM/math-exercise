@@ -138,7 +138,9 @@
     await Promise.all(requested.map(function (name) {
       var key = name.toLowerCase();
       if (!loads[key]) {
-        loads[key] = py.loadPackage(name).catch(function (error) {
+        loads[key] = globalThis.MathExerciseRuntime.transaction(py, function () {
+          return py.loadPackage(name);
+        }).catch(function (error) {
           delete loads[key];
           throw error;
         });
@@ -167,8 +169,10 @@
   // such as `symbols`, `Matrix` or `sqrt`. ctm-libs installs it once per
   // runtime, with the guard that keeps the other components' interpreter state.
   async function initializeSympy(py) {
-    await py.loadPackage('sympy');
-    await globalThis.MathExerciseRuntime.ensureGuard(py);
+    await globalThis.MathExerciseRuntime.transaction(py, async function () {
+      await py.loadPackage('sympy');
+      await globalThis.MathExerciseRuntime.ensureGuard(py);
+    });
     await globalThis.MathExerciseRuntime.ensureCheckers(py);
   }
 
@@ -855,8 +859,8 @@
     var credit = Number(value);
     return Number.isFinite(credit) && credit >= 0 && credit <= 1 ? credit : 0.5;
   }
-  function callCheckers(py, name, request) {
-    return globalThis.MathExerciseRuntime.callCheckers(py, 'math_exercise.' + name, request);
+  function callCheckers(py, name, request, onStart) {
+    return globalThis.MathExerciseRuntime.callCheckers(py, 'math_exercise.' + name, request, undefined, {onStart: onStart});
   }
 
   // A check is one request through ctm-libs' callCheckers, which runs the
@@ -864,9 +868,9 @@
   // there). There is no queue for the whole page: a runtime that hangs holds
   // up no check on the next one (after a restart). The answer and the
   // options are copied when the check is asked for.
-  function checkField(el, mode, opts) {var field={value:el.value,dataset:Object.assign({},el.dataset)}, options=JSON.parse(JSON.stringify(opts||{}));return checkFieldNow(field,mode,options);}
-  function checkCustom(response, opts) {var answer=JSON.parse(JSON.stringify(response)),options=JSON.parse(JSON.stringify(opts));return checkCustomNow(answer,options);}
-  async function checkFieldNow(el, mode, opts) {
+  function checkField(el, mode, opts, onStart) {var field={value:el.value,dataset:Object.assign({},el.dataset)}, options=JSON.parse(JSON.stringify(opts||{}));return checkFieldNow(field,mode,options,onStart);}
+  function checkCustom(response, opts, onStart) {var answer=JSON.parse(JSON.stringify(response)),options=JSON.parse(JSON.stringify(opts));return checkCustomNow(answer,options,onStart);}
+  async function checkFieldNow(el, mode, opts, onStart) {
     var val = el.value.trim();
     if (!val) return { status: 'empty', score: 0.0 };
     opts = opts || {};
@@ -884,7 +888,7 @@
         form:      opts.form      || '',
         partial_credit: !!opts.partialCredit,
         form_credit: finiteCredit(opts.formCredit),
-      }));
+      }, onStart));
     });
   }
 
@@ -942,7 +946,7 @@
     return runOnCurrentRuntime(function () { return ensurePackages(packages); }, packages);
   }
 
-  async function checkCustomNow(response, opts) {
+  async function checkCustomNow(response, opts, onStart) {
     if (opts.variant && !opts.questionContext) {
       if (!response || typeof response !== 'object' || Array.isArray(response)) throw new Error('Generated custom responses must be objects');
       response = Object.assign({}, response, {variant: opts.variant});
@@ -956,7 +960,7 @@
         checker:  opts.checker || '',
       };
       if (opts.questionContext) request.question_context = opts.questionContext;
-      return JSON.parse(await callCheckers(py, 'check_custom', request));
+      return JSON.parse(await callCheckers(py, 'check_custom', request, onStart));
     }, opts.packages);
   }
 
@@ -1352,6 +1356,7 @@
       if (feedbackHandle) feedbackHandle.cancel();
       checkedEvidence = null;
       var checkSnapshot = localSnapshot();
+      var checkEpoch = globalThis.MathExerciseRuntime.stopCount();
       var results = [];
       checkBtn.disabled = true;
       if (feedbackBtn) feedbackBtn.disabled = true;
@@ -1387,20 +1392,25 @@
       };
       // A reload during another check's retry ends with that check's own phase.
       var stillLoading = true;
-      var onReload = function () { timePhase(activeReloads > 0 || stillLoading); };
+      var waitingForPython = function () { cancelSlow(); phase = null; };
+      var onRunning = function () {
+        fbDiv.innerHTML = '<div class="math-fb-checking">' + L.checking + '</div>';
+        timePhase(false);
+      };
+      var onReload = function () { if (activeReloads > 0 || stillLoading) timePhase(true); else waitingForPython(); };
       reloadHooks.add(onReload);
       try {
         timePhase(true);
         await prepareRuntime(checkOpts.packages);
         stillLoading = false;
-        timePhase(activeReloads > 0);
+        waitingForPython();
         var parts = [];
         var fieldElements = fieldIds.map(function (id) { return document.getElementById(id); });
         if (mode === 'custom') {
           var transport = await collectCustomResponse(fieldIds, checkOpts, false, collectDynamicMatrixInputs(questionDiv));
-          if (checkSnapshot !== localSnapshot()) return;
-          var custom = transport.empty ? { status: 'empty', score: 0 } : await checkCustom(transport.response, checkOpts);
-          if (checkSnapshot !== localSnapshot()) return;
+          if (checkSnapshot !== localSnapshot() || stoppedSince(checkEpoch)) return;
+          var custom = transport.empty ? { status: 'empty', score: 0 } : await checkCustom(transport.response, checkOpts, onRunning);
+          if (checkSnapshot !== localSnapshot() || stoppedSince(checkEpoch)) return;
           checkedEvidence = { snapshot: checkSnapshot, graph: JSON.stringify(transport.response), results: [safeResult(custom)] };
           applyCustomAssessment(questionDiv, custom);
           var customMessage = custom.feedback ? ' ' + escHtml(custom.feedback) : '';
@@ -1426,8 +1436,10 @@
           var el     = document.getElementById(fieldIds[i]);
           if (!el) continue;
           var prefix = fieldIds.length > 1 ? escHtml(fieldLabel(i)) + ': ' : '';
-          var res    = await checkField(el, mode, checkOpts);
-          if (checkSnapshot !== localSnapshot()) return;
+          waitingForPython();
+          var res    = await checkField(el, mode, checkOpts, onRunning);
+          cancelSlow();
+          if (checkSnapshot !== localSnapshot() || stoppedSince(checkEpoch)) return;
           results.push({ label: fieldLabel(i), result: safeResult(res) });
           el.classList.remove('math-input-ok', 'math-input-dependent', 'math-input-partial', 'math-input-wrong', 'math-input-err');
           if (typeof res.score === 'number') { totalScore += res.score; scoredFields++; }
@@ -1447,8 +1459,10 @@
         fbDiv.innerHTML = parts.join('');
         publishStoredResult(results.map(function (item) { return item.result; }));
       } catch (err) {
-        fbDiv.innerHTML = '<div class="math-fb-err">&#9888;&nbsp;' + friendlyError(String(err)) + '</div>';
-        if (storedAnswers) storedAnswers.result({status: 'invalid', score: 0});
+        // Cancellation/infrastructure failures are not completed grading
+        // results and must not overwrite a previously completed score.
+        fbDiv.innerHTML = '<div class="math-fb-err">&#9888;&nbsp;' +
+          (stoppedSince(checkEpoch) || err && (err.cancelled || err.restarted) ? escHtml(L.errStopped) : friendlyError(String(err))) + '</div>';
       } finally {
         reloadHooks.delete(onReload);
         cancelSlow();
@@ -1752,7 +1766,7 @@
       }
     });
     if (cells.length) ensurePyodide().catch(function (e) {
-      console.warn('math-exercise: Pyodide preload failed (will retry on the first check):', e);
+      console.warn('math-exercise: Pyodide preload failed (use Retry to restart Python):', e);
     });
     try { await ensureKatex(); }
     catch (error) {

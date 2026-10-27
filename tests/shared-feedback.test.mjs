@@ -186,7 +186,7 @@ test('a long check in a worker runtime offers Stop; a stopped check is not repea
   for (let i = 0; i < 100 && !cell.querySelector('.math-stop-btn'); i++) await new Promise(r => setTimeout(r, 5));
   cell.querySelector('.math-stop-btn').click();
   for (let i = 0; i < 100 && !cell.querySelector('.math-fb-err'); i++) await new Promise(r => setTimeout(r, 5));
-  assert.match(cell.querySelector('.math-fb-err').textContent, /Stopped\. Python was restarted/);
+  assert.match(cell.querySelector('.math-fb-err').textContent, /Stopped\./);
   assert.equal(restarts, 1);
   assert.equal(checks, 1);
   p.dom.window.close();
