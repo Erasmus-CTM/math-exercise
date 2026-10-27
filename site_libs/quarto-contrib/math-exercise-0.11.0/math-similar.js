@@ -409,6 +409,9 @@
         ],
         {
           signal,
+          // Solving a fresh problem takes longer than ordinary feedback (60 s),
+          // especially with a reasoning feedback model.
+          timeoutMs: 180000,
           validate: (text) => {
             try {
               const value = parseJSON(text);
