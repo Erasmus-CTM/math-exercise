@@ -2,14 +2,14 @@
   "comment": "Exact P13 dependencies; AC merges with merge commits.",
   "ctm-libs": {
     "repository": "Erasmus-CTM/ctm-libs",
-    "commit": "34af5e71defb65f4ff2d686266cc9c2612624fc2"
+    "commit": "365eadcc98489f0202d0e55b06172e3567b0a8c3"
   },
   "ctm-checkers": {
     "repository": "Erasmus-CTM/ctm-checkers",
-    "commit": "406df5883357499b73293e0e97ee63503d490ca8"
+    "commit": "57823df14c42a83f808f85bf0086a7feacc920cf"
   },
   "ctm-assessment": {
     "repository": "Erasmus-CTM/ctm-assessment",
-    "commit": "60c2b4df30a91b97e689494af49baf5ee47f73c3"
+    "commit": "f4be5a6c96fa2eabc5ca7daf71dc438575b2a726"
   }
 }
