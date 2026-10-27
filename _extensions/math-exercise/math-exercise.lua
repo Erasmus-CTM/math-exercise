@@ -642,6 +642,22 @@ local function inlineMarkdown(s)
   return table.concat(out)
 end
 
+-- A math span as the renderer must see it, as mathSpan() in math-exercise.js:
+-- a line break inside math becomes a space (the task's newlines become <br>
+-- afterwards, which KaTeX's auto-render cannot match across), and a bare
+-- \begin{..}..\end{..} gets delimiters of its own, inline for environments
+-- KaTeX allows in inline math, display for the others.
+local INLINE_ENVIRONMENTS = {
+  matrix = true, pmatrix = true, bmatrix = true, Bmatrix = true, vmatrix = true, Vmatrix = true,
+  smallmatrix = true, array = true, cases = true, aligned = true, gathered = true, split = true,
+}
+local function mathSpan(span, env)
+  span = span:gsub("\r?\n", " ")
+  if not env then return span end
+  if INLINE_ENVIRONMENTS[(env:gsub("%*$", ""))] then return "\\(" .. span .. "\\)" end
+  return "\\[" .. span .. "\\]"
+end
+
 -- Escapes a run of exercise text and formats inline Markdown outside math
 -- (\( \), \[ \], \begin{..} \end{..} after normalizeTaskMathDelimiters) and
 -- outside code spans. Each math span is a slot while formatting, so emphasis
@@ -660,7 +676,7 @@ local function proseHtml(text)
     elseif closer then
       local close = text:find(closer, position + 2, true)
       local stop = close and (close + #closer - 1) or #text
-      table.insert(maths, (attrEsc(text:sub(position, stop))))
+      table.insert(maths, (attrEsc(mathSpan(text:sub(position, stop), env))))
       table.insert(plain, MATH_SLOT)
       position = stop + 1
     else
