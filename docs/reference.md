@@ -1119,10 +1119,16 @@ number, an expression stays a non-constant expression in `vars`, with the
 original Symbols. Values outside the exact-value codec are rejected. The checker
 then sees the bound values in `response['variables']`; the original teacher
 answers are not carried over, so it must compute from the variables. The
-question shows the bound values from the LaTeX that ctm-checkers returns, and
-the bound context is saved with the practice problem, so reload needs neither AI
-nor Python. A rejected candidate gets the reason for repair. `similar-data`
-takes precedence over the implicit matrix `A` contract.
+question shows the bound values from the LaTeX that ctm-checkers returns
+(natural logarithms as `\ln`), inside math wherever the marker stands (inline,
+display or an environment). With new givens, recipes never replace the
+independent solve: only the solve confirms that the question text and the
+checker agree, so the key is labelled unverified. The saved problem keeps the
+givens as data and the shown LaTeX; reload needs neither AI nor Python, and
+before its first check the givens are bound again from the original context and
+must show the same LaTeX, otherwise the problem is not graded. A rejected
+candidate gets the reason for repair. `similar-data` takes precedence over the
+implicit matrix `A` contract.
 
 Practice specifications, answers, results and local key flags are nested in the
 original exercise's saved record, with a maximum of ten and a UTF-8 byte budget.

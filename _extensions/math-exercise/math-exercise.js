@@ -1092,7 +1092,11 @@
       }
     }
 
-    if (cell._similarContext) checkOpts.questionContext = cell._similarContext;
+    // A generated practice problem's context; a restored one is verified (and
+    // set) before its first check, so it is read when the check starts.
+    if ('_similarContext' in cell)
+      Object.defineProperty(checkOpts, 'questionContext', {enumerable: true, configurable: true,
+        get: function () { return cell._similarContext || undefined; }});
     var storedAnswers = cell._generatedStore || null, variantBoards = null;
     var storageVariants = JSON.parse(cell.dataset.storageVariants || '[]');
     function storedVariant() { return storageVariants[idx] || null; }

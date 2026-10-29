@@ -11,6 +11,11 @@
   same authored checker grades the new problem. The bound data is saved with
   the practice problem and restores without AI or Python. Example 4 on the
   similar-problems page. Needs a ctm-checkers with `math_exercise.bind_data`.
+  With new givens the independent solve always runs (recipes do not replace
+  it), and a restored problem's givens are bound again before its first check.
+- A generated problem for a custom checker may write its variables with other
+  separators (`a b` for `a, b`); before, every such candidate was rejected,
+  although the prompt asks for space-separated variables.
 - Math that spans several lines, and a bare `\begin{...}...\end{...}` without
   `$`, are typeset. Before, the line break became `<br>` inside the formula, and
   KaTeX's auto-render left such math (and bare environments) as raw TeX. This

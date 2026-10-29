@@ -973,6 +973,9 @@ local function buildExercise(el, state)
       if not name:match("^[A-Za-z][A-Za-z0-9_]*$") or name:find("__", 1, true) or #name > 32 then
         fail('math-exercise: similar-data: invalid variable name ' .. name)
       end
+      for _, seen in ipairs(similarData) do
+        if seen == name then fail('math-exercise: similar-data lists ' .. name .. ' twice') end
+      end
       similarData[#similarData + 1] = name
     end
     if #similarData == 0 or #similarData > 8 then fail('math-exercise: similar-data lists one to eight variables') end
