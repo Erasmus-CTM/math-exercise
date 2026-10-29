@@ -1,0 +1,15 @@
+{
+  "differences": [
+    {
+      "path": "math-exercise/similar-problems.html",
+      "case": "/^math-exercise\\/similar-problems\\.html#\\d+:similar-tangent\\|/",
+      "onlyIn": "head",
+      "reason": "Example 4 adds a tangent exercise with givens and similar-data; its response cases have no base counterpart. Existing exercises must retain exact parity."
+    },
+    {
+      "case": "authored:math-exercise:similar-problems.qmd#similar-tangent",
+      "onlyIn": "head",
+      "reason": "The new tangent example includes authored assertions for its checker with givens."
+    }
+  ]
+}

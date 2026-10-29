@@ -98,12 +98,13 @@ checker grades the new problem.
 #|       h, x0 = response['variables']['h'], response['variables']['x0']
 #|       line = diff(h, x).subs(x, x0)*(x - x0) + h.subs(x, x0)
 #|       return {'correct': simplify(response['expressions'][0] - line) == 0}
-#| tests:
-#|   - name: tangent at e
-#|     answers: [2*x - E]
-#|     expect: correct
-#|   - name: wrong slope
-#|     answers: [x]
-#|     expect: wrong
+#| tests: |
+#|   def test(check, symbols):
+#|       x = symbols['x']
+#|       assert check({'expressions': [2*x - E]}, symbols)['correct']
+#|       assert not check({'expressions': [x]}, symbols)['correct']
+#|       # Other givens, as a generated problem binds them.
+#|       other = {'h': log(x), 'x0': Integer(2)}
+#|       assert check({'expressions': [x/2 + log(2) - 1], 'variables': other}, symbols)['correct']
 Find the tangent to $h(x)=x\ln x$ at $x=e$. $y=$ _[2*x-E]
 ```
