@@ -455,7 +455,7 @@ test("exercise false overrides course opt-in", async ({ page }) => {
     .locator('.math-exercise-cell[data-label="similar-derivative"]')
     .first();
   await expect(first.locator(".math-similar-controls")).toHaveCount(0);
-  await expect(page.locator(".math-similar-controls")).toHaveCount(2);
+  await expect(page.locator(".math-similar-controls")).toHaveCount(3);
 });
 
 test("hostile prose stays escaped on generation and changed-source restore", async ({
@@ -1080,4 +1080,244 @@ test("a matrix response with ambiguous scalar blanks is repaired into the requir
   expect(JSON.parse(traffic[0].messages[1].content).answerInput.kind).toBe(
     "matrix",
   );
+});
+
+const tangent = (data, question) => ({
+  question:
+    question || "Find the tangent to $h(x)={{h}}$ at $x={{x0}}$. $y=$ _[1]",
+  mode: "custom",
+  vars: "x",
+  checker: "original",
+  data,
+  fields: [{ answer: "x-1" }],
+});
+const tangentCell = (page) =>
+  page.locator('.math-exercise-cell[data-label="similar-tangent"]').first();
+
+test("similar-data binds new checker givens, grades with them and restores without AI/Python", async ({
+  page,
+}) => {
+  const { traffic } = await open(page, {
+    generate: () =>
+      JSON.stringify(tangent({ h: "x^2*log(x)", x0: "1" })),
+    solve: () => JSON.stringify({ answers: ["x - 1"] }),
+  });
+  const original = tangentCell(page);
+  await original.getByRole("button", { name: "Harder", exact: true }).click();
+  const child = original.locator(".math-generated-problem");
+  await expect(child).toHaveCount(1);
+  const prompt = JSON.parse(traffic[0].messages[1].content);
+  expect(Object.keys(prompt.checkers[0].data)).toEqual(["h", "x0"]);
+  expect(prompt.checkers[0].data.x0).toContain("exact real number");
+  expect(prompt.checkers[0].data.h).toContain("SymPy expression in x");
+  expect(prompt.checkers[0].restrictions).toContain("{{h}}");
+  // The question shows the bound values, rendered from ctm-checkers' LaTeX.
+  const tex = () =>
+    child.locator(".math-exercise-question").evaluate((node) => node.textContent);
+  expect(await tex()).toContain("x^{2} \\ln");
+  expect(await tex()).not.toContain("{{");
+  // The authored checker grades with the bound givens, not the original ones.
+  await child.locator(".math-input").fill("2*x - E");
+  await child.locator(".math-check-btn").click();
+  await expect(child.locator(".math-feedback-area")).toContainText("match");
+  await expect(child.locator(".math-feedback-area")).not.toContainText("Correct!");
+  await child.locator(".math-input").fill("x - 1");
+  await child.locator(".math-check-btn").click();
+  await expect(child.locator(".math-feedback-area")).toContainText("Correct!");
+  const calls = traffic.length;
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(tangentCell(page).locator(".math-generated-problem")).toHaveCount(1);
+  expect(
+    await tangentCell(page)
+      .locator(".math-generated-problem .math-exercise-question")
+      .evaluate((node) => node.textContent),
+  ).toContain("x^{2} \\ln");
+  expect(traffic.length).toBe(calls);
+  expect(await page.evaluate(() => window.__pythonCalls)).toBe(0);
+  // After reload the givens are bound again before the first check.
+  const restored = tangentCell(page).locator(".math-generated-problem");
+  await restored.locator(".math-input").fill("2*x - E");
+  await restored.locator(".math-check-btn").click();
+  await expect(restored.locator(".math-feedback-area")).toContainText("match");
+  await restored.locator(".math-input").fill("x - 1");
+  await restored.locator(".math-check-btn").click();
+  await expect(restored.locator(".math-feedback-area")).toContainText("Correct!");
+  expect(traffic.length).toBe(calls);
+});
+
+test("a saved problem whose shown givens were changed is never graded", async ({
+  page,
+}) => {
+  await open(page, {
+    generate: () => JSON.stringify(tangent({ h: "x^2*log(x)", x0: "1" })),
+    solve: () => JSON.stringify({ answers: ["x - 1"] }),
+  });
+  await tangentCell(page).getByRole("button", { name: "Harder", exact: true }).click();
+  await expect(tangentCell(page).locator(".math-generated-problem")).toHaveCount(1);
+  // Edit the saved display and context in browser storage, as a learner could.
+  const edited = await page.evaluate(() => {
+    let count = 0;
+    for (const store of [localStorage, sessionStorage])
+      for (const key of Object.keys(store)) {
+        const value = store.getItem(key);
+        if (value.includes("x^{2}")) {
+          store.setItem(key, value.split("x^{2}").join("x^{3}"));
+          count++;
+        }
+      }
+    return count;
+  });
+  expect(edited).toBeGreaterThan(0);
+  await page.reload({ waitUntil: "domcontentloaded" });
+  const restored = tangentCell(page).locator(".math-generated-problem");
+  await expect(restored).toHaveCount(1);
+  await restored.locator(".math-input").fill("x - 1");
+  await restored.locator(".math-check-btn").click();
+  await expect(restored.locator(".math-check-btn")).toBeDisabled();
+  await expect(restored.locator(".math-feedback-area")).not.toContainText("Correct");
+});
+
+test("similar-data always solves independently, even with a recipe", async ({
+  page,
+}) => {
+  const { traffic } = await open(page, {
+    generate: () =>
+      JSON.stringify({
+        ...tangent({ h: "x^2*log(x)", x0: "1" }),
+        fields: [{ answer: "x-1", recipe: { op: "value", expr: "x-1" } }],
+      }),
+    solve: () => JSON.stringify({ answers: ["x - 1"] }),
+  });
+  const original = tangentCell(page);
+  await original.getByRole("button", { name: "Harder", exact: true }).click();
+  await expect(original.locator(".math-generated-problem")).toHaveCount(1);
+  expect(
+    traffic.some((body) =>
+      body.messages[0].content.startsWith("Solve this mathematical problem independently"),
+    ),
+  ).toBe(true);
+  await expect(original.locator(".math-generated-label")).toContainText(/unverified/i);
+});
+
+test("similar-data rejects givens of another kind and names the reason for repair", async ({
+  page,
+}) => {
+  const { traffic } = await open(page, {
+    generate: (n) =>
+      JSON.stringify(
+        tangent(n === 1 ? { h: "x^2*log(x)", x0: "x" } : { h: "x^2*log(x)", x0: "1" }),
+      ),
+    solve: () => JSON.stringify({ answers: ["x - 1"] }),
+  });
+  const original = tangentCell(page);
+  await original.getByRole("button", { name: "Harder", exact: true }).click();
+  await expect(original.locator(".math-generated-problem")).toHaveCount(1);
+  const generation = traffic.filter((body) => body.max_tokens === 16384);
+  expect(generation).toHaveLength(2);
+  expect(JSON.stringify(generation[1].messages)).toContain(
+    "x0 must be an exact real number",
+  );
+});
+
+for (const [name, candidate, python] of [
+  ["a missing given", tangent({ h: "x^2*log(x)" }), false],
+  ["an undeclared given", tangent({ h: "x^2*log(x)", x0: "1", k: "2" }), false],
+  [
+    "a given written into the question",
+    tangent({ h: "x^2*log(x)", x0: "1" }, "Find the tangent to $h(x)=x^2\\ln x$ at $x={{x0}}$. $y=$ _[1]"),
+    false,
+  ],
+  ["an unsupported function", tangent({ h: "cot(x)", x0: "1" }), true],
+])
+  test(`similar-data never admits ${name}`, async ({ page }) => {
+    const { traffic } = await open(page, {
+      generate: () => JSON.stringify(candidate),
+      solve: () => JSON.stringify({ answers: ["x - 1"] }),
+    });
+    const original = tangentCell(page);
+    await original.getByRole("button", { name: "Harder", exact: true }).click();
+    await expect(original.locator(".math-similar-status")).toContainText(
+      "Could not create",
+    );
+    await expect(original.locator(".math-generated-problem")).toHaveCount(0);
+    // The data contract is checked before Python; only admitted shapes reach
+    // ctm-checkers, which rejects values outside the exact-value codec.
+    expect((await page.evaluate(() => window.__pythonCalls)) > 0).toBe(python);
+    expect(traffic.filter((body) => body.max_tokens === 16384).length).toBeGreaterThanOrEqual(2);
+  });
+
+test("similar-data generation and grading run in the real browser Pyodide runtime", async ({
+  page,
+}) => {
+  test.setTimeout(150000);
+  await open(page, {
+    realPython: true,
+    generate: () => JSON.stringify(tangent({ h: "x^2*log(x)", x0: "1" })),
+    solve: () => JSON.stringify({ answers: ["x - 1"] }),
+  });
+  const original = tangentCell(page);
+  await original.getByRole("button", { name: "Harder", exact: true }).click();
+  const child = original.locator(".math-generated-problem");
+  await expect(child).toHaveCount(1, { timeout: 120000 });
+  await child.locator(".math-input").fill("x - 1");
+  await child.locator(".math-check-btn").click();
+  await expect(child.locator(".math-feedback-area")).toContainText("Correct", {
+    timeout: 30000,
+  });
+});
+
+test("similar-data accepts the original variables written with other separators", async ({
+  page,
+}) => {
+  await open(page, {
+    generate: () =>
+      JSON.stringify({ ...tangent({ h: "x^2*log(x)", x0: "1" }), vars: "x," }),
+    solve: () => JSON.stringify({ answers: ["x - 1"] }),
+  });
+  const original = tangentCell(page);
+  await original.getByRole("button", { name: "Harder", exact: true }).click();
+  await expect(original.locator(".math-generated-problem")).toHaveCount(1);
+});
+
+for (const [where, question] of [
+  ["inline math", "Tangent to $h(x)={{h}}$ at $x={{x0}}$: $y=$ _[1]"],
+  ["display math", "Tangent to $$h(x)={{h}}$$ at \\(x={{x0}}\\): $y=$ _[1]"],
+  ["prose", "Tangent to {{h}} at x = {{x0}}: $y=$ _[1]"],
+  ["an environment", "Tangent to \\begin{aligned}h(x)&={{h}}\\end{aligned} at $x={{x0}}$: $y=$ _[1]"],
+])
+  test(`similar-data givens in ${where} are typeset, never left as TeX source`, async ({
+    page,
+  }) => {
+    await open(page, {
+      generate: () =>
+        JSON.stringify(tangent({ h: "x^2*log(x)", x0: "1" }, question)),
+      solve: () => JSON.stringify({ answers: ["x - 1"] }),
+    });
+    const original = tangentCell(page);
+    await original.getByRole("button", { name: "Harder", exact: true }).click();
+    const child = original.locator(".math-generated-problem");
+    await expect(child).toHaveCount(1);
+    const shown = child.locator(".math-exercise-question");
+    await expect(shown.locator(".katex").first()).toBeVisible();
+    const visible = await shown.evaluate((node) => {
+      const copy = node.cloneNode(true);
+      copy.querySelectorAll(".katex-mathml, annotation").forEach((el) => el.remove());
+      return copy.textContent;
+    });
+    expect(visible).not.toMatch(/\$|\\ln|\\frac|\{\{/);
+  });
+
+test("givens give the original custom checker its data without variants", async ({
+  page,
+}) => {
+  await open(page);
+  const original = tangentCell(page);
+  expect(await original.getAttribute("data-variants")).toBeNull();
+  await original.locator(".math-exercise-question .math-input").first().fill("x");
+  await original.locator(".math-check-btn").first().click();
+  await expect(original.locator(".math-feedback-area").first()).not.toContainText("Correct!");
+  await expect(original.locator(".math-feedback-area").first()).toContainText(/\S/);
+  await original.locator(".math-exercise-question .math-input").first().fill("2*x - E");
+  await original.locator(".math-check-btn").first().click();
+  await expect(original.locator(".math-feedback-area").first()).toContainText("Correct!");
 });
