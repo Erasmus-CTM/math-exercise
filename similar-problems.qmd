@@ -72,3 +72,38 @@ coordinates, even if a candidate's independence answer happens to be correct.
 #|     expect: wrong
 Are the columns of $A={@A@}$ linearly independent? _[1]
 ```
+
+## 4. A tangent with checker data
+
+The authored checker reads the function $h$ and the point $x_0$ from
+`variables`. `similar-data: h, x0` lets a generated problem choose new givens
+for them; ctm-checkers admits the model's text, and the same checker grades the
+new problem.
+
+```{math-exercise}
+#| label: similar-tangent
+#| vars: x
+#| mode: custom
+#| field-labels: Tangent
+#| context: none
+#| variables: |
+#|   h = x*log(x)
+#|   x0 = E
+#| similar-data: h, x0
+#| harder: Use a product or composition whose value and slope at the point are still exact.
+#| simpler: Use a single power or logarithm at a convenient point.
+#| checker: |
+#|   def check(response, symbols):
+#|       x = symbols['x']
+#|       h, x0 = response['variables']['h'], response['variables']['x0']
+#|       line = diff(h, x).subs(x, x0)*(x - x0) + h.subs(x, x0)
+#|       return {'correct': simplify(response['expressions'][0] - line) == 0}
+#| tests:
+#|   - name: tangent at e
+#|     answers: [2*x - E]
+#|     expect: correct
+#|   - name: wrong slope
+#|     answers: [x]
+#|     expect: wrong
+Find the tangent to $h(x)={@h@}$ at $x={@x0@}$. $y=$ _[2*x-E]
+```

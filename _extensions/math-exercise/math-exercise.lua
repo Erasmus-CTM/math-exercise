@@ -964,10 +964,24 @@ local function buildExercise(el, state)
   end
   local generationPolicy = {exercise = label, name = ""}
   if feedbackForExercises then generationPolicy = ctm.feedback.selection(el, opts, "generation-policy") end
+  -- Variables of the authored checker that generated problems may change
+  -- (`#| similar-data: h, x0`); their values are bound in ctm-checkers.
+  local similarData = {}
+  if opts["similar-data"] then
+    if mode ~= "custom" or not opts["checker"] then fail('math-exercise: similar-data needs mode: custom with a checker and variables') end
+    for name in opts["similar-data"]:gmatch("[^,%s]+") do
+      if not name:match("^[A-Za-z][A-Za-z0-9_]*$") or name:find("__", 1, true) or #name > 32 then
+        fail('math-exercise: similar-data: invalid variable name ' .. name)
+      end
+      similarData[#similarData + 1] = name
+    end
+    if #similarData == 0 or #similarData > 8 then fail('math-exercise: similar-data lists one to eight variables') end
+  end
   -- Base data attributes shared by both modes
   local attrs = ' data-similar="' .. tostring(similar) .. '"'
              .. ' data-similar-guidance="' .. attrEsc(quarto.json.encode(similar and {harder = opts.harder or "", easier = opts.simpler or "", same = opts.same or ""} or {})) .. '"'
              .. ' data-generation-policy="' .. attrEsc(quarto.json.encode(similar and generationPolicy or {})) .. '"'
+             .. ' data-similar-data="' .. attrEsc(similar and table.concat(similarData, ",") or "") .. '"'
              .. ' id="'             .. eid                .. '"'
              .. ' data-label="'     .. attrEsc(label)     .. '"'
              .. ' data-mode="'      .. attrEsc(mode)      .. '"'

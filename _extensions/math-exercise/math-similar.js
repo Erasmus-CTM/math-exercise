@@ -72,7 +72,33 @@
     copy.variant = null;
     return copy;
   }
+  // Givens of a custom checker opened with `#| similar-data`: ctm-checkers
+  // binds the model's text (math_exercise.bind_data) and returns the LaTeX
+  // that replaces each {{name}} in the question.
+  const DATA_MARKER = /\{\{([A-Za-z][A-Za-z0-9_]{0,31})\}\}/g;
+  function insideMath(text, index) {
+    const before = text.slice(0, index).replace(/\\\$/g, "");
+    return (
+      (before.match(/\$/g) || []).length % 2 === 1 ||
+      before.lastIndexOf("\\(") > before.lastIndexOf("\\)") ||
+      before.lastIndexOf("\\[") > before.lastIndexOf("\\]")
+    );
+  }
+  function displayedData(spec) {
+    const used = new Set();
+    const question = spec.question.replace(DATA_MARKER, (marker, name, at) => {
+      if (!Object.prototype.hasOwnProperty.call(spec.display, name))
+        throw new Error("Unknown given " + marker);
+      used.add(name);
+      const latex = "{" + spec.display[name] + "}";
+      return insideMath(spec.question, at) ? latex : "$" + latex + "$";
+    });
+    if (Object.keys(spec.display).some((name) => !used.has(name)))
+      throw new Error("The question must show every given with {{name}}");
+    return question;
+  }
   function displayedQuestion(spec) {
+    if (spec.mode === "custom" && spec.display) return displayedData(spec);
     if (spec.mode !== "custom" || !spec.data?.A) return spec.question;
     if (!spec.data || (spec.question.match(/\{\{A\}\}/g) || []).length !== 1)
       throw new Error(
@@ -99,10 +125,31 @@
     const originalOptions = o.options(),
       custom = o.mode === "custom";
     if (custom && !originalOptions.checker) return null;
+    const contextValues =
+      originalOptions.questionContext?.variables?.value?.[1] || [];
+    const dataNames = custom
+      ? (cell.dataset.similarData || "").split(",").filter(Boolean)
+      : [];
+    // An exact number stays a number; anything with a symbol is an expression.
+    const hasSymbol = (wire) =>
+      Array.isArray(wire) &&
+      (wire[0] === "symbol" || wire.some((part) => hasSymbol(part)));
+    const dataKinds = {};
+    for (const name of dataNames) {
+      const pair = contextValues.find((entry) => entry[0] === name);
+      if (!pair || !Array.isArray(pair[1]) || pair[1][0] === "matrix") {
+        console.warn(
+          "math-exercise: similar-data names " + name +
+            ", which is not a number or expression variable of " +
+            (cell.dataset.label || cell.id) + "; similar problems are off",
+        );
+        return null;
+      }
+      dataKinds[name] = hasSymbol(pair[1]) ? "expression" : "number";
+    }
+    const bindsData = dataNames.length > 0;
     const bindsA =
-      !!originalOptions.questionContext?.variables?.value?.[1]?.some(
-        (pair) => pair[0] === "A",
-      );
+      !bindsData && contextValues.some((pair) => pair[0] === "A");
     const originalQuestion = cell.querySelector(".math-exercise-question");
     const originalInputs = Array.from(
       originalQuestion.querySelectorAll(".math-input"),
@@ -183,6 +230,36 @@
     document.addEventListener("ai-feedback:settings-change", cancelActive);
     cell.addEventListener("math-exercise:variant-change", cancelActive);
     availability();
+    function validData(spec, restored) {
+      const data = spec.data,
+        text = (value, limit) =>
+          typeof value === "string" && value.length > 0 && value.length <= limit;
+      if (
+        !data ||
+        typeof data !== "object" ||
+        Array.isArray(data) ||
+        Object.keys(data).sort().join(",") !== [...dataNames].sort().join(",") ||
+        Object.values(data).some((value) => !text(value, 4096))
+      )
+        return false;
+      const markers = new Set(
+        Array.from(spec.question.matchAll(DATA_MARKER), (match) => match[1]),
+      );
+      if (
+        markers.size !== dataNames.length ||
+        dataNames.some((name) => !markers.has(name))
+      )
+        return false;
+      if (!restored) return spec.display === undefined;
+      const display = spec.display;
+      return (
+        !!display &&
+        typeof display === "object" &&
+        !Array.isArray(display) &&
+        Object.keys(display).sort().join(",") === [...dataNames].sort().join(",") &&
+        Object.values(display).every((value) => text(value, 8000))
+      );
+    }
     function valid(spec, restored = false) {
       if (
         !spec ||
@@ -204,6 +281,7 @@
             "context",
             "source",
             "options",
+            "display",
           ]
         : [
             "question",
@@ -299,7 +377,11 @@
         custom &&
         (spec.checker !== "original" ||
           spec.vars !== (cell.dataset.vars || "") ||
-          (bindsA ? !spec.data?.A : spec.data && Object.keys(spec.data).length))
+          (bindsData
+            ? !validData(spec, restored)
+            : bindsA
+              ? !spec.data?.A
+              : spec.data && Object.keys(spec.data).length))
       )
         throw new Error(
           "Only the original trusted checker and its data contract may be selected",
@@ -360,7 +442,9 @@
     }
     function context(spec) {
       const original = spec.context || o.options().questionContext;
-      return spec.data?.A ? bindData(original, spec.data) : original;
+      return spec.data?.A && !spec.display
+        ? bindData(original, spec.data)
+        : original;
     }
     async function assessAnswers(spec, answers) {
       if (custom) {
@@ -541,6 +625,30 @@
           spec.context = clone(o.options().questionContext);
         spec.source = cell.dataset.ctmSource || "";
       }
+      if (bindsData) {
+        let bound;
+        try {
+          bound = await o.call("bind_data", {
+            context: spec.context,
+            names: dataNames,
+            data: spec.data,
+            vars: spec.vars,
+          });
+        } catch (error) {
+          // Only ctm-checkers' reason (the last line), not a Python traceback,
+          // goes back to the model for repair.
+          const lines = String(error?.message || error).trim().split("\n");
+          const reason = lines
+            .reverse()
+            .map((line) => /^\w*(?:Error|Exception): (.+)$/.exec(line.trim()))
+            .find(Boolean);
+          throw new Error(reason ? reason[1] : lines[0]);
+        }
+        assertActive(signal);
+        spec.context = bound.context;
+        spec.display = bound.latex;
+        displayedQuestion(spec);
+      }
       for (const field of spec.fields) {
         assertActive(signal);
         if (field.recipe) {
@@ -660,13 +768,31 @@
               {
                 id: "original",
                 purpose: "Use the original authored mathematical checker",
-                data: bindsA
-                  ? {
-                      A: "nonempty rectangular matrix of exact rational entries; columns are the given vectors",
-                    }
-                  : {},
+                data: bindsData
+                  ? Object.fromEntries(
+                      dataNames.map((name) => [
+                        name,
+                        dataKinds[name] === "number"
+                          ? "exact real number as SymPy text, for example 2, 1/2, E or log(3); Euler's number is E"
+                          : "SymPy expression in " + (cell.dataset.vars || "the variables") +
+                            " as text, with explicit multiplication and functions such as log, exp, sqrt, sin; Euler's number is E",
+                      ]),
+                    )
+                  : bindsA
+                    ? {
+                        A: "nonempty rectangular matrix of exact rational entries; columns are the given vectors",
+                      }
+                    : {},
                 answerShape: "the same fixed expression fields as the original",
-                restrictions: bindsA
+                restrictions: bindsData
+                  ? "Do not modify checker code. Choose new givens for exactly " +
+                    dataNames.join(", ") +
+                    ' in the requested direction and supply them as data:{' +
+                    dataNames.map((name) => name + ':"…"').join(",") +
+                    '}. In the question write {{name}} wherever a given appears, inside math, for example $h(x)={{' +
+                    dataNames[0] +
+                    '}}$; never write the given values in another form. Select checker:"original" and answer the same fields.'
+                  : bindsA
                   ? 'Do not modify authored constants or checker code. Put {{A}} exactly once in the question to display the bound givens. Select checker:"original" and supply data:{A:[[...]]}.'
                   : 'Preserve every original mathematical given and target; vary only presentation or guidance. Select checker:"original", omit data, and preserve the original fixed response shape. Do not modify checker code or authored constants.',
               },
