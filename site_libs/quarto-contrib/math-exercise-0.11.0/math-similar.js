@@ -72,8 +72,45 @@
     copy.variant = null;
     return copy;
   }
+  // Givens of a custom checker opened with `#| similar-data`: ctm-checkers
+  // binds the model's text (math_exercise.bind_data) and returns the LaTeX
+  // that replaces each {{name}} in the question.
+  const DATA_MARKER = /\{\{([A-Za-z][A-Za-z0-9_]{0,31})\}\}/g;
+  function insideMath(text, index) {
+    let inline = false,
+      display = false;
+    for (let i = 0; i < index; i++) {
+      if (text[i] === "\\") i++;
+      else if (text[i] === "$" && text[i + 1] === "$") {
+        display = !display;
+        i++;
+      } else if (text[i] === "$") inline = !inline;
+    }
+    const before = text.slice(0, index);
+    return (
+      inline ||
+      display ||
+      before.lastIndexOf("\\(") > before.lastIndexOf("\\)") ||
+      before.lastIndexOf("\\[") > before.lastIndexOf("\\]") ||
+      before.lastIndexOf("\\begin{") > before.lastIndexOf("\\end{")
+    );
+  }
+  function displayedData(spec) {
+    const used = new Set();
+    const question = spec.question.replace(DATA_MARKER, (marker, name, at) => {
+      if (!Object.prototype.hasOwnProperty.call(spec.display, name))
+        throw new Error("Unknown given " + marker);
+      used.add(name);
+      const latex = "{" + spec.display[name] + "}";
+      return insideMath(spec.question, at) ? latex : "$" + latex + "$";
+    });
+    if (Object.keys(spec.display).some((name) => !used.has(name)))
+      throw new Error("The question must show every given with {{name}}");
+    return question;
+  }
   function displayedQuestion(spec) {
-    if (spec.mode !== "custom" || !spec.data?.A) return spec.question;
+    if (spec.mode === "custom" && spec.display) return displayedData(spec);
+    if (spec.mode !== "custom" || !Array.isArray(spec.data?.A)) return spec.question;
     if (!spec.data || (spec.question.match(/\{\{A\}\}/g) || []).length !== 1)
       throw new Error(
         "The custom question must display its bound matrix A once",
@@ -99,10 +136,53 @@
     const originalOptions = o.options(),
       custom = o.mode === "custom";
     if (custom && !originalOptions.checker) return null;
+    const contextValues =
+      originalOptions.questionContext?.variables?.value?.[1] || [];
+    // Givens without variants: name = expression lines (ctm-checkers checks
+    // them); a given that uses a variable of vars is an expression.
+    const givenTexts = Object.fromEntries(
+      String(originalOptions.givens || "")
+        .split("\n")
+        .map((line) => /^\s*([A-Za-z][A-Za-z0-9_]*)\s*=(.*)$/.exec(line))
+        .filter(Boolean)
+        .map((match) => [match[1], match[2].trim()]),
+    );
+    const varNames = String(cell.dataset.vars || "").split(/[\s,]+/).filter(Boolean);
+    const dataNames = custom
+      ? (cell.dataset.similarData || "").split(",").filter(Boolean)
+      : [];
+    // An exact number stays a number; anything with a symbol is an expression.
+    const hasSymbol = (wire) =>
+      Array.isArray(wire) &&
+      (wire[0] === "symbol" || wire.some((part) => hasSymbol(part)));
+    const dataKinds = {};
+    for (const name of dataNames) {
+      if (!originalOptions.questionContext && name in givenTexts) {
+        dataKinds[name] = varNames.some((variable) =>
+          new RegExp("(^|[^A-Za-z0-9_])" + variable + "($|[^A-Za-z0-9_])").test(givenTexts[name]),
+        )
+          ? "expression"
+          : "number";
+        continue;
+      }
+      const pair = contextValues.find((entry) => entry[0] === name);
+      if (
+        !pair ||
+        !Array.isArray(pair[1]) ||
+        !["integer", "rational", "constant", "symbol", "expression"].includes(pair[1][0])
+      ) {
+        console.warn(
+          "math-exercise: similar-data names " + name +
+            ", which is not a number or expression variable of " +
+            (cell.dataset.label || cell.id) + "; similar problems are off",
+        );
+        return null;
+      }
+      dataKinds[name] = hasSymbol(pair[1]) ? "expression" : "number";
+    }
+    const bindsData = dataNames.length > 0;
     const bindsA =
-      !!originalOptions.questionContext?.variables?.value?.[1]?.some(
-        (pair) => pair[0] === "A",
-      );
+      !bindsData && contextValues.some((pair) => pair[0] === "A");
     const originalQuestion = cell.querySelector(".math-exercise-question");
     const originalInputs = Array.from(
       originalQuestion.querySelectorAll(".math-input"),
@@ -183,6 +263,36 @@
     document.addEventListener("ai-feedback:settings-change", cancelActive);
     cell.addEventListener("math-exercise:variant-change", cancelActive);
     availability();
+    function validData(spec, restored) {
+      const data = spec.data,
+        text = (value, limit) =>
+          typeof value === "string" && value.length > 0 && value.length <= limit;
+      if (
+        !data ||
+        typeof data !== "object" ||
+        Array.isArray(data) ||
+        Object.keys(data).sort().join(",") !== [...dataNames].sort().join(",") ||
+        Object.values(data).some((value) => !text(value, 4096))
+      )
+        return false;
+      const markers = new Set(
+        Array.from(spec.question.matchAll(DATA_MARKER), (match) => match[1]),
+      );
+      if (
+        markers.size !== dataNames.length ||
+        dataNames.some((name) => !markers.has(name))
+      )
+        return false;
+      if (!restored) return spec.display === undefined;
+      const display = spec.display;
+      return (
+        !!display &&
+        typeof display === "object" &&
+        !Array.isArray(display) &&
+        Object.keys(display).sort().join(",") === [...dataNames].sort().join(",") &&
+        Object.values(display).every((value) => text(value, 8000))
+      );
+    }
     function valid(spec, restored = false) {
       if (
         !spec ||
@@ -204,6 +314,7 @@
             "context",
             "source",
             "options",
+            "display",
           ]
         : [
             "question",
@@ -299,7 +410,11 @@
         custom &&
         (spec.checker !== "original" ||
           spec.vars !== (cell.dataset.vars || "") ||
-          (bindsA ? !spec.data?.A : spec.data && Object.keys(spec.data).length))
+          (bindsData
+            ? !validData(spec, restored)
+            : bindsA
+              ? !spec.data?.A
+              : spec.data && Object.keys(spec.data).length))
       )
         throw new Error(
           "Only the original trusted checker and its data contract may be selected",
@@ -358,9 +473,53 @@
         form_credit: options.formCredit || 0.5,
       };
     }
+    // ctm-checkers binds the model's givens to the original context.
+    async function bindGivens(spec) {
+      try {
+        const original = o.options().questionContext
+          ? { context: o.options().questionContext }
+          : {
+              givens: o.options().givens,
+              fields: originalInputs.map((_, index) => String(index + 1)),
+            };
+        return await o.call("bind_data", {
+          ...original,
+          names: dataNames,
+          data: spec.data,
+          vars: spec.vars,
+        });
+      } catch (error) {
+        // Only ctm-checkers' reason (the last line), not a Python traceback,
+        // goes back to the model for repair.
+        const lines = String(error?.message || error).trim().split("\n");
+        const reason = lines
+          .reverse()
+          .map((line) => /^\w*(?:Error|Exception): (.+)$/.exec(line.trim()))
+          .find(Boolean);
+        throw new Error(reason ? reason[1] : lines[0]);
+      }
+    }
+    // A saved problem keeps its givens as data. The context the checker sees
+    // is bound again from the original before the first check, and must show
+    // the saved LaTeX; a stored context is never trusted.
+    const verifiedContexts = new WeakMap();
+    async function boundContext(spec) {
+      if (!bindsData || !spec.display) return context(spec);
+      if (verifiedContexts.has(spec)) return verifiedContexts.get(spec);
+      const bound = await bindGivens(spec);
+      if (
+        Object.keys(bound.latex).length !== Object.keys(spec.display).length ||
+        Object.entries(bound.latex).some(([name, latex]) => spec.display[name] !== latex)
+      )
+        throw new Error("The saved practice problem does not match its givens");
+      verifiedContexts.set(spec, bound.context);
+      return bound.context;
+    }
     function context(spec) {
       const original = spec.context || o.options().questionContext;
-      return spec.data?.A ? bindData(original, spec.data) : original;
+      return Array.isArray(spec.data?.A) && !spec.display
+        ? bindData(original, spec.data)
+        : original;
     }
     async function assessAnswers(spec, answers) {
       if (custom) {
@@ -369,7 +528,8 @@
           generated: true,
           vars: spec.vars,
           checker: opts.checker,
-          question_context: context(spec),
+          question_context: await boundContext(spec),
+          ...(opts.questionContext || spec.display ? {} : { givens: opts.givens || "" }),
           response: { kind: "expressions", raw: answers, inputs: {} },
         });
       }
@@ -514,6 +674,15 @@
           spec.vars.every((name) => typeof name === "string")
         )
           spec.vars = spec.vars.join(" ");
+        // The same variables as an authored checker, separated differently
+        // ("a b" for "a, b"), are the original's variables.
+        const names = (text) => String(text).split(/[\s,]+/).filter(Boolean).join(" ");
+        if (
+          custom &&
+          typeof spec.vars === "string" &&
+          names(spec.vars) === names(cell.dataset.vars || "")
+        )
+          spec.vars = cell.dataset.vars || "";
         if (Array.isArray(spec.fields))
           for (const field of spec.fields) {
             if (
@@ -541,14 +710,28 @@
           spec.context = clone(o.options().questionContext);
         spec.source = cell.dataset.ctmSource || "";
       }
+      if (bindsData) {
+        const bound = await bindGivens(spec);
+        assertActive(signal);
+        spec.context = bound.context;
+        spec.display = bound.latex;
+        verifiedContexts.set(spec, bound.context);
+        displayedQuestion(spec);
+      }
       for (const field of spec.fields) {
         assertActive(signal);
-        if (field.recipe) {
+        // With new givens only the independent solve confirms that the
+        // question text and the checker agree, so recipes do not replace it.
+        if (field.recipe && !bindsData) {
           const computed = await o.call("compute_key", {
             recipe: field.recipe,
             answer: field.answer,
             mode: custom ? "equivalent" : spec.mode,
             vars: spec.vars,
+            // A numeric field compares under its own precision.
+            tolerance: spec.options.tolerance || "",
+            decplaces: spec.options.decplaces || "",
+            sigfigs: spec.options.sigfigs || "",
           });
           field.key = computed.key;
           field.computed = true;
@@ -660,13 +843,31 @@
               {
                 id: "original",
                 purpose: "Use the original authored mathematical checker",
-                data: bindsA
-                  ? {
-                      A: "nonempty rectangular matrix of exact rational entries; columns are the given vectors",
-                    }
-                  : {},
+                data: bindsData
+                  ? Object.fromEntries(
+                      dataNames.map((name) => [
+                        name,
+                        dataKinds[name] === "number"
+                          ? "exact real number as SymPy text, for example 2, 1/2, E or log(3); Euler's number is E"
+                          : "SymPy expression in " + (cell.dataset.vars || "the variables") +
+                            " as text, with explicit multiplication and functions such as log, exp, sqrt, sin; Euler's number is E",
+                      ]),
+                    )
+                  : bindsA
+                    ? {
+                        A: "nonempty rectangular matrix of exact rational entries; columns are the given vectors",
+                      }
+                    : {},
                 answerShape: "the same fixed expression fields as the original",
-                restrictions: bindsA
+                restrictions: bindsData
+                  ? "Do not modify checker code. Choose new givens for exactly " +
+                    dataNames.join(", ") +
+                    ' in the requested direction and supply them as data:{' +
+                    dataNames.map((name) => name + ':"…"').join(",") +
+                    '}. In the question write {{name}} wherever a given appears, inside math, for example $h(x)={{' +
+                    dataNames[0] +
+                    '}}$; never write the given values in another form. Select checker:"original" and answer the same fields.'
+                  : bindsA
                   ? 'Do not modify authored constants or checker code. Put {{A}} exactly once in the question to display the bound givens. Select checker:"original" and supply data:{A:[[...]]}.'
                   : 'Preserve every original mathematical given and target; vary only presentation or guidance. Select checker:"original", omit data, and preserve the original fixed response shape. Do not modify checker code or authored constants.',
               },
@@ -1040,7 +1241,32 @@
         report,
       );
       child.querySelector(".math-legend-panel").style.display = "none";
-      if (custom) child._similarContext = context(spec);
+      if (custom && bindsData && spec.display && !verifiedContexts.has(spec)) {
+        child._similarContext = null;
+        const check = child.querySelector(".math-check-btn");
+        check?.addEventListener(
+          "click",
+          async (event) => {
+            if (verifiedContexts.has(spec)) return;
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            try {
+              child._similarContext = await boundContext(spec);
+              check.click();
+            } catch (error) {
+              check.disabled = true;
+              saved.textContent = L.outdated;
+            }
+          },
+          true,
+        );
+      } else if (custom)
+        child._similarContext = bindsData && spec.display
+          ? verifiedContexts.get(spec)
+          : context(spec);
+      // Unchanged givens (no similar-data) reach the practice card's checker.
+      if (custom && !child._similarContext && o.options().givens)
+        child.dataset.givens = JSON.stringify(o.options().givens);
       const readInputs = () => {
         const fields = {};
         inputs.forEach((el, index) => (fields[index + 1] = el.value));

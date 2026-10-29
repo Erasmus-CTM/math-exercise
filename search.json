@@ -175,6 +175,13 @@
     "text": "3. Linear independence with an authored check\nThe vectors are the columns of \\(A\\). Enter 1 for independent and 0 for dependent. This fixed scalar response permits different vector families without resizable answer inputs. The checker also rejects vectors longer than five coordinates, even if a candidate’s independence answer happens to be correct.\n\nNot approved for students.\n↻\n\n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙"
   },
   {
+    "objectID": "similar-problems.html#a-tangent-with-checker-data",
+    "href": "similar-problems.html#a-tangent-with-checker-data",
+    "title": "Similar problems — practice testbox",
+    "section": "4. A tangent with checker data",
+    "text": "4. A tangent with checker data\nThe authored checker reads the function \\(h\\) and the point \\(x_0\\) from its givens (exact data without variants). similar-data: h, x0 lets a generated problem choose new givens; ctm-checkers admits the model’s text, and the same checker grades the new problem.\n\nFind the tangent to \\(h(x)=x\\ln x\\) at \\(x=e\\). \\(y=\\) \n\n\n  ✓ Check\n  ⓘ Input help\n  \n    💬 Feedback\n    ⚙"
+  },
+  {
     "objectID": "basic-features.html",
     "href": "basic-features.html",
     "title": "Basic exercise features",
