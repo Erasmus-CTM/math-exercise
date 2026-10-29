@@ -13,6 +13,11 @@
   similar-problems page. Needs a ctm-checkers with `math_exercise.bind_data`.
   With new givens the independent solve always runs (recipes do not replace
   it), and a restored problem's givens are bound again before its first check.
+- `#| givens:` gives a custom checker exact data without variants (one
+  `name = expression` per line); the checker reads `response['variables']`,
+  in the browser and in declarative tests. `similar-data` can name givens.
+- In a numeric field, a generated recipe key is compared with the model's
+  answer under the field's tolerance, decimal places or significant figures.
 - A generated problem for a custom checker may write its variables with other
   separators (`a b` for `a, b`); before, every such candidate was rejected,
   although the prompt asks for space-separated variables.

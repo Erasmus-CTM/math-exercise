@@ -138,6 +138,16 @@
     if (custom && !originalOptions.checker) return null;
     const contextValues =
       originalOptions.questionContext?.variables?.value?.[1] || [];
+    // Givens without variants: name = expression lines (ctm-checkers checks
+    // them); a given that uses a variable of vars is an expression.
+    const givenTexts = Object.fromEntries(
+      String(originalOptions.givens || "")
+        .split("\n")
+        .map((line) => /^\s*([A-Za-z][A-Za-z0-9_]*)\s*=(.*)$/.exec(line))
+        .filter(Boolean)
+        .map((match) => [match[1], match[2].trim()]),
+    );
+    const varNames = String(cell.dataset.vars || "").split(/[\s,]+/).filter(Boolean);
     const dataNames = custom
       ? (cell.dataset.similarData || "").split(",").filter(Boolean)
       : [];
@@ -147,6 +157,14 @@
       (wire[0] === "symbol" || wire.some((part) => hasSymbol(part)));
     const dataKinds = {};
     for (const name of dataNames) {
+      if (!originalOptions.questionContext && name in givenTexts) {
+        dataKinds[name] = varNames.some((variable) =>
+          new RegExp("(^|[^A-Za-z0-9_])" + variable + "($|[^A-Za-z0-9_])").test(givenTexts[name]),
+        )
+          ? "expression"
+          : "number";
+        continue;
+      }
       const pair = contextValues.find((entry) => entry[0] === name);
       if (
         !pair ||
@@ -458,8 +476,14 @@
     // ctm-checkers binds the model's givens to the original context.
     async function bindGivens(spec) {
       try {
+        const original = o.options().questionContext
+          ? { context: o.options().questionContext }
+          : {
+              givens: o.options().givens,
+              fields: originalInputs.map((_, index) => String(index + 1)),
+            };
         return await o.call("bind_data", {
-          context: o.options().questionContext,
+          ...original,
           names: dataNames,
           data: spec.data,
           vars: spec.vars,
@@ -505,6 +529,7 @@
           vars: spec.vars,
           checker: opts.checker,
           question_context: await boundContext(spec),
+          ...(opts.questionContext || spec.display ? {} : { givens: opts.givens || "" }),
           response: { kind: "expressions", raw: answers, inputs: {} },
         });
       }
@@ -703,6 +728,10 @@
             answer: field.answer,
             mode: custom ? "equivalent" : spec.mode,
             vars: spec.vars,
+            // A numeric field compares under its own precision.
+            tolerance: spec.options.tolerance || "",
+            decplaces: spec.options.decplaces || "",
+            sigfigs: spec.options.sigfigs || "",
           });
           field.key = computed.key;
           field.computed = true;
@@ -1235,6 +1264,9 @@
         child._similarContext = bindsData && spec.display
           ? verifiedContexts.get(spec)
           : context(spec);
+      // Unchanged givens (no similar-data) reach the practice card's checker.
+      if (custom && !child._similarContext && o.options().givens)
+        child.dataset.givens = JSON.stringify(o.options().givens);
       const readInputs = () => {
         const fields = {};
         inputs.forEach((el, index) => (fields[index + 1] = el.value));

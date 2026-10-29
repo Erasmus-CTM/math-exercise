@@ -1306,3 +1306,18 @@ for (const [where, question] of [
     });
     expect(visible).not.toMatch(/\$|\\ln|\\frac|\{\{/);
   });
+
+test("givens give the original custom checker its data without variants", async ({
+  page,
+}) => {
+  await open(page);
+  const original = tangentCell(page);
+  expect(await original.getAttribute("data-variants")).toBeNull();
+  await original.locator(".math-exercise-question .math-input").first().fill("x");
+  await original.locator(".math-check-btn").first().click();
+  await expect(original.locator(".math-feedback-area").first()).not.toContainText("Correct!");
+  await expect(original.locator(".math-feedback-area").first()).toContainText(/\S/);
+  await original.locator(".math-exercise-question .math-input").first().fill("2*x - E");
+  await original.locator(".math-check-btn").first().click();
+  await expect(original.locator(".math-feedback-area").first()).toContainText("Correct!");
+});

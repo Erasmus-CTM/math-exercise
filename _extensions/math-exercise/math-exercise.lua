@@ -967,8 +967,21 @@ local function buildExercise(el, state)
   -- Variables of the authored checker that generated problems may change
   -- (`#| similar-data: h, x0`); their values are bound in ctm-checkers.
   local similarData = {}
+  -- Exact data for the authored checker without variants (#| givens:), one
+  -- `name = expression` per line; ctm-checkers parses and checks them.
+  local givens = opts["givens"] or ""
+  local givenNames = {}
+  if givens:match("%S") then
+    if mode ~= "custom" or not opts["checker"] then fail('math-exercise: givens need mode: custom with a checker') end
+    if opts["variables"] then fail('math-exercise: use either givens or variables, not both') end
+    for line in givens:gmatch("[^\n]+") do
+      local name = line:match("^%s*([A-Za-z][A-Za-z0-9_]*)%s*=")
+      if line:match("%S") and not name then fail('math-exercise: givens: write one "name = expression" per line: ' .. line) end
+      if name then givenNames[name] = true end
+    end
+  end
   if opts["similar-data"] then
-    if mode ~= "custom" or not opts["checker"] then fail('math-exercise: similar-data needs mode: custom with a checker and variables') end
+    if mode ~= "custom" or not opts["checker"] then fail('math-exercise: similar-data needs mode: custom with a checker and givens or variables') end
     for name in opts["similar-data"]:gmatch("[^,%s]+") do
       if not name:match("^[A-Za-z][A-Za-z0-9_]*$") or name:find("__", 1, true) or #name > 32 then
         fail('math-exercise: similar-data: invalid variable name ' .. name)
@@ -976,6 +989,7 @@ local function buildExercise(el, state)
       for _, seen in ipairs(similarData) do
         if seen == name then fail('math-exercise: similar-data lists ' .. name .. ' twice') end
       end
+      if givens:match("%S") and not givenNames[name] then fail('math-exercise: similar-data: ' .. name .. ' is not one of the givens') end
       similarData[#similarData + 1] = name
     end
     if #similarData == 0 or #similarData > 8 then fail('math-exercise: similar-data lists one to eight variables') end
@@ -995,6 +1009,7 @@ local function buildExercise(el, state)
              .. ' data-sigfigs="'   .. attrEsc(sigfigs)   .. '"'
              .. ' data-form="'      .. attrEsc(form)      .. '"'
              .. ' data-checker="'   .. jsonStrAttr(checker) .. '"'
+             .. ' data-givens="'    .. jsonStrAttr(givens) .. '"'
              .. ' data-packages="'  .. jsonArrAttr(packages) .. '"'
              .. ' data-response="'  .. attrEsc(response) .. '"'
              .. ' data-embed-response="' .. tostring(embedResponse) .. '"'

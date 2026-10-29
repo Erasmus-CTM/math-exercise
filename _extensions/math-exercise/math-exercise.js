@@ -973,6 +973,7 @@
         checker:  opts.checker || '',
       };
       if (opts.questionContext) request.question_context = opts.questionContext;
+      else if (opts.givens) request.givens = opts.givens;
       return JSON.parse(await callCheckers(py, 'check_custom', request, onStart));
     }, opts.packages);
   }
@@ -1058,8 +1059,9 @@
     try { configuredFieldLabels = JSON.parse(cell.dataset.fieldLabels || '[]'); } catch (e) {}
     var structuralFieldLabels = [];
     try { structuralFieldLabels = JSON.parse(cell.dataset.structuralFieldLabels || '[]'); } catch (e) {}
-    var checker = '';
+    var checker = '', givens = '';
     try { checker = JSON.parse(cell.dataset.checker || '""'); } catch (e) {}
+    try { givens = JSON.parse(cell.dataset.givens || '""'); } catch (e) {}
     var packages = [];
     try { packages = JSON.parse(cell.dataset.packages || '[]'); } catch (e) {}
     var formCredit = finiteCredit(cell.dataset.formCredit || '0.5');
@@ -1072,6 +1074,7 @@
       form:      cell.dataset.form      || '',
       vars:       vars,
       checker:    checker,
+      givens:     givens,
       packages:   packages,
       responseSource: cell.dataset.response || '',
       partialCredit: cell.dataset.partialCredit === 'true',

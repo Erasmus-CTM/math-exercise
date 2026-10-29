@@ -130,7 +130,8 @@ option for ordinary exercises. No page script or MutationObserver is needed.
 | `checker` | multiline Python | — | trusted author checker for `mode: custom`; define `check(response, symbols)` |
 | `tests` | multiline Python or `.py` path | — | optional build-time assertions; define `test(check, symbols)` |
 | `packages` | comma-separated package names | — | Pyodide packages to load lazily before checking, e.g. `networkx`; intended for `mode: custom` |
-| `similar-data` | comma-separated variable names | — | number or expression variables of `variables` that a generated similar problem may replace; `mode: custom` only. See [Similar practice problems](#similar-practice-problems) |
+| `givens` | multiline `name = expression` | — | exact data for a `mode: custom` checker without variants; the checker reads `response['variables']`. Same restricted grammar as generated mathematics; not together with `variables` |
+| `similar-data` | comma-separated names | — | givens (or number/expression variables of `variables`) that a generated similar problem may replace; `mode: custom` only. See [Similar practice problems](#similar-practice-problems) |
 | `response` | `jsxgraph:iframe-id` | — | obtain arbitrary JSON from a JSXGraph assessment iframe instead of expression fields |
 | `embed-response` | `true` / `false` | `false` | move the referenced JSXGraph iframe into the exercise card, between the question and controls |
 | `partial-credit` | `true` / `false` | `false` | average multiple fields, partially score sets, and award `form-credit` for equivalent answers in the wrong form |
@@ -1108,16 +1109,19 @@ as exact rational entries and the same fixed scalar response fields. The checker
 must enforce any hard task bounds, such as coordinate count at most five.
 Resizable matrices, graphical responses and model-written checkers are excluded.
 
-`#| similar-data: h, x0` opens number and expression variables of a custom
-exercise's `variables` to generation, so a similar problem can have new givens
-for the same authored checker (example 4 on the similar-problems page: the
-function and point of a tangent). The model must supply exactly these names as
+`#| similar-data: h, x0` opens number and expression givens of a custom
+exercise to generation, so a similar problem can have new givens for the same
+authored checker (example 4 on the similar-problems page: the function and
+point of a tangent). The givens come from `#| givens:` (one `name = expression`
+per line, exact data without variants, approval or a variant chooser) or from
+the number and expression variables of `variables`. The model must supply exactly these names as
 mathematical text and write `{{h}}` in the question wherever a given appears.
 ctm-checkers' `math_exercise.bind_data` interprets the text with the restricted
 grammar used for model keys (never Python source): a number stays an exact real
 number, an expression stays a non-constant expression in `vars`, with the
 original Symbols. Values outside the exact-value codec are rejected. The checker
-then sees the bound values in `response['variables']`; the original teacher
+then sees the bound values in `response['variables']`, as the original
+exercise sees its own givens; the original teacher
 answers are not carried over, so it must compute from the variables. The
 question shows the bound values from the LaTeX that ctm-checkers returns
 (natural logarithms as `\ln`), inside math wherever the marker stands (inline,

@@ -75,10 +75,10 @@ Are the columns of $A={@A@}$ linearly independent? _[1]
 
 ## 4. A tangent with checker data
 
-The authored checker reads the function $h$ and the point $x_0$ from
-`variables`. `similar-data: h, x0` lets a generated problem choose new givens
-for them; ctm-checkers admits the model's text, and the same checker grades the
-new problem.
+The authored checker reads the function $h$ and the point $x_0$ from its
+`givens` (exact data without variants). `similar-data: h, x0` lets a generated
+problem choose new givens; ctm-checkers admits the model's text, and the same
+checker grades the new problem.
 
 ```{math-exercise}
 #| label: similar-tangent
@@ -86,7 +86,7 @@ new problem.
 #| mode: custom
 #| field-labels: Tangent
 #| context: none
-#| variables: |
+#| givens: |
 #|   h = x*log(x)
 #|   x0 = E
 #| similar-data: h, x0
@@ -105,5 +105,5 @@ new problem.
 #|   - name: wrong slope
 #|     answers: [x]
 #|     expect: wrong
-Find the tangent to $h(x)={@h@}$ at $x={@x0@}$. $y=$ _[2*x-E]
+Find the tangent to $h(x)=x\ln x$ at $x=e$. $y=$ _[2*x-E]
 ```
