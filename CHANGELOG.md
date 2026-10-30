@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Similar problems accept model output that means the same: a custom-checked
+  field keeps its authored checker and variables when the model leaves out
+  `checker` or writes `x` for `x, e`; an answer written as `y = x - 1` or
+  `f(x) = …` is its right-hand side; the independent solve may give JSON
+  numbers. A Python error is reported (to the model for repair and under
+  Details) by its last line instead of the whole traceback.
 - Similar problems can change the givens of a custom-checked exercise.
   `#| similar-data: h, x0` names number or expression variables of the
   exercise's `variables` that a generated problem may replace. The model gives
