@@ -817,6 +817,20 @@ test("independent re-solve accepts a JSON fence without weakening answer compari
   );
 });
 
+test("independent re-solve accepts a JSON number as the answer", async ({
+  page,
+}) => {
+  const { traffic, original } = await open(page, {
+    generate: () =>
+      JSON.stringify({ question: "Compute $6/3$. _[1]", fields: [{ answer: "2" }], vars: "" }),
+    solve: () => '{"answers":[2]}',
+  });
+  await original.getByRole("button", { name: "Harder", exact: true }).click();
+  await expect(original.locator(".math-generated-problem")).toHaveCount(1);
+  // One solve call: the number is an answer, not a format failure to repair.
+  expect(traffic).toHaveLength(2);
+});
+
 test("implicit multiplication remains a mathematical answer after Check and AI feedback", async ({
   page,
 }) => {
@@ -1273,6 +1287,33 @@ test("similar-data accepts the original variables written with other separators"
     generate: () =>
       JSON.stringify({ ...tangent({ h: "x^2*log(x)", x0: "1" }), vars: "x," }),
     solve: () => JSON.stringify({ answers: ["x - 1"] }),
+  });
+  const original = tangentCell(page);
+  await original.getByRole("button", { name: "Harder", exact: true }).click();
+  await expect(original.locator(".math-generated-problem")).toHaveCount(1);
+});
+
+test("similar-data keeps the authored checker and its variables when a model leaves them out or changes them", async ({
+  page,
+}) => {
+  const candidate = { ...tangent({ h: "x^2*log(x)", x0: "1" }), vars: "x e" };
+  delete candidate.checker;
+  await open(page, {
+    generate: () => JSON.stringify(candidate),
+    solve: () => JSON.stringify({ answers: ["x - 1"] }),
+  });
+  const original = tangentCell(page);
+  await original.getByRole("button", { name: "Harder", exact: true }).click();
+  await expect(original.locator(".math-generated-problem")).toHaveCount(1);
+});
+
+test("similar-data reads a labelled answer such as y = x - 1 as its right-hand side", async ({
+  page,
+}) => {
+  await open(page, {
+    generate: () =>
+      JSON.stringify({ ...tangent({ h: "x^2*log(x)", x0: "1" }), fields: [{ answer: "y = x - 1" }] }),
+    solve: () => JSON.stringify({ answers: ["y=x-1"] }),
   });
   const original = tangentCell(page);
   await original.getByRole("button", { name: "Harder", exact: true }).click();

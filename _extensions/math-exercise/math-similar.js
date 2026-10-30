@@ -575,12 +575,13 @@
           validate: (text) => {
             try {
               const value = parseJSON(text);
+              const answers = Array.isArray(value.answers)
+                ? value.answers.map(bareAnswer)
+                : null;
               if (
-                !Array.isArray(value.answers) ||
-                value.answers.length !== spec.fields.length ||
-                value.answers.some(
-                  (a) => typeof a !== "string" || a.length > 4096,
-                )
+                !answers ||
+                answers.length !== spec.fields.length ||
+                answers.some((a) => typeof a !== "string" || a.length > 4096)
               )
                 return "Return the requested JSON answers.";
               return "";
@@ -590,7 +591,7 @@
           },
         },
       );
-      return parseJSON(reply.text).answers;
+      return parseJSON(reply.text).answers.map(bareAnswer);
     }
     function assertActive(signal) {
       if (signal.aborted) throw new DOMException("Cancelled", "AbortError");
@@ -663,6 +664,17 @@
         spec.question.slice(last.index + last[0].length);
       return spec;
     }
+    // A model answer such as "y = x - 1" or "f(x) = 2x" for a field the
+    // question already labels, or a JSON number: the bare mathematical answer
+    // (answers are never equations).
+    function bareAnswer(answer) {
+      if (typeof answer === "number" && Number.isFinite(answer))
+        return String(answer);
+      if (typeof answer !== "string") return answer;
+      const match =
+        /^\s*[A-Za-z][A-Za-z0-9_']*(?:\([^()=]*\))?\s*=([^=<>]*)$/.exec(answer);
+      return match && match[1].trim() ? match[1].trim() : answer;
+    }
     function parseCandidate(text) {
       const spec = parseJSON(text);
       if (spec && typeof spec === "object" && !Array.isArray(spec)) {
@@ -674,24 +686,16 @@
           spec.vars.every((name) => typeof name === "string")
         )
           spec.vars = spec.vars.join(" ");
-        // The same variables as an authored checker, separated differently
-        // ("a b" for "a, b"), are the original's variables.
-        const names = (text) => String(text).split(/[\s,]+/).filter(Boolean).join(" ");
-        if (
-          custom &&
-          typeof spec.vars === "string" &&
-          names(spec.vars) === names(cell.dataset.vars || "")
-        )
+        // An authored checker fixes the variables and is the only checker: a
+        // model that writes "x" for "x, e" or leaves out checker still means
+        // the original's.
+        if (custom) {
           spec.vars = cell.dataset.vars || "";
+          if (spec.checker === undefined) spec.checker = "original";
+        }
         if (Array.isArray(spec.fields))
-          for (const field of spec.fields) {
-            if (
-              field &&
-              typeof field.answer === "number" &&
-              Number.isFinite(field.answer)
-            )
-              field.answer = String(field.answer);
-          }
+          for (const field of spec.fields)
+            if (field) field.answer = bareAnswer(field.answer);
       }
       return normalizeMatrix(spec);
     }
@@ -757,6 +761,16 @@
       }
       assertActive(signal);
       return spec;
+    }
+    // A Python traceback from the checker runtime: its last line is the
+    // reason the model can act on and the author can read.
+    function pythonReason(error) {
+      const message = String(error?.message || "");
+      if (!/Traceback \(most recent call last\)/.test(message)) return error;
+      const lines = message.trim().split("\n").filter((line) => line.trim());
+      const reason = new Error(lines[lines.length - 1].trim());
+      reason.code = error.code;
+      return reason;
     }
     function messages(direction) {
       const selection = JSON.parse(cell.dataset.generationPolicy || "{}");
@@ -1010,7 +1024,7 @@
             failure =
               error.code === "VALIDATION" && lastValidation
                 ? new Error(lastValidation)
-                : error;
+                : pythonReason(error);
           }
         }
         throw failure;
